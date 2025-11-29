@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM12,20c-4.41,0 -8,-3.59 -8,-8s3.59,-8 8,-8 8,3.59 8,8 -3.59,8 -8,8z"/>
+    <!-- Eyes -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M15.5,9c-0.83,0 -1.5,0.67 -1.5,1.5s0.67,1.5 1.5,1.5 1.5,-0.67 1.5,-1.5 -0.67,-1.5 -1.5,-1.5zM8.5,9c-0.83,0 -1.5,0.67 -1.5,1.5S7.67,12 8.5,12s1.5,-0.67 1.5,-1.5S9.33,9 8.5,9z"/>
+    <!-- Mask -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6,14c0,0 2,4 6,4s6,-4 6,-4v-2H6v2z"/>
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M4,13h2v1H4zM18,13h2v1h-2z"/>
+</vector>
