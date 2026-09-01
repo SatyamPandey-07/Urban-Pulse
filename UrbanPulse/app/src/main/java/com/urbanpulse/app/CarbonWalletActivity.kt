@@ -70,16 +70,17 @@ class CarbonWalletActivity : BaseActivity() {
     }
 
     /**
-     * Scores the traveler's actual chosen stay + transport together against every
-     * other stay×mode combination reachable at the same distance, instead of
-     * showing the hospitality and mobility picks as two disconnected numbers.
+     * Scores the traveler's actual chosen stay + transport + activities together
+     * against every other stay×mode combination reachable at the same distance,
+     * instead of showing three disconnected numbers.
      */
     private fun renderTripSummary() {
         val stay = TripPlanManager.getSelectedStay()
         val mobility = TripPlanManager.getSelectedMobility()
+        val experiences = TripPlanManager.getSelectedExperiences()
         val card = findViewById<View>(R.id.cardTripSummary)
 
-        if (stay == null && mobility == null) {
+        if (stay == null && mobility == null && experiences == null) {
             card.visibility = View.GONE
             return
         }
@@ -93,8 +94,14 @@ class CarbonWalletActivity : BaseActivity() {
             "🚌 Transport: ${it.modeLabel} — %.0fg CO2e • ₹%d".format(Locale.US, it.carbonGrams, it.fareRupees)
         } ?: "🚌 Transport: not yet chosen — pick a route in Green Journey Planner"
 
-        val combinedCarbonKg = (stay?.carbonKgPerNight ?: 0.0) + (mobility?.carbonGrams ?: 0.0) / 1000.0
-        val combinedCost = (stay?.priceRupees ?: 0) + (mobility?.fareRupees ?: 0)
+        findViewById<TextView>(R.id.tvTripExperienceLine).text = experiences?.let {
+            "🎟️ Activities: ${it.names.joinToString(", ")} — %.1f kg CO2e • ₹%d".format(Locale.US, it.totalCarbonKg, it.totalPriceRupees)
+        } ?: "🎟️ Activities: not yet chosen — build one in Eco & Inclusive Itinerary"
+
+        val combinedCarbonKg = (stay?.carbonKgPerNight ?: 0.0) +
+            (mobility?.carbonGrams ?: 0.0) / 1000.0 +
+            (experiences?.totalCarbonKg ?: 0.0)
+        val combinedCost = (stay?.priceRupees ?: 0) + (mobility?.fareRupees ?: 0) + (experiences?.totalPriceRupees ?: 0)
 
         findViewById<TextView>(R.id.tvTripCombinedLine).text = String.format(
             Locale.US, "Combined footprint: %.1f kg CO2e • ₹%d total", combinedCarbonKg, combinedCost
@@ -107,10 +114,11 @@ class CarbonWalletActivity : BaseActivity() {
             lifecycleScope.launch {
                 val allStays = HospitalityRepository(this@CarbonWalletActivity).getAllStays()
                 val allModes = CarbonEstimator.estimateAllModes(mobility.distanceKm.coerceAtLeast(1.5))
+                val experienceCarbon = experiences?.totalCarbonKg ?: 0.0
 
                 val allCombinedCarbon = allStays.flatMap { s ->
                     allModes.map { m ->
-                        parseCarbonKg(s.carbonFootprintPerNight) + m.carbonGrams / 1000.0
+                        parseCarbonKg(s.carbonFootprintPerNight) + m.carbonGrams / 1000.0 + experienceCarbon
                     }
                 }
                 val beatenCount = allCombinedCarbon.count { it >= combinedCarbonKg }
@@ -118,7 +126,8 @@ class CarbonWalletActivity : BaseActivity() {
                     ((beatenCount.toDouble() / allCombinedCarbon.size) * 100).roundToInt()
                 } else 0
 
-                percentileView.text = "Greener than $percentile% of the ${allCombinedCarbon.size} possible stay+route combinations for this trip"
+                val activityNote = if (experiences != null) " (with your chosen activities held fixed)" else ""
+                percentileView.text = "Greener than $percentile% of the ${allCombinedCarbon.size} possible stay+route combinations for this trip$activityNote"
             }
         } else {
             percentileView.visibility = View.GONE

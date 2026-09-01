@@ -198,6 +198,14 @@
                     android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                     android:textColor="?attr/colorOnSurface" />
 
+                <TextView
+                    android:id="@+id/tvTripExperienceLine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:textColor="?attr/colorOnSurface" />
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
