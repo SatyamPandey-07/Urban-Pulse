@@ -30,8 +30,16 @@ class SearchAdapter(
         return Holder(view)
     }
 
-    override fun getItemCount() = items.size
+    private var itemsList = items.toMutableList()
+
+    fun updateResults(newItems: List<SearchResult>) {
+        itemsList.clear()
+        itemsList.addAll(newItems)
+        notifyDataSetChanged()
+    }
+
+    override fun getItemCount() = itemsList.size
 
     override fun onBindViewHolder(holder: Holder, position: Int) =
-        holder.bind(items[position])
+        holder.bind(itemsList[position])
 }

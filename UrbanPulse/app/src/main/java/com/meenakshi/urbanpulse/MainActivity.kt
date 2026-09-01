@@ -71,4 +71,11 @@ class MainActivity : BaseActivity() {
             startActivity(Intent(this, SosActivity::class.java))
         }
     }
+
+    fun switchToTab(position: Int) {
+        if (position in 0 until (viewPager.adapter?.itemCount ?: 0)) {
+            viewPager.setCurrentItem(position, true)
+            bottomNavigation.menu.getItem(position).isChecked = true
+        }
+    }
 }
