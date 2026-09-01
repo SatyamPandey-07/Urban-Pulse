@@ -66,11 +66,11 @@ class YatriAiFragment : Fragment() {
         view.findViewById<MaterialButton>(R.id.btnClearChat).setOnClickListener {
             messages.clear()
             chatAdapter.notifyDataSetChanged()
-            addAiMessage("Hello! I am Yatri AI, your smart city mobility companion. How can I assist your journey today?")
+            addAiMessage("Hello! I am Yatri AI, your sustainable mobility and inclusive hospitality assistant. How can I assist your journey today?")
         }
 
         if (messages.isEmpty()) {
-            addAiMessage("Hello. I am Yatri AI, your intelligent urban mobility and safety assistant.\n\nAsk me about:\n- Nearest Hospitals and Healthcare Centers\n- Live Traffic and Arterial Congestion\n- Air Quality Index (AQI) and Weather\n- Low-emission Eco Routes\n- Hazard reporting and Emergency SOS")
+            addAiMessage("Hello. I am Yatri AI, your intelligent green travel and accessible hospitality companion.\n\nAsk me about:\n- Certified Solar & Zero-Waste Stays\n- Multimodal Low-Carbon Route Planning\n- Step-Free Transit & Wheelchair-Accessible Venues\n- Air Quality Index (AQI) and Weather\n- Hotel Resource & Kitchen Waste Analytics")
         }
     }
 
@@ -125,7 +125,7 @@ class YatriAiFragment : Fragment() {
 
     private fun setupSuggestionChips(view: View) {
         view.findViewById<Chip>(R.id.chipSuggestHospital).setOnClickListener {
-            sendMessage("Find the nearest hospital")
+            sendMessage("Find the nearest accessible hospital")
         }
         view.findViewById<Chip>(R.id.chipSuggestTraffic).setOnClickListener {
             sendMessage("What is the current live traffic status?")
@@ -134,7 +134,7 @@ class YatriAiFragment : Fragment() {
             sendMessage("What is the air quality index and weather today?")
         }
         view.findViewById<Chip>(R.id.chipSuggestEco).setOnClickListener {
-            sendMessage("Give me an eco-friendly route with low carbon emissions")
+            sendMessage("Recommend a certified solar eco-resort with wheelchair accessibility")
         }
         view.findViewById<Chip>(R.id.chipSuggestHazard).setOnClickListener {
             sendMessage("I want to report a road hazard")
@@ -194,13 +194,45 @@ class YatriAiFragment : Fragment() {
 
     private fun getSmartAssistantResponse(input: String): String {
         val q = input.lowercase()
+        val accessMgr = context?.let { AccessibilityManager.getInstance(it) }
+        val wheelchairMode = accessMgr?.isWheelchairModeEnabled == true
 
         return when {
+            q.contains("hotel") || q.contains("stay") || q.contains("resort") || q.contains("accommodation") || q.contains("dining") -> {
+                "Verified Sustainable & Inclusive Accommodations:\n\n" +
+                "1. The Orchid Eco-Heritage Resort (Vile Parle)\n" +
+                "   • Sustainability: 100% Solar & Biogas Grid • Zero Single-Use Plastic\n" +
+                "   • Carbon Footprint: 4.2 kg CO2e / night (68% below city avg)\n" +
+                "   • Accessibility: 98% Match (Wheelchair Ramp, Roll-in Showers, Braille Elevators, Hearing Loops)\n\n" +
+                "2. ITC Grand Central (Parel)\n" +
+                "   • Sustainability: Wind Powered • LEED Platinum • Zero Food Waste to Landfill\n" +
+                "   • Accessibility: 95% Match (Step-Free Entrance, Tactile Pathways, Visual Smoke Alarms)\n\n" +
+                "3. Bandra Farm-to-Table Eco Bistro & Suites\n" +
+                "   • Sustainability: Organic Local Sourcing • Rainwater Harvesting • EV Superchargers\n" +
+                "   • Accessibility: 92% Match (Accessible Dining & Wide Doorways)\n\n" +
+                "Tap 'Eco Stays' on your Dashboard to view full environmental audits and direct venue contact."
+            }
+            q.contains("route") || q.contains("metro") || q.contains("transit") || q.contains("bus") || q.contains("carbon") -> {
+                val accessibilityNote = if (wheelchairMode) {
+                    "Accessibility Filter Active: Route is 100% Step-Free via station elevators."
+                } else {
+                    "Step-Free Access: Elevators available at all interchange concourses."
+                }
+
+                "Multimodal Green Journey Recommendation:\n\n" +
+                "- Mode 1 (Recommended): Metro Line 3 (Aqua Line)\n" +
+                "  • Travel Time: 24 mins • Fare: ₹30\n" +
+                "  • Emissions: 45g CO2e per passenger (-435g CO2 vs Petrol Taxi)\n" +
+                "  • $accessibilityNote\n\n" +
+                "- Mode 2: BEST Electric Low-Floor Bus\n" +
+                "  • Travel Time: 36 mins • Fare: ₹15 • Emissions: 70g CO2e\n" +
+                "  • Hydraulic wheelchair ramp equipped.\n\n" +
+                "Earn +40 PULSE Carbon Credits by booking the Metro option!"
+            }
             q.contains("hospital") || q.contains("doctor") || q.contains("medical") || q.contains("clinic") -> {
-                "Nearby Medical Facilities:\n\n" +
-                "1. Lilavati Hospital & Research Centre (1.8 km)\n   • 24/7 Emergency & Trauma Care\n   • Tel: +91 22 2675 1000\n\n" +
-                "2. Hinduja Healthcare Surgical (2.6 km)\n   • Multi-specialty Urgent Care\n   • Tel: +91 22 2445 1515\n\n" +
-                "3. KEM Hospital & Medical Centre (4.1 km)\n   • Trauma Care Center\n\n" +
+                "Nearby Medical Facilities (Accessibility Audited):\n\n" +
+                "1. Lilavati Hospital & Research Centre (1.8 km)\n   • 24/7 Emergency & Trauma Care • Step-Free Ambulance Bay\n   • Tel: +91 22 2675 1000\n\n" +
+                "2. Hinduja Healthcare Surgical (2.6 km)\n   • Multi-specialty Urgent Care • Wheelchair Porter Service\n   • Tel: +91 22 2445 1515\n\n" +
                 "Direct navigation and dialing options are available via the Map and Medical Directory."
             }
             q.contains("traffic") || q.contains("congestion") || q.contains("jam") || q.contains("road") -> {
@@ -218,20 +250,6 @@ class YatriAiFragment : Fragment() {
                 "- Weather: 28°C • Partly Cloudy • Humidity 68%\n\n" +
                 "Health Recommendation: Sensitive individuals and outdoor runners are advised to wear an N95 mask during peak traffic hours."
             }
-            q.contains("eco") || q.contains("green") || q.contains("carbon") || q.contains("co2") || q.contains("cycle") -> {
-                "Eco-Friendly Route Analysis:\n\n" +
-                "- Optimal Route: Via Coastal Promenade & Metro Corridor\n" +
-                "- Estimated Emission Savings: ~320g CO2 vs idling in traffic\n" +
-                "- Rewards: +35 PULSE points upon completion via transit or EV.\n\n" +
-                "A public bicycle docking station is located 150m from your current position."
-            }
-            q.contains("hazard") || q.contains("pothole") || q.contains("accident") || q.contains("report") -> {
-                "Urban Hazard Reporting:\n\n" +
-                "To report a road blockage, pothole, or infrastructure issue:\n" +
-                "1. Select the Report Hazard option or tap Incident Reporting.\n" +
-                "2. Tag your current GPS location.\n" +
-                "3. Attach a photo and submit — verified reports update the city map for all citizens and award +50 XP."
-            }
             q.contains("sos") || q.contains("emergency") || q.contains("help") || q.contains("police") || q.contains("danger") -> {
                 "Emergency Assistance Helplines:\n\n" +
                 "- National Emergency Helpline: 112\n" +
@@ -241,13 +259,13 @@ class YatriAiFragment : Fragment() {
                 "Tap the SOS button in the top navigation bar at any time to broadcast your real-time coordinates and send SMS alerts to emergency contacts."
             }
             q.contains("hi") || q.contains("hello") || q.contains("hey") -> {
-                "Hello. I am ready to guide your commute. What would you like to check — live traffic, nearest healthcare facility, or air quality index?"
+                "Hello. I am ready to guide your journey. What would you like to check — eco-friendly stays, accessible green routes, live traffic, or your carbon savings passport?"
             }
             else -> {
                 "Analysis for \"$input\":\n\n" +
                 "- Current Urban Context: Mumbai Metropolitan Region\n" +
-                "- Status: Road conditions on major corridors are normal. No major route closures reported.\n\n" +
-                "Feel free to ask for directions, EV charging hubs, emergency clinics, or route optimization."
+                "- Sustainability Status: Green transit corridors and certified eco-accommodations are fully indexed.\n\n" +
+                "Feel free to ask for accessible route planning, EV charging hubs, certified green hotels, or kitchen waste optimization."
             }
         }
     }

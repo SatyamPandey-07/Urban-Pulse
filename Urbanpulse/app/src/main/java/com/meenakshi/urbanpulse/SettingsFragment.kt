@@ -1,5 +1,6 @@
 package com.meenakshi.urbanpulse
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -9,11 +10,18 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 enum class SettingType {
+    ACCESSIBILITY_PROFILE,
+    CARBON_WALLET,
+    HOSPITALITY_EXPLORER,
+    ROUTE_PLANNER,
+    HOTEL_OPTIMIZER,
     APPEARANCE,
     ACCENT_COLOR,
     LOCATION,
@@ -42,22 +50,71 @@ class SettingsFragment : Fragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.settingsRecyclerView)
         
         recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = SettingsAdapter(getSettingsList())
+        recyclerView.adapter = SettingsAdapter(getSettingsList()) { item ->
+            handleSettingClick(item)
+        }
         
         return view
     }
 
     private fun getSettingsList(): List<SettingItem> {
+        val accessMgr = context?.let { AccessibilityManager.getInstance(it) }
+        val wheelchairStatus = if (accessMgr?.isWheelchairModeEnabled == true) "Active (Step-Free Rerouting)" else "Disabled"
+
         return listOf(
-            SettingItem("Appearance", "Themes, animations, and app layout", R.drawable.ic_light_mode, "#FDE293"),
-            SettingItem("Home location", "Mumbai, Maharashtra, India", R.drawable.ic_location_pin, "#C3E7A1"),
-            SettingItem("App units", "Temperature, wind, pressure, visibility, precipitation", R.drawable.ic_dashboard, "#D3E3FD"),
-            SettingItem("Background updates", "Widget updates, update interval", R.drawable.ic_digital_twin, "#F8D7DA"),
-            SettingItem("Weather Models", "Open-Meteo Weather models", R.drawable.ic_dashboard, "#A7F3D0"),
-            SettingItem("App language", "English", R.drawable.ic_yatri_ai, "#FBCFE8"),
-            SettingItem("Export data", "", R.drawable.ic_send_24, "#F7D8BA"),
-            SettingItem("Import data", "", R.drawable.ic_send_24, "#F7D8BA")
+            SettingItem("Inclusive Accessibility Profile", "Wheelchair: $wheelchairStatus, Visual & Hearing alerts", R.drawable.ic_settings, "#D3E3FD", SettingType.ACCESSIBILITY_PROFILE),
+            SettingItem("Green Travel Passport", "142.8 kg CO2 saved • Gold Explorer", R.drawable.ic_map, "#C3E7A1", SettingType.CARBON_WALLET),
+            SettingItem("Sustainable & Inclusive Stays", "Verified solar hotels, zero-waste resorts & accessibility audits", R.drawable.ic_dashboard, "#A7F3D0", SettingType.HOSPITALITY_EXPLORER),
+            SettingItem("Multimodal Green Route Planner", "Compare Metro, EV Cab, and bus carbon emissions", R.drawable.ic_traffic, "#FDE293", SettingType.ROUTE_PLANNER),
+            SettingItem("Hotel Resource & Waste Hub", "B2B Energy, Water & AI Kitchen surplus diversion", R.drawable.ic_digital_twin, "#FBCFE8", SettingType.HOTEL_OPTIMIZER),
+            SettingItem("Appearance & Theme", "System Default Dark Surface", R.drawable.ic_light_mode, "#FDE293", SettingType.APPEARANCE),
+            SettingItem("Default City Hub", "Mumbai, Maharashtra, India", R.drawable.ic_location_pin, "#D3E3FD", SettingType.LOCATION),
+            SettingItem("Measurement Units", "Metric (°C, km/h, kg CO2e)", R.drawable.ic_dashboard, "#F8D7DA", SettingType.UNITS),
+            SettingItem("Language", "English", R.drawable.ic_yatri_ai, "#E9D5FF", SettingType.LANGUAGE)
         )
+    }
+
+    private fun handleSettingClick(item: SettingItem) {
+        val ctx = context ?: return
+        val accessMgr = AccessibilityManager.getInstance(ctx)
+
+        when (item.type) {
+            SettingType.ACCESSIBILITY_PROFILE -> {
+                val options = arrayOf(
+                    "Wheelchair / Step-Free Preference",
+                    "High-Contrast & Large Badges",
+                    "Hearing & Visual Flash Alerts",
+                    "Service Animal Friendly Only"
+                )
+                val checked = booleanArrayOf(
+                    accessMgr.isWheelchairModeEnabled,
+                    accessMgr.isVisualAssistanceEnabled,
+                    accessMgr.isHearingAssistanceEnabled,
+                    accessMgr.isServiceAnimalFriendlyOnly
+                )
+
+                AlertDialog.Builder(ctx)
+                    .setTitle("Inclusive Accessibility Preferences")
+                    .setMultiChoiceItems(options, checked) { _, which, isChecked ->
+                        when (which) {
+                            0 -> accessMgr.isWheelchairModeEnabled = isChecked
+                            1 -> accessMgr.isVisualAssistanceEnabled = isChecked
+                            2 -> accessMgr.isHearingAssistanceEnabled = isChecked
+                            3 -> accessMgr.isServiceAnimalFriendlyOnly = isChecked
+                        }
+                    }
+                    .setPositiveButton("Save Preferences") { _, _ ->
+                        Toast.makeText(ctx, "Accessibility preferences updated & synced with Yatri AI.", Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            SettingType.CARBON_WALLET -> startActivity(Intent(ctx, CarbonWalletActivity::class.java))
+            SettingType.HOSPITALITY_EXPLORER -> startActivity(Intent(ctx, HospitalityActivity::class.java))
+            SettingType.ROUTE_PLANNER -> startActivity(Intent(ctx, GreenRoutePlannerActivity::class.java))
+            SettingType.HOTEL_OPTIMIZER -> startActivity(Intent(ctx, HotelOptimizerActivity::class.java))
+            else -> Toast.makeText(ctx, "${item.title} configuration active", Toast.LENGTH_SHORT).show()
+        }
     }
 }
 

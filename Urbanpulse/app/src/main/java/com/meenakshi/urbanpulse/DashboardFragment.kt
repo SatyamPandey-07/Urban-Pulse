@@ -1,5 +1,6 @@
 package com.meenakshi.urbanpulse
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -34,6 +35,22 @@ class DashboardFragment : Fragment() {
             (activity as? MainActivity)?.switchToTab(1)
         }
 
+        view.findViewById<MaterialButton>(R.id.btnOpenHospitality)?.setOnClickListener {
+            startActivity(Intent(activity, HospitalityActivity::class.java))
+        }
+
+        view.findViewById<MaterialButton>(R.id.btnOpenRoutePlanner)?.setOnClickListener {
+            startActivity(Intent(activity, GreenRoutePlannerActivity::class.java))
+        }
+
+        view.findViewById<MaterialButton>(R.id.btnOpenHotelOptimizer)?.setOnClickListener {
+            startActivity(Intent(activity, HotelOptimizerActivity::class.java))
+        }
+
+        view.findViewById<MaterialButton>(R.id.btnOpenCarbonWallet)?.setOnClickListener {
+            startActivity(Intent(activity, CarbonWalletActivity::class.java))
+        }
+
         setupAirQualityChart(view)
         setupTrafficChart(view)
     }
@@ -52,7 +69,7 @@ class DashboardFragment : Fragment() {
         )
 
         val dataSet = LineDataSet(entries, "AQI").apply {
-            color = Color.parseColor("#38BDF8") // Solid Sky Blue
+            color = Color.parseColor("#38BDF8")
             valueTextColor = Color.parseColor("#94A3B8")
             valueTextSize = 9f
             lineWidth = 2.5f
@@ -100,7 +117,7 @@ class DashboardFragment : Fragment() {
         )
 
         val dataSet = BarDataSet(entries, "Traffic Index").apply {
-            color = Color.parseColor("#10B981") // Solid Emerald
+            color = Color.parseColor("#10B981")
             valueTextColor = Color.parseColor("#94A3B8")
             valueTextSize = 9f
         }

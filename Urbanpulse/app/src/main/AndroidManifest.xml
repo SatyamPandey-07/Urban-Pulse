@@ -50,6 +50,10 @@
         <activity android:name=".MedicalActivity" android:exported="false" />
         <activity android:name=".PostDetailActivity" android:exported="false" />
         <activity android:name=".ReportIncidentActivity" android:exported="false" />
+        <activity android:name=".HospitalityActivity" android:exported="false" />
+        <activity android:name=".GreenRoutePlannerActivity" android:exported="false" />
+        <activity android:name=".HotelOptimizerActivity" android:exported="false" />
+        <activity android:name=".CarbonWalletActivity" android:exported="false" />
         <activity android:name=".YatriAiActivity" android:exported="false" />
 
     </application>
