@@ -5,19 +5,25 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.ChipGroup
+import com.urbanpulse.app.intent.TripIntent
+import com.urbanpulse.app.intent.TripIntentParser
 import com.urbanpulse.app.mobility.CarbonEstimator
 import com.urbanpulse.app.mobility.MobilityOptimizer
 import com.urbanpulse.app.mobility.MobilityOption
 import com.urbanpulse.app.mobility.TradeoffPriority
 import com.urbanpulse.app.mobility.TravelMode
+import com.urbanpulse.app.trip.TripPlanManager
+import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -92,7 +98,42 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
 
         btnConfirm.setOnClickListener { confirmJourney() }
 
+        val etTripIntent = findViewById<EditText>(R.id.etTripIntent)
+        val tvIntentSummary = findViewById<TextView>(R.id.tvIntentSummary)
+        findViewById<MaterialButton>(R.id.btnApplyIntent).setOnClickListener {
+            val text = etTripIntent.text.toString()
+            if (text.isBlank()) return@setOnClickListener
+            lifecycleScope.launch {
+                val parsedIntent = TripIntentParser.parse(text, BuildConfig.GEMINI_API_KEY)
+                applyTripIntent(parsedIntent, chipGroupTradeoff, tvIntentSummary)
+            }
+        }
+
         recalcAndRender()
+    }
+
+    private fun applyTripIntent(intent: TripIntent, chipGroupTradeoff: ChipGroup, summaryView: TextView) {
+        if (intent.requireWheelchairAccess) {
+            AccessibilityManager.getInstance(this).isWheelchairModeEnabled = true
+        }
+
+        val chipId = when {
+            intent.prioritizeAccessibility || intent.requireWheelchairAccess -> R.id.chipTradeoffStepFree
+            intent.prioritizeSpeed -> R.id.chipTradeoffFastest
+            intent.prioritizeBudget -> R.id.chipTradeoffBudget
+            else -> R.id.chipTradeoffEco // carbon priority is the default when nothing else stands out
+        }
+        chipGroupTradeoff.check(chipId) // triggers the existing chip listener -> recalcAndRender()
+
+        val appliedBits = mutableListOf<String>()
+        if (intent.requireWheelchairAccess) appliedBits += "wheelchair access required"
+        if (intent.requireSolarEnergy) appliedBits += "solar-powered preferred"
+        if (intent.requireZeroWaste) appliedBits += "zero-waste preferred"
+        if (intent.maxPriceRupees != null) appliedBits += "budget under ₹${intent.maxPriceRupees}"
+
+        summaryView.visibility = View.VISIBLE
+        summaryView.text = "Parsed via ${if (intent.parsedBy == "gemini") "Gemini" else "keyword rules"}" +
+            if (appliedBits.isNotEmpty()) " — ${appliedBits.joinToString(", ")}" else ""
     }
 
     /** Recomputes real distance/cost/carbon for every mode (including walk/cycle feasibility) and re-renders every card. */
