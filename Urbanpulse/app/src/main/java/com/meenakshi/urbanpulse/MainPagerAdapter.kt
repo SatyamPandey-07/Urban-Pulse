@@ -8,7 +8,7 @@ import com.tomtom.sdk.map.display.MapOptions
 
 class MainPagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
 
-    override fun getItemCount(): Int = 4 // Dashboard, Map, Digital Twin, Settings
+    override fun getItemCount(): Int = 5 // Dashboard, Map, Digital Twin, Yatri AI, Settings
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
@@ -18,7 +18,8 @@ class MainPagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapte
                 MapFragment.newInstance(mapOptions)
             }
             2 -> DigitalTwinFragment()
-            3 -> SettingsFragment()
+            3 -> YatriAiFragment()
+            4 -> SettingsFragment()
             else -> DashboardFragment()
         }
     }

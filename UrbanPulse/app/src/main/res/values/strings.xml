@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UrbanPulse</string>
+    <string name="title_activity_map">Map</string>
+
+    <!-- Settings Items -->
+    <string name="settings_title">Settings</string>
+    <string name="pref_appearance">Appearance</string>
+    <string name="pref_appearance_desc">Theme, animations and app layout</string>
+    <string name="pref_home_location">Home Location</string>
+    <string name="pref_home_location_desc">Set your default city</string>
+    <string name="pref_app_units">Units</string>
+    <string name="pref_app_units_desc">Temperature, wind, pressure</string>
+    <string name="pref_language">App Language</string>
+    <string name="pref_language_desc">English</string>
+    <string name="pref_export_data">Export Data</string>
+    <string name="pref_import_data">Import Data</string>
+    <string name="pref_accent_color">Accent Color</string>
+    <string name="pref_sign_out">Sign Out</string>
+
+    <!-- Dialog Titles -->
+    <string name="dialog_theme_title">Choose Theme</string>
+    <string name="dialog_accent_title">Choose Accent Color</string>
+    <string name="dialog_location_title">Set Home Location</string>
+    <string name="dialog_units_title">Select Units</string>
+    <string name="dialog_language_title">Select Language</string>
+
+    <!-- Dialog Options -->
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System Default</string>
+    
+    <string name="unit_metric">Metric (°C, km/h)</string>
+    <string name="unit_imperial">Imperial (°F, mph)</string>
+
+    <string name="lang_english">English</string>
+    <string name="lang_hindi">हिन्दी (Hindi)</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="location_city_hint">City Name</string>
+    <string name="location_country_hint">Country Code (e.g. IN)</string>
+</resources>

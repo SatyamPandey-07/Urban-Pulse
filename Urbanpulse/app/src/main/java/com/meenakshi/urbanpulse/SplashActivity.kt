@@ -16,5 +16,10 @@ class SplashActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            startActivity(android.content.Intent(this, WelcomeActivity::class.java))
+            finish()
+        }, 1200)
     }
 }

@@ -27,24 +27,18 @@ object GamificationManager {
     
     fun getLevel(): Int {
         val xp = getXp()
-        // Exponential curve: Level = (XP / 1000) ^ 0.5 + 1 roughly, or simplistic steps
-        // Using provided example: Level 2 needs 1000 XP.
-        // Let's use: XP = 1000 * (Level - 1)^1.5
-        // Level = (XP / 1000)^(1/1.5) + 1
         if (xp < 1000) return 1
         return (Math.pow(xp / 1000.0, 1.0/1.5) + 1).toInt()
     }
     
     fun getNextLevelXp(): Long {
         val nextLevel = getLevel() + 1
-        // XP needed = 1000 * (nextLevel - 1)^1.5
         return (1000 * (nextLevel - 1).toDouble().pow(1.5)).toLong()
     }
 
     fun addXp(amount: Int) {
         val current = getXp()
         prefs.edit().putLong(KEY_XP, current + amount).apply()
-        // Check for level up logic here if needed (toast, etc)
     }
 
     fun addPulse(amount: Int) {
@@ -69,16 +63,13 @@ object GamificationManager {
         val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
         
         if (lastLoginDay == -1) {
-            // First login
             prefs.edit().putInt(KEY_LAST_LOGIN, currentDay).putInt(KEY_STREAK, 1).apply()
         } else if (currentDay == lastLoginDay + 1) {
-            // Streak continued
             val streak = getStreak() + 1
             prefs.edit().putInt(KEY_LAST_LOGIN, currentDay).putInt(KEY_STREAK, streak).apply()
-            addXp(50) // Daily bonus
+            addXp(50)
         } else if (currentDay > lastLoginDay + 1) {
-            // Streak broken
-             prefs.edit().putInt(KEY_LAST_LOGIN, currentDay).putInt(KEY_STREAK, 1).apply()
+            prefs.edit().putInt(KEY_LAST_LOGIN, currentDay).putInt(KEY_STREAK, 1).apply()
         }
     }
     
@@ -92,10 +83,23 @@ object GamificationManager {
 
     // --- Challenges ---
     fun getActiveChallenges(): List<Challenge> {
-        // Mock logic for now. In real app, fetch from Firestore or generate based on week
         return listOf(
-            Challenge("ch1", "Walk 2,000 steps", "Daily", 2000, 0, 100, 10), // 100 XP, 10 Pulse
+            Challenge("ch1", "Walk 2,000 steps", "Daily", 2000, 0, 100, 10),
             Challenge("ch2", "Report 3 hazards", "Weekly", 3, 0, 500, 50)
+        )
+    }
+
+    fun getAvailableChallenges(): List<Challenge> = getActiveChallenges()
+
+    // --- Badges ---
+    fun getAllBadges(): List<Badge> {
+        return listOf(
+            Badge("b1", "Eco Pioneer", "Save 10kg of CO2", R.drawable.ic_fire, 5, 10),
+            Badge("b2", "Urban Scout", "Report 5 incidents", R.drawable.ic_location_pin, 3, 5),
+            Badge("b3", "Daily Walker", "Reach 10,000 steps", R.drawable.ic_dashboard, 10000, 10000),
+            Badge("b4", "Night Owl", "Report a safe path at night", R.drawable.ic_map, 1, 1),
+            Badge("b5", "AI Navigator", "Ask Yatri AI 10 questions", R.drawable.ic_yatri_ai, 4, 10),
+            Badge("b6", "Community Hero", "Get 50 upvotes", R.drawable.ic_confetti, 12, 50)
         )
     }
 }
@@ -103,9 +107,18 @@ object GamificationManager {
 data class Challenge(
     val id: String,
     val title: String,
-    val type: String, // Daily, Weekly
+    val type: String,
     val target: Int,
     var progress: Int,
     val xpReward: Int,
     val pulseReward: Int
+)
+
+data class Badge(
+    val id: String,
+    val title: String,
+    val description: String,
+    val iconRes: Int,
+    val progress: Int,
+    val target: Int
 )

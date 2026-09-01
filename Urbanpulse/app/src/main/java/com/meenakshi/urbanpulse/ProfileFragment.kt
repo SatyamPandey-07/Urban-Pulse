@@ -4,14 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
@@ -21,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class ProfileFragment : Fragment() {
@@ -74,12 +70,51 @@ class ProfileFragment : Fragment() {
         val currentAccent = prefs.getString("theme_color", "green")?.replaceFirstChar { it.uppercase() } ?: "Green"
         
         return listOf(
-            SettingItem(SettingType.APPEARANCE, R.string.pref_appearance, R.string.pref_appearance_desc, R.drawable.ic_light_mode, "#FDE293"),
-            SettingItem(SettingType.ACCENT_COLOR, R.string.pref_accent_color, 0, R.drawable.ic_color_lens, "#E1BEE7", currentAccent),
-            SettingItem(SettingType.LOCATION, R.string.pref_home_location, 0, R.drawable.ic_location_pin, "#C3E7A1", currentLoc),
-            SettingItem(SettingType.UNITS, R.string.pref_app_units, R.string.pref_app_units_desc, R.drawable.ic_dashboard, "#D3E3FD"),
-            SettingItem(SettingType.LANGUAGE, R.string.pref_language, 0, R.drawable.ic_yatri_ai, "#FBCFE8", currentLang),
-            SettingItem(SettingType.SIGN_OUT, R.string.pref_sign_out, 0, R.drawable.ic_send_24, "#FFCDD2", "") // Reddish for sign out
+            SettingItem(
+                title = getString(R.string.pref_appearance),
+                subtitle = getString(R.string.pref_appearance_desc),
+                iconRes = R.drawable.ic_light_mode,
+                iconBgColorHex = "#FDE293",
+                type = SettingType.APPEARANCE
+            ),
+            SettingItem(
+                title = getString(R.string.pref_accent_color),
+                subtitle = currentAccent,
+                iconRes = R.drawable.ic_color_lens,
+                iconBgColorHex = "#E1BEE7",
+                type = SettingType.ACCENT_COLOR,
+                extraValue = currentAccent
+            ),
+            SettingItem(
+                title = getString(R.string.pref_home_location),
+                subtitle = currentLoc,
+                iconRes = R.drawable.ic_location_pin,
+                iconBgColorHex = "#C3E7A1",
+                type = SettingType.LOCATION,
+                extraValue = currentLoc
+            ),
+            SettingItem(
+                title = getString(R.string.pref_app_units),
+                subtitle = getString(R.string.pref_app_units_desc),
+                iconRes = R.drawable.ic_dashboard,
+                iconBgColorHex = "#D3E3FD",
+                type = SettingType.UNITS
+            ),
+            SettingItem(
+                title = getString(R.string.pref_language),
+                subtitle = currentLang,
+                iconRes = R.drawable.ic_yatri_ai,
+                iconBgColorHex = "#FBCFE8",
+                type = SettingType.LANGUAGE,
+                extraValue = currentLang
+            ),
+            SettingItem(
+                title = getString(R.string.pref_sign_out),
+                subtitle = "",
+                iconRes = R.drawable.ic_send_24,
+                iconBgColorHex = "#FFCDD2",
+                type = SettingType.SIGN_OUT
+            )
         )
     }
 
@@ -96,7 +131,7 @@ class ProfileFragment : Fragment() {
     }
     
     private fun signOut() {
-        AuthManager.signOut(requireContext())
+        AuthManager.signOut()
         val intent = Intent(requireContext(), WelcomeActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)

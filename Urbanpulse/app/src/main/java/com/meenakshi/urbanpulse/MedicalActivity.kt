@@ -18,14 +18,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
-import com.tomtom.sdk.search.SearchOptions
-import com.tomtom.sdk.search.online.OnlineSearch
 import com.tomtom.sdk.location.GeoPoint
+import com.tomtom.sdk.search.Search
+import com.tomtom.sdk.search.SearchCallback
+import com.tomtom.sdk.search.common.error.SearchFailure
+import com.tomtom.sdk.search.SearchOptions
+import com.tomtom.sdk.search.SearchResponse
+import com.tomtom.sdk.search.model.result.SearchResult
+import com.tomtom.sdk.search.online.OnlineSearch
 
 class MedicalActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var searchApi: OnlineSearch
+    private lateinit var searchApi: Search
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,16 +66,15 @@ class MedicalActivity : AppCompatActivity() {
                 limit = 10
             )
             
-            searchApi.search(options, object : com.tomtom.sdk.search.SearchCallback {
-                override fun onSuccess(result: com.tomtom.sdk.search.model.result.SearchResult) {
+            searchApi.search(options, object : SearchCallback {
+                override fun onSuccess(result: SearchResponse) {
                     val places = result.results
-                    // Also search for "clinic" and combine? Or just hospital. "Hospital" usually covers mostly.
                     runOnUiThread {
                         recyclerView.adapter = MedicalAdapter(places, loc)
                     }
                 }
 
-                override fun onFailure(failure: com.tomtom.sdk.search.SearchFailure) {
+                override fun onFailure(failure: SearchFailure) {
                     runOnUiThread {
                         Toast.makeText(this@MedicalActivity, "Search failed: ${failure.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -81,7 +85,7 @@ class MedicalActivity : AppCompatActivity() {
 }
 
 class MedicalAdapter(
-    private val places: List<com.tomtom.sdk.search.model.result.Place>,
+    private val places: List<SearchResult>,
     private val userLocation: Location
 ) : RecyclerView.Adapter<MedicalAdapter.ViewHolder>() {
 
@@ -99,30 +103,19 @@ class MedicalAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val place = places[position]
-        holder.name.text = place.poi?.name ?: "Unknown"
-        holder.address.text = place.address.freeformAddress
+        holder.name.text = place.place.name ?: "Medical Center"
+        holder.address.text = place.place.address?.freeformAddress ?: ""
         
         // Calculate distance
         val results = FloatArray(1)
         Location.distanceBetween(
             userLocation.latitude, userLocation.longitude,
-            place.position.latitude, place.position.longitude,
+            place.place.coordinate.latitude, place.place.coordinate.longitude,
             results
         )
         holder.distance.text = "%.1f km".format(results[0] / 1000)
 
-        val phone = place.poi?.phone
-        if (!phone.isNullOrEmpty()) {
-            holder.btnCall.visibility = View.VISIBLE
-            holder.btnCall.setOnClickListener {
-                val intent = Intent(Intent.ACTION_DIAL).apply {
-                    data = Uri.parse("tel:$phone")
-                }
-                holder.itemView.context.startActivity(intent)
-            }
-        } else {
-            holder.btnCall.visibility = View.GONE
-        }
+        holder.btnCall.visibility = View.GONE
     }
 
     override fun getItemCount() = places.size
