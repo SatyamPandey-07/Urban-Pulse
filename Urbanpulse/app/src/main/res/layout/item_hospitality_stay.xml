@@ -71,6 +71,17 @@
 
         </LinearLayout>
 
+        <!-- Evidence-Graph Pareto Badges (Greenest / Most Accessible / Best Value / Best Balance) -->
+        <TextView
+            android:id="@+id/tvBadges"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="🏆 Best Balance"
+            android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold" />
+
         <!-- Divider -->
         <View
             android:layout_width="match_parent"

@@ -6,16 +6,18 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.meenakshi.urbanpulse.evidence.RankedHospitalityStay
 
 class HospitalityAdapter(
-    private var stays: List<HospitalityStay>,
-    private val onItemClick: (HospitalityStay) -> Unit
+    private var rankedStays: List<RankedHospitalityStay>,
+    private val onItemClick: (RankedHospitalityStay) -> Unit
 ) : RecyclerView.Adapter<HospitalityAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvStayName: TextView = view.findViewById(R.id.tvStayName)
         val tvStayCategoryLocation: TextView = view.findViewById(R.id.tvStayCategoryLocation)
         val tvEcoBadge: TextView = view.findViewById(R.id.tvEcoBadge)
+        val tvBadges: TextView = view.findViewById(R.id.tvBadges)
         val tvEnergyWaste: TextView = view.findViewById(R.id.tvEnergyWaste)
         val tvCarbonImpact: TextView = view.findViewById(R.id.tvCarbonImpact)
         val tvAccessibilityTags: TextView = view.findViewById(R.id.tvAccessibilityTags)
@@ -31,7 +33,8 @@ class HospitalityAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val stay = stays[position]
+        val ranked = rankedStays[position]
+        val stay = ranked.stay
         holder.tvStayName.text = stay.name
         holder.tvStayCategoryLocation.text = "${stay.category} • ${stay.location}"
         holder.tvEcoBadge.text = "Eco Level ${stay.ecoScore}"
@@ -41,14 +44,21 @@ class HospitalityAdapter(
         holder.tvPrice.text = stay.pricePerNight
         holder.tvAccessibilityScore.text = "${stay.accessibilityRating}% Accessibility Match"
 
-        holder.btnViewAudit.setOnClickListener { onItemClick(stay) }
-        holder.itemView.setOnClickListener { onItemClick(stay) }
+        if (ranked.badges.isNotEmpty()) {
+            holder.tvBadges.visibility = View.VISIBLE
+            holder.tvBadges.text = "🏆 " + ranked.badges.joinToString("  •  ") { it.label }
+        } else {
+            holder.tvBadges.visibility = View.GONE
+        }
+
+        holder.btnViewAudit.setOnClickListener { onItemClick(ranked) }
+        holder.itemView.setOnClickListener { onItemClick(ranked) }
     }
 
-    override fun getItemCount(): Int = stays.size
+    override fun getItemCount(): Int = rankedStays.size
 
-    fun updateList(newList: List<HospitalityStay>) {
-        stays = newList
+    fun updateList(newList: List<RankedHospitalityStay>) {
+        rankedStays = newList
         notifyDataSetChanged()
     }
 }

@@ -8,9 +8,16 @@ import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.ChipGroup
+import com.meenakshi.urbanpulse.evidence.RankedHospitalityStay
+import com.meenakshi.urbanpulse.viewmodel.HospitalityViewModel
+import kotlinx.coroutines.launch
 
 class HospitalityActivity : BaseActivity() {
 
@@ -19,64 +26,9 @@ class HospitalityActivity : BaseActivity() {
     private lateinit var etSearch: EditText
     private lateinit var chipGroup: ChipGroup
 
-    private val allStays = listOf(
-        HospitalityStay(
-            id = "stay_1",
-            name = "The Orchid Eco-Heritage Resort",
-            category = "Certified Eco-Resort",
-            location = "Vile Parle, Mumbai",
-            ecoScore = 5,
-            accessibilityRating = 98,
-            energySource = "100% Solar & Biogas Grid",
-            wastePolicy = "Zero Single-Use Plastic • In-house Composting",
-            accessibilityTags = listOf("Wheelchair Ramp", "Roll-in Shower", "Braille Elevators", "Hearing Loop"),
-            carbonFootprintPerNight = "4.2 kg CO2e / night (68% below city avg)",
-            pricePerNight = "₹4,200 / night",
-            contactPhone = "+91 22 2616 4040"
-        ),
-        HospitalityStay(
-            id = "stay_2",
-            name = "ITC Grand Central Green Hotel",
-            category = "LEED Platinum Luxury Stay",
-            location = "Parel, Mumbai",
-            ecoScore = 5,
-            accessibilityRating = 95,
-            energySource = "Wind Farm Powered • 100% LED Sensor Lighting",
-            wastePolicy = "Zero Food Waste to Landfill • Treated Greywater",
-            accessibilityTags = listOf("Step-Free Entrance", "Tactile Pathways", "Accessible Parking", "Visual Smoke Alarms"),
-            carbonFootprintPerNight = "5.1 kg CO2e / night (60% below city avg)",
-            pricePerNight = "₹7,800 / night",
-            contactPhone = "+91 22 2410 1010"
-        ),
-        HospitalityStay(
-            id = "stay_3",
-            name = "Bandra Farm-to-Table Eco Bistro & Suites",
-            category = "Sustainable Boutique Stay",
-            location = "Bandra West, Mumbai",
-            ecoScore = 4,
-            accessibilityRating = 92,
-            energySource = "Rooftop Solar Array • EV Fast Chargers",
-            wastePolicy = "Local Organic Sourcing • Rainwater Harvesting",
-            accessibilityTags = listOf("Wheelchair Accessible Dining", "Wide Doorways", "Accessible Restrooms"),
-            carbonFootprintPerNight = "3.8 kg CO2e / night (72% below city avg)",
-            pricePerNight = "₹3,500 / night",
-            contactPhone = "+91 22 2640 5500"
-        ),
-        HospitalityStay(
-            id = "stay_4",
-            name = "Sanjay Gandhi Nature Lodge & Eco-Cabins",
-            category = "Bio-Reserve Retreat",
-            location = "Borivali, Mumbai",
-            ecoScore = 5,
-            accessibilityRating = 88,
-            energySource = "Off-grid Solar • Passive Natural Cooling",
-            wastePolicy = "100% Biodegradable • Dry Toilet Systems",
-            accessibilityTags = listOf("Gentle Slope Boardwalks", "Audio Trail Guides", "Guide Dog Friendly"),
-            carbonFootprintPerNight = "1.9 kg CO2e / night (88% below city avg)",
-            pricePerNight = "₹2,400 / night",
-            contactPhone = "+91 22 2886 0389"
-        )
-    )
+    private val viewModel: HospitalityViewModel by lazy {
+        ViewModelProvider(this)[HospitalityViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,63 +41,63 @@ class HospitalityActivity : BaseActivity() {
         chipGroup = findViewById(R.id.chipGroupHospitality)
 
         rvStays.layoutManager = LinearLayoutManager(this)
-        adapter = HospitalityAdapter(allStays) { showStayAuditDialog(it) }
+        adapter = HospitalityAdapter(emptyList()) { showStayAuditDialog(it) }
         rvStays.adapter = adapter
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.rankedStays.collect { ranked ->
+                    adapter.updateList(ranked)
+                }
+            }
+        }
 
         setupFilterListeners()
     }
 
     private fun setupFilterListeners() {
-        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            filterStays()
+        chipGroup.setOnCheckedStateChangeListener { _, _ ->
+            val filter = when (chipGroup.checkedChipId) {
+                R.id.chipFilterWheelchair -> HospitalityViewModel.ChipFilter.WHEELCHAIR
+                R.id.chipFilterSolar -> HospitalityViewModel.ChipFilter.SOLAR
+                R.id.chipFilterZeroWaste -> HospitalityViewModel.ChipFilter.ZERO_WASTE
+                R.id.chipFilterBraille -> HospitalityViewModel.ChipFilter.BRAILLE
+                else -> HospitalityViewModel.ChipFilter.ALL
+            }
+            viewModel.updateChipFilter(filter)
         }
 
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                filterStays()
+                viewModel.updateQuery(s.toString())
             }
             override fun afterTextChanged(s: Editable?) {}
         })
     }
 
-    private fun filterStays() {
-        val query = etSearch.text.toString().trim().lowercase()
-        val checkedId = chipGroup.checkedChipId
+    private fun showStayAuditDialog(ranked: RankedHospitalityStay) {
+        val stay = ranked.stay
 
-        val filtered = allStays.filter { stay ->
-            val matchesQuery = query.isEmpty() ||
-                    stay.name.lowercase().contains(query) ||
-                    stay.location.lowercase().contains(query) ||
-                    stay.category.lowercase().contains(query)
+        val badgeLine = if (ranked.badges.isNotEmpty()) {
+            "🏆 " + ranked.badges.joinToString(" • ") { it.label } + "\n\n"
+        } else ""
 
-            val matchesChip = when (checkedId) {
-                R.id.chipFilterWheelchair -> stay.accessibilityTags.any { it.contains("Wheelchair", true) || it.contains("Step-Free", true) }
-                R.id.chipFilterSolar -> stay.energySource.contains("Solar", true)
-                R.id.chipFilterZeroWaste -> stay.wastePolicy.contains("Zero", true)
-                R.id.chipFilterBraille -> stay.accessibilityTags.any { it.contains("Braille", true) || it.contains("Tactile", true) }
-                else -> true
+        val evidenceSection = ranked.evidence.joinToString("\n\n") { claim ->
+            var text = "${claim.confidence.icon} [${claim.confidence.label}] ${claim.claim}\n" +
+                "Sources: ${claim.sources.joinToString(", ")}"
+            if (claim.contradiction != null) {
+                text += "\n⚠️ ${claim.contradiction}"
             }
-
-            matchesQuery && matchesChip
+            text
         }
 
-        adapter.updateList(filtered)
-    }
-
-    private fun showStayAuditDialog(stay: HospitalityStay) {
         AlertDialog.Builder(this)
             .setTitle(stay.name)
             .setMessage(
-                "Classification: ${stay.category}\nLocation: ${stay.location}\n\n" +
-                "🌿 Environmental Audit:\n" +
-                "• Energy: ${stay.energySource}\n" +
-                "• Waste Policy: ${stay.wastePolicy}\n" +
-                "• Carbon Impact: ${stay.carbonFootprintPerNight}\n\n" +
-                "♿ Accessibility Verification:\n" +
-                "• Match Rating: ${stay.accessibilityRating}%\n" +
-                "• Verified Features: ${stay.accessibilityTags.joinToString(", ")}\n\n" +
-                "Tariff: ${stay.pricePerNight}"
+                badgeLine +
+                "Classification: ${stay.category}\nLocation: ${stay.location}\nTariff: ${stay.pricePerNight}\n\n" +
+                "Evidence Graph — Why this?\n\n" + evidenceSection
             )
             .setPositiveButton("Call Venue") { _, _ ->
                 val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${stay.contactPhone}"))
