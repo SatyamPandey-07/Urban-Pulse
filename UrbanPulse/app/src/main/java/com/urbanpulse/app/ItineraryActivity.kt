@@ -1,4 +1,4 @@
-package com.meenakshi.urbanpulse
+package com.urbanpulse.app
 
 import android.content.Intent
 import android.os.Bundle
