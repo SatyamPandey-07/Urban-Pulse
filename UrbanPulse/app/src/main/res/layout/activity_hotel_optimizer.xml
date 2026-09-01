@@ -81,7 +81,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Energy Intensity"
+                        android:text="Energy"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -98,7 +98,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="kWh / guest-night"
+                        android:text="kWh / guest"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -106,7 +106,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="▼ 22% vs benchmark"
+                        android:text="▼ 22% vs avg"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
@@ -134,7 +134,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Water Usage"
+                        android:text="Water"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -151,7 +151,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Liters / room / day"
+                        android:text="L / room / day"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -159,7 +159,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="88% greywater recycled"
+                        android:text="Greywater 100%"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
@@ -204,7 +204,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="kg / 100 covers"
+                        android:text="kg / day"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -212,7 +212,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="Zero to landfill"
+                        android:text="92% Diverted"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
@@ -221,52 +221,6 @@
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-
-        <!-- Live ESG Compliance & Audit Generator Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Widget.Material3.CardView.Filled"
-            app:cardCornerRadius="24dp"
-            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
-            app:strokeWidth="1dp"
-            app:strokeColor="?attr/colorPrimary"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="B2B ESG Compliance &amp; Sustainability Audit"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Generate verified sustainability audit sheets for Bureau of Energy Efficiency (BEE), LEED Platinum, and Green Hospitality certifications."
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnGenerateEsgReport"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:text="Generate &amp; Export ESG Audit Sheet"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_dashboard" />
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
         <!-- AI Kitchen Surplus Forecasting Card -->
         <com.google.android.material.card.MaterialCardView
@@ -312,12 +266,13 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDispatchShelter"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
                     android:layout_marginTop="14dp"
-                    android:text="Auto-Dispatch Alert to Local Food Shelter"
-                    app:cornerRadius="16dp" />
+                    android:text="Auto-Dispatch Alert to Food Shelter"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_confetti" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -366,11 +321,58 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnApplyHvacEco"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
                     android:layout_marginTop="14dp"
                     android:text="Apply Automated Eco Setpoint"
-                    app:cornerRadius="16dp" />
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_digital_twin" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Live ESG Compliance & Audit Generator Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:strokeWidth="1dp"
+            app:strokeColor="?attr/colorPrimary"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="B2B ESG Compliance &amp; Sustainability Audit"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Generate verified sustainability audit sheets for Bureau of Energy Efficiency (BEE), LEED Platinum, and Green Hospitality certifications."
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGenerateEsgReport"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="14dp"
+                    android:text="Generate &amp; Export ESG Audit Sheet"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_dashboard" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
