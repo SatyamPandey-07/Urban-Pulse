@@ -1,0 +1,37 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Outer Glow Capsule Ring -->
+    <path
+        android:fillColor="#1510B981"
+        android:pathData="M60,10 C87.61,10 110,32.39 110,60 C110,87.61 87.61,110 60,110 C32.39,110 10,87.61 10,60 C10,32.39 32.39,10 60,10 Z" />
+
+    <!-- Sleek Geometric Shield / Leaf Foundation -->
+    <path
+        android:fillColor="#1E293B"
+        android:strokeColor="#334155"
+        android:strokeWidth="2"
+        android:pathData="M60,22 C80,22 96,38 96,60 C96,86 60,102 60,102 C60,102 24,86 24,60 C24,38 40,22 60,22 Z" />
+
+    <!-- Vibrant Pulse Waveform (Green & Inclusive City Heartbeat) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#10B981"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M34,60 L46,60 L52,42 L62,78 L70,52 L76,64 L86,60" />
+
+    <!-- Smart City Geo-Beacon Pin Core -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M60,34 C63.3,34 66,36.7 66,40 C66,44.5 60,50 60,50 C60,50 54,44.5 54,40 C54,36.7 56.7,34 60,34 Z" />
+
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M60,38 C61.1,38 62,38.9 62,40 C62,41.1 61.1,42 60,42 C58.9,42 58,41.1 58,40 C58,38.9 58.9,38 60,38 Z" />
+
+</vector>
