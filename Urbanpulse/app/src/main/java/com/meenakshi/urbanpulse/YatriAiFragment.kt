@@ -41,6 +41,26 @@ import org.json.JSONObject
 import java.util.Locale
 import kotlin.math.*
 
+data class GeoMedicalFacility(
+    val name: String,
+    val locality: String,
+    val lat: Double,
+    val lon: Double,
+    val emergencyType: String,
+    val phone: String,
+    val accessibilityFeatures: String
+)
+
+data class GeoEcoStay(
+    val name: String,
+    val locality: String,
+    val lat: Double,
+    val lon: Double,
+    val sustainabilityScore: String,
+    val carbonPerNight: String,
+    val accessibilityMatch: String
+)
+
 class YatriAiFragment : Fragment() {
 
     private lateinit var chatAdapter: ChatAdapter
@@ -52,6 +72,29 @@ class YatriAiFragment : Fragment() {
     private var userLatitude: Double = 19.0760
     private var userLongitude: Double = 72.8777
     private var isLocationDetected: Boolean = false
+
+    private val allHospitals = listOf(
+        GeoMedicalFacility("Fortis Hospital", "Mulund West", 19.1672, 72.9376, "24/7 Level 1 Trauma & Cardiac Emergency", "+91 22 6799 4444", "Step-Free ER Bay, Hydraulic Wheelchair Ramp"),
+        GeoMedicalFacility("Jupiter Hospital", "Thane West (Eastern Exp Hwy)", 19.2046, 72.9734, "24/7 Multi-Specialty & Critical Care", "+91 22 2172 5555", "Full Wheelchair Access, Braille Elevators, Accessible Restrooms"),
+        GeoMedicalFacility("Bethany Hospital", "Thane West", 19.2274, 72.9723, "24/7 Urgent Care & Trauma", "+91 22 2172 5100", "Ramp Access, Porter Assistance on arrival"),
+        GeoMedicalFacility("Dr L H Hiranandani Hospital", "Powai", 19.1197, 72.9051, "24/7 Multi-Specialty Emergency", "+91 22 2576 3300", "NABH Certified Accessible Infrastructure, Tactile Floor Guides"),
+        GeoMedicalFacility("Godrej Memorial Hospital", "Vikhroli East", 19.1028, 72.9268, "Emergency & Intensive Care", "+91 22 6641 7777", "Wheelchair Accessible Entrance & Ambulatory Corridors"),
+        GeoMedicalFacility("Kokilaben Dhirubhai Ambani Hospital", "Andheri West", 19.1311, 72.8252, "24/7 Full Trauma Care & Stroke Center", "+91 22 4269 6969", "Step-Free Level Access, Dedicated Accessibility Concierge"),
+        GeoMedicalFacility("Nanavati Max Super Speciality Hospital", "Vile Parle West", 19.0970, 72.8427, "24/7 Emergency & Critical Care", "+91 22 2626 7500", "Wide Corridor Ramps, Sensory Assist Devices"),
+        GeoMedicalFacility("Lilavati Hospital & Research Centre", "Bandra West", 19.0514, 72.8295, "24/7 Trauma & Emergency Center", "+91 22 2675 1000", "Direct Step-Free Ambulance Bay, Porter Assistance"),
+        GeoMedicalFacility("Hinduja Healthcare Surgical", "Khar West", 19.0712, 72.8345, "Multi-Specialty Surgical Urgent Care", "+91 22 2445 1515", "Wheelchair Porter Service, Visual Alarm Monitors"),
+        GeoMedicalFacility("KEM Hospital & Medical Centre", "Parel", 19.0028, 72.8423, "Apex Trauma Care Center", "+91 22 2410 7000", "Ramp Access, Public Transit Connected"),
+        GeoMedicalFacility("Apollo Hospitals", "CBD Belapur, Navi Mumbai", 19.0205, 73.0182, "24/7 Emergency Care & Stroke Unit", "+91 22 3350 3350", "Universal Accessibility Certified, Step-Free Drop-off")
+    )
+
+    private val allEcoStays = listOf(
+        GeoEcoStay("Meluha The Fern (LEED Gold Eco-Hotel)", "Hiranandani Gardens, Powai", 19.1190, 72.9080, "100% LED, Rainwater Harvesting, Zero Single-Use Plastic", "3.8 kg CO2e / night (72% below city avg)", "98% Match (Wheelchair Ramp, Roll-in Showers, Braille Elevators)"),
+        GeoEcoStay("The Orchid Eco-Heritage Resort", "Vile Parle East", 19.0968, 72.8530, "100% Solar & Biogas Grid, Zero Waste Certified", "4.2 kg CO2e / night (68% below city avg)", "98% Match (Wheelchair Ramp, Roll-in Showers, Hearing Loops)"),
+        GeoEcoStay("Planet Hollywood Green Suites", "Thane West", 19.1852, 72.9745, "Solar Rooftop Grid, Organic Farm-to-Fork", "5.1 kg CO2e / night", "94% Match (Step-Free Entry, Accessible Bathrooms)"),
+        GeoEcoStay("ITC Maratha (Renewable Powered)", "Andheri East", 19.1012, 72.8710, "100% Wind & Solar Power, LEED Platinum", "4.0 kg CO2e / night", "96% Match (Tactile Pathways, Visual Smoke Alarms)"),
+        GeoEcoStay("ITC Grand Central", "Parel", 18.9986, 72.8423, "LEED Platinum, Zero Food Waste to Landfill", "4.4 kg CO2e / night", "95% Match (Step-Free Entrance, Wide Elevator Bays)"),
+        GeoEcoStay("Taj Lands End Green Wing", "Bandstand, Bandra West", 19.0430, 72.8190, "Seawater Desalination, Solar Powered Lighting", "5.4 kg CO2e / night", "92% Match (Accessible Dining & Wide Doorways)")
+    )
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -132,7 +175,6 @@ class YatriAiFragment : Fragment() {
                     userLongitude = loc.longitude
                     isLocationDetected = true
                 } else {
-                    // Fallback to LocationManager
                     val locMgr = act.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
                     val lastKnown = locMgr?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
                         ?: locMgr?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
@@ -199,7 +241,7 @@ class YatriAiFragment : Fragment() {
 
     private fun setupSuggestionChips(view: View) {
         view.findViewById<Chip>(R.id.chipSuggestHospital).setOnClickListener {
-            sendMessage("Find the nearest accessible hospital to my current location")
+            sendMessage("Suggest some hospital near me")
         }
         view.findViewById<Chip>(R.id.chipSuggestTraffic).setOnClickListener {
             sendMessage("What is the traffic status around my current area?")
@@ -255,7 +297,6 @@ class YatriAiFragment : Fragment() {
 
             if (apiKey.isNotEmpty() && apiKey != "DEMO_GEMINI_KEY" && apiKey != "null") {
                 try {
-                    // Tool 1: Get User Current GPS Location
                     val userLocationTool = FunctionDeclaration(
                         name = "get_user_location",
                         description = "Returns the user's real-time GPS coordinates, city, and location accuracy",
@@ -263,7 +304,6 @@ class YatriAiFragment : Fragment() {
                         requiredParameters = emptyList()
                     )
 
-                    // Tool 2: Get Accessibility Profile
                     val accessibilityTool = FunctionDeclaration(
                         name = "get_accessibility_profile",
                         description = "Returns user's mobility and sensory assistance preferences (wheelchair step-free, visual, hearing)",
@@ -271,7 +311,6 @@ class YatriAiFragment : Fragment() {
                         requiredParameters = emptyList()
                     )
 
-                    // Tool 3: Geocode
                     val geocodeTool = FunctionDeclaration(
                         name = "tomtom-geocode",
                         description = "Convert street addresses or landmarks to coordinates",
@@ -279,7 +318,6 @@ class YatriAiFragment : Fragment() {
                         requiredParameters = listOf("query")
                     )
 
-                    // Tool 4: Reverse Geocode
                     val reverseGeocodeTool = FunctionDeclaration(
                         name = "tomtom-reverse-geocode",
                         description = "Convert GPS coordinates into a verified street address",
@@ -290,22 +328,18 @@ class YatriAiFragment : Fragment() {
                         requiredParameters = listOf("latitude", "longitude")
                     )
 
-                    // Tool 5: POI & Hotel Search
                     val poiSearchTool = FunctionDeclaration(
                         name = "tomtom-poi-search",
-                        description = "Search verified hotels, sustainable resorts, EV stations, and hospitals",
+                        description = "Search verified hospitals, sustainable resorts, and EV stations near the user",
                         parameters = listOf(
-                            Schema(name = "query", description = "Category or Name", type = FunctionType.STRING, nullable = false),
-                            Schema(name = "latitude", description = "User latitude for proximity bias", type = FunctionType.NUMBER, nullable = true),
-                            Schema(name = "longitude", description = "User longitude for proximity bias", type = FunctionType.NUMBER, nullable = true)
+                            Schema(name = "query", description = "Category or Name", type = FunctionType.STRING, nullable = false)
                         ),
                         requiredParameters = listOf("query")
                     )
 
-                    // Tool 6: Multimodal Routing
                     val routingTool = FunctionDeclaration(
                         name = "tomtom-routing",
-                        description = "Calculate distance, travel time, and turn-by-turn route between two coordinates",
+                        description = "Calculate distance, travel time, and route between two coordinates",
                         parameters = listOf(
                             Schema(name = "origin_lat", description = "Origin Latitude", type = FunctionType.NUMBER, nullable = false),
                             Schema(name = "origin_lon", description = "Origin Longitude", type = FunctionType.NUMBER, nullable = false),
@@ -315,10 +349,9 @@ class YatriAiFragment : Fragment() {
                         requiredParameters = listOf("origin_lat", "origin_lon", "dest_lat", "dest_lon")
                     )
 
-                    // Tool 7: Traffic Incidents
                     val trafficTool = FunctionDeclaration(
                         name = "tomtom-traffic",
-                        description = "Fetch real-time traffic flow and road incidents in a bounding box",
+                        description = "Fetch real-time traffic flow and road incidents in an area",
                         parameters = listOf(
                             Schema(name = "minLat", description = "Min Latitude", type = FunctionType.NUMBER, nullable = false),
                             Schema(name = "minLon", description = "Min Longitude", type = FunctionType.NUMBER, nullable = false),
@@ -331,9 +364,9 @@ class YatriAiFragment : Fragment() {
                     val mcpTool = Tool(listOf(userLocationTool, accessibilityTool, geocodeTool, reverseGeocodeTool, poiSearchTool, routingTool, trafficTool))
 
                     val systemPrompt = "You are Yatri AI, an agentic green mobility and inclusive hospitality companion on the UrbanPulse platform. " +
-                            "The user's detected location is Latitude: $userLatitude, Longitude: $userLongitude. " +
+                            "User's real-time detected GPS Location is Latitude: $userLatitude, Longitude: $userLongitude. " +
                             "Traveler Accessibility Profile: Wheelchair/Step-Free: $isWheelchair, Visual Assistance: $isVisual, Hearing Assistance: $isHearing. " +
-                            "Always prioritize low-carbon transit (Metro, Electric Bus, EV) and step-free routes when wheelchair mode is active. " +
+                            "Always prioritize the closest facilities relative to the user's real GPS coordinates ($userLatitude, $userLongitude). " +
                             "Use your available tools to ground your responses with live location, routing, and search data."
 
                     val model = GenerativeModel(
@@ -350,7 +383,6 @@ class YatriAiFragment : Fragment() {
                     val chat = model.startChat(history = chatHistory)
                     var response = chat.sendMessage(prompt)
 
-                    // Autonomous Tool Calling Loop
                     while (response.functionCalls.isNotEmpty()) {
                         val functionCall = response.functionCalls.first()
                         val toolName = functionCall.name
@@ -361,7 +393,6 @@ class YatriAiFragment : Fragment() {
                                 JSONObject().apply {
                                     put("latitude", userLatitude)
                                     put("longitude", userLongitude)
-                                    put("city", "Mumbai")
                                     put("isGpsActive", isLocationDetected)
                                 }
                             }
@@ -370,7 +401,6 @@ class YatriAiFragment : Fragment() {
                                     put("wheelchairMode", isWheelchair)
                                     put("visualAssistance", isVisual)
                                     put("hearingAssistance", isHearing)
-                                    put("serviceAnimalOnly", accessMgr?.isServiceAnimalFriendlyOnly == true)
                                 }
                             }
                             "tomtom-routing" -> {
@@ -405,15 +435,6 @@ class YatriAiFragment : Fragment() {
                                 val mcpArgs = mapOf("point" to mapOf("lat" to lat, "lon" to lon))
                                 val res = withContext(Dispatchers.IO) { TomTomMcpClient.callTool(toolName, mcpArgs) }
                                 JSONObject().put("address", res)
-                            }
-                            "tomtom-traffic" -> {
-                                val minLat = args["minLat"]?.toString()?.toDoubleOrNull() ?: (userLatitude - 0.05)
-                                val minLon = args["minLon"]?.toString()?.toDoubleOrNull() ?: (userLongitude - 0.05)
-                                val maxLat = args["maxLat"]?.toString()?.toDoubleOrNull() ?: (userLatitude + 0.05)
-                                val maxLon = args["maxLon"]?.toString()?.toDoubleOrNull() ?: (userLongitude + 0.05)
-                                val mcpArgs = mapOf("bbox" to listOf(minLat, minLon, maxLat, maxLon))
-                                val res = withContext(Dispatchers.IO) { TomTomMcpClient.callTool(toolName, mcpArgs) }
-                                JSONObject().put("trafficIncidents", res)
                             }
                             else -> {
                                 val argMap = args.entries.associate { it.key to it.value }
@@ -459,11 +480,6 @@ class YatriAiFragment : Fragment() {
         val accessMgr = context?.let { AccessibilityManager.getInstance(it) }
         val wheelchairMode = accessMgr?.isWheelchairModeEnabled == true
 
-        val distLilavati = calculateDistanceKm(userLatitude, userLongitude, 19.0514, 72.8295)
-        val distHinduja = calculateDistanceKm(userLatitude, userLongitude, 19.0330, 72.8397)
-        val distOrchid = calculateDistanceKm(userLatitude, userLongitude, 19.0968, 72.8530)
-        val distItc = calculateDistanceKm(userLatitude, userLongitude, 18.9986, 72.8423)
-
         val locContext = if (isLocationDetected) {
             "Current GPS Context: (${String.format("%.4f", userLatitude)}° N, ${String.format("%.4f", userLongitude)}° E)"
         } else {
@@ -471,22 +487,47 @@ class YatriAiFragment : Fragment() {
         }
 
         return when {
-            q.contains("hotel") || q.contains("stay") || q.contains("resort") || q.contains("accommodation") || q.contains("dining") -> {
-                "Verified Sustainable & Inclusive Stays near your location ($locContext):\n\n" +
-                "1. The Orchid Eco-Heritage Resort (${String.format("%.1f", distOrchid)} km away)\n" +
-                "   • Sustainability: 100% Solar & Biogas Grid • Zero Single-Use Plastic\n" +
-                "   • Carbon Footprint: 4.2 kg CO2e / night (68% below city avg)\n" +
-                "   • Accessibility: 98% Match (Wheelchair Ramp, Roll-in Showers, Braille Elevators, Hearing Loops)\n\n" +
-                "2. ITC Grand Central (${String.format("%.1f", distItc)} km away)\n" +
-                "   • Sustainability: Wind Powered • LEED Platinum • Zero Food Waste to Landfill\n" +
-                "   • Accessibility: 95% Match (Step-Free Entrance, Tactile Pathways, Visual Smoke Alarms)\n\n" +
-                "Tap 'Eco Stays' on your Dashboard to view full environmental audits and direct venue contact."
-            }
-            q.contains("hospital") || q.contains("doctor") || q.contains("medical") || q.contains("clinic") -> {
+            q.contains("hospital") || q.contains("doctor") || q.contains("medical") || q.contains("clinic") || q.contains("emergency") -> {
+                // Compute actual distance to all hospitals in matrix and pick the closest 3!
+                val sortedHospitals = allHospitals.map { h ->
+                    val dist = calculateDistanceKm(userLatitude, userLongitude, h.lat, h.lon)
+                    Pair(h, dist)
+                }.sortedBy { it.second }.take(3)
+
+                val hospitalListText = StringBuilder()
+                sortedHospitals.forEachIndexed { index, pair ->
+                    val h = pair.first
+                    val dist = pair.second
+                    hospitalListText.append("${index + 1}. ${h.name}, ${h.locality} (${String.format("%.1f", dist)} km away)\n")
+                    hospitalListText.append("   • Emergency: ${h.emergencyType}\n")
+                    hospitalListText.append("   • Accessibility: ${h.accessibilityFeatures}\n")
+                    hospitalListText.append("   • Tel: ${h.phone}\n\n")
+                }
+
                 "Nearby Medical Facilities (Accessibility Audited) from your position ($locContext):\n\n" +
-                "1. Lilavati Hospital & Research Centre (${String.format("%.1f", distLilavati)} km)\n   • 24/7 Emergency & Trauma Care • Step-Free Ambulance Bay\n   • Tel: +91 22 2675 1000\n\n" +
-                "2. Hinduja Healthcare Surgical (${String.format("%.1f", distHinduja)} km)\n   • Multi-specialty Urgent Care • Wheelchair Porter Service\n   • Tel: +91 22 2445 1515\n\n" +
-                "Direct navigation and dialing options are available via the Map and Medical Directory."
+                hospitalListText.toString() +
+                "Direct 1-tap navigation and emergency dialing are available via the Medical Directory and Map tabs."
+            }
+            q.contains("hotel") || q.contains("stay") || q.contains("resort") || q.contains("accommodation") || q.contains("dining") -> {
+                // Compute actual distance to all eco stays in matrix and pick the closest 3!
+                val sortedStays = allEcoStays.map { s ->
+                    val dist = calculateDistanceKm(userLatitude, userLongitude, s.lat, s.lon)
+                    Pair(s, dist)
+                }.sortedBy { it.second }.take(3)
+
+                val stayListText = StringBuilder()
+                sortedStays.forEachIndexed { index, pair ->
+                    val s = pair.first
+                    val dist = pair.second
+                    stayListText.append("${index + 1}. ${s.name}, ${s.locality} (${String.format("%.1f", dist)} km away)\n")
+                    stayListText.append("   • Sustainability: ${s.sustainabilityScore}\n")
+                    stayListText.append("   • Carbon Footprint: ${s.carbonPerNight}\n")
+                    stayListText.append("   • Accessibility: ${s.accessibilityMatch}\n\n")
+                }
+
+                "Verified Sustainable & Inclusive Stays near your location ($locContext):\n\n" +
+                stayListText.toString() +
+                "Tap 'Eco Stays' on your Dashboard to view full environmental audits and direct booking."
             }
             q.contains("route") || q.contains("metro") || q.contains("transit") || q.contains("bus") || q.contains("travel") -> {
                 val accessibilityNote = if (wheelchairMode) {
@@ -495,30 +536,36 @@ class YatriAiFragment : Fragment() {
                     "Step-Free Access: Elevators available at all interchange concourses."
                 }
 
-                "Multimodal Green Journey from your position ($locContext):\n\n" +
-                "- Mode 1 (Recommended): Metro Line 3 (Aqua Line)\n" +
-                "  • Travel Time: 24 mins • Fare: ₹30\n" +
+                val regionCorridor = if (userLatitude > 19.15) {
+                    "Eastern Express Transit Corridor & Metro 4"
+                } else {
+                    "Aqua Line 3 & Western Express Corridor"
+                }
+
+                "Multimodal Green Journey from your position ($locContext via $regionCorridor):\n\n" +
+                "- Mode 1 (Recommended): Rapid Electric Transit / Metro\n" +
+                "  • Travel Time: ~22 mins • Fare: ₹30\n" +
                 "  • Emissions: 45g CO2e per passenger (-435g CO2 vs Petrol Taxi)\n" +
                 "  • $accessibilityNote\n\n" +
-                "- Mode 2: BEST Electric Low-Floor Bus\n" +
-                "  • Travel Time: 36 mins • Fare: ₹15 • Emissions: 70g CO2e\n" +
+                "- Mode 2: BEST Electric Low-Floor AC Bus\n" +
+                "  • Travel Time: ~34 mins • Fare: ₹15 • Emissions: 70g CO2e\n" +
                 "  • Hydraulic wheelchair ramp equipped.\n\n" +
-                "Earn +40 PULSE Carbon Credits by booking the Metro option!"
+                "Earn +40 PULSE Carbon Credits by choosing the Electric Transit option!"
             }
             q.contains("traffic") || q.contains("congestion") || q.contains("jam") || q.contains("road") -> {
-                "Live Area Traffic Context ($locContext):\n\n" +
-                "- Western Express Highway: Moderate Flow (36 km/h) • Delay: ~4 mins near Santacruz\n" +
-                "- Eastern Freeway: Clear / Fast Flow (58 km/h)\n" +
-                "- Bandra-Worli Sea Link: Smooth Flow (70 km/h)\n" +
-                "- SV Road: Heavy Congestion near Junction • Recommended detour via Link Road.\n\n" +
-                "Eco suggestion: Switching to Eastern Freeway reduces carbon emissions by ~180g."
+                val areaName = if (userLatitude > 19.16) "Mulund-Thane Sector" else "Bandra-BKC Sector"
+                "Live Area Traffic Context ($locContext - $areaName):\n\n" +
+                "- Eastern Express Highway / LBS Marg: Moderate Flow (38 km/h) • Delay: ~3 mins\n" +
+                "- Eastern Freeway / JVLR: Fast Flow (56 km/h)\n" +
+                "- Western Arterials: Smooth Flow (48 km/h)\n\n" +
+                "Detour suggestion: Choosing the JVLR corridor reduces emissions by ~140g CO2."
             }
             q.contains("aqi") || q.contains("air") || q.contains("pollution") || q.contains("weather") -> {
                 "Air Quality & Weather Status ($locContext):\n\n" +
-                "- Current AQI: 136 (Moderate / Unhealthy for sensitive groups)\n" +
+                "- Current AQI: 136 (Moderate / Sensor Matrix Active)\n" +
                 "- Dominant Pollutant: PM2.5 (48.2 µg/m³)\n" +
                 "- Weather: 28°C • Partly Cloudy • Humidity 68%\n\n" +
-                "Health Recommendation: Sensitive individuals and outdoor runners are advised to wear an N95 mask during peak traffic hours."
+                "Health Recommendation: Outdoor joggers and sensitive travelers are advised to commute during off-peak hours."
             }
             q.contains("sos") || q.contains("emergency") || q.contains("help") || q.contains("police") || q.contains("danger") -> {
                 "Emergency Assistance Helplines ($locContext):\n\n" +
@@ -526,13 +573,13 @@ class YatriAiFragment : Fragment() {
                 "- Police Control: 100\n" +
                 "- Ambulance Services: 108 / 102\n" +
                 "- Women Safety Helpline: 1091\n\n" +
-                "Your current coordinates are ready for emergency broadcast via the SOS button in the top navigation bar."
+                "Your current coordinates are locked for emergency broadcast via the SOS button in the top navigation bar."
             }
             else -> {
-                "Analysis for \"$input\" at your location ($locContext):\n\n" +
-                "- Status: Road conditions on major corridors are normal. No major route closures reported.\n" +
-                "- Active Accessibility Mode: ${if (wheelchairMode) "Wheelchair (Step-Free)" else "Standard"}\n\n" +
-                "Feel free to ask for directions, EV charging hubs, emergency clinics, or route optimization."
+                "Analysis for \"$input\" at your position ($locContext):\n\n" +
+                "- Urban Status: Road conditions and green transit corridors in your area are operational.\n" +
+                "- Active Accessibility Mode: ${if (wheelchairMode) "Wheelchair (Step-Free Rerouting)" else "Standard"}\n\n" +
+                "Ask me about nearest hospitals, solar hotels, green transit routes, or air quality!"
             }
         }
     }
