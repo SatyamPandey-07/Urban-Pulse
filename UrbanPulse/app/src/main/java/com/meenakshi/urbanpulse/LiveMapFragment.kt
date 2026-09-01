@@ -35,7 +35,6 @@ import com.tomtom.sdk.search.SearchCallback
 import com.tomtom.sdk.search.SearchOptions
 import com.tomtom.sdk.search.SearchResponse
 import com.tomtom.sdk.search.common.error.SearchFailure
-import com.tomtom.sdk.search.model.result.SearchResult
 import com.tomtom.sdk.search.online.OnlineSearch
 
 class LiveMapFragment : Fragment() {
@@ -126,27 +125,27 @@ class LiveMapFragment : Fragment() {
                 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
                 <style>
-                    html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: #121218; font-family: -apple-system, Roboto, sans-serif; }
+                    html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: #0F172A; font-family: -apple-system, Roboto, sans-serif; }
                     .leaflet-control-attribution { display: none; }
                     .custom-pin {
                         display: flex; align-items: center; justify-content: center;
-                        border-radius: 50%; color: white; font-weight: bold; font-size: 14px;
+                        border-radius: 50%; color: white; font-weight: 600; font-size: 11px;
                         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
                     }
                     .user-pulse {
-                        width: 18px; height: 18px; background: #2196F3; border: 3px solid white;
-                        border-radius: 50%; box-shadow: 0 0 15px #2196F3;
+                        width: 18px; height: 18px; background: #38BDF8; border: 3px solid #FFFFFF;
+                        border-radius: 50%; box-shadow: 0 0 15px #38BDF8;
                         animation: radar 2s infinite ease-out;
                     }
                     @keyframes radar {
-                        0% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7); }
-                        70% { box-shadow: 0 0 0 16px rgba(33, 150, 243, 0); }
-                        100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+                        0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+                        70% { box-shadow: 0 0 0 16px rgba(56, 189, 248, 0); }
+                        100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
                     }
                     .leaflet-popup-content-wrapper {
-                        background: #1E1E2C; color: #FFFFFF; border-radius: 12px; border: 1px solid #333344;
+                        background: #1E293B; color: #F8FAFC; border-radius: 12px; border: 1px solid #334155;
                     }
-                    .leaflet-popup-tip { background: #1E1E2C; }
+                    .leaflet-popup-tip { background: #1E293B; }
                 </style>
             </head>
             <body>
@@ -154,7 +153,6 @@ class LiveMapFragment : Fragment() {
                 <script>
                     var map = L.map('map', { zoomControl: false }).setView([19.0760, 72.8777], 13);
                     
-                    // Dark Matter Tile Layer (High contrast, modern dark style)
                     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                         maxZoom: 19,
                         subdomains: 'abcd'
@@ -162,34 +160,33 @@ class LiveMapFragment : Fragment() {
 
                     var userMarker = L.marker([19.0760, 72.8777], {
                         icon: L.divIcon({ className: 'user-pulse', iconSize: [18, 18], iconAnchor: [9, 9] })
-                    }).addTo(map).bindPopup("<b>📍 You are here</b><br>Live GPS Active");
+                    }).addTo(map).bindPopup("<b>Current Location</b><br>GPS Active");
 
                     // Traffic Polylines
                     var trafficLines = [];
                     function drawTraffic() {
                         var greenLine = L.polyline([
                             [19.0544, 72.8402], [19.0760, 72.8777], [19.1136, 72.8697]
-                        ], { color: '#00E676', weight: 6, opacity: 0.85 }).addTo(map).bindPopup("🚦 Western Highway: Fast Flow (54 km/h)");
+                        ], { color: '#10B981', weight: 5, opacity: 0.85 }).addTo(map).bindPopup("Western Highway: Fast Flow (54 km/h)");
 
                         var yellowLine = L.polyline([
                             [19.0760, 72.8777], [19.0600, 72.8900], [19.0400, 72.9000]
-                        ], { color: '#FFD600', weight: 6, opacity: 0.85 }).addTo(map).bindPopup("🚦 Eastern Freeway: Moderate (38 km/h)");
+                        ], { color: '#F59E0B', weight: 5, opacity: 0.85 }).addTo(map).bindPopup("Eastern Freeway: Moderate (38 km/h)");
 
                         var redLine = L.polyline([
                             [19.0760, 72.8777], [19.0650, 72.8350]
-                        ], { color: '#FF1744', weight: 6, opacity: 0.85 }).addTo(map).bindPopup("⚠️ SV Road: Heavy Congestion (18 km/h)");
+                        ], { color: '#EF4444', weight: 5, opacity: 0.85 }).addTo(map).bindPopup("SV Road: Heavy Congestion (18 km/h)");
 
                         trafficLines = [greenLine, yellowLine, redLine];
                     }
                     drawTraffic();
 
-                    // Preload City POIs
                     var pois = [
-                        { lat: 19.0515, lon: 72.8290, title: "🏥 Lilavati Hospital", desc: "24/7 Emergency Trauma Care", bg: "#E91E63" },
-                        { lat: 19.0330, lon: 72.8550, title: "🏥 Hinduja Healthcare", desc: "Multi-Speciality Urgent Care", bg: "#E91E63" },
-                        { lat: 19.0880, lon: 72.8890, title: "⚡ Tata Power EV Supercharger", desc: "60 kW CCS2 Fast Charging (4 Available)", bg: "#00E5FF" },
-                        { lat: 19.0680, lon: 72.8350, title: "⚠️ Pothole & Roadwork Alert", desc: "Reported 20 mins ago • Slow traffic", bg: "#FF9100" },
-                        { lat: 19.0950, lon: 72.8650, title: "🌿 Eco Transit Corridor", desc: "Dedicated Electric Bus / Cycling Track", bg: "#4CAF50" }
+                        { lat: 19.0515, lon: 72.8290, code: "MED", title: "Lilavati Hospital", desc: "24/7 Emergency Trauma Care", bg: "#EF4444" },
+                        { lat: 19.0330, lon: 72.8550, code: "MED", title: "Hinduja Healthcare", desc: "Multi-Speciality Urgent Care", bg: "#EF4444" },
+                        { lat: 19.0880, lon: 72.8890, code: "EV", title: "Fast Charging Hub", desc: "60 kW CCS2 (4 Available)", bg: "#38BDF8" },
+                        { lat: 19.0680, lon: 72.8350, code: "HAZ", title: "Roadwork Alert", desc: "Reported 20 mins ago • Slow traffic", bg: "#F97316" },
+                        { lat: 19.0950, lon: 72.8650, code: "ECO", title: "Eco Transit Corridor", desc: "Dedicated Electric Bus / Cycling Track", bg: "#10B981" }
                     ];
 
                     var markers = [];
@@ -197,15 +194,14 @@ class LiveMapFragment : Fragment() {
                         var m = L.marker([p.lat, p.lon], {
                             icon: L.divIcon({
                                 className: 'custom-pin',
-                                html: '<div style="background:' + p.bg + '; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:16px;">' + p.title.substring(0, 2) + '</div>',
-                                iconSize: [32, 32],
-                                iconAnchor: [16, 16]
+                                html: '<div style="background:' + p.bg + '; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:10px;">' + p.code + '</div>',
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 15]
                             })
                         }).addTo(map).bindPopup("<b>" + p.title + "</b><br>" + p.desc);
                         markers.push(m);
                     });
 
-                    // JS Interface Functions
                     window.setCenter = function(lat, lon, zoom) {
                         map.flyTo([lat, lon], zoom, { duration: 1.2 });
                         userMarker.setLatLng([lat, lon]);
@@ -213,7 +209,7 @@ class LiveMapFragment : Fragment() {
 
                     window.addPin = function(lat, lon, title, desc) {
                         map.flyTo([lat, lon], 15, { duration: 1.0 });
-                        L.marker([lat, lon]).addTo(map).bindPopup("<b>📍 " + title + "</b><br>" + desc).openPopup();
+                        L.marker([lat, lon]).addTo(map).bindPopup("<b>" + title + "</b><br>" + desc).openPopup();
                     };
 
                     window.toggleTrafficOverlay = function(show) {
@@ -234,7 +230,7 @@ class LiveMapFragment : Fragment() {
             etMapSearch.setText(result.place.name ?: "")
             val coordinate = result.place.coordinate
             centerMap(coordinate.latitude, coordinate.longitude, 15)
-            tvLiveStatusTitle.text = "📍 ${result.place.name ?: "Selected Location"}"
+            tvLiveStatusTitle.text = result.place.name ?: "Selected Location"
             tvLiveStatusSubtitle.text = result.place.address?.freeformAddress ?: "Lat: %.4f, Lon: %.4f".format(coordinate.latitude, coordinate.longitude)
         }
         rvSearchResults.adapter = searchAdapter
@@ -297,22 +293,22 @@ class LiveMapFragment : Fragment() {
         when {
             q.contains("hospital") || q.contains("clinic") -> {
                 centerMap(19.0515, 72.8290, 15)
-                tvLiveStatusTitle.text = "🏥 Lilavati Hospital & Research Centre"
+                tvLiveStatusTitle.text = "Lilavati Hospital & Research Centre"
                 tvLiveStatusSubtitle.text = "Bandra West, Mumbai • 24/7 Emergency Trauma Care"
             }
             q.contains("ev") || q.contains("charge") -> {
                 centerMap(19.0880, 72.8890, 15)
-                tvLiveStatusTitle.text = "⚡ Tata Power Fast Charging Hub"
+                tvLiveStatusTitle.text = "Tata Power Fast Charging Hub"
                 tvLiveStatusSubtitle.text = "BKC, Mumbai • 4 Superchargers Available"
             }
             q.contains("hazard") || q.contains("traffic") -> {
                 centerMap(19.0680, 72.8350, 15)
-                tvLiveStatusTitle.text = "⚠️ SV Road Congestion & Roadwork"
+                tvLiveStatusTitle.text = "SV Road Congestion & Roadwork"
                 tvLiveStatusSubtitle.text = "Average speed: 18 km/h • Detour advised"
             }
             else -> {
                 centerMap(19.0760, 72.8777, 14)
-                tvLiveStatusTitle.text = "📍 $query, Mumbai"
+                tvLiveStatusTitle.text = "$query, Mumbai"
                 tvLiveStatusSubtitle.text = "Coordinates: 19.0760° N, 72.8777° E"
             }
         }
@@ -322,7 +318,7 @@ class LiveMapFragment : Fragment() {
     private fun setupChips(view: View) {
         view.findViewById<Chip>(R.id.chipHospitals).setOnClickListener {
             centerMap(19.0515, 72.8290, 15)
-            tvLiveStatusTitle.text = "🏥 Lilavati Hospital (Nearest Emergency)"
+            tvLiveStatusTitle.text = "Lilavati Hospital (Nearest Emergency)"
             tvLiveStatusSubtitle.text = "1.8 km away • Tel: +91 22 2675 1000"
             Toast.makeText(context, "Showing Nearest Hospitals", Toast.LENGTH_SHORT).show()
         }
@@ -330,28 +326,28 @@ class LiveMapFragment : Fragment() {
         view.findViewById<Chip>(R.id.chipTraffic).setOnClickListener {
             isTrafficEnabled = !isTrafficEnabled
             mapWebView.evaluateJavascript("window.toggleTrafficOverlay($isTrafficEnabled);", null)
-            tvLiveStatusTitle.text = if (isTrafficEnabled) "🚦 Live Traffic Active" else "🚦 Traffic Overlay Hidden"
-            tvLiveStatusSubtitle.text = "Real-time congestion tracking enabled • Average speed 42 km/h"
+            tvLiveStatusTitle.text = if (isTrafficEnabled) "Live Traffic Active" else "Traffic Overlay Hidden"
+            tvLiveStatusSubtitle.text = "Real-time congestion tracking • Average speed 42 km/h"
             Toast.makeText(context, "Traffic Overlay: ${if (isTrafficEnabled) "ON" else "OFF"}", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipIncidents).setOnClickListener {
             centerMap(19.0680, 72.8350, 15)
-            tvLiveStatusTitle.text = "⚠️ Road Hazard Alert: Pothole / Work"
+            tvLiveStatusTitle.text = "Road Hazard Alert: Roadwork"
             tvLiveStatusSubtitle.text = "SV Road Junction • Reported by 12 citizens"
             Toast.makeText(context, "Showing Active Hazards", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipEco).setOnClickListener {
             centerMap(19.0950, 72.8650, 14)
-            tvLiveStatusTitle.text = "🌿 Eco Route Corridor"
-            tvLiveStatusSubtitle.text = "Saves ~320g of CO2 vs Highway • +35 PULSE points"
+            tvLiveStatusTitle.text = "Eco Route Corridor"
+            tvLiveStatusSubtitle.text = "Saves 320g of CO2 vs Highway • +35 PULSE points"
             Toast.makeText(context, "Eco Route Highlighted", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipEV).setOnClickListener {
             centerMap(19.0880, 72.8890, 15)
-            tvLiveStatusTitle.text = "⚡ Tata Power Fast Charging Hub"
+            tvLiveStatusTitle.text = "Tata Power Fast Charging Hub"
             tvLiveStatusSubtitle.text = "BKC • 4 Superchargers Available (60 kW)"
             Toast.makeText(context, "Showing EV Charging Stations", Toast.LENGTH_SHORT).show()
         }
