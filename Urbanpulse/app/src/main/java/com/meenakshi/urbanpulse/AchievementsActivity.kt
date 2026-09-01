@@ -16,10 +16,7 @@ import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.web3j.crypto.Keys
-import org.web3j.protocol.Web3j
-import org.web3j.protocol.http.HttpService
-import java.math.BigInteger
+import java.util.UUID
 
 class AchievementsActivity : AppCompatActivity() {
 
@@ -54,16 +51,7 @@ class AchievementsActivity : AppCompatActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // Simulate Wallet Connection by generating a new key pair (or connecting to node)
-                // In a real app, you'd use WalletConnect to link MetaMask
-                
-                // Connect to a public node (e.g., Cloudflare Eth Mainnet for read-only check)
-                // val web3 = Web3j.build(HttpService("https://cloudflare-eth.com"))
-                // val clientVersion = web3.web3ClientVersion().send()
-                
-                // Create a dummy wallet for demo
-                val ecKeyPair = Keys.createEcKeyPair()
-                val address = "0x" + Keys.getAddress(ecKeyPair)
+                val address = "0x" + UUID.randomUUID().toString().replace("-", "").take(40)
 
                 withContext(Dispatchers.Main) {
                     tvWalletStatus.text = "Wallet Connected"
@@ -71,69 +59,60 @@ class AchievementsActivity : AppCompatActivity() {
                     btnConnectWallet.visibility = View.GONE
                     Toast.makeText(this@AchievementsActivity, "Connected: $address", Toast.LENGTH_SHORT).show()
                     
-                    // Reveal hidden achievements or update status
                     (achievementsRecyclerView.adapter as AchievementsAdapter).unlockAchievement()
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    tvWalletStatus.text = "Connection Failed"
+                    tvWalletStatus.text = "Failed to connect"
                     btnConnectWallet.isEnabled = true
-                    Toast.makeText(this@AchievementsActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
     private fun setupAchievementsList() {
-        val list = mutableListOf(
-            Achievement("Carbon Cutter", "Saved 50kg of CO2 emissions", true),
-            Achievement("Public Transport Hero", "Used public transport 20 times", true),
-            Achievement("Early Adopter", "Joined UrbanPulse Alpha", true),
-            Achievement("Green Investor", "Owned 1 Green NFT (Hidden)", false) // Locked initially
+        val achievements = listOf(
+            Achievement("First Step", "Walk 1,000 steps in a day", R.drawable.ic_map, true),
+            Achievement("Eco Commuter", "Use public transit 5 times", R.drawable.ic_traffic, true),
+            Achievement("Clean Air Champion", "Report 3 low-pollution zones", R.drawable.ic_dashboard, false),
+            Achievement("Web3 Pioneer", "Connect a Web3 Wallet", R.drawable.ic_settings, false)
         )
-        
+
         achievementsRecyclerView.layoutManager = LinearLayoutManager(this)
-        achievementsRecyclerView.adapter = AchievementsAdapter(list)
+        achievementsRecyclerView.adapter = AchievementsAdapter(achievements.toMutableList())
     }
 }
 
-data class Achievement(val title: String, val desc: String, var isUnlocked: Boolean)
+data class Achievement(val title: String, val description: String, val iconRes: Int, var isUnlocked: Boolean)
 
-class AchievementsAdapter(private val items: List<Achievement>) : RecyclerView.Adapter<AchievementsAdapter.ViewHolder>() {
+class AchievementsAdapter(private val list: MutableList<Achievement>) :
+    RecyclerView.Adapter<AchievementsAdapter.ViewHolder>() {
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.tvTitle)
-        val desc: TextView = view.findViewById(R.id.tvDesc)
-        val badge: ImageView = view.findViewById(R.id.imgBadge)
+    class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        val icon: ImageView = v.findViewById(R.id.imgBadge)
+        val title: TextView = v.findViewById(R.id.tvTitle)
+        val desc: TextView = v.findViewById(R.id.tvDesc)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_achievement, parent, false)
-        return ViewHolder(view)
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_achievement, parent, false)
+        return ViewHolder(v)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
+        val item = list[position]
         holder.title.text = item.title
-        holder.desc.text = item.desc
-        
-        if (item.isUnlocked) {
-            holder.badge.alpha = 1.0f
-            holder.title.alpha = 1.0f
-        } else {
-            holder.badge.alpha = 0.3f
-            holder.title.alpha = 0.5f
-            holder.desc.text = "Connect Wallet to unlock"
-        }
+        holder.desc.text = item.description
+        holder.icon.setImageResource(item.iconRes)
+        holder.itemView.alpha = if (item.isUnlocked) 1.0f else 0.5f
     }
 
-    override fun getItemCount() = items.size
-    
+    override fun getItemCount() = list.size
+
     fun unlockAchievement() {
-        // Demo logic: Unlock the last item
-        if (items.isNotEmpty()) {
-            items.last().isUnlocked = true
-            notifyItemChanged(items.lastIndex)
+        if (list.size > 3) {
+            list[3].isUnlocked = true
+            notifyItemChanged(3)
         }
     }
 }
