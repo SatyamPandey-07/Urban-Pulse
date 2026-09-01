@@ -17,11 +17,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.FunctionDeclaration
+import com.google.ai.client.generativeai.type.FunctionType
+import com.google.ai.client.generativeai.type.Schema
+import com.google.ai.client.generativeai.type.Tool
+import com.google.ai.client.generativeai.type.content
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.meenakshi.urbanpulse.network.TomTomMcpClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.util.Locale
 
 class YatriAiFragment : Fragment() {
@@ -174,9 +183,86 @@ class YatriAiFragment : Fragment() {
 
             if (apiKey.isNotEmpty() && apiKey != "DEMO_GEMINI_KEY" && apiKey != "null") {
                 try {
-                    val model = GenerativeModel("gemini-1.5-flash", apiKey)
-                    val result = model.generateContent(prompt)
-                    answer = result.text
+                    // TomTom MCP Tools for Gemini Function Calling
+                    val geocodeTool = FunctionDeclaration(
+                        name = "tomtom-geocode", description = "Convert street addresses to coordinates",
+                        parameters = listOf(Schema(name = "query", description = "Address", type = FunctionType.STRING, nullable = false)),
+                        requiredParameters = listOf("query")
+                    )
+                    val reverseGeocodeTool = FunctionDeclaration(
+                        name = "tomtom-reverse-geocode", description = "Coordinates to address",
+                        parameters = listOf(
+                            Schema(name = "latitude", description = "Latitude", type = FunctionType.NUMBER, nullable = false),
+                            Schema(name = "longitude", description = "Longitude", type = FunctionType.NUMBER, nullable = false)
+                        ), requiredParameters = listOf("latitude", "longitude")
+                    )
+                    val poiSearchTool = FunctionDeclaration(
+                        name = "tomtom-poi-search", description = "Find businesses or hospitality categories",
+                        parameters = listOf(
+                            Schema(name = "query", description = "Category or Name", type = FunctionType.STRING, nullable = false)
+                        ), requiredParameters = listOf("query")
+                    )
+                    val routingTool = FunctionDeclaration(
+                        name = "tomtom-routing", description = "Calculate route distance and travel time",
+                        parameters = listOf(
+                            Schema(name = "origin_lat", description = "Origin lat", type = FunctionType.NUMBER, nullable = false),
+                            Schema(name = "origin_lon", description = "Origin lon", type = FunctionType.NUMBER, nullable = false),
+                            Schema(name = "dest_lat", description = "Dest lat", type = FunctionType.NUMBER, nullable = false),
+                            Schema(name = "dest_lon", description = "Dest lon", type = FunctionType.NUMBER, nullable = false)
+                        ), requiredParameters = listOf("origin_lat", "origin_lon", "dest_lat", "dest_lon")
+                    )
+
+                    val mcpTool = Tool(listOf(geocodeTool, reverseGeocodeTool, poiSearchTool, routingTool))
+                    val model = GenerativeModel(
+                        modelName = "gemini-1.5-flash",
+                        apiKey = apiKey,
+                        tools = listOf(mcpTool)
+                    )
+
+                    val chatHistory = messages.filter { !it.isLoading }.map {
+                        content(if (it.isUser) "user" else "model") { text(it.message) }
+                    }.toMutableList()
+
+                    val chat = model.startChat(history = chatHistory)
+                    var response = chat.sendMessage(prompt)
+
+                    // Execute Tool Calls if LLM invoked any TomTom MCP tools
+                    while (response.functionCalls.isNotEmpty()) {
+                        val functionCall = response.functionCalls.first()
+                        val toolName = functionCall.name
+                        val args = functionCall.args
+                        val argMap = args.entries.associate { it.key to it.value }
+
+                        val mcpArgs = mutableMapOf<String, Any?>()
+                        if (toolName == "tomtom-routing") {
+                            val originLat = args["origin_lat"]?.toString()?.toDoubleOrNull()
+                            val originLon = args["origin_lon"]?.toString()?.toDoubleOrNull()
+                            val destLat = args["dest_lat"]?.toString()?.toDoubleOrNull()
+                            val destLon = args["dest_lon"]?.toString()?.toDoubleOrNull()
+                            if (originLat != null && originLon != null && destLat != null && destLon != null) {
+                                mcpArgs["origin"] = mapOf("lat" to originLat, "lon" to originLon)
+                                mcpArgs["destination"] = mapOf("lat" to destLat, "lon" to destLon)
+                            }
+                        } else if (toolName == "tomtom-reverse-geocode") {
+                            val lat = args["latitude"]?.toString()?.toDoubleOrNull()
+                            val lon = args["longitude"]?.toString()?.toDoubleOrNull()
+                            if (lat != null && lon != null) mcpArgs["point"] = mapOf("lat" to lat, "lon" to lon)
+                        } else {
+                            mcpArgs.putAll(argMap)
+                        }
+
+                        val toolResult = withContext(Dispatchers.IO) {
+                            TomTomMcpClient.callTool(toolName, mcpArgs)
+                        }
+
+                        response = chat.sendMessage(
+                            content("function") {
+                                part(com.google.ai.client.generativeai.type.FunctionResponsePart(toolName, JSONObject().put("result", toolResult)))
+                            }
+                        )
+                    }
+
+                    answer = response.text
                 } catch (e: Exception) {
                     // Fall back to smart local engine
                 }
