@@ -14,10 +14,10 @@ object ParetoOptimizer {
     private val carbonPattern = Regex("""(\d+(\.\d+)?)\s*kg""")
     private val pricePattern = Regex("""[\d,]+""")
 
-    private fun parseCarbon(value: String): Double =
+    fun parseCarbon(value: String): Double =
         carbonPattern.find(value)?.groupValues?.get(1)?.toDoubleOrNull() ?: Double.MAX_VALUE
 
-    private fun parsePrice(value: String): Double =
+    fun parsePrice(value: String): Double =
         pricePattern.find(value)?.value?.replace(",", "")?.toDoubleOrNull() ?: Double.MAX_VALUE
 
     private fun normalize(value: Double, min: Double, max: Double, higherIsBetter: Boolean): Double {

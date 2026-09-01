@@ -22,6 +22,7 @@ import com.urbanpulse.app.mobility.MobilityOptimizer
 import com.urbanpulse.app.mobility.MobilityOption
 import com.urbanpulse.app.mobility.TradeoffPriority
 import com.urbanpulse.app.mobility.TravelMode
+import com.urbanpulse.app.trip.SelectedMobility
 import com.urbanpulse.app.trip.TripPlanManager
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -270,6 +271,15 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
         GamificationManager.addPulse(credits)
         GamificationManager.addCo2Saved(avoidedGrams)
         GamificationManager.addXp(credits * 2)
+
+        TripPlanManager.setSelectedMobility(
+            SelectedMobility(
+                modeLabel = option.mode.label,
+                carbonGrams = option.carbonGrams,
+                fareRupees = option.fareRupees,
+                distanceKm = option.distanceKm
+            )
+        )
 
         Toast.makeText(
             this,
