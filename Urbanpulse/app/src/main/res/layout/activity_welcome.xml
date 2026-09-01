@@ -6,53 +6,55 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="32dp"
-    android:background="@drawable/bg_gradient_auth">
+    android:background="@color/bg_dark">
 
     <ImageView
-        android:layout_width="280dp"
-        android:layout_height="280dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:src="@drawable/ic_digital_twin" 
-        app:tint="@color/white"
-        android:layout_marginBottom="48dp"/>
-        <!-- Placeholder for illustration -->
+        app:tint="@color/primary_blue"
+        android:layout_marginBottom="36dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome =)"
-        android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
+        android:text="UrbanPulse"
+        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
         android:textStyle="bold"
-        android:textColor="#311B92"/>
+        android:textColor="@color/text_primary"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="We're here to help you navigate and improve your city."
+        android:text="Real-time geo-intelligence, smart city navigation, and civic safety."
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        android:textColor="#4527A0"
+        android:textColor="@color/text_secondary"
         android:textAlignment="center"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="48dp"/>
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="40dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCreateAccount"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Create Account"
-        android:textColor="#4527A0"
-        app:backgroundTint="@color/white"
-        app:cornerRadius="28dp"
+        android:layout_height="54dp"
+        android:text="Get Started"
+        android:textColor="@color/bg_dark"
+        android:textStyle="bold"
+        app:backgroundTint="@color/primary_blue"
+        app:cornerRadius="14dp"
         style="@style/Widget.Material3.Button"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Log In"
-        android:textColor="@color/white"
-        app:backgroundTint="#B39DDB"
-        app:cornerRadius="28dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="54dp"
+        android:text="Sign In"
+        android:textColor="@color/text_primary"
+        app:backgroundTint="@color/surface_card"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/surface_border"
+        app:cornerRadius="14dp"
+        android:layout_marginTop="14dp"
         style="@style/Widget.Material3.Button"/>
 
 </LinearLayout>
