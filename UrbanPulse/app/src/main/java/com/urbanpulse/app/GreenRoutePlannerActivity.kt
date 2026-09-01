@@ -32,10 +32,7 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
     private lateinit var tvRankedHeader: TextView
     private lateinit var btnConfirm: MaterialButton
 
-    private lateinit var cardMetro: MaterialCardView
-    private lateinit var cardBus: MaterialCardView
-    private lateinit var cardEvCab: MaterialCardView
-    private lateinit var cardTaxi: MaterialCardView
+    private lateinit var cardByMode: Map<TravelMode, MaterialCardView>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,10 +46,14 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
         val btnUseGps = findViewById<MaterialButton>(R.id.btnUseGps)
         val chipGroupTradeoff = findViewById<ChipGroup>(R.id.chipGroupTradeoff)
 
-        cardMetro = findViewById(R.id.cardOptionMetro)
-        cardBus = findViewById(R.id.cardOptionBus)
-        cardEvCab = findViewById(R.id.cardOptionEvCab)
-        cardTaxi = findViewById(R.id.cardOptionTaxi)
+        cardByMode = mapOf(
+            TravelMode.WALK to findViewById(R.id.cardOptionWalk),
+            TravelMode.CYCLE to findViewById(R.id.cardOptionCycle),
+            TravelMode.METRO to findViewById(R.id.cardOptionMetro),
+            TravelMode.BUS to findViewById(R.id.cardOptionBus),
+            TravelMode.EV_CAB to findViewById(R.id.cardOptionEvCab),
+            TravelMode.TAXI to findViewById(R.id.cardOptionTaxi)
+        )
 
         tvRankedHeader = findViewById(R.id.tvRankedHeader)
         btnConfirm = findViewById(R.id.btnConfirmGreenRoute)
@@ -87,17 +88,14 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
             recalcAndRender()
         }
 
-        cardMetro.setOnClickListener { selectMode(TravelMode.METRO) }
-        cardBus.setOnClickListener { selectMode(TravelMode.BUS) }
-        cardEvCab.setOnClickListener { selectMode(TravelMode.EV_CAB) }
-        cardTaxi.setOnClickListener { selectMode(TravelMode.TAXI) }
+        cardByMode.forEach { (mode, card) -> card.setOnClickListener { selectMode(mode) } }
 
         btnConfirm.setOnClickListener { confirmJourney() }
 
         recalcAndRender()
     }
 
-    /** Recomputes real distance/cost/carbon for every mode and re-renders all four cards. */
+    /** Recomputes real distance/cost/carbon for every mode (including walk/cycle feasibility) and re-renders every card. */
     private fun recalcAndRender() {
         val accessMgr = AccessibilityManager.getInstance(this)
         val requireStepFree = accessMgr.isWheelchairModeEnabled || lastPriority == TradeoffPriority.STEP_FREE
@@ -122,7 +120,10 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
 
         allOptions.forEach { option -> renderOption(option, ranked) }
 
-        if (requireStepFree && !allOptions.first { it.mode == selectedMode }.stepFreeAccessible) {
+        val selectedIsUsable = allOptions.first { it.mode == selectedMode }.let {
+            it.practical && (!requireStepFree || it.stepFreeAccessible)
+        }
+        if (!selectedIsUsable) {
             selectedMode = ranked.first().mode
         }
         highlightSelected()
@@ -133,30 +134,43 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
 
     private fun renderOption(option: MobilityOption, ranked: List<MobilityOption>) {
         val ids = when (option.mode) {
+            TravelMode.WALK -> OptionViewIds(R.id.tvWalkMetrics, R.id.tvWalkAccessibility, R.id.tvWalkSavings, R.id.tvWalkBadge)
+            TravelMode.CYCLE -> OptionViewIds(R.id.tvCycleMetrics, R.id.tvCycleAccessibility, R.id.tvCycleSavings, R.id.tvCycleBadge)
             TravelMode.METRO -> OptionViewIds(R.id.tvMetroMetrics, R.id.tvMetroAccessibility, R.id.tvMetroSavings, R.id.tvMetroBadge)
             TravelMode.BUS -> OptionViewIds(R.id.tvBusMetrics, R.id.tvBusAccessibility, R.id.tvBusSavings, R.id.tvBusBadge)
             TravelMode.EV_CAB -> OptionViewIds(R.id.tvEvCabMetrics, R.id.tvEvCabAccessibility, R.id.tvEvCabSavings, R.id.tvEvCabBadge)
             TravelMode.TAXI -> OptionViewIds(R.id.tvTaxiMetrics, R.id.tvTaxiAccessibility, R.id.tvTaxiSavings, R.id.tvTaxiBadge)
         }
 
-        findViewById<TextView>(ids.metrics).text = String.format(
-            Locale.US, "%d mins • ₹%d • %.0fg CO2e per passenger", option.durationMin, option.fareRupees, option.carbonGrams
-        )
-        findViewById<TextView>(ids.access).text = "Accessibility: ${option.accessibilityNote}"
-
+        val metricsView = findViewById<TextView>(ids.metrics)
+        val accessView = findViewById<TextView>(ids.access)
         val savingsView = findViewById<TextView>(ids.savings)
-        if (option.mode == TravelMode.TAXI) {
-            savingsView.text = "Baseline high-emission reference"
+        val badgeView = findViewById<TextView>(ids.badge)
+
+        if (!option.practical) {
+            metricsView.text = String.format(Locale.US, "%.1f km • %s", option.distanceKm, option.impracticalReason ?: "Not practical for this distance")
+            accessView.text = "Accessibility: ${option.accessibilityNote}"
+            savingsView.text = "Choose a motorized option for this distance"
         } else {
-            val baseline = ranked.firstOrNull { it.mode == TravelMode.TAXI }?.carbonGrams
-                ?: CarbonEstimator.estimateOption(TravelMode.TAXI, option.distanceKm).carbonGrams
-            val avoided = option.carbonAvoidedVsBaseline(baseline)
-            val cleanerPct = if (baseline > 0) ((avoided / baseline) * 100).roundToInt() else 0
-            savingsView.text = String.format(Locale.US, "CO2 Avoided vs Petrol Cab: -%.0fg (%d%% cleaner)", avoided, cleanerPct)
+            metricsView.text = if (option.carbonGrams > 0.0) {
+                String.format(Locale.US, "%d mins • ₹%d • %.0fg CO2e per passenger", option.durationMin, option.fareRupees, option.carbonGrams)
+            } else {
+                String.format(Locale.US, "%d mins • ₹%d • 0g CO2e (zero-emission)", option.durationMin, option.fareRupees)
+            }
+            accessView.text = "Accessibility: ${option.accessibilityNote}"
+
+            if (option.mode == TravelMode.TAXI) {
+                savingsView.text = "Baseline high-emission reference"
+            } else {
+                val baseline = ranked.firstOrNull { it.mode == TravelMode.TAXI }?.carbonGrams
+                    ?: CarbonEstimator.estimateOption(TravelMode.TAXI, option.distanceKm).carbonGrams
+                val avoided = option.carbonAvoidedVsBaseline(baseline)
+                val cleanerPct = if (baseline > 0) ((avoided / baseline) * 100).roundToInt() else 0
+                savingsView.text = String.format(Locale.US, "CO2 Avoided vs Petrol Cab: -%.0fg (%d%% cleaner)", avoided, cleanerPct)
+            }
         }
 
         val badgeText = MobilityOptimizer.badgeFor(option, ranked)
-        val badgeView = findViewById<TextView>(ids.badge)
         badgeView.text = badgeText
         badgeView.setTextColor(
             Color.parseColor(
@@ -166,6 +180,7 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
                     badgeText.contains("STEP-FREE") -> "#38BDF8"
                     badgeText.contains("FASTEST") -> "#F59E0B"
                     badgeText.contains("LOWEST FARE") -> "#10B981"
+                    badgeText.contains("NOT PRACTICAL") -> "#94A3B8"
                     else -> "#64748B"
                 }
             )
@@ -173,20 +188,18 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
     }
 
     private fun selectMode(mode: TravelMode) {
+        val option = lastRanked.firstOrNull { it.mode == mode } ?: return
+        if (!option.practical) {
+            Toast.makeText(this, option.impracticalReason ?: "Not practical for this distance", Toast.LENGTH_SHORT).show()
+            return
+        }
         selectedMode = mode
         highlightSelected()
-        val option = lastRanked.firstOrNull { it.mode == mode } ?: return
         val baseline = lastRanked.firstOrNull { it.mode == TravelMode.TAXI }?.carbonGrams ?: option.carbonGrams
         updateConfirmButton(baseline)
     }
 
     private fun highlightSelected() {
-        val cardByMode = mapOf(
-            TravelMode.METRO to cardMetro,
-            TravelMode.BUS to cardBus,
-            TravelMode.EV_CAB to cardEvCab,
-            TravelMode.TAXI to cardTaxi
-        )
         cardByMode.forEach { (mode, card) ->
             if (mode == selectedMode) {
                 card.strokeWidth = 4

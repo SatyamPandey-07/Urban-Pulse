@@ -39,10 +39,23 @@ object CarbonEstimator {
         val farePerKm: Double,
         val gramsPerKm: Double,
         val stepFree: Boolean,
-        val accessibilityNote: String
+        val accessibilityNote: String,
+        /** Beyond this distance the mode is not a realistic choice (e.g. walking 20km). Null = no cap. */
+        val maxPracticalKm: Double? = null,
+        val impracticalReason: String? = null
     )
 
     private val profiles = mapOf(
+        TravelMode.WALK to ModeProfile(
+            avgSpeedKmh = 4.8, baseFare = 0, farePerKm = 0.0, gramsPerKm = 0.0,
+            stepFree = false, accessibilityNote = "Self-paced, no vehicle boarding — not suited to wheelchair users over distance",
+            maxPracticalKm = 3.0, impracticalReason = "Too far to walk practically"
+        ),
+        TravelMode.CYCLE to ModeProfile(
+            avgSpeedKmh = 14.0, baseFare = 10, farePerKm = 2.0, gramsPerKm = 0.0,
+            stepFree = false, accessibilityNote = "Requires cycling ability — bike-share dock access only",
+            maxPracticalKm = 10.0, impracticalReason = "Too far for a shared-cycle trip"
+        ),
         TravelMode.METRO to ModeProfile(32.0, 10, 2.5, 14.0, true, "100% Step-Free • Tactile Paving • Level Boarding"),
         TravelMode.BUS to ModeProfile(18.0, 5, 1.2, 21.0, true, "Low-floor hydraulic wheelchair ramp"),
         TravelMode.EV_CAB to ModeProfile(24.0, 40, 12.0, 35.0, false, "Curbside door-to-door, folding wheelchair trunk"),
@@ -85,6 +98,7 @@ object CarbonEstimator {
         val durationMin = ((distanceKm / profile.avgSpeedKmh) * 60).roundToInt().coerceAtLeast(3)
         val fare = (profile.baseFare + distanceKm * profile.farePerKm).roundToInt()
         val carbon = distanceKm * profile.gramsPerKm
+        val isPractical = profile.maxPracticalKm == null || distanceKm <= profile.maxPracticalKm
         return MobilityOption(
             mode = mode,
             distanceKm = distanceKm,
@@ -92,7 +106,9 @@ object CarbonEstimator {
             fareRupees = fare,
             carbonGrams = carbon,
             stepFreeAccessible = profile.stepFree,
-            accessibilityNote = profile.accessibilityNote
+            accessibilityNote = profile.accessibilityNote,
+            practical = isPractical,
+            impracticalReason = if (isPractical) null else profile.impracticalReason
         )
     }
 

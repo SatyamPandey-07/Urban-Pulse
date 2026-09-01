@@ -1,6 +1,8 @@
 package com.urbanpulse.app.mobility
 
 enum class TravelMode(val label: String) {
+    WALK("Walking"),
+    CYCLE("Cycling"),
     METRO("Electric Metro"),
     BUS("Electric AC Bus"),
     EV_CAB("Shared EV Rideshare"),
@@ -15,6 +17,8 @@ data class MobilityOption(
     val carbonGrams: Double,
     val stepFreeAccessible: Boolean,
     val accessibilityNote: String,
+    val practical: Boolean = true,
+    val impracticalReason: String? = null,
     val balanceScore: Double = 0.0
 ) {
     /** CO2 avoided per passenger versus the conventional petrol taxi baseline. */
