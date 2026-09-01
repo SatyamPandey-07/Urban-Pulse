@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121218">
+    android:background="@color/bg_dark">
 
     <!-- Interactive Live Vector Map Canvas / Tile Layer -->
     <FrameLayout
@@ -40,10 +40,10 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             app:cardCornerRadius="26dp"
-            app:cardElevation="6dp"
+            app:cardElevation="0dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#33FFFFFF"
-            app:cardBackgroundColor="#E61E1E28">
+            app:strokeColor="@color/surface_border"
+            app:cardBackgroundColor="@color/surface_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -53,10 +53,10 @@
                 android:paddingHorizontal="16dp">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_search"
-                    app:tint="#A0A0B0" />
+                    app:tint="@color/text_secondary" />
 
                 <EditText
                     android:id="@+id/etMapSearch"
@@ -64,13 +64,13 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@null"
-                    android:hint="Search places, hospitals, fuel..."
+                    android:hint="Search places, addresses, facilities..."
                     android:imeOptions="actionSearch"
                     android:inputType="text"
                     android:paddingHorizontal="12dp"
                     android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#707080" />
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_tertiary" />
 
                 <ImageButton
                     android:id="@+id/btnClearSearch"
@@ -79,7 +79,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_close"
                     android:visibility="gone"
-                    app:tint="#A0A0B0" />
+                    app:tint="@color/text_secondary" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -102,45 +102,65 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🏥 Hospitals"
-                    android:textColor="#E0E0FF"
-                    app:chipBackgroundColor="#252535" />
+                    android:text="Hospitals"
+                    app:chipIcon="@drawable/ic_medical"
+                    app:chipIconTint="@color/solid_error"
+                    android:textColor="@color/text_primary"
+                    app:chipBackgroundColor="@color/surface_card"
+                    app:chipStrokeColor="@color/surface_border"
+                    app:chipStrokeWidth="1dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipTraffic"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🚦 Traffic Flow"
-                    android:textColor="#E0E0FF"
-                    app:chipBackgroundColor="#252535" />
+                    android:text="Traffic Flow"
+                    app:chipIcon="@drawable/ic_traffic"
+                    app:chipIconTint="@color/solid_warning"
+                    android:textColor="@color/text_primary"
+                    app:chipBackgroundColor="@color/surface_card"
+                    app:chipStrokeColor="@color/surface_border"
+                    app:chipStrokeWidth="1dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipIncidents"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚠️ Hazards"
-                    android:textColor="#E0E0FF"
-                    app:chipBackgroundColor="#252535" />
+                    android:text="Hazards"
+                    app:chipIcon="@drawable/ic_fire"
+                    app:chipIconTint="@color/primary_orange"
+                    android:textColor="@color/text_primary"
+                    app:chipBackgroundColor="@color/surface_card"
+                    app:chipStrokeColor="@color/surface_border"
+                    app:chipStrokeWidth="1dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipEco"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🌿 Eco Routes"
-                    android:textColor="#E0E0FF"
-                    app:chipBackgroundColor="#252535" />
+                    android:text="Eco Routes"
+                    app:chipIcon="@drawable/ic_map"
+                    app:chipIconTint="@color/solid_success"
+                    android:textColor="@color/text_primary"
+                    app:chipBackgroundColor="@color/surface_card"
+                    app:chipStrokeColor="@color/surface_border"
+                    app:chipStrokeWidth="1dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipEV"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚡ EV Stations"
-                    android:textColor="#E0E0FF"
-                    app:chipBackgroundColor="#252535" />
+                    android:text="EV Stations"
+                    app:chipIcon="@drawable/ic_location_pin"
+                    app:chipIconTint="@color/primary_blue"
+                    android:textColor="@color/text_primary"
+                    app:chipBackgroundColor="@color/surface_card"
+                    app:chipStrokeColor="@color/surface_border"
+                    app:chipStrokeWidth="1dp" />
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
@@ -174,8 +194,9 @@
             android:layout_marginBottom="12dp"
             android:contentDescription="Toggle Traffic"
             android:src="@drawable/ic_traffic"
-            app:tint="#FFFFFF"
-            app:backgroundTint="#2D2D42"
+            app:tint="@color/text_primary"
+            app:backgroundTint="@color/surface_card"
+            app:elevation="0dp"
             app:fabSize="mini" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -185,8 +206,9 @@
             android:layout_marginBottom="12dp"
             android:contentDescription="Report Hazard"
             android:src="@drawable/ic_fire"
-            app:tint="#FF5722"
-            app:backgroundTint="#2D2D42"
+            app:tint="@color/solid_error"
+            app:backgroundTint="@color/surface_card"
+            app:elevation="0dp"
             app:fabSize="mini" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -195,12 +217,13 @@
             android:layout_height="wrap_content"
             android:contentDescription="My Location"
             android:src="@drawable/ic_location_pin"
-            app:tint="#FFFFFF"
-            app:backgroundTint="?attr/colorPrimary" />
+            app:tint="@color/bg_dark"
+            app:backgroundTint="@color/primary_blue"
+            app:elevation="0dp" />
 
     </LinearLayout>
 
-    <!-- Bottom City Intelligence Card (Floating cleanly above Bottom Navigation) -->
+    <!-- Bottom City Intelligence Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardCityStatus"
         android:layout_width="match_parent"
@@ -208,17 +231,17 @@
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="80dp"
-        app:cardCornerRadius="18dp"
-        app:cardElevation="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
         app:strokeWidth="1dp"
-        app:strokeColor="#25FFFFFF"
-        app:cardBackgroundColor="#F01E1E2C">
+        app:strokeColor="@color/surface_border"
+        app:cardBackgroundColor="@color/surface_card">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="14dp"
+            android:padding="16dp"
             android:gravity="center_vertical">
 
             <LinearLayout
@@ -231,9 +254,9 @@
                     android:id="@+id/tvLiveStatusTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🟢 Live City Pulse: Smooth Flow"
+                    android:text="City Pulse: Smooth Flow"
                     android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -241,9 +264,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Avg speed: 42 km/h • AQI: 86 (Moderate)"
+                    android:text="Average speed: 42 km/h • AQI: 86 (Moderate)"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="#A0A0B8" />
+                    android:textColor="@color/text_secondary" />
 
             </LinearLayout>
 
@@ -253,9 +276,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Ask AI"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/primary_blue"
                 app:icon="@drawable/ic_yatri_ai"
-                app:iconTint="?attr/colorPrimary" />
+                app:iconTint="@color/primary_blue" />
 
         </LinearLayout>
 
