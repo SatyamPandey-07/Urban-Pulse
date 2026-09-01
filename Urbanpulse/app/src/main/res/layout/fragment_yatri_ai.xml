@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark">
+    android:background="?attr/colorSurface">
 
     <!-- Header -->
     <LinearLayout
@@ -16,7 +16,7 @@
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
-        android:background="@color/bg_dark"
+        android:background="?attr/colorSurface"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -25,17 +25,24 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_yatri_ai"
-                app:tint="@color/primary_blue" />
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_circle_icon"
+                app:backgroundTint="?attr/colorSurfaceContainerLow">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_yatri_ai"
+                    app:tint="?attr/colorPrimary" />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="14dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -43,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:text="Yatri AI"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold" />
 
                 <TextView
@@ -51,7 +58,7 @@
                     android:layout_height="wrap_content"
                     android:text="Active • Smart Mobility Assistant"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 
@@ -61,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Clear"
-                android:textColor="@color/text_secondary" />
+                android:textColor="?attr/colorOnSurfaceVariant" />
 
         </LinearLayout>
 
@@ -85,11 +92,11 @@
                     android:layout_height="wrap_content"
                     android:text="Nearest Hospitals"
                     app:chipIcon="@drawable/ic_medical"
-                    app:chipIconTint="@color/solid_error"
-                    android:textColor="@color/text_primary"
-                    app:chipBackgroundColor="@color/surface_card"
-                    app:chipStrokeColor="@color/surface_border"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipSuggestTraffic"
@@ -98,11 +105,11 @@
                     android:layout_height="wrap_content"
                     android:text="Live Traffic"
                     app:chipIcon="@drawable/ic_traffic"
-                    app:chipIconTint="@color/solid_warning"
-                    android:textColor="@color/text_primary"
-                    app:chipBackgroundColor="@color/surface_card"
-                    app:chipStrokeColor="@color/surface_border"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipSuggestAqi"
@@ -111,11 +118,11 @@
                     android:layout_height="wrap_content"
                     android:text="AQI &amp; Weather"
                     app:chipIcon="@drawable/ic_dashboard"
-                    app:chipIconTint="@color/primary_blue"
-                    android:textColor="@color/text_primary"
-                    app:chipBackgroundColor="@color/surface_card"
-                    app:chipStrokeColor="@color/surface_border"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipSuggestEco"
@@ -124,11 +131,11 @@
                     android:layout_height="wrap_content"
                     android:text="Eco Routes"
                     app:chipIcon="@drawable/ic_map"
-                    app:chipIconTint="@color/solid_success"
-                    android:textColor="@color/text_primary"
-                    app:chipBackgroundColor="@color/surface_card"
-                    app:chipStrokeColor="@color/surface_border"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipSuggestHazard"
@@ -137,11 +144,11 @@
                     android:layout_height="wrap_content"
                     android:text="Report Hazard"
                     app:chipIcon="@drawable/ic_fire"
-                    app:chipIconTint="@color/primary_orange"
-                    android:textColor="@color/text_primary"
-                    app:chipBackgroundColor="@color/surface_card"
-                    app:chipStrokeColor="@color/surface_border"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipSuggestSos"
@@ -150,20 +157,14 @@
                     android:layout_height="wrap_content"
                     android:text="Emergency SOS"
                     app:chipIcon="@drawable/ic_sos"
-                    app:chipIconTint="@color/solid_error"
-                    android:textColor="@color/text_primary"
-                    app:chipBackgroundColor="@color/surface_card"
-                    app:chipStrokeColor="@color/surface_border"
-                    app:chipStrokeWidth="1dp" />
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/surface_border" />
 
     </LinearLayout>
 
@@ -176,58 +177,57 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="8dp"
         app:layout_constraintTop_toBottomOf="@id/headerLayout"
-        app:layout_constraintBottom_toTopOf="@id/inputLayout"
+        app:layout_constraintBottom_toTopOf="@id/inputCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Bottom Input Bar -->
-    <LinearLayout
-        android:id="@+id/inputLayout"
+    <!-- Bottom Input Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/inputCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="14dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="75dp"
-        android:gravity="center_vertical"
-        android:background="@color/surface_card"
-        android:elevation="0dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="80dp"
+        style="@style/Widget.Material3.CardView.Filled"
+        app:cardCornerRadius="28dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+        app:strokeWidth="0dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            app:boxCornerRadiusTopStart="24dp"
-            app:boxCornerRadiusTopEnd="24dp"
-            app:boxCornerRadiusBottomStart="24dp"
-            app:boxCornerRadiusBottomEnd="24dp"
-            app:boxStrokeColor="@color/surface_border"
-            android:hint="Ask Yatri AI...">
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="6dp"
+            android:gravity="center_vertical">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <EditText
                 android:id="@+id/messageInput"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="Ask Yatri AI..."
                 android:inputType="textCapSentences|textMultiLine"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_tertiary"
+                android:textColor="?attr/colorOnSurface"
+                android:textColorHint="?attr/colorOnSurfaceVariant"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                 android:maxLines="4" />
-        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/sendButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:contentDescription="Send Message"
-            android:src="@drawable/ic_send_24"
-            app:tint="@color/bg_dark"
-            app:backgroundTint="@color/primary_blue"
-            app:elevation="0dp"
-            app:fabSize="normal" />
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/sendButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:contentDescription="Send Message"
+                android:src="@drawable/ic_send_24"
+                app:tint="?attr/colorOnPrimary"
+                app:backgroundTint="?attr/colorPrimary"
+                app:elevation="0dp"
+                app:fabSize="mini" />
 
-    </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

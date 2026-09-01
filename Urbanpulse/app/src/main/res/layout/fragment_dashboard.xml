@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark"
+    android:background="?attr/colorSurface"
     tools:context=".DashboardFragment">
 
     <LinearLayout
@@ -14,15 +14,24 @@
         android:padding="16dp"
         android:paddingBottom="80dp">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dashboard"
+            android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="24dp"
+            android:layout_marginStart="8dp"/>
+
         <!-- Real-Time Geo-Intelligence Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="0dp"
-            app:cardCornerRadius="16dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/surface_border"
-            app:cardBackgroundColor="@color/surface_card">
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -36,15 +45,15 @@
                     android:text="Real-Time Geo-Intelligence"
                     android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="?attr/colorOnSurface" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Live Traffic • Dynamic Sensor Matrix"
+                    android:text="Live Traffic • Sensor Matrix Active"
                     android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnFollowLiveMap"
@@ -53,9 +62,8 @@
                     android:layout_marginTop="16dp"
                     android:text="Follow Live Map"
                     app:icon="@drawable/ic_map"
-                    app:iconTint="@color/primary_blue"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:textColor="@color/primary_blue"/>
+                    app:cornerRadius="16dp"
+                    style="@style/Widget.Material3.Button.TonalButton"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -63,7 +71,7 @@
         <!-- Spacer -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="14dp" />
+            android:layout_height="16dp" />
 
         <!-- AQI and Weather -->
         <LinearLayout
@@ -75,25 +83,24 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="16dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/surface_border"
-                app:cardBackgroundColor="@color/surface_card"
+                style="@style/Widget.Material3.CardView.Filled"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:strokeWidth="0dp"
                 android:layout_marginEnd="6dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Air Quality (AQI)"
+                        android:text="Air Quality"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -102,7 +109,7 @@
                         android:text="136"
                         android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
                         android:textStyle="bold"
-                        android:textColor="@color/solid_warning" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -110,7 +117,7 @@
                         android:layout_marginTop="2dp"
                         android:text="Moderate • PM2.5"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/text_tertiary" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -119,25 +126,24 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="16dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/surface_border"
-                app:cardBackgroundColor="@color/surface_card"
+                style="@style/Widget.Material3.CardView.Filled"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:strokeWidth="0dp"
                 android:layout_marginStart="6dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="City Weather"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -146,15 +152,15 @@
                         android:text="28°C"
                         android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Partly Cloudy • 68% Hum"
+                        android:text="Partly Cloudy"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/text_tertiary" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -163,39 +169,38 @@
         <!-- Spacer -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="14dp" />
+            android:layout_height="16dp" />
 
         <!-- Air Quality Trend -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="0dp"
-            app:cardCornerRadius="16dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/surface_border"
-            app:cardBackgroundColor="@color/surface_card">
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Historical Air Quality Trend (7 Days)"
+                    android:text="Air Quality Trend (7 Days)"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="?attr/colorOnSurface" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="PM2.5 / PM10 Weekly Sensor Averages"
+                    android:text="Weekly sensor averages"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/airQualityChart"
@@ -209,39 +214,38 @@
         <!-- Spacer -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="14dp" />
+            android:layout_height="16dp" />
 
         <!-- 12h Traffic Forecast -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="0dp"
-            app:cardCornerRadius="16dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/surface_border"
-            app:cardBackgroundColor="@color/surface_card">
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="12h Traffic &amp; Mobility Forecast"
+                    android:text="12h Traffic Forecast"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="?attr/colorOnSurface" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Predicted arterial congestion level index"
+                    android:text="Predicted arterial congestion level"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="@color/text_secondary" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <com.github.mikephil.charting.charts.BarChart
                     android:id="@+id/trafficChart"

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark"
+    android:background="?attr/colorSurface"
     tools:context=".DigitalTwinFragment">
 
     <LinearLayout
@@ -14,34 +14,33 @@
         android:padding="16dp"
         android:paddingBottom="80dp">
 
-        <!-- Digital Twin Simulator Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Digital Twin Simulator"
-            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            android:text="Digital Twin"
+            android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
             android:textStyle="bold"
-            android:textColor="@color/text_primary" />
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"/>
 
-        <!-- Use Case Description -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Simulate urban scenarios, EV adoption impact, and real-time emission mitigation."
+            android:text="Simulate urban scenarios, EV adoption impact, and emission mitigation in real time."
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textColor="@color/text_secondary"
-            android:layout_marginBottom="20dp"/>
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="24dp"/>
 
         <!-- Control Sliders Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="0dp"
-            app:cardCornerRadius="16dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/surface_border"
-            app:cardBackgroundColor="@color/surface_card"
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:strokeWidth="0dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -61,14 +60,14 @@
                         android:layout_weight="1"
                         android:text="Traffic Volume"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_primary"/>
+                        android:textColor="?attr/colorOnSurface"/>
                     <TextView
                         android:id="@+id/tvTrafficVolumeValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="50%"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_blue"/>
+                        android:textColor="?attr/colorPrimary"/>
                 </LinearLayout>
 
                 <com.google.android.material.slider.Slider
@@ -77,10 +76,7 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="0"
                     android:valueTo="100"
-                    android:value="50"
-                    app:thumbColor="@color/primary_blue"
-                    app:trackColorActive="@color/primary_blue"
-                    app:trackColorInactive="@color/surface_border"/>
+                    android:value="50"/>
 
                 <!-- EV Adoption Slider -->
                 <LinearLayout
@@ -94,14 +90,14 @@
                         android:layout_weight="1"
                         android:text="EV Fleet Adoption"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_primary"/>
+                        android:textColor="?attr/colorOnSurface"/>
                     <TextView
                         android:id="@+id/tvEvAdoptionValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="25%"
                         android:textStyle="bold"
-                        android:textColor="@color/solid_success"/>
+                        android:textColor="?attr/colorPrimary"/>
                 </LinearLayout>
 
                 <com.google.android.material.slider.Slider
@@ -110,10 +106,7 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="0"
                     android:valueTo="100"
-                    android:value="25"
-                    app:thumbColor="@color/solid_success"
-                    app:trackColorActive="@color/solid_success"
-                    app:trackColorInactive="@color/surface_border"/>
+                    android:value="25"/>
 
                 <!-- Public Transport Slider -->
                 <LinearLayout
@@ -127,14 +120,14 @@
                         android:layout_weight="1"
                         android:text="Public Transit Frequency"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_primary"/>
+                        android:textColor="?attr/colorOnSurface"/>
                     <TextView
                         android:id="@+id/tvTransitValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="70%"
                         android:textStyle="bold"
-                        android:textColor="@color/primary_indigo"/>
+                        android:textColor="?attr/colorPrimary"/>
                 </LinearLayout>
 
                 <com.google.android.material.slider.Slider
@@ -143,10 +136,7 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="0"
                     android:valueTo="100"
-                    android:value="70"
-                    app:thumbColor="@color/primary_indigo"
-                    app:trackColorActive="@color/primary_indigo"
-                    app:trackColorInactive="@color/surface_border"/>
+                    android:value="70"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -155,10 +145,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Simulated Environmental &amp; Traffic Impact"
+            android:text="Simulated Impact"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginStart="8dp"
             android:layout_marginBottom="12dp"/>
 
         <!-- Results 2x2 Grid -->
@@ -174,11 +165,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="16dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/surface_border"
-                app:cardBackgroundColor="@color/surface_card"
+                style="@style/Widget.Material3.CardView.Filled"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:strokeWidth="0dp"
                 android:layout_margin="4dp">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -190,7 +180,7 @@
                         android:layout_height="wrap_content"
                         android:text="PM2.5 Level"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_secondary"/>
+                        android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
                         android:id="@+id/tvMetricPm25"
                         android:layout_width="wrap_content"
@@ -198,7 +188,7 @@
                         android:layout_marginTop="4dp"
                         android:text="92 µg/m³"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="?attr/colorOnSurface"
                         android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
                     <TextView
                         android:id="@+id/tvMetricPm25Delta"
@@ -206,7 +196,7 @@
                         android:layout_height="wrap_content"
                         android:text="-24% Improvement"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/solid_success"/>
+                        android:textColor="?attr/colorPrimary"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -215,11 +205,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="16dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/surface_border"
-                app:cardBackgroundColor="@color/surface_card"
+                style="@style/Widget.Material3.CardView.Filled"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:strokeWidth="0dp"
                 android:layout_margin="4dp">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -231,7 +220,7 @@
                         android:layout_height="wrap_content"
                         android:text="NO₂ Emission"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_secondary"/>
+                        android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
                         android:id="@+id/tvMetricNo2"
                         android:layout_width="wrap_content"
@@ -239,7 +228,7 @@
                         android:layout_marginTop="4dp"
                         android:text="28 ppb"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="?attr/colorOnSurface"
                         android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
                     <TextView
                         android:id="@+id/tvMetricNo2Delta"
@@ -247,7 +236,7 @@
                         android:layout_height="wrap_content"
                         android:text="-31% Improvement"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/solid_success"/>
+                        android:textColor="?attr/colorPrimary"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -256,11 +245,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="16dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/surface_border"
-                app:cardBackgroundColor="@color/surface_card"
+                style="@style/Widget.Material3.CardView.Filled"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:strokeWidth="0dp"
                 android:layout_margin="4dp">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -272,7 +260,7 @@
                         android:layout_height="wrap_content"
                         android:text="Daily CO₂ Saved"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_secondary"/>
+                        android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
                         android:id="@+id/tvMetricCo2"
                         android:layout_width="wrap_content"
@@ -280,7 +268,7 @@
                         android:layout_marginTop="4dp"
                         android:text="340 Tons"
                         android:textStyle="bold"
-                        android:textColor="@color/solid_success"
+                        android:textColor="?attr/colorOnSurface"
                         android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
                     <TextView
                         android:id="@+id/tvMetricCo2Delta"
@@ -288,7 +276,7 @@
                         android:layout_height="wrap_content"
                         android:text="+42% vs Baseline"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/solid_success"/>
+                        android:textColor="?attr/colorPrimary"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -297,11 +285,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                app:cardElevation="0dp"
-                app:cardCornerRadius="16dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/surface_border"
-                app:cardBackgroundColor="@color/surface_card"
+                style="@style/Widget.Material3.CardView.Filled"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+                app:strokeWidth="0dp"
                 android:layout_margin="4dp">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -313,7 +300,7 @@
                         android:layout_height="wrap_content"
                         android:text="Noise Index"
                         android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_secondary"/>
+                        android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
                         android:id="@+id/tvMetricNoise"
                         android:layout_width="wrap_content"
@@ -321,7 +308,7 @@
                         android:layout_marginTop="4dp"
                         android:text="58 dB"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="?attr/colorOnSurface"
                         android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
                     <TextView
                         android:id="@+id/tvMetricNoiseDelta"
@@ -329,7 +316,7 @@
                         android:layout_height="wrap_content"
                         android:text="Optimal Range"
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/primary_blue"/>
+                        android:textColor="?attr/colorOnSurfaceVariant"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
