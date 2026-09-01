@@ -1,149 +1,240 @@
-# 📊 HackCelestial 3.0 — Pitch Deck Slide Content
+# 🚀 HackCelestial 3.0 — Official Presentation Slide Content
 **Mahatma Education Society’s PILLAI UNIVERSITY**  
-**Hackathon Challenge**: *HackCelestial 3.0*
+**Event**: HackCelestial 3.0  
+**Team Name**: `UntrainedModels`  
+**Problem Statement**: `Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality`  
+**Project Name**: **UrbanPulse**
 
 ---
 
-<!-- SLIDE 1 -->
-## 📌 Slide 1: Identification, Focus Area & Pitch Summary
+## 🖥️ SLIDE 1: Title & Pitch Summary
 
-### Header:
-- **Institution**: Mahatma Education Society’s PILLAI UNIVERSITY
-- **Event**: HackCelestial 3.0
-- **Logos**: Pillai University | TechAlegria | Pillai HOC
-
-### 01. Identification:
-- **Team Name**: `UntrainedModels`
-
-### 02. Focus Area:
-- **Problem Statement Title**:  
-  **Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality**
-
-### 03. Pitch Summary:
-- **Abstract**:  
-  **UrbanPulse** is an AI-powered, evidence-grounded travel and hospitality platform designed to make tourism both sustainable and accessible. It creates personalized itineraries and route plans by considering a traveler’s budget, mobility requirements, step-free preferences, transport modes, comfort, and carbon sensitivity. The platform combines Gemini 1.5 Flash agentic function-calling with TomTom MCP spatial tools, live Open-Meteo environmental telemetry, carbon estimation, and multi-objective Pareto optimization to generate and compare travel options. For hospitality businesses, UrbanPulse provides dynamic facility resource forecasting, automated HVAC eco-scheduling, surplus food rescue dispatch, and 1-tap verifiable ESG audit export sheets.
-
----
-
-<!-- SLIDE 2 -->
-## 📌 Slide 2: Proposed Solution
-
-### Visual Diagram Structure:
 ```
-[User Request: Voice / Chat / UI]
-            │
-            ▼
-[LLM Intent & Preference Parser] ──► [Matched Against Evidence Matrix (GPS + TomTom API)]
-            │
-            ▼
-   [Optimization Engine]
-     ┌──────┴──────────────────────────────┐
-     ▼                                     ▼
-[Traveler B2C App]                [Hotel B2B Dashboard]
- • Dual-Route Map Comparison       • Live Dynamic Facility Slider
- • Pareto-Optimal Green Routes     • AI Kitchen Surplus Forecasting
- • Accessibility Confidence Score  • Auto-Dispatch to Food Shelters
- • Carbon Budget & Passport        • 1-Tap Signed ESG Audit Export
-```
+====================================================================================================
+Mahatma Education Society's PILLAI UNIVERSITY                                   HackCelestial 3.0
+====================================================================================================
 
-### Description:
-UrbanPulse turns a traveler's plain-language request into a verified, mathematically optimized journey. A Gemini AI Agent parses stated preferences (budget, mobility, step-free needs, carbon goals) into structured constraints, which are grounded against live TomTom routing and Open-Meteo sensor data—every accessibility and sustainability metric is backed by live API calculations, never hallucinated. A multi-objective optimizer balances cost, carbon emissions, travel time, and step-free access to generate Pareto-optimal options for travelers, while hotels get a parallel resource dashboard for dynamic occupancy scaling, food waste shelter dispatch, and exportable ESG compliance sheets.
+01. Identification
+Team Name: UntrainedModels
 
----
+02. Focus Area
+Problem Statement Title:
+Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality
 
-<!-- SLIDE 3 -->
-## 📌 Slide 3: Flow Chart | Architecture
+03. Pitch Summary
+Abstract:
+UrbanPulse is an AI-powered, evidence-grounded travel and hospitality platform designed to make
+tourism both environmentally sustainable and universally accessible. It generates personalized,
+multimodal itineraries by balancing a traveler’s budget, step-free mobility requirements, sensory
+preferences, transit modes, comfort, and carbon sensitivity.
 
-### High-Level Design (HLD):
-1. **Presentation Layer**: Native Kotlin Android + Material Design 3 UI, Dark Slate Surface (`#0F172A`), Leaflet Vector Canvas.
-2. **ViewModel Layer**: MVVM Architecture with Kotlin Coroutines + StateFlow reactive state management.
-3. **Domain Layer**: Intent Parser, Multi-Objective Pareto Optimizer, Carbon Footprint Engine, Evidence-Based Accessibility Ranker.
-4. **Data Layer**: Live City Intelligence Service, Local SharedPreferences Passport Ledger, Offline-Resilient Geodesic Fallback Matrix.
-5. **External Services**: TomTom Maps & Routing API, TomTom MCP Server, Open-Meteo Air Quality & Weather API, Google Play FusedLocation Services.
-
-### Basic Flow:
-```
-[User Enters Trip / Hospitality Request]
-                 │
-                 ▼
-[Parse into Structured Constraints (Mobility, Budget, Carbon, Time)]
-                 │
-                 ▼
-[Fetch Live TomTom Routes, Traffic & Open-Meteo AQI Data]
-                 │
-                 ▼
-     <Meets Hard Constraints (e.g. 100% Step-Free)?>
-        ├── NO  ──► [Ineligible Route Excluded]
-        └── YES ──► [Multi-Objective Pareto Optimization]
-                          │
-                          ▼
-[Render Simultaneous Dual Routes (Green vs Normal) + "Why this?" Explanation]
+The platform pairs Gemini 1.5 Flash agentic function-calling with TomTom MCP spatial tools,
+live Open-Meteo environmental telemetry, and multi-objective Pareto optimization to deliver
+provable travel recommendations with zero hardcoded assumptions. Simultaneously, UrbanPulse
+empowers hotels and resorts with live facility resource forecasting, automated HVAC eco-scheduling,
+surplus food shelter rescue dispatching, and 1-tap verifiable ESG compliance audit sheets.
+====================================================================================================
 ```
 
 ---
 
-<!-- SLIDE 4 -->
-## 📌 Slide 4: Innovation and Unique Functionality
+## 🖥️ SLIDE 2: Proposed Solution
 
-### 1. Evidence-Based Accessibility
-- Never assumes binary `"Accessible: Yes"`—every transit hub and facility is tagged with verified physical attributes (level boarding, elevator concourses, tactile paths, wheelchair ramps).
-- Proximity ranking grounded strictly in real GPS coordinates `(19.1775° N, 72.9544° E)` with live TomTom POI search.
-- Flags and eliminates route segments with physical barriers.
+```
+====================================================================================================
+                                      Proposed Solution
+====================================================================================================
 
-### 2. Multi-Objective Pareto Optimization
-- Returns multiple optimal choices (**Greenest**, **100% Step-Free**, **Fastest**, **Lowest Cost**) instead of a single arbitrary answer.
-- Hard constraints (e.g., wheelchair step-free requirement) eliminate inaccessible paths outright.
-- Soft preferences (carbon priority, budget threshold) dynamically shape ranking and visual highlighting.
+[ARCHITECTURE DATAFLOW DIAGRAM]
 
-### 3. Explainable Dual-Route Comparison
-- Live map renders **both routes simultaneously**: Glowing Neon Green Corridor (`#10B981`) vs. Standard Congested Path (`#EF4444`).
-- Interactive HUD explains exact tradeoffs: **`-435g CO2 (91% Cleaner) • ₹210 Saved • 12 mins Faster`**.
-- Turns sustainability from vague marketing into clear, provable numbers.
+User Voice / Chat / UI Request
+       │
+       ▼
+LLM Intent Parser (Gemini 1.5 Flash)
+       │
+       ▼
+Evidence Matrix (Live GPS + TomTom MCP Tools + Open-Meteo Telemetry)
+       │
+       ▼
+Multi-Objective Pareto Optimizer (Carbon vs Time vs Cost vs Step-Free)
+       │
+       ├────────────────────────────────────────┬────────────────────────────────────────┐
+       ▼                                        ▼                                        ▼
+[Traveler Features: Android App]     [Hotel Features: B2B Dashboard]          [Additional Capabilities]
+• Simultaneous Dual-Route Canvas     • Live Operations Scale Slider           • Multilingual Voice Input
+• Pareto-Optimal Green Corridors     • AI Kitchen Surplus Forecasting         • 1-Tap Demo / Judge Access
+• Evidence-Based Accessibility       • Auto-Dispatch to Food Shelters         • SOS & Trauma Geodesic Pinning
+• Carbon Wallet & Incentive Ledger   • Signed LEED / BEE ESG Audit Export     • Weather & AQI Health Shield
 
-### 4. LLM as Reasoner, Not Decision-Maker
-- Gemini 1.5 Flash is constrained to intent parsing and autonomous function calling with TomTom MCP tools.
-- Mathematical carbon emission formulas and geodesic distances govern all recommendations to guarantee zero hallucination.
-- Completely auditable and transparent logic.
 
----
+[RIGHT SUMMARY CARD]
+UrbanPulse transforms a traveler's plain-language request into a verified, mathematically
+optimized journey. An LLM parses stated preferences (budget, mobility, step-free requirements,
+carbon goals) into structured constraints, which are grounded against live TomTom routing and
+Open-Meteo environmental sensor data—every accessibility and sustainability metric is backed
+by a live API source, not just asserted.
 
-<!-- SLIDE 5 -->
-## 📌 Slide 5: Technical Details & Tech Stack
-
-### Frameworks & Technologies:
-- **Kotlin + Android SDK 34 (Android 14)**: Native UI with Material Design 3 and custom vector geometry.
-- **MVVM Architecture**: Kotlin Coroutines, StateFlow, LiveData for reactive state management.
-- **TomTom Maps & Routing API**: Online search, traffic flow segment analysis, and multimodal routing.
-- **TomTom Model Context Protocol (MCP)**: Tool integration for agentic autonomous execution.
-- **Open-Meteo APIs**: Real-time localized weather telemetry and Air Quality Index (PM2.5, PM10, US AQI).
-- **Google Generative AI SDK**: Gemini 1.5 Flash function calling.
-
-### Cost & Scalability:
-- **TomTom API**: Free tier (~2,500 requests/day) covers hackathon and pilot scale; commercial tier scales at ~$0.50 per 1,000 requests.
-- **Open-Meteo API**: Free, open-access, zero API key required.
-- **Gemini 1.5 Flash**: Highly optimized token efficiency with native function calling, free tier sufficient for demo, enterprise scalability at $0.075 / 1M tokens.
-- **Hosting & Backend**: Self-contained client-side intelligence engine with zero mandatory server runtime cost during demo.
-
----
-
-<!-- SLIDE 6 -->
-## 📌 Slide 6: Existing Solutions and Comparison
-
-| Feature Dimension | Existing Solutions (Google Maps / MakeMyTrip) | Typical Eco Badge Apps | **UrbanPulse (Our Solution)** |
-| :--- | :--- | :--- | :--- |
-| **Accessibility Info** | Binary yes/no listing, often outdated and unverified | Self-reported checklists | **Evidence-based audit matrix with verified step-free, tactile, and elevator data** |
-| **Route Visualization** | Shows single car/transit route | Text-only recommendations | **Simultaneous Dual-Route Map Canvas (Green Path vs Normal Route) with live HUD** |
-| **Sustainability Data** | Vague "eco-friendly" badge or zero data | Generic static carbon charts | **Transparent live $\text{CO}_2\text{e}$ calculation per trip with visible methodology** |
-| **Optimization Logic** | Optimizes solely for transit time | Static manual sorting | **Multi-objective Pareto Optimizer (Carbon vs Time vs Budget vs Accessibility)** |
-| **B2B Hotel Optimizer** | None | Static surveys | **Dynamic facility occupancy slider, automated HVAC eco setpoint & shelter dispatch** |
-| **ESG Audit Compliance** | None | None | **1-Tap verifiable ESG compliance audit sheet export via Android share sheet** |
+A multi-objective optimizer balances cost, carbon, time, and accessibility to generate Pareto-
+optimal trips for travelers, while hotels get a parallel resource dashboard for facility demand
+forecasting, HVAC energy optimization, surplus food rescue, and exportable ESG audit compliance.
+====================================================================================================
+```
 
 ---
 
-<!-- SLIDE 7 -->
-## 📌 Slide 7: Supplementary Information
+## 🖥️ SLIDE 3: Flow Chart | Architecture
 
-### 🔗 Project Links:
-- **GitHub Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
-- **APK Target**: Android 8.0+ (API 26 to 34), tested live on **Vivo V40**
-- **1-Tap Demo Access**: Instant Judge / Guest mode built into Welcome and Login screens for immediate evaluation.
+```
+====================================================================================================
+                                  Flow Chart | Architecture
+====================================================================================================
+
+[HIGH-LEVEL DESIGN (HLD)]                            [BASIC FLOW]
+
+┌──────────────────────────────────────┐            ┌──────────────────────────────────────────────┐
+│             Mobile App               │            │           User Enters Trip Request           │
+│   Native Kotlin + Material Design 3  │            │     in natural language / voice / chips      │
+└──────────────────┬───────────────────┘            └──────────────────────┬───────────────────────┘
+                   │                                                       │
+┌──────────────────▼───────────────────┐            ┌──────────────────────▼───────────────────────┐
+│           ViewModel Layer            │            │        Parse into Structured Constraints     │
+│   MVVM + Coroutines + StateFlow      │            │       (Mobility, Carbon, Budget, Time)       │
+└──────────────────┬───────────────────┘            └──────────────────────┬───────────────────────┘
+                   │                                                       │
+┌──────────────────▼───────────────────┐            ┌──────────────────────▼───────────────────────┐
+│            Domain Layer              │            │        Fetch Live TomTom & Weather Data      │
+│  Intent Parser • Pareto Optimizer    │            │  (Routing API, Traffic Flow, Open-Meteo AQI) │
+└──────────────────┬───────────────────┘            └──────────────────────┬───────────────────────┘
+                   │                                                       │
+┌──────────────────▼───────────────────┐                                   ▼
+│             Data Layer               │                         /───────────────────\
+│ Live City Service • Offline Matrix   │                        <  Meets Hard         >─── NO ──► [Excluded]
+└──────────────────┬───────────────────┘                        <  Constraints?       >
+                   │                                             \───────────────────/
+┌──────────────────▼───────────────────┐                                   │ YES
+│          External Services           │                                   ▼
+│ TomTom Maps & MCP • Open-Meteo API   │            ┌──────────────────────────────────────────────┐
+│ Google Play FusedLocation Services   │            │             Pareto Optimization              │
+└──────────────────────────────────────┘            │        rank & compute tradeoff scores        │
+                                                    └──────────────────────┬───────────────────────┘
+                                                                           │
+                                                    ┌──────────────────────▼───────────────────────┐
+                                                    │        Recommended Trip Plans on Map         │
+                                                    │  Dual-Route Canvas with "Why this?" HUD      │
+                                                    └──────────────────────────────────────────────┘
+====================================================================================================
+```
+
+---
+
+## 🖥️ SLIDE 4: Innovation and Unique Functionality
+
+```
+====================================================================================================
+                               Innovation and Unique Functionality
+====================================================================================================
+
+┌─────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────┐
+│ Evidence-Based Accessibility                    │ │ Multi-Objective Pareto Optimization             │
+│ • Never states "Accessible: Yes" outright;     │ │ • Returns multiple optimal trips (Greenest,     │
+│   every claim is verified with physical specs   │ │   100% Step-Free, Fastest, Lowest Cost)         │
+│   (level boarding, elevator concourse, tactile).│ │   instead of one single "black-box" choice.     │
+│ • Real GPS proximity ranking to local trauma    │ │ • Hard constraints (e.g. wheelchair ramp)       │
+│   hospitals (Fortis Mulund, Jupiter Thane).     │ │   eliminate ineligible routes outright.         │
+│ • Flags contradictions between listings and     │ │ • Soft preferences (carbon priority, budget)    │
+│   physical street infrastructure.               │ │   dynamically shape ranking and route scores.   │
+└─────────────────────────────────────────────────┘ └─────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────┐
+│ Explainable Dual-Route Recommendations          │ │ LLM as Reasoner, Not Decision-Maker             │
+│ • Renders simultaneous Dual Routes on map:      │ │ • Gemini 1.5 Flash only parses natural intent   │
+│   Neon Green Path (#10B981) vs Normal (#EF4444).│ │   into structured constraints with MCP tools.   │
+│ • Floating HUD explains exact real-time delta:  │ │ • A deterministic mathematical engine makes     │
+│   "-435g CO2 (91% Cleaner) • ₹210 Saved".       │ │   the actual physical carbon & route decisions. │
+│ • Turns sustainability from preachy to          │ │ • Keeps the system 100% auditable, transparent, │
+│   provable, data-backed savings.                │ │   and immune to LLM hallucination.              │
+└─────────────────────────────────────────────────┘ └─────────────────────────────────────────────────┘
+====================================================================================================
+```
+
+---
+
+## 🖥️ SLIDE 5: Technical Details & Tech Stack
+
+```
+====================================================================================================
+Technical Details                                                                         Tech Stack
+====================================================================================================
+
+Frameworks & Technologies:
+• Kotlin 1.9 + Android SDK 34 (Android 14) with Material Design 3 and custom dark theme token system.
+• MVVM Architecture with Kotlin Coroutines + StateFlow for reactive, non-blocking asynchronous state.
+• TomTom Maps SDK & Routing API: Dynamic polyline canvas, live traffic segment analysis, POI search.
+• TomTom Model Context Protocol (MCP): Tool integration for agentic autonomous query resolution.
+• Open-Meteo Live APIs: Real-time localized weather telemetry and Air Quality Index (PM2.5, PM10, AQI).
+• Google Generative AI SDK: Gemini 1.5 Flash Function Calling for structured grounding.
+• Networking: OkHttp 4.12 + Retrofit 2.9 + Gson serialization.
+
+Cost & Scalability Analysis:
+• TomTom API: Free tier (~2,500 calls/day) covers hackathon & pilot scale; paid scales at ~$0.50/1k calls.
+• Open-Meteo API: 100% free, open-access, zero API key or billing required.
+• Gemini 1.5 Flash: Highly optimized token usage via native function calling; free tier sufficient for demo;
+  production scaling costs only $0.075 per 1M input tokens.
+• Local Processing: Client-side mathematical optimization & caching engine with zero server runtime overhead.
+• Google Play Developer Account: One-time $25 registration for global store distribution.
+====================================================================================================
+```
+
+---
+
+## 🖥️ SLIDE 6: Existing Solutions and Comparison
+
+```
+====================================================================================================
+                                 Existing Solutions and Comparison
+====================================================================================================
+
+┌─────────────────────┬───────────────────────────────────────┬─────────────────────────────────────┐
+│ Dimension           │ Existing Solutions (Google Maps / MMT)│ UrbanPulse (Our Solution)           │
+├─────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Accessibility Info  │ Binary yes/no listing, often          │ Evidence-based audit matrix with    │
+│                     │ inaccurate or outdated                │ verified step-free & elevator data  │
+├─────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Route Visualization │ Single road route, optimized only     │ Simultaneous Dual-Route Canvas      │
+│                     │ for vehicle speed                     │ (Green vs Normal) with live HUD     │
+├─────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Sustainability Data │ Vague "eco-friendly" badges with      │ Transparent live CO2e estimation    │
+│                     │ zero data or backing                  │ with visible math & credit ledger   │
+├─────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Explainability      │ Black-box ranking — no tradeoff       │ "Why this?" HUD + Tradeoff Priority │
+│                     │ reasoning shown to user               │ Selector (Carbon/Time/Cost/Access)  │
+├─────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Personalization     │ Generic filters only — price, star    │ Natural-language intent parsed into │
+│                     │ rating, distance                      │ multi-constraint travel personas    │
+├─────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ B2B Hotel Tools &   │ None (hospitality business side is    │ Live occupancy slider, HVAC eco     │
+│ ESG Compliance      │ completely ignored)                   │ setpoints & 1-tap signed ESG export │
+└─────────────────────┴───────────────────────────────────────┴─────────────────────────────────────┘
+====================================================================================================
+```
+
+---
+
+## 🖥️ SLIDE 7: Supplementary Information
+
+```
+====================================================================================================
+                                 Supplementary Information (Optional)
+====================================================================================================
+
+┌─────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────┐
+│ 🎬 Live Demo & APK Target                       │ │ 🌐 Live GitHub Repository                       │
+│                                                 │ │                                                 │
+│ • Production APK: Native Android 8.0+ (API 26+) │ │ URL: https://github.com/SatyamPandey-07/        │
+│ • Live Hardware Target: Tested on Vivo V40      │ │      Urban-Pulse                                │
+│ • 1-Tap Demo / Judge Access: Instant bypass     │ │                                                 │
+│   buttons on Welcome and Login screens for      │ │ Clean architecture, documented commits, and    │
+│   zero-friction evaluation during live pitches. │ │ production Gradle build setup.                  │
+└─────────────────────────────────────────────────┘ └─────────────────────────────────────────────────┘
+====================================================================================================
+```
