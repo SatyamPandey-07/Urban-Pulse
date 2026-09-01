@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Dashboard" />
+    <item
+        android:id="@+id/navigation_map"
+        android:icon="@drawable/ic_map"
+        android:title="Live Map" />
+    <item
+        android:id="@+id/navigation_digital_twin"
+        android:icon="@drawable/ic_digital_twin"
+        android:title="Digital Twin" />
+    <item
+        android:id="@+id/navigation_yatri_ai"
+        android:icon="@drawable/ic_yatri_ai"
+        android:title="Yatri AI" />
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="Settings" />
+</menu>

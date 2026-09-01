@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base Application Theme -->
+    <style name="Theme.UrbanPulse" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorSecondary">@color/teal_700</item>
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+    </style>
+
+    <!-- Theme Variants -->
+    <style name="Theme.Urbanpulse.Green" parent="Theme.UrbanPulse">
+        <item name="colorPrimary">@color/primary_green</item>
+    </style>
+
+    <style name="Theme.Urbanpulse.Blue" parent="Theme.UrbanPulse">
+        <item name="colorPrimary">@color/primary_blue</item>
+    </style>
+
+    <style name="Theme.Urbanpulse.Purple" parent="Theme.UrbanPulse">
+        <item name="colorPrimary">@color/primary_purple</item>
+    </style>
+
+    <style name="Theme.Urbanpulse.Orange" parent="Theme.UrbanPulse">
+        <item name="colorPrimary">@color/primary_orange</item>
+    </style>
+
+    <style name="Theme.Urbanpulse.Pink" parent="Theme.UrbanPulse">
+        <item name="colorPrimary">@color/primary_pink</item>
+    </style>
+
+    <style name="Theme.Urbanpulse.Teal" parent="Theme.UrbanPulse">
+        <item name="colorPrimary">@color/primary_teal</item>
+    </style>
+</resources>
