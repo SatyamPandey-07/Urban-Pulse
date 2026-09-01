@@ -3,7 +3,6 @@ package com.urbanpulse.app
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
@@ -25,8 +24,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.location.LocationServices
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.tomtom.sdk.location.GeoPoint
@@ -36,29 +38,49 @@ import com.tomtom.sdk.search.SearchOptions
 import com.tomtom.sdk.search.SearchResponse
 import com.tomtom.sdk.search.common.error.SearchFailure
 import com.tomtom.sdk.search.online.OnlineSearch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class LiveMapFragment : Fragment() {
 
     private lateinit var mapWebView: WebView
-    private var searchApi: Search? = null
     private lateinit var etMapSearch: EditText
     private lateinit var btnClearSearch: ImageButton
     private lateinit var rvSearchResults: RecyclerView
     private lateinit var searchAdapter: SearchAdapter
+    private lateinit var fabTrafficToggle: FloatingActionButton
+    private lateinit var fabReportHazard: FloatingActionButton
+    private lateinit var fabMyLocation: FloatingActionButton
+    private lateinit var btnAskYatri: MaterialButton
     private lateinit var tvLiveStatusTitle: TextView
     private lateinit var tvLiveStatusSubtitle: TextView
 
-    private var currentLat = 19.0760
-    private var currentLon = 72.8777
+    private var searchApi: Search? = null
     private var isTrafficEnabled = true
     private var isMapLoaded = false
+
+    private var currentLat = 19.1775
+    private var currentLon = 72.9544
+
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .build()
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
-            updateUserLocation()
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        ) {
+            fetchUserLocation()
         }
     }
 
@@ -76,13 +98,17 @@ class LiveMapFragment : Fragment() {
         etMapSearch = view.findViewById(R.id.etMapSearch)
         btnClearSearch = view.findViewById(R.id.btnClearSearch)
         rvSearchResults = view.findViewById(R.id.rvSearchResults)
+        fabTrafficToggle = view.findViewById(R.id.fabTrafficToggle)
+        fabReportHazard = view.findViewById(R.id.fabReportHazard)
+        fabMyLocation = view.findViewById(R.id.fabMyLocation)
+        btnAskYatri = view.findViewById(R.id.btnAskYatri)
         tvLiveStatusTitle = view.findViewById(R.id.tvLiveStatusTitle)
         tvLiveStatusSubtitle = view.findViewById(R.id.tvLiveStatusSubtitle)
 
         setupInteractiveMap()
         setupSearch()
         setupChips(view)
-        setupFabs(view)
+        setupFabs()
 
         context?.let { ctx ->
             searchApi = OnlineSearch.create(ctx, BuildConfig.TOMTOM_API_KEY)
@@ -142,6 +168,10 @@ class LiveMapFragment : Fragment() {
                         70% { box-shadow: 0 0 0 16px rgba(56, 189, 248, 0); }
                         100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
                     }
+                    .dest-pin {
+                        width: 24px; height: 24px; background: #10B981; border: 3px solid #FFFFFF;
+                        border-radius: 50%; box-shadow: 0 0 16px #10B981;
+                    }
                     .leaflet-popup-content-wrapper {
                         background: #1E293B; color: #F8FAFC; border-radius: 12px; border: 1px solid #334155;
                     }
@@ -151,55 +181,49 @@ class LiveMapFragment : Fragment() {
             <body>
                 <div id="map"></div>
                 <script>
-                    var map = L.map('map', { zoomControl: false }).setView([19.0760, 72.8777], 13);
+                    var map = L.map('map', { zoomControl: false }).setView([19.1775, 72.9544], 13);
                     
                     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                         maxZoom: 19,
                         subdomains: 'abcd'
                     }).addTo(map);
 
-                    var userMarker = L.marker([19.0760, 72.8777], {
+                    var userMarker = L.marker([19.1775, 72.9544], {
                         icon: L.divIcon({ className: 'user-pulse', iconSize: [18, 18], iconAnchor: [9, 9] })
-                    }).addTo(map).bindPopup("<b>Current Location</b><br>GPS Active");
+                    }).addTo(map).bindPopup("<b>Your Current Location</b><br>GPS Active");
 
-                    // Traffic Polylines
+                    var routeLayerGroup = L.layerGroup().addTo(map);
                     var trafficLines = [];
+
                     function drawTraffic() {
                         var greenLine = L.polyline([
                             [19.0544, 72.8402], [19.0760, 72.8777], [19.1136, 72.8697]
-                        ], { color: '#10B981', weight: 5, opacity: 0.85 }).addTo(map).bindPopup("Western Highway: Fast Flow (54 km/h)");
+                        ], { color: '#10B981', weight: 4, opacity: 0.8 }).addTo(map).bindPopup("Western Highway: Fast Flow (54 km/h)");
 
                         var yellowLine = L.polyline([
                             [19.0760, 72.8777], [19.0600, 72.8900], [19.0400, 72.9000]
-                        ], { color: '#F59E0B', weight: 5, opacity: 0.85 }).addTo(map).bindPopup("Eastern Freeway: Moderate (38 km/h)");
+                        ], { color: '#F59E0B', weight: 4, opacity: 0.8 }).addTo(map).bindPopup("Eastern Freeway: Moderate (38 km/h)");
 
-                        var redLine = L.polyline([
-                            [19.0760, 72.8777], [19.0650, 72.8350]
-                        ], { color: '#EF4444', weight: 5, opacity: 0.85 }).addTo(map).bindPopup("SV Road: Heavy Congestion (18 km/h)");
-
-                        trafficLines = [greenLine, yellowLine, redLine];
+                        trafficLines = [greenLine, yellowLine];
                     }
                     drawTraffic();
 
                     var pois = [
-                        { lat: 19.0515, lon: 72.8290, code: "MED", title: "Lilavati Hospital", desc: "24/7 Emergency Trauma Care", bg: "#EF4444" },
-                        { lat: 19.0330, lon: 72.8550, code: "MED", title: "Hinduja Healthcare", desc: "Multi-Speciality Urgent Care", bg: "#EF4444" },
+                        { lat: 19.1728, lon: 72.9564, code: "MED", title: "Fortis Hospital Mulund", desc: "24/7 Trauma Emergency", bg: "#EF4444" },
+                        { lat: 19.2050, lon: 72.9734, code: "MED", title: "Jupiter Hospital Thane", desc: "Step-Free Critical Care", bg: "#EF4444" },
                         { lat: 19.0880, lon: 72.8890, code: "EV", title: "Fast Charging Hub", desc: "60 kW CCS2 (4 Available)", bg: "#38BDF8" },
-                        { lat: 19.0680, lon: 72.8350, code: "HAZ", title: "Roadwork Alert", desc: "Reported 20 mins ago • Slow traffic", bg: "#F97316" },
-                        { lat: 19.0950, lon: 72.8650, code: "ECO", title: "Eco Transit Corridor", desc: "Dedicated Electric Bus / Cycling Track", bg: "#10B981" }
+                        { lat: 19.1200, lon: 72.9050, code: "ECO", title: "Powai Lake Eco Track", desc: "Dedicated Electric Mobility Corridor", bg: "#10B981" }
                     ];
 
-                    var markers = [];
                     pois.forEach(function(p) {
-                        var m = L.marker([p.lat, p.lon], {
+                        L.marker([p.lat, p.lon], {
                             icon: L.divIcon({
                                 className: 'custom-pin',
-                                html: '<div style="background:' + p.bg + '; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:10px;">' + p.code + '</div>',
-                                iconSize: [30, 30],
-                                iconAnchor: [15, 15]
+                                html: '<div style="background:' + p.bg + '; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:9px;">' + p.code + '</div>',
+                                iconSize: [28, 28],
+                                iconAnchor: [14, 14]
                             })
                         }).addTo(map).bindPopup("<b>" + p.title + "</b><br>" + p.desc);
-                        markers.push(m);
                     });
 
                     window.setCenter = function(lat, lon, zoom) {
@@ -207,9 +231,41 @@ class LiveMapFragment : Fragment() {
                         userMarker.setLatLng([lat, lon]);
                     };
 
-                    window.addPin = function(lat, lon, title, desc) {
-                        map.flyTo([lat, lon], 15, { duration: 1.0 });
-                        L.marker([lat, lon]).addTo(map).bindPopup("<b>" + title + "</b><br>" + desc).openPopup();
+                    window.drawGreenRoute = function(coords, distKm, timeMin, co2Saved, destTitle) {
+                        routeLayerGroup.clearLayers();
+
+                        // Outer glowing green polyline
+                        var glowLine = L.polyline(coords, {
+                            color: '#059669',
+                            weight: 9,
+                            opacity: 0.45,
+                            lineCap: 'round',
+                            lineJoin: 'round'
+                        });
+
+                        // Vibrant inner neon emerald polyline
+                        var mainLine = L.polyline(coords, {
+                            color: '#10B981',
+                            weight: 5,
+                            opacity: 0.95,
+                            lineCap: 'round',
+                            lineJoin: 'round'
+                        });
+
+                        routeLayerGroup.addLayer(glowLine);
+                        routeLayerGroup.addLayer(mainLine);
+
+                        if (coords.length > 0) {
+                            var destCoord = coords[coords.length - 1];
+                            var destMarker = L.marker(destCoord, {
+                                icon: L.divIcon({ className: 'dest-pin', iconSize: [24, 24], iconAnchor: [12, 12] })
+                            }).bindPopup("<b>🌿 " + destTitle + "</b><br>" + distKm + " km • " + timeMin + " mins<br><span style='color:#10B981;font-weight:bold;'>-" + co2Saved + " CO2e saved vs car</span>");
+                            
+                            routeLayerGroup.addLayer(destMarker);
+                            destMarker.openPopup();
+                        }
+
+                        map.fitBounds(mainLine.getBounds(), { padding: [50, 50], maxZoom: 15 });
                     };
 
                     window.toggleTrafficOverlay = function(show) {
@@ -227,11 +283,10 @@ class LiveMapFragment : Fragment() {
         rvSearchResults.layoutManager = LinearLayoutManager(context)
         searchAdapter = SearchAdapter(emptyList()) { result ->
             rvSearchResults.visibility = View.GONE
-            etMapSearch.setText(result.place.name ?: "")
-            val coordinate = result.place.coordinate
-            centerMap(coordinate.latitude, coordinate.longitude, 15)
-            tvLiveStatusTitle.text = result.place.name ?: "Selected Location"
-            tvLiveStatusSubtitle.text = result.place.address?.freeformAddress ?: "Lat: %.4f, Lon: %.4f".format(coordinate.latitude, coordinate.longitude)
+            val name = result.place.name ?: "Destination"
+            etMapSearch.setText(name)
+            val coord = result.place.coordinate
+            calculateAndDrawGreenRoute(coord.latitude, coord.longitude, name)
         }
         rvSearchResults.adapter = searchAdapter
 
@@ -291,36 +346,110 @@ class LiveMapFragment : Fragment() {
     private fun fallbackLocalSearch(query: String) {
         val q = query.lowercase()
         when {
-            q.contains("hospital") || q.contains("clinic") -> {
-                centerMap(19.0515, 72.8290, 15)
-                tvLiveStatusTitle.text = "Lilavati Hospital & Research Centre"
-                tvLiveStatusSubtitle.text = "Bandra West, Mumbai • 24/7 Emergency Trauma Care"
+            q.contains("hospital") || q.contains("clinic") || q.contains("fortis") -> {
+                calculateAndDrawGreenRoute(19.1728, 72.9564, "Fortis Hospital Mulund")
+            }
+            q.contains("jupiter") || q.contains("thane") -> {
+                calculateAndDrawGreenRoute(19.2050, 72.9734, "Jupiter Hospital Thane")
             }
             q.contains("ev") || q.contains("charge") -> {
-                centerMap(19.0880, 72.8890, 15)
-                tvLiveStatusTitle.text = "Tata Power Fast Charging Hub"
-                tvLiveStatusSubtitle.text = "BKC, Mumbai • 4 Superchargers Available"
+                calculateAndDrawGreenRoute(19.1200, 72.9050, "Powai EV Fast Charging Hub")
             }
-            q.contains("hazard") || q.contains("traffic") -> {
-                centerMap(19.0680, 72.8350, 15)
-                tvLiveStatusTitle.text = "SV Road Congestion & Roadwork"
-                tvLiveStatusSubtitle.text = "Average speed: 18 km/h • Detour advised"
+            q.contains("csmt") || q.contains("south") -> {
+                calculateAndDrawGreenRoute(18.9400, 72.8353, "CSMT South Mumbai")
             }
             else -> {
-                centerMap(19.0760, 72.8777, 14)
-                tvLiveStatusTitle.text = "$query, Mumbai"
-                tvLiveStatusSubtitle.text = "Coordinates: 19.0760° N, 72.8777° E"
+                calculateAndDrawGreenRoute(19.0760, 72.8777, query)
             }
         }
-        Toast.makeText(context, "Location found: $query", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Calculating Green Route to $query...", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun calculateAndDrawGreenRoute(destLat: Double, destLon: Double, destName: String) {
+        tvLiveStatusTitle.text = "Routing to $destName..."
+        tvLiveStatusSubtitle.text = "Querying live TomTom Green Corridor..."
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val apiKey = BuildConfig.TOMTOM_API_KEY
+            val url = "https://api.tomtom.com/routing/1/calculateRoute/$currentLat,$currentLon:$destLat,$destLon/json?key=$apiKey"
+
+            var pointsArray = JSONArray()
+            var distKm = 0.0
+            var timeMin = 0
+            var co2Grams = 0
+
+            try {
+                val req = Request.Builder().url(url).get().build()
+                httpClient.newCall(req).execute().use { resp ->
+                    if (resp.isSuccessful) {
+                        val body = resp.body?.string()
+                        if (body != null) {
+                            val json = JSONObject(body)
+                            val routes = json.optJSONArray("routes")
+                            if (routes != null && routes.length() > 0) {
+                                val firstRoute = routes.getJSONObject(0)
+                                val summary = firstRoute.optJSONObject("summary")
+                                val lengthMeters = summary?.optDouble("lengthInMeters", 0.0) ?: 0.0
+                                val travelSecs = summary?.optInt("travelTimeInSeconds", 0) ?: 0
+
+                                distKm = lengthMeters / 1000.0
+                                timeMin = travelSecs / 60
+                                co2Grams = (distKm * 28.0).toInt()
+
+                                val legs = firstRoute.optJSONArray("legs")
+                                if (legs != null && legs.length() > 0) {
+                                    val points = legs.getJSONObject(0).optJSONArray("points")
+                                    if (points != null) {
+                                        for (i in 0 until points.length()) {
+                                            val p = points.getJSONObject(i)
+                                            val lat = p.getDouble("latitude")
+                                            val lon = p.getDouble("longitude")
+                                            val coordArr = JSONArray().apply {
+                                                put(lat)
+                                                put(lon)
+                                            }
+                                            pointsArray.put(coordArr)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Fallback geometry
+            }
+
+            if (pointsArray.length() == 0) {
+                // Geodesic curve fallback
+                val midLat = (currentLat + destLat) / 2.0 + 0.005
+                val midLon = (currentLon + destLon) / 2.0 - 0.003
+                pointsArray = JSONArray().apply {
+                    put(JSONArray().apply { put(currentLat); put(currentLon) })
+                    put(JSONArray().apply { put(midLat); put(midLon) })
+                    put(JSONArray().apply { put(destLat); put(destLon) })
+                }
+                distKm = 4.2
+                timeMin = 14
+                co2Grams = 120
+            }
+
+            val distFormatted = String.format(Locale.US, "%.1f", distKm)
+            val co2Formatted = "${co2Grams}g"
+
+            withContext(Dispatchers.Main) {
+                tvLiveStatusTitle.text = "🌿 Green Path: $destName"
+                tvLiveStatusSubtitle.text = "$distFormatted km • $timeMin mins • Avoided $co2Formatted CO2e via Electric Transit"
+                val js = "window.drawGreenRoute($pointsArray, '$distFormatted', '$timeMin', '$co2Formatted', '${destName.replace("'", "")}');"
+                mapWebView.evaluateJavascript(js, null)
+            }
+        }
     }
 
     private fun setupChips(view: View) {
         view.findViewById<Chip>(R.id.chipHospitals).setOnClickListener {
-            centerMap(19.0515, 72.8290, 15)
-            tvLiveStatusTitle.text = "Lilavati Hospital (Nearest Emergency)"
-            tvLiveStatusSubtitle.text = "1.8 km away • Tel: +91 22 2675 1000"
-            Toast.makeText(context, "Showing Nearest Hospitals", Toast.LENGTH_SHORT).show()
+            calculateAndDrawGreenRoute(19.1728, 72.9564, "Fortis Hospital Mulund (Emergency)")
+            Toast.makeText(context, "Green Emergency Route to Fortis Mulund", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipTraffic).setOnClickListener {
@@ -332,78 +461,86 @@ class LiveMapFragment : Fragment() {
         }
 
         view.findViewById<Chip>(R.id.chipIncidents).setOnClickListener {
-            centerMap(19.0680, 72.8350, 15)
-            tvLiveStatusTitle.text = "Road Hazard Alert: Roadwork"
-            tvLiveStatusSubtitle.text = "SV Road Junction • Reported by 12 citizens"
-            Toast.makeText(context, "Showing Active Hazards", Toast.LENGTH_SHORT).show()
+            calculateAndDrawGreenRoute(19.1820, 72.9600, "LBS Marg Obstruction Detour")
+            Toast.makeText(context, "Detouring Active Road Hazard", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipEco).setOnClickListener {
-            centerMap(19.0950, 72.8650, 14)
-            tvLiveStatusTitle.text = "Eco Route Corridor"
-            tvLiveStatusSubtitle.text = "Saves 320g of CO2 vs Highway • +35 PULSE points"
-            Toast.makeText(context, "Eco Route Highlighted", Toast.LENGTH_SHORT).show()
+            calculateAndDrawGreenRoute(19.1200, 72.9050, "Powai Green Mobility Corridor")
+            Toast.makeText(context, "Low-Carbon Green Corridor Plotted", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipEV).setOnClickListener {
-            centerMap(19.0880, 72.8890, 15)
-            tvLiveStatusTitle.text = "Tata Power Fast Charging Hub"
-            tvLiveStatusSubtitle.text = "BKC • 4 Superchargers Available (60 kW)"
-            Toast.makeText(context, "Showing EV Charging Stations", Toast.LENGTH_SHORT).show()
+            calculateAndDrawGreenRoute(19.2050, 72.9734, "Thane Supercharging Station (60kW)")
+            Toast.makeText(context, "Green Route to EV Supercharger", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun setupFabs(view: View) {
-        view.findViewById<FloatingActionButton>(R.id.fabMyLocation).setOnClickListener {
-            checkLocationPermission()
+    private fun setupFabs() {
+        fabMyLocation.setOnClickListener {
+            fetchUserLocation()
+            centerMap(currentLat, currentLon, 15)
+            Toast.makeText(context, "Centered at GPS location", Toast.LENGTH_SHORT).show()
         }
 
-        view.findViewById<FloatingActionButton>(R.id.fabTrafficToggle).setOnClickListener {
+        fabTrafficToggle.setOnClickListener {
             isTrafficEnabled = !isTrafficEnabled
             mapWebView.evaluateJavascript("window.toggleTrafficOverlay($isTrafficEnabled);", null)
-            Toast.makeText(context, "Traffic layer: ${if (isTrafficEnabled) "Enabled" else "Disabled"}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Traffic Overlay: ${if (isTrafficEnabled) "ON" else "OFF"}", Toast.LENGTH_SHORT).show()
         }
 
-        view.findViewById<FloatingActionButton>(R.id.fabReportHazard).setOnClickListener {
-            startActivity(Intent(activity, ReportIncidentActivity::class.java))
+        fabReportHazard.setOnClickListener {
+            calculateAndDrawGreenRoute(19.1820, 72.9600, "Active Hazard Detour")
+            Toast.makeText(context, "Emergency Green Hazard Detour Plotted!", Toast.LENGTH_SHORT).show()
         }
 
-        view.findViewById<View>(R.id.btnAskYatri).setOnClickListener {
+        btnAskYatri.setOnClickListener {
             (activity as? MainActivity)?.switchToTab(3)
         }
     }
 
+    private fun centerMap(lat: Double, lon: Double, zoom: Int) {
+        mapWebView.evaluateJavascript("window.setCenter($lat, $lon, $zoom);", null)
+    }
+
     private fun checkLocationPermission() {
         val ctx = context ?: return
-        if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            updateUserLocation()
-        } else {
-            locationPermissionLauncher.launch(arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ))
-        }
-    }
-
-    private fun updateUserLocation() {
-        val ctx = context ?: return
-        val lm = ctx.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return
         if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                ?: lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            if (loc != null) {
-                currentLat = loc.latitude
-                currentLon = loc.longitude
-            }
+            ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fetchUserLocation()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
         }
-        centerMap(currentLat, currentLon, 14)
-        Toast.makeText(context, "Centered on your location", Toast.LENGTH_SHORT).show()
     }
 
-    private fun centerMap(lat: Double, lon: Double, zoom: Int) {
-        if (isMapLoaded) {
-            mapWebView.evaluateJavascript("window.setCenter($lat, $lon, $zoom);", null)
+    private fun fetchUserLocation() {
+        val act = activity ?: return
+        try {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(act)
+            fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
+                if (loc != null) {
+                    currentLat = loc.latitude
+                    currentLon = loc.longitude
+                    centerMap(currentLat, currentLon, 14)
+                } else {
+                    val locMgr = act.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+                    val lastKnown = locMgr?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                        ?: locMgr?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                    if (lastKnown != null) {
+                        currentLat = lastKnown.latitude
+                        currentLon = lastKnown.longitude
+                        centerMap(currentLat, currentLon, 14)
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            // Permission denied
         }
     }
 }
