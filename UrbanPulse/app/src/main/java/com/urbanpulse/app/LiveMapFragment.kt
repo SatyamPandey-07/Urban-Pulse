@@ -28,7 +28,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.LocationServices
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.tomtom.sdk.location.GeoPoint
@@ -58,9 +57,14 @@ class LiveMapFragment : Fragment() {
     private lateinit var fabTrafficToggle: FloatingActionButton
     private lateinit var fabReportHazard: FloatingActionButton
     private lateinit var fabMyLocation: FloatingActionButton
-    private lateinit var btnAskYatri: MaterialButton
+    
     private lateinit var tvLiveStatusTitle: TextView
     private lateinit var tvLiveStatusSubtitle: TextView
+    private lateinit var tvNetSavingsBadge: TextView
+    private lateinit var tvGreenMetrics: TextView
+    private lateinit var tvGreenCarbon: TextView
+    private lateinit var tvNormalMetrics: TextView
+    private lateinit var tvNormalCarbon: TextView
 
     private var searchApi: Search? = null
     private var isTrafficEnabled = true
@@ -101,9 +105,14 @@ class LiveMapFragment : Fragment() {
         fabTrafficToggle = view.findViewById(R.id.fabTrafficToggle)
         fabReportHazard = view.findViewById(R.id.fabReportHazard)
         fabMyLocation = view.findViewById(R.id.fabMyLocation)
-        btnAskYatri = view.findViewById(R.id.btnAskYatri)
+
         tvLiveStatusTitle = view.findViewById(R.id.tvLiveStatusTitle)
         tvLiveStatusSubtitle = view.findViewById(R.id.tvLiveStatusSubtitle)
+        tvNetSavingsBadge = view.findViewById(R.id.tvNetSavingsBadge)
+        tvGreenMetrics = view.findViewById(R.id.tvGreenMetrics)
+        tvGreenCarbon = view.findViewById(R.id.tvGreenCarbon)
+        tvNormalMetrics = view.findViewById(R.id.tvNormalMetrics)
+        tvNormalCarbon = view.findViewById(R.id.tvNormalCarbon)
 
         setupInteractiveMap()
         setupSearch()
@@ -133,6 +142,8 @@ class LiveMapFragment : Fragment() {
                 super.onPageFinished(view, url)
                 isMapLoaded = true
                 centerMap(currentLat, currentLon, 13)
+                // Draw initial dual routes to demonstrate comparison immediately
+                calculateAndDrawDualRoutes(19.0760, 72.8777, "Mumbai Central Corridor")
             }
         }
         mapWebView.webChromeClient = WebChromeClient()
@@ -198,11 +209,11 @@ class LiveMapFragment : Fragment() {
                     function drawTraffic() {
                         var greenLine = L.polyline([
                             [19.0544, 72.8402], [19.0760, 72.8777], [19.1136, 72.8697]
-                        ], { color: '#10B981', weight: 4, opacity: 0.8 }).addTo(map).bindPopup("Western Highway: Fast Flow (54 km/h)");
+                        ], { color: '#10B981', weight: 4, opacity: 0.6 }).addTo(map).bindPopup("Western Highway: Fast Flow (54 km/h)");
 
                         var yellowLine = L.polyline([
                             [19.0760, 72.8777], [19.0600, 72.8900], [19.0400, 72.9000]
-                        ], { color: '#F59E0B', weight: 4, opacity: 0.8 }).addTo(map).bindPopup("Eastern Freeway: Moderate (38 km/h)");
+                        ], { color: '#F59E0B', weight: 4, opacity: 0.6 }).addTo(map).bindPopup("Eastern Freeway: Moderate (38 km/h)");
 
                         trafficLines = [greenLine, yellowLine];
                     }
@@ -231,41 +242,49 @@ class LiveMapFragment : Fragment() {
                         userMarker.setLatLng([lat, lon]);
                     };
 
-                    window.drawGreenRoute = function(coords, distKm, timeMin, co2Saved, destTitle) {
+                    window.drawDualRoutes = function(greenCoords, normalCoords, destTitle, greenSummary, normalSummary) {
                         routeLayerGroup.clearLayers();
 
-                        // Outer glowing green polyline
-                        var glowLine = L.polyline(coords, {
+                        // 🔴 1. Normal / Petrol Cab Polyline (Red/Coral with dashed accent)
+                        var normalLine = L.polyline(normalCoords, {
+                            color: '#EF4444',
+                            weight: 5,
+                            opacity: 0.85,
+                            dashArray: '8, 8',
+                            lineCap: 'round'
+                        }).bindPopup("<b>🚗 Normal Route (Petrol Cab)</b><br>" + normalSummary);
+
+                        // 🟢 2. Green & Inclusive Path (Glowing Neon Emerald Polyline)
+                        var greenGlow = L.polyline(greenCoords, {
                             color: '#059669',
-                            weight: 9,
-                            opacity: 0.45,
-                            lineCap: 'round',
-                            lineJoin: 'round'
+                            weight: 10,
+                            opacity: 0.4,
+                            lineCap: 'round'
                         });
 
-                        // Vibrant inner neon emerald polyline
-                        var mainLine = L.polyline(coords, {
+                        var greenLine = L.polyline(greenCoords, {
                             color: '#10B981',
                             weight: 5,
-                            opacity: 0.95,
-                            lineCap: 'round',
-                            lineJoin: 'round'
-                        });
+                            opacity: 1.0,
+                            lineCap: 'round'
+                        }).bindPopup("<b>🌿 Green Path (Electric Transit)</b><br>" + greenSummary);
 
-                        routeLayerGroup.addLayer(glowLine);
-                        routeLayerGroup.addLayer(mainLine);
+                        routeLayerGroup.addLayer(normalLine);
+                        routeLayerGroup.addLayer(greenGlow);
+                        routeLayerGroup.addLayer(greenLine);
 
-                        if (coords.length > 0) {
-                            var destCoord = coords[coords.length - 1];
+                        if (greenCoords.length > 0) {
+                            var destCoord = greenCoords[greenCoords.length - 1];
                             var destMarker = L.marker(destCoord, {
                                 icon: L.divIcon({ className: 'dest-pin', iconSize: [24, 24], iconAnchor: [12, 12] })
-                            }).bindPopup("<b>🌿 " + destTitle + "</b><br>" + distKm + " km • " + timeMin + " mins<br><span style='color:#10B981;font-weight:bold;'>-" + co2Saved + " CO2e saved vs car</span>");
+                            }).bindPopup("<b>Destination: " + destTitle + "</b><br><span style='color:#10B981;font-weight:bold;'>Green Path: " + greenSummary + "</span><br><span style='color:#EF4444;'>Standard: " + normalSummary + "</span>");
                             
                             routeLayerGroup.addLayer(destMarker);
                             destMarker.openPopup();
                         }
 
-                        map.fitBounds(mainLine.getBounds(), { padding: [50, 50], maxZoom: 15 });
+                        var group = L.featureGroup([normalLine, greenLine]);
+                        map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 15 });
                     };
 
                     window.toggleTrafficOverlay = function(show) {
@@ -286,7 +305,7 @@ class LiveMapFragment : Fragment() {
             val name = result.place.name ?: "Destination"
             etMapSearch.setText(name)
             val coord = result.place.coordinate
-            calculateAndDrawGreenRoute(coord.latitude, coord.longitude, name)
+            calculateAndDrawDualRoutes(coord.latitude, coord.longitude, name)
         }
         rvSearchResults.adapter = searchAdapter
 
@@ -347,36 +366,41 @@ class LiveMapFragment : Fragment() {
         val q = query.lowercase()
         when {
             q.contains("hospital") || q.contains("clinic") || q.contains("fortis") -> {
-                calculateAndDrawGreenRoute(19.1728, 72.9564, "Fortis Hospital Mulund")
+                calculateAndDrawDualRoutes(19.1728, 72.9564, "Fortis Hospital Mulund")
             }
             q.contains("jupiter") || q.contains("thane") -> {
-                calculateAndDrawGreenRoute(19.2050, 72.9734, "Jupiter Hospital Thane")
+                calculateAndDrawDualRoutes(19.2050, 72.9734, "Jupiter Hospital Thane")
             }
             q.contains("ev") || q.contains("charge") -> {
-                calculateAndDrawGreenRoute(19.1200, 72.9050, "Powai EV Fast Charging Hub")
+                calculateAndDrawDualRoutes(19.1200, 72.9050, "Powai EV Fast Charging Hub")
             }
             q.contains("csmt") || q.contains("south") -> {
-                calculateAndDrawGreenRoute(18.9400, 72.8353, "CSMT South Mumbai")
+                calculateAndDrawDualRoutes(18.9400, 72.8353, "CSMT South Mumbai")
             }
             else -> {
-                calculateAndDrawGreenRoute(19.0760, 72.8777, query)
+                calculateAndDrawDualRoutes(19.0760, 72.8777, query)
             }
         }
-        Toast.makeText(context, "Calculating Green Route to $query...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Comparing Dual Routes to $query...", Toast.LENGTH_SHORT).show()
     }
 
-    private fun calculateAndDrawGreenRoute(destLat: Double, destLon: Double, destName: String) {
-        tvLiveStatusTitle.text = "Routing to $destName..."
-        tvLiveStatusSubtitle.text = "Querying live TomTom Green Corridor..."
+    private fun calculateAndDrawDualRoutes(destLat: Double, destLon: Double, destName: String) {
+        tvLiveStatusTitle.text = "Comparing Routes to $destName"
+        tvLiveStatusSubtitle.text = "Querying live TomTom Green Corridor vs Standard Cab..."
 
         lifecycleScope.launch(Dispatchers.IO) {
             val apiKey = BuildConfig.TOMTOM_API_KEY
             val url = "https://api.tomtom.com/routing/1/calculateRoute/$currentLat,$currentLon:$destLat,$destLon/json?key=$apiKey"
 
-            var pointsArray = JSONArray()
+            var greenPoints = JSONArray()
+            var normalPoints = JSONArray()
             var distKm = 0.0
-            var timeMin = 0
-            var co2Grams = 0
+            var greenTimeMin = 0
+            var normalTimeMin = 0
+            var greenCo2 = 45
+            var normalCo2 = 480
+            var greenFare = 30
+            var normalFare = 240
 
             try {
                 val req = Request.Builder().url(url).get().build()
@@ -393,8 +417,12 @@ class LiveMapFragment : Fragment() {
                                 val travelSecs = summary?.optInt("travelTimeInSeconds", 0) ?: 0
 
                                 distKm = lengthMeters / 1000.0
-                                timeMin = travelSecs / 60
-                                co2Grams = (distKm * 28.0).toInt()
+                                normalTimeMin = travelSecs / 60
+                                greenTimeMin = (normalTimeMin * 0.7).toInt().coerceAtLeast(12)
+                                normalCo2 = (distKm * 28.0).toInt().coerceAtLeast(300)
+                                greenCo2 = (normalCo2 * 0.1).toInt().coerceAtLeast(40)
+                                normalFare = (distKm * 15.0).toInt().coerceAtLeast(150)
+                                greenFare = 30
 
                                 val legs = firstRoute.optJSONArray("legs")
                                 if (legs != null && legs.length() > 0) {
@@ -404,11 +432,14 @@ class LiveMapFragment : Fragment() {
                                             val p = points.getJSONObject(i)
                                             val lat = p.getDouble("latitude")
                                             val lon = p.getDouble("longitude")
-                                            val coordArr = JSONArray().apply {
-                                                put(lat)
-                                                put(lon)
-                                            }
-                                            pointsArray.put(coordArr)
+                                            
+                                            // Green Path follows the exact route
+                                            greenPoints.put(JSONArray().apply { put(lat); put(lon) })
+
+                                            // Normal arterial route has traffic offset simulation
+                                            val offsetLat = lat + if (i % 2 == 0) 0.002 else -0.001
+                                            val offsetLon = lon + if (i % 2 == 0) -0.002 else 0.0015
+                                            normalPoints.put(JSONArray().apply { put(offsetLat); put(offsetLon) })
                                         }
                                     }
                                 }
@@ -420,59 +451,86 @@ class LiveMapFragment : Fragment() {
                 // Fallback geometry
             }
 
-            if (pointsArray.length() == 0) {
-                // Geodesic curve fallback
-                val midLat = (currentLat + destLat) / 2.0 + 0.005
-                val midLon = (currentLon + destLon) / 2.0 - 0.003
-                pointsArray = JSONArray().apply {
+            if (greenPoints.length() == 0) {
+                // Geodesic curve for Green path
+                val midLat1 = (currentLat + destLat) / 2.0 + 0.004
+                val midLon1 = (currentLon + destLon) / 2.0 - 0.003
+                greenPoints = JSONArray().apply {
                     put(JSONArray().apply { put(currentLat); put(currentLon) })
-                    put(JSONArray().apply { put(midLat); put(midLon) })
+                    put(JSONArray().apply { put(midLat1); put(midLon1) })
                     put(JSONArray().apply { put(destLat); put(destLon) })
                 }
-                distKm = 4.2
-                timeMin = 14
-                co2Grams = 120
+
+                // Congested arterial curve for Normal path
+                val midLat2 = (currentLat + destLat) / 2.0 - 0.005
+                val midLon2 = (currentLon + destLon) / 2.0 + 0.006
+                normalPoints = JSONArray().apply {
+                    put(JSONArray().apply { put(currentLat); put(currentLon) })
+                    put(JSONArray().apply { put(midLat2); put(midLon2) })
+                    put(JSONArray().apply { put(destLat); put(destLon) })
+                }
+
+                distKm = 14.8
+                greenTimeMin = 22
+                normalTimeMin = 36
+                greenCo2 = 45
+                normalCo2 = 480
+                greenFare = 30
+                normalFare = 240
             }
 
+            val savedCo2 = normalCo2 - greenCo2
             val distFormatted = String.format(Locale.US, "%.1f", distKm)
-            val co2Formatted = "${co2Grams}g"
+            val greenSummary = "$greenTimeMin mins • ₹$greenFare • ${greenCo2}g CO2"
+            val normalSummary = "$normalTimeMin mins • ₹$normalFare • ${normalCo2}g CO2"
 
             withContext(Dispatchers.Main) {
-                tvLiveStatusTitle.text = "🌿 Green Path: $destName"
-                tvLiveStatusSubtitle.text = "$distFormatted km • $timeMin mins • Avoided $co2Formatted CO2e via Electric Transit"
-                val js = "window.drawGreenRoute($pointsArray, '$distFormatted', '$timeMin', '$co2Formatted', '${destName.replace("'", "")}');"
+                tvLiveStatusTitle.text = "Dual Routes: $destName ($distFormatted km)"
+                tvLiveStatusSubtitle.text = "🟢 Green Metro/Electric vs 🔴 Normal Petrol Cab"
+                tvNetSavingsBadge.text = "-${savedCo2}g CO2 (91% Cleaner)"
+
+                tvGreenMetrics.text = "$greenTimeMin mins • ₹$greenFare"
+                tvGreenCarbon.text = "${greenCo2}g CO2e • Step-Free"
+
+                tvNormalMetrics.text = "$normalTimeMin mins • ₹$normalFare"
+                tvNormalCarbon.text = "${normalCo2}g CO2e • Congested"
+
+                val js = "window.drawDualRoutes($greenPoints, $normalPoints, '${destName.replace("'", "")}', '$greenSummary', '$normalSummary');"
                 mapWebView.evaluateJavascript(js, null)
             }
         }
     }
 
     private fun setupChips(view: View) {
+        view.findViewById<Chip>(R.id.chipCompareDual).setOnClickListener {
+            calculateAndDrawDualRoutes(19.0760, 72.8777, "BKC to CSMT Transit Corridor")
+            Toast.makeText(context, "Comparing Green Path vs Normal Road Route", Toast.LENGTH_SHORT).show()
+        }
+
         view.findViewById<Chip>(R.id.chipHospitals).setOnClickListener {
-            calculateAndDrawGreenRoute(19.1728, 72.9564, "Fortis Hospital Mulund (Emergency)")
-            Toast.makeText(context, "Green Emergency Route to Fortis Mulund", Toast.LENGTH_SHORT).show()
+            calculateAndDrawDualRoutes(19.1728, 72.9564, "Fortis Hospital Mulund (Emergency)")
+            Toast.makeText(context, "Dual Route to Fortis Mulund", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipTraffic).setOnClickListener {
             isTrafficEnabled = !isTrafficEnabled
             mapWebView.evaluateJavascript("window.toggleTrafficOverlay($isTrafficEnabled);", null)
-            tvLiveStatusTitle.text = if (isTrafficEnabled) "Live Traffic Active" else "Traffic Overlay Hidden"
-            tvLiveStatusSubtitle.text = "Real-time congestion tracking • Average speed 42 km/h"
             Toast.makeText(context, "Traffic Overlay: ${if (isTrafficEnabled) "ON" else "OFF"}", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipIncidents).setOnClickListener {
-            calculateAndDrawGreenRoute(19.1820, 72.9600, "LBS Marg Obstruction Detour")
+            calculateAndDrawDualRoutes(19.1820, 72.9600, "LBS Marg Obstruction Detour")
             Toast.makeText(context, "Detouring Active Road Hazard", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipEco).setOnClickListener {
-            calculateAndDrawGreenRoute(19.1200, 72.9050, "Powai Green Mobility Corridor")
+            calculateAndDrawDualRoutes(19.1200, 72.9050, "Powai Green Mobility Corridor")
             Toast.makeText(context, "Low-Carbon Green Corridor Plotted", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<Chip>(R.id.chipEV).setOnClickListener {
-            calculateAndDrawGreenRoute(19.2050, 72.9734, "Thane Supercharging Station (60kW)")
-            Toast.makeText(context, "Green Route to EV Supercharger", Toast.LENGTH_SHORT).show()
+            calculateAndDrawDualRoutes(19.2050, 72.9734, "Thane Supercharging Station (60kW)")
+            Toast.makeText(context, "Dual Route to EV Supercharger", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -490,12 +548,8 @@ class LiveMapFragment : Fragment() {
         }
 
         fabReportHazard.setOnClickListener {
-            calculateAndDrawGreenRoute(19.1820, 72.9600, "Active Hazard Detour")
+            calculateAndDrawDualRoutes(19.1820, 72.9600, "Active Hazard Detour")
             Toast.makeText(context, "Emergency Green Hazard Detour Plotted!", Toast.LENGTH_SHORT).show()
-        }
-
-        btnAskYatri.setOnClickListener {
-            (activity as? MainActivity)?.switchToTab(3)
         }
     }
 

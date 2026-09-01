@@ -62,7 +62,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@null"
-                    android:hint="Search places, addresses, facilities..."
+                    android:hint="Search places, facilities, destinations..."
                     android:imeOptions="actionSearch"
                     android:inputType="text"
                     android:paddingHorizontal="12dp"
@@ -94,6 +94,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:singleLine="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipCompareDual"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Compare Dual Routes"
+                    android:checked="true"
+                    app:chipIcon="@drawable/ic_traffic"
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipHospitals"
@@ -180,7 +194,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:layout_marginBottom="165dp"
+        android:layout_marginBottom="240dp"
         android:layout_marginEnd="16dp"
         android:orientation="vertical">
 
@@ -220,60 +234,149 @@
 
     </LinearLayout>
 
-    <!-- Bottom City Intelligence Card -->
+    <!-- Bottom Dual Path Side-by-Side Comparison HUD Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardCityStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="76dp"
         style="@style/Widget.Material3.CardView.Filled"
         app:cardCornerRadius="24dp"
         app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
-        app:strokeWidth="0dp">
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorPrimary">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="18dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <!-- Route Header Title -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:id="@+id/tvLiveStatusTitle"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="City Pulse: Smooth Flow"
+                    android:layout_weight="1"
+                    android:text="Dual Route Comparison"
                     android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvLiveStatusSubtitle"
+                    android:id="@+id/tvNetSavingsBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Average speed: 42 km/h • AQI: 86"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:text="-435g CO2 (91% Cleaner)"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAskYatri"
-                style="@style/Widget.Material3.Button.TonalButton"
+            <TextView
+                android:id="@+id/tvLiveStatusSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ask AI"
-                app:cornerRadius="16dp"
-                app:icon="@drawable/ic_yatri_ai" />
+                android:layout_marginTop="2dp"
+                android:text="Comparing Green Electric Corridor vs Standard Petrol Cab"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <!-- Side-by-Side Comparison Matrix -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <!-- 🟢 Green Route Column -->
+                <LinearLayout
+                    android:id="@+id/layoutGreenRouteCard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_rounded_card_green"
+                    android:padding="10dp"
+                    android:layout_marginEnd="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🌿 GREEN PATH"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="#10B981"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvGreenMetrics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="22 mins • ₹30"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvGreenCarbon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="45g CO2e • Step-Free"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="#10B981" />
+
+                </LinearLayout>
+
+                <!-- 🔴 Normal Route Column -->
+                <LinearLayout
+                    android:id="@+id/layoutNormalRouteCard"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_rounded_card_red"
+                    android:padding="10dp"
+                    android:layout_marginStart="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🚗 STANDARD PATH"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="#EF4444"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvNormalMetrics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="34 mins • ₹240"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvNormalCarbon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="480g CO2e • High Congestion"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="#EF4444" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
