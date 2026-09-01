@@ -30,7 +30,7 @@
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textAlignment="center"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="48dp"/>
+        android:layout_marginBottom="40dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCreateAccount"
@@ -52,6 +52,17 @@
         android:textStyle="bold"
         style="@style/Widget.Material3.Button.TonalButton"
         app:cornerRadius="20dp"
-        android:layout_marginTop="14dp"/>
+        android:layout_marginTop="12dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDemoDirect"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="1-Tap Demo / Judge Access"
+        android:textStyle="bold"
+        app:icon="@drawable/ic_confetti"
+        style="@style/Widget.Material3.Button.TextButton"
+        app:cornerRadius="20dp"
+        android:layout_marginTop="8dp"/>
 
 </LinearLayout>

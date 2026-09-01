@@ -21,7 +21,22 @@ class LoginActivity : AppCompatActivity() {
         val emailEditText = findViewById<TextInputEditText>(R.id.emailEditText)
         val passwordEditText = findViewById<TextInputEditText>(R.id.passwordEditText)
         val loginButton = findViewById<MaterialButton>(R.id.loginButton)
+        val btnDemoLogin = findViewById<MaterialButton>(R.id.btnDemoLogin)
         val signUpPromptTextView = findViewById<TextView>(R.id.signUpPromptTextView)
+
+        fun performLogin(email: String) {
+            val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            prefs.edit()
+                .putString("user_email", email)
+                .putBoolean("is_logged_in", true)
+                .apply()
+
+            Toast.makeText(this, "Logged in as $email (Demo Mode Active)", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
 
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
@@ -40,11 +55,6 @@ class LoginActivity : AppCompatActivity() {
                           (email.contains("@") && password.length >= 6)
 
             if (isValid) {
-                prefs.edit()
-                    .putString("user_email", email)
-                    .putBoolean("is_logged_in", true)
-                    .apply()
-
                 lifecycleScope.launch {
                     try {
                         AuthManager.signIn(email, password)
@@ -52,12 +62,7 @@ class LoginActivity : AppCompatActivity() {
                         // Offline / demo fallback
                     }
                 }
-
-                Toast.makeText(this, "Logged in successfully!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
+                performLogin(email)
             } else {
                 MaterialAlertDialogBuilder(this)
                     .setTitle("Login Failed")
@@ -65,6 +70,12 @@ class LoginActivity : AppCompatActivity() {
                     .setPositiveButton("OK", null)
                     .show()
             }
+        }
+
+        btnDemoLogin.setOnClickListener {
+            emailEditText.setText("demo.traveler@urbanpulse.ai")
+            passwordEditText.setText("urbanpulse2026")
+            performLogin("demo.traveler@urbanpulse.ai")
         }
 
         signUpPromptTextView.setOnClickListener {
