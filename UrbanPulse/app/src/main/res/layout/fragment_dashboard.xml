@@ -143,6 +143,7 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="6dp"
                         android:text="Hotel Optimizer"
                         app:cornerRadius="14dp"
                         app:icon="@drawable/ic_digital_twin" />
@@ -154,9 +155,21 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginStart="4dp"
+                        android:layout_marginBottom="6dp"
                         android:text="Carbon Wallet"
                         app:cornerRadius="14dp"
                         app:icon="@drawable/ic_map" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnOpenItinerary"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnSpan="2"
+                        android:layout_columnWeight="2"
+                        android:text="AI Eco Itinerary Generator"
+                        app:cornerRadius="14dp"
+                        app:icon="@drawable/ic_confetti" />
 
                 </GridLayout>
 

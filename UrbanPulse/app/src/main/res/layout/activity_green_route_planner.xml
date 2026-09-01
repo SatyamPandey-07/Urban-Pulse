@@ -45,7 +45,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Multimodal Carbon &amp; Accessibility Comparison"
+                    android:text="Tradeoff Optimizer • Live Multimodal Carbon Matrix"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -53,7 +53,7 @@
 
         </LinearLayout>
 
-        <!-- Route Origin and Destination Card -->
+        <!-- Route Origin and Destination Custom Input Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -61,60 +61,155 @@
             app:cardCornerRadius="24dp"
             app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
             app:strokeWidth="0dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="14dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="18dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Origin: Bandra Kurla Complex (BKC)"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold" />
-
-                <View
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/inputLayoutOrigin"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="10dp"
-                    android:background="?attr/colorSurfaceVariant"
-                    android:alpha="0.3" />
-
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Destination: Chhatrapati Shivaji Terminus (CSMT)"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold" />
+                    android:hint="Origin / Start Point"
+                    app:boxCornerRadiusTopStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusBottomEnd="14dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etOrigin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Current GPS Location (Mulund / Thane)"
+                        android:inputType="textPostalAddress" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/inputLayoutDest"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Distance: 16.4 km • Transit Corridor Active"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:layout_marginTop="10dp"
+                    android:hint="Destination"
+                    app:boxCornerRadiusTopStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusBottomEnd="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDestination"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Chhatrapati Shivaji Maharaj Terminus (CSMT)"
+                        android:inputType="textPostalAddress" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRecalculateRoute"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Calculate Live Routes"
+                        app:cornerRadius="14dp"
+                        app:icon="@drawable/ic_traffic" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUseGps"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GPS Lock"
+                        android:layout_marginStart="6dp"
+                        app:icon="@drawable/ic_location_pin" />
+
+                </LinearLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Section Title -->
+        <!-- Tradeoff Optimizer Priority Filter -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Multimodal Route Options"
+            android:text="Tradeoff Optimization Priority"
+            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupTradeoff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTradeoffEco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lowest Carbon Impact"
+                    android:checked="true"
+                    style="@style/Widget.Material3.Chip.Filter" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTradeoffStepFree"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100% Step-Free Accessible"
+                    style="@style/Widget.Material3.Chip.Filter" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTradeoffFastest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fastest Travel Time"
+                    style="@style/Widget.Material3.Chip.Filter" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTradeoffBudget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lowest Cost"
+                    style="@style/Widget.Material3.Chip.Filter" />
+
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <!-- Ranked Options Container -->
+        <TextView
+            android:id="@+id/tvRankedHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ranked Multimodal Options (Sorted by Lowest Carbon)"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textColor="?attr/colorOnSurface"
             android:textStyle="bold"
             android:layout_marginStart="8dp"
             android:layout_marginBottom="12dp" />
 
-        <!-- Option 1: Electric Metro (Recommended Green & Inclusive) -->
+        <!-- Option 1: Electric Metro -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardOptionMetro"
             android:layout_width="match_parent"
@@ -139,18 +234,20 @@
                     android:gravity="center_vertical">
 
                     <TextView
+                        android:id="@+id/tvMetroTitle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Metro Line 3 (Aqua Line)"
+                        android:text="Rapid Electric Transit (Metro)"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                         android:textColor="?attr/colorOnSurface"
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvMetroBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="LOWEST IMPACT"
+                        android:text="#1 BEST MATCH"
                         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold" />
@@ -158,6 +255,7 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tvMetroMetrics"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
@@ -166,25 +264,27 @@
                     android:textColor="?attr/colorOnSurface" />
 
                 <TextView
+                    android:id="@+id/tvMetroAccessibility"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Accessibility: 100% Step-Free • Tactile Paths • Level Boarding"
+                    android:text="Accessibility: 100% Step-Free • Tactile Paving • Level Boarding"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorPrimary" />
 
                 <TextView
+                    android:id="@+id/tvMetroSavings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="CO2 Saved vs Petrol Cab: -435g (91% cleaner)"
+                    android:text="CO2 Avoided vs Petrol Cab: -435g (91% cleaner)"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Option 2: Electric Bus (BEST) -->
+        <!-- Option 2: Electric Bus -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardOptionBus"
             android:layout_width="match_parent"
@@ -204,7 +304,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="BEST Electric AC Bus (Route C-505)"
+                    android:text="BEST Electric AC Low-Floor Bus"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold" />
@@ -221,7 +321,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Accessibility: Low-floor entry with hydraulic wheelchair ramp"
+                    android:text="Accessibility: Low-floor hydraulic wheelchair ramp"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorPrimary" />
 
@@ -229,14 +329,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="CO2 Saved vs Petrol Cab: -410g (85% cleaner)"
+                    android:text="CO2 Avoided vs Petrol Cab: -410g (85% cleaner)"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Option 3: EV Cab Shared -->
+        <!-- Option 3: Shared EV Cab -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardOptionEvCab"
             android:layout_width="match_parent"
@@ -273,7 +373,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Accessibility: Direct curb pickup, folding wheelchair trunk space"
+                    android:text="Accessibility: Curbside door-to-door, folding wheelchair trunk"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -281,14 +381,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="CO2 Saved vs Petrol Cab: -360g (75% cleaner)"
+                    android:text="CO2 Avoided vs Petrol Cab: -360g (75% cleaner)"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Option 4: Conventional Petrol Taxi -->
+        <!-- Option 4: Petrol Taxi Baseline -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardOptionTaxi"
             android:layout_width="match_parent"
@@ -308,7 +408,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Conventional Petrol Taxi"
+                    android:text="Conventional Petrol Cab"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold" />
@@ -325,7 +425,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Accessibility: Standard curbside sedan"
+                    android:text="Accessibility: Standard sedan curbside"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -333,7 +433,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Baseline emissions reference"
+                    android:text="Baseline high-emission reference"
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -345,7 +445,7 @@
             android:id="@+id/btnConfirmGreenRoute"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Start Green Metro Journey (+40 Points)"
+            android:text="Confirm Green Journey (+40 Carbon Credits)"
             app:cornerRadius="20dp"
             style="@style/Widget.Material3.Button"/>
 

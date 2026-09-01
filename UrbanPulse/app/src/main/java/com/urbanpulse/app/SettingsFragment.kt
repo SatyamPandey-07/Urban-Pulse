@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.meenakshi.urbanpulse.*
 
 enum class SettingType {
     ACCESSIBILITY_PROFILE,
@@ -22,6 +23,7 @@ enum class SettingType {
     HOSPITALITY_EXPLORER,
     ROUTE_PLANNER,
     HOTEL_OPTIMIZER,
+    ITINERARY_PLANNER,
     APPEARANCE,
     ACCENT_COLOR,
     LOCATION,
@@ -65,8 +67,9 @@ class SettingsFragment : Fragment() {
             SettingItem("Inclusive Accessibility Profile", "Wheelchair: $wheelchairStatus, Visual & Hearing alerts", R.drawable.ic_settings, "#D3E3FD", SettingType.ACCESSIBILITY_PROFILE),
             SettingItem("Green Travel Passport", "142.8 kg CO2 saved • Gold Explorer", R.drawable.ic_map, "#C3E7A1", SettingType.CARBON_WALLET),
             SettingItem("Sustainable & Inclusive Stays", "Verified solar hotels, zero-waste resorts & accessibility audits", R.drawable.ic_dashboard, "#A7F3D0", SettingType.HOSPITALITY_EXPLORER),
-            SettingItem("Multimodal Green Route Planner", "Compare Metro, EV Cab, and bus carbon emissions", R.drawable.ic_traffic, "#FDE293", SettingType.ROUTE_PLANNER),
-            SettingItem("Hotel Resource & Waste Hub", "B2B Energy, Water & AI Kitchen surplus diversion", R.drawable.ic_digital_twin, "#FBCFE8", SettingType.HOTEL_OPTIMIZER),
+            SettingItem("Multimodal Green Route Planner", "Tradeoff optimizer for Metro, EV Cab, and bus emissions", R.drawable.ic_traffic, "#FDE293", SettingType.ROUTE_PLANNER),
+            SettingItem("AI Eco & Inclusive Itinerary", "Personalized step-free & low-carbon day itineraries", R.drawable.ic_confetti, "#FED7AA", SettingType.ITINERARY_PLANNER),
+            SettingItem("Hotel Resource & Waste Hub", "B2B Energy, Water, food surplus & ESG compliance", R.drawable.ic_digital_twin, "#FBCFE8", SettingType.HOTEL_OPTIMIZER),
             SettingItem("Appearance & Theme", "System Default Dark Surface", R.drawable.ic_light_mode, "#FDE293", SettingType.APPEARANCE),
             SettingItem("Default City Hub", "Mumbai, Maharashtra, India", R.drawable.ic_location_pin, "#D3E3FD", SettingType.LOCATION),
             SettingItem("Measurement Units", "Metric (°C, km/h, kg CO2e)", R.drawable.ic_dashboard, "#F8D7DA", SettingType.UNITS),
@@ -112,6 +115,7 @@ class SettingsFragment : Fragment() {
             SettingType.CARBON_WALLET -> startActivity(Intent(ctx, CarbonWalletActivity::class.java))
             SettingType.HOSPITALITY_EXPLORER -> startActivity(Intent(ctx, HospitalityActivity::class.java))
             SettingType.ROUTE_PLANNER -> startActivity(Intent(ctx, GreenRoutePlannerActivity::class.java))
+            SettingType.ITINERARY_PLANNER -> startActivity(Intent(ctx, ItineraryActivity::class.java))
             SettingType.HOTEL_OPTIMIZER -> startActivity(Intent(ctx, HotelOptimizerActivity::class.java))
             else -> Toast.makeText(ctx, "${item.title} configuration active", Toast.LENGTH_SHORT).show()
         }

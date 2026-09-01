@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.meenakshi.urbanpulse.*
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -49,6 +50,10 @@ class DashboardFragment : Fragment() {
 
         view.findViewById<MaterialButton>(R.id.btnOpenCarbonWallet)?.setOnClickListener {
             startActivity(Intent(activity, CarbonWalletActivity::class.java))
+        }
+
+        view.findViewById<MaterialButton>(R.id.btnOpenItinerary)?.setOnClickListener {
+            startActivity(Intent(activity, ItineraryActivity::class.java))
         }
 
         setupAirQualityChart(view)
