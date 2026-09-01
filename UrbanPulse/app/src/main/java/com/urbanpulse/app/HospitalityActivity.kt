@@ -27,7 +27,7 @@ class HospitalityActivity : BaseActivity() {
     private lateinit var chipGroup: ChipGroup
 
     private val viewModel: HospitalityViewModel by lazy {
-        ViewModelProvider(this)[HospitalityViewModel::class.java]
+        ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))[HospitalityViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
