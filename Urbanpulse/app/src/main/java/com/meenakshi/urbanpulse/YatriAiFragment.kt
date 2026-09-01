@@ -17,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -71,7 +70,7 @@ class YatriAiFragment : Fragment() {
         }
 
         if (messages.isEmpty()) {
-            addAiMessage("👋 Hello! I am **Yatri AI**, your intelligent urban mobility & safety assistant.\n\nAsk me about:\n• 🏥 Nearest Hospitals & Clinics\n• 🚦 Live Traffic & Road Congestion\n• 🌬️ Air Quality (AQI) & Weather\n• 🌿 Low-carbon Eco Routes\n• ⚠️ Hazard reporting & SOS support")
+            addAiMessage("Hello. I am Yatri AI, your intelligent urban mobility and safety assistant.\n\nAsk me about:\n- Nearest Hospitals and Healthcare Centers\n- Live Traffic and Arterial Congestion\n- Air Quality Index (AQI) and Weather\n- Low-emission Eco Routes\n- Hazard reporting and Emergency SOS")
         }
     }
 
@@ -135,13 +134,13 @@ class YatriAiFragment : Fragment() {
             sendMessage("What is the air quality index and weather today?")
         }
         view.findViewById<Chip>(R.id.chipSuggestEco).setOnClickListener {
-            sendMessage("Give me an eco-friendly route with low CO2 emissions")
+            sendMessage("Give me an eco-friendly route with low carbon emissions")
         }
         view.findViewById<Chip>(R.id.chipSuggestHazard).setOnClickListener {
             sendMessage("I want to report a road hazard")
         }
         view.findViewById<Chip>(R.id.chipSuggestSos).setOnClickListener {
-            sendMessage("Help, I need emergency assistance!")
+            sendMessage("I need emergency assistance")
         }
     }
 
@@ -179,12 +178,12 @@ class YatriAiFragment : Fragment() {
                     val result = model.generateContent(prompt)
                     answer = result.text
                 } catch (e: Exception) {
-                    // Fall back to smart local intelligence
+                    // Fall back to smart local engine
                 }
             }
 
             if (answer.isNullOrEmpty()) {
-                delay(600) // Realistic typing feel
+                delay(500)
                 answer = getSmartAssistantResponse(prompt)
             }
 
@@ -198,56 +197,57 @@ class YatriAiFragment : Fragment() {
 
         return when {
             q.contains("hospital") || q.contains("doctor") || q.contains("medical") || q.contains("clinic") -> {
-                "🏥 **Nearby Medical Facilities Found:**\n\n" +
-                "1. **Lilavati Hospital & Research Centre** (1.8 km)\n   • 24/7 Emergency & Trauma Care\n   • Tel: +91 22 2675 1000\n\n" +
-                "2. **Hinduja Healthcare Surgical** (2.6 km)\n   • Multi-specialty & Urgent Care\n   • Tel: +91 22 2445 1515\n\n" +
-                "3. **KEM Hospital & Medical Centre** (4.1 km)\n   • Government Trauma Center\n\n" +
-                "💡 *Tip: Tap on the Medical Directory in Settings or Map to start instant navigation or direct dial.*"
+                "Nearby Medical Facilities:\n\n" +
+                "1. Lilavati Hospital & Research Centre (1.8 km)\n   • 24/7 Emergency & Trauma Care\n   • Tel: +91 22 2675 1000\n\n" +
+                "2. Hinduja Healthcare Surgical (2.6 km)\n   • Multi-specialty Urgent Care\n   • Tel: +91 22 2445 1515\n\n" +
+                "3. KEM Hospital & Medical Centre (4.1 km)\n   • Trauma Care Center\n\n" +
+                "Direct navigation and dialing options are available via the Map and Medical Directory."
             }
             q.contains("traffic") || q.contains("congestion") || q.contains("jam") || q.contains("road") -> {
-                "🚦 **Live City Traffic Report:**\n\n" +
-                "• **Western Express Highway**: Moderate Flow (36 km/h) • Delay: ~4 mins near Santacruz\n" +
-                "• **Eastern Freeway**: Clear / Fast Flow (58 km/h)\n" +
-                "• **Bandra-Worli Sea Link**: Smooth Flow (70 km/h)\n" +
-                "• **SV Road**: Heavy near Junction • Suggested detour via Link Road.\n\n" +
-                "🌿 *Eco suggestion: Switching to Eastern Freeway saves 180g of carbon emissions.*"
+                "Live City Traffic Report:\n\n" +
+                "- Western Express Highway: Moderate Flow (36 km/h) • Delay: ~4 mins near Santacruz\n" +
+                "- Eastern Freeway: Clear / Fast Flow (58 km/h)\n" +
+                "- Bandra-Worli Sea Link: Smooth Flow (70 km/h)\n" +
+                "- SV Road: Heavy Congestion near Junction • Recommended detour via Link Road.\n\n" +
+                "Eco suggestion: Switching to Eastern Freeway reduces carbon emissions by ~180g."
             }
             q.contains("aqi") || q.contains("air") || q.contains("pollution") || q.contains("weather") -> {
-                "🌬️ **Air Quality & Weather Matrix:**\n\n" +
-                "• **Current AQI**: 136 *(Moderate / Unhealthy for sensitive groups)*\n" +
-                "• **Main Pollutant**: PM2.5 (48.2 µg/m³)\n" +
-                "• **Weather**: 28°C • Partly Cloudy • Humidity 68%\n\n" +
-                "🛡️ **Health Recommendation**: Sensitive individuals and runners are advised to wear a mask during peak traffic hours (5 PM - 8 PM)."
+                "Air Quality & Weather Status:\n\n" +
+                "- Current AQI: 136 (Moderate / Unhealthy for sensitive groups)\n" +
+                "- Dominant Pollutant: PM2.5 (48.2 µg/m³)\n" +
+                "- Weather: 28°C • Partly Cloudy • Humidity 68%\n\n" +
+                "Health Recommendation: Sensitive individuals and outdoor runners are advised to wear an N95 mask during peak traffic hours."
             }
             q.contains("eco") || q.contains("green") || q.contains("carbon") || q.contains("co2") || q.contains("cycle") -> {
-                "🌿 **Eco-Friendly Route Analysis:**\n\n" +
-                "• **Optimal Route**: Via Coastal Promenade & Metro Corridor\n" +
-                "• **CO2 Reduction**: ~320g saved vs idling in highway traffic\n" +
-                "• **Rewards**: You will earn **+35 PULSE coins** for completing this route by public transit or EV!\n\n" +
-                "🚴 *A public cycle stand is available 150m from your current position.*"
+                "Eco-Friendly Route Analysis:\n\n" +
+                "- Optimal Route: Via Coastal Promenade & Metro Corridor\n" +
+                "- Estimated Emission Savings: ~320g CO2 vs idling in traffic\n" +
+                "- Rewards: +35 PULSE points upon completion via transit or EV.\n\n" +
+                "A public bicycle docking station is located 150m from your current position."
             }
             q.contains("hazard") || q.contains("pothole") || q.contains("accident") || q.contains("report") -> {
-                "⚠️ **Urban Hazard Reporting:**\n\n" +
-                "To report a pothole, road blockage, fallen tree, or streetlight issue:\n" +
-                "1. Tap the **Report Hazard** button or select **Incident Reporting**.\n" +
-                "2. Pin your current GPS location.\n" +
-                "3. Attach a photo and submit — verified reports earn **+50 XP** and update the live city map for all citizens!"
+                "Urban Hazard Reporting:\n\n" +
+                "To report a road blockage, pothole, or infrastructure issue:\n" +
+                "1. Select the Report Hazard option or tap Incident Reporting.\n" +
+                "2. Tag your current GPS location.\n" +
+                "3. Attach a photo and submit — verified reports update the city map for all citizens and award +50 XP."
             }
             q.contains("sos") || q.contains("emergency") || q.contains("help") || q.contains("police") || q.contains("danger") -> {
-                "🚨 **EMERGENCY ASSISTANCE ACTIVE:**\n\n" +
-                "• **Police Helpline**: 112 / 100\n" +
-                "• **Ambulance Emergency**: 108 / 102\n" +
-                "• **Women Helpline**: 1091\n\n" +
-                "Tap the **SOS** button on the top right at any time to instantly broadcast your real-time GPS coordinates and trigger automated SMS alerts to your emergency contacts!"
+                "Emergency Assistance Helplines:\n\n" +
+                "- National Emergency Helpline: 112\n" +
+                "- Police Control: 100\n" +
+                "- Ambulance Services: 108 / 102\n" +
+                "- Women Safety Helpline: 1091\n\n" +
+                "Tap the SOS button in the top navigation bar at any time to broadcast your real-time coordinates and send SMS alerts to emergency contacts."
             }
             q.contains("hi") || q.contains("hello") || q.contains("hey") -> {
-                "Hello! 👋 I am ready to guide your commute. What would you like to check — Live Map traffic, nearest hospital, or air quality index?"
+                "Hello. I am ready to guide your commute. What would you like to check — live traffic, nearest healthcare facility, or air quality index?"
             }
             else -> {
-                "I have analyzed your query for **'$input'**.\n\n" +
-                "• **Live Location Status**: Mumbai City Metropolitan Area\n" +
-                "• **Commute Recommendation**: Road conditions are currently optimal. No critical road closures detected on major arterial corridors.\n\n" +
-                "Feel free to ask me for specific directions, EV charging hubs, emergency clinics, or eco-friendly routes!"
+                "Analysis for \"$input\":\n\n" +
+                "- Current Urban Context: Mumbai Metropolitan Region\n" +
+                "- Status: Road conditions on major corridors are normal. No major route closures reported.\n\n" +
+                "Feel free to ask for directions, EV charging hubs, emergency clinics, or route optimization."
             }
         }
     }
