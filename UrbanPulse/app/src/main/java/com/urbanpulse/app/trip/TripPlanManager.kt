@@ -17,6 +17,12 @@ data class SelectedMobility(
     val distanceKm: Double
 )
 
+data class SelectedExperiences(
+    val names: List<String>,
+    val totalCarbonKg: Double,
+    val totalPriceRupees: Int
+)
+
 /**
  * Remembers the traveler's current stay + transport choice across screens so
  * a combined trip-level summary can be computed, instead of Hospitality and
@@ -67,6 +73,23 @@ object TripPlanManager {
             carbonGrams = prefs.getFloat("mobility_carbon_grams", 0f).toDouble(),
             fareRupees = prefs.getInt("mobility_fare", 0),
             distanceKm = prefs.getFloat("mobility_distance_km", 0f).toDouble()
+        )
+    }
+
+    fun setSelectedExperiences(experiences: SelectedExperiences) {
+        prefs.edit()
+            .putString("experience_names", experiences.names.joinToString("|"))
+            .putFloat("experience_total_carbon_kg", experiences.totalCarbonKg.toFloat())
+            .putInt("experience_total_price", experiences.totalPriceRupees)
+            .apply()
+    }
+
+    fun getSelectedExperiences(): SelectedExperiences? {
+        val namesJoined = prefs.getString("experience_names", null) ?: return null
+        return SelectedExperiences(
+            names = namesJoined.split("|"),
+            totalCarbonKg = prefs.getFloat("experience_total_carbon_kg", 0f).toDouble(),
+            totalPriceRupees = prefs.getInt("experience_total_price", 0)
         )
     }
 }
