@@ -50,7 +50,7 @@ surplus food shelter rescue dispatching, and 1-tap verifiable ESG compliance aud
 User Voice / Chat / UI Request
        │
        ▼
-LLM Intent Parser (Gemini 1.5 Flash)
+LLM Intent Parser (Gemini 1.5 Flash Function Calling)
        │
        ▼
 Evidence Matrix (Live GPS + TomTom MCP Tools + Open-Meteo Telemetry)

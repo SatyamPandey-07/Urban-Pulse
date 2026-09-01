@@ -9,28 +9,32 @@
 
 > **HackCelestial 3.0 — Mahatma Education Society’s Pillai University**  
 > **Challenge Track**: *Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality*  
-> **Team**: *UntrainedModels*
+> **Team**: *UntrainedModels*  
+> **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
 
 ---
 
 ## 📌 Executive Summary
 
-**UrbanPulse** is an AI-powered, evidence-grounded sustainability and accessibility platform that transforms how travelers make low-carbon, inclusive journeys and empowers hospitality businesses with real-time resource optimization and verified ESG compliance tools.
+**UrbanPulse** is an AI-powered, evidence-grounded sustainability and accessibility platform that bridges the gap between green, inclusive traveler mobility and hospitality business resource optimization.
 
-Unlike conventional travel aggregators that provide binary `"accessible: yes/no"` badges or vague `"eco-friendly"` claims, UrbanPulse integrates **live TomTom routing, geodesic proximity ranking, sensor-level Open-Meteo environmental telemetry, and multi-objective Pareto optimization** to deliver mathematically grounded travel decisions with zero hardcoded assumptions.
+Built natively for Android, UrbanPulse replaces static badges with **live TomTom routing, geodesic proximity ranking, sensor-level Open-Meteo environmental telemetry, and real-time multi-objective Pareto trade-off optimization**—delivering provable carbon avoidance and step-free travel recommendations with zero hardcoded assumptions.
+
+Simultaneously, the platform features a full **B2B Hotel Resource & ESG Compliance Engine** enabling hoteliers to forecast buffet food surplus, auto-dispatch meals to local shelters, automate HVAC eco setpoints, and generate signed LEED/BEE compliance audit sheets.
 
 ---
 
 ## 🎯 Problem Statement & Alignment
 
-| Challenge Dimension | Industry Pain Point | UrbanPulse Solution |
+| Challenge Dimension | Industry Pain Point | UrbanPulse Implementation |
 | :--- | :--- | :--- |
-| **Green Travel Recommendations** | Travelers lack transparent carbon footprint metrics across multimodal choices. | **Real-time Multimodal Carbon Estimator** comparing Metro Line 3, BEST Electric Bus, EV Rideshare, and Petrol Taxis with grams of $\text{CO}_2\text{e}$ avoided. |
-| **Accessible Mobility Planning** | Inaccurate accessibility info forces travelers with mobility/sensory needs into risky situations. | **Evidence-Grounded Accessibility Engine** with step-free rerouting, elevator telemetry, tactile paving indicators, and sensory alert preferences. |
-| **Dual Route Visualization** | Navigation apps show only standard traffic without contextual green alternatives. | **Simultaneous Dual-Route Canvas** rendering the Glowing Green Corridor (`#10B981`) and Standard Congested Corridor (`#EF4444`) with live difference HUD. |
-| **Sustainable Hospitality Discovery** | Hotels lack verified environmental accountability; travelers struggle to find genuine eco-resorts. | **Verified Eco-Stay Matrix** scoring solar energy mix, greywater recycling rate, zero single-use plastic, and verified step-free audits. |
-| **Hotel Resource & Waste Optimization (B2B)** | Hotels lack predictive tools to prevent kitchen surplus waste and optimize HVAC energy loads. | **B2B Hotel Resource Hub** with live occupancy sliders, AI buffet food surplus forecasting, 1-tap shelter dispatch (Feeding India/Roti Bank), and automated 26°C eco setpoint. |
+| **Green Travel Recommendations** | Travelers lack transparent, multimodal carbon footprint metrics across transit options. | **Multimodal Carbon Estimator** comparing Metro Line 3, BEST Electric Buses, Shared EV Cabs, and Petrol Taxis with grams of $\text{CO}_2\text{e}$ avoided. |
+| **Accessible Mobility Planning** | Inaccurate or binary accessibility data forces travelers with mobility/sensory needs into inaccessible situations. | **Evidence-Grounded Accessibility Matrix** with verified level boarding, elevator concourses, tactile paving indicators, and sensory alert preferences. |
+| **Simultaneous Dual-Route Map** | Maps show only standard car navigation without contextual green alternatives. | **Simultaneous Dual-Route Canvas** rendering the Glowing Green Corridor (`#10B981`) and Standard Congested Corridor (`#EF4444`) with live difference HUD. |
+| **Sustainable Hospitality Discovery** | Hotels lack verified environmental accountability; travelers struggle to find genuine eco-resorts. | **Verified Eco-Stay Directory** scoring solar energy mix, greywater recycling rate, zero single-use plastic, and verified step-free audits. |
+| **Hotel Resource Optimization (B2B)** | Hotels lack predictive tools to prevent kitchen surplus waste and optimize HVAC energy loads. | **B2B Hotel Resource Hub** with live occupancy sliders, AI buffet food surplus forecasting, 1-tap shelter dispatch (Feeding India/Roti Bank), and automated 26°C eco setpoint. |
 | **Verified ESG Compliance** | Preparing sustainability audit sheets for LEED/BEE star ratings is manual and tedious. | **1-Tap Dynamic ESG Audit Sheet Generator** exporting signed compliance reports via native Android share sheets (CSV/PDF). |
+| **Citizen Safety & Urban Resilience** | Travel apps lack emergency trauma grounding and real-time hazard detours. | **Integrated SOS Emergency Network**, 24/7 Level 1 Trauma calling, and citizen incident reporting feeds. |
 
 ---
 
@@ -38,8 +42,8 @@ Unlike conventional travel aggregators that provide binary `"accessible: yes/no"
 
 ```mermaid
 graph TD
-    A[Traveler / Hotelier] -->|Natural Language / UI Interaction| B[Presentation Layer: Jetpack Compose & Material 3]
-    B --> C[State & ViewModel Layer: Kotlin Coroutines + StateFlow]
+    A[Traveler / Hotelier] -->|Voice / Chat / UI Interaction| B[Presentation Layer: Jetpack Compose & Material 3]
+    B --> C[ViewModel & State Layer: Kotlin Coroutines + StateFlow]
     C --> D[Domain & Intelligence Layer]
     
     subgraph Intelligence & Optimization Engine
@@ -56,19 +60,20 @@ graph TD
         G --> L[FusedLocation GPS Provider]
     end
 
-    subgraph Business Solutions
+    subgraph Dual-Sided Solutions
         D --> M[B2C Green Travel Passport & Carbon Wallet]
         D --> N[B2B Hotel Resource & ESG Compliance Engine]
         D --> O[AI Eco & Inclusive Itinerary Generator]
+        D --> P[Citizen SOS & Trauma Response Network]
     end
 ```
 
 ---
 
-## 🌟 Key Features & Innovations
+## 🌟 Core Modules & Capabilities
 
 ### 1. 🤖 Yatri AI — Agentic Assistant with Live MCP Tool Calling
-- **Grounding Without Guesswork**: Powered by Gemini 1.5 Flash with live function-calling capabilities (`get_user_location`, `get_accessibility_profile`, `tomtom-routing`, `tomtom-poi-search`, `tomtom-reverse-geocode`, `tomtom-traffic`).
+- **Grounding Without Guesswork**: Powered by **Google Gemini 1.5 Flash** with live autonomous function calling (`get_user_location`, `get_accessibility_profile`, `tomtom-routing`, `tomtom-poi-search`, `tomtom-reverse-geocode`, `tomtom-traffic`).
 - **Zero Hardcoding**: Dynamically resolves nearby hospitals, EV stations, eco-resorts, and weather metrics strictly through live API responses.
 - **Location-Aware Context**: Injects fine-location GPS coordinates `(19.1775° N, 72.9544° E)` directly into system instructions to prioritize nearby emergency trauma and hospitality hubs.
 
@@ -96,7 +101,13 @@ graph TD
 - **1-Tap Food Shelter Dispatch**: Auto-dispatches surplus food alerts with driver tracking to Roti Bank & Feeding India Mumbai.
 - **Verified ESG Audit Export**: Compiles signed LEED Platinum and BEE 4.8/5.0 Star audit sheets with native Android sharing (`Intent.ACTION_SEND`).
 
-### 6. ⚡ 1-Tap Judge & Demo Access Mode
+### 6. 🚨 Broader Urban Safety & Citizen Backbone
+- **Emergency SOS Network**: 1-tap broadcast of coordinates to emergency dispatch and pre-configured trusted contacts.
+- **24/7 Medical Trauma Directory**: Direct dialing and step-free ambulance bay routing to Level 1 trauma facilities.
+- **Community Incident Feeds**: Real-time citizen reports on road hazards, flooding, and wheelchair elevator outages.
+- **Health Connect Integration**: Syncs physical steps, active calories, and low-carbon walking streaks.
+
+### 7. ⚡ 1-Tap Judge & Demo Access Mode
 - Instant evaluation bypass buttons on **Welcome** and **Sign In** screens to allow hackathon judges to test full end-to-end functionality in 1 second.
 
 ---
@@ -125,6 +136,7 @@ graph TD
 | **AI Tool Grounding** | Generic chatbot without tools | None | **Autonomous Function Calling with live TomTom MCP & GPS telemetry** |
 | **B2B Hotel Resource Management** | None | Generic sustainability checklists | **Live occupancy simulation, automated HVAC eco setpoints & surplus food shelter dispatch** |
 | **ESG Audit Compliance** | None | Manual survey entry | **1-Tap exportable LEED & BEE compliance sheets via Android share sheet** |
+| **Urban Safety & SOS** | None | None | **Integrated SOS Emergency Network, Trauma Calling & Incident Feeds** |
 
 ---
 
@@ -165,6 +177,6 @@ graph TD
 ---
 
 ## 👥 Team: UntrainedModels
-- **Project**: UrbanPulse (Green & Inclusive Travel Platform)
+- **Project**: UrbanPulse (Smart Sustainable & Accessible Hospitality Platform)
 - **Institution**: Pillai University — HackCelestial 3.0
 - **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
