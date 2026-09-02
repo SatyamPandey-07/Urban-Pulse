@@ -1,4 +1,4 @@
-# 🌿 UrbanPulse — Smart Sustainable & Accessible Travel Platform
+# UrbanPulse — Smart Sustainable & Accessible Travel Platform
 
 [![Android Version](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
@@ -7,14 +7,14 @@
 [![Gemini AI](https://img.shields.io/badge/Gemini%201.5%20Flash-Function%20Calling-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10B981.svg)](LICENSE)
 
-> **HackCelestial 3.0 — Mahatma Education Society’s Pillai University**  
-> **Challenge Track**: *Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality*  
-> **Team**: *UntrainedModels*  
+> **HackCelestial 3.0 — Mahatma Education Society’s Pillai University** 
+> **Challenge Track**: *Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality* 
+> **Team**: *UntrainedModels* 
 > **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
 
 ---
 
-## 📌 Executive Summary
+## Executive Summary
 
 **UrbanPulse** is an AI-powered, evidence-grounded sustainability and accessibility platform that bridges the gap between green, inclusive traveler mobility and hospitality business resource optimization.
 
@@ -24,7 +24,7 @@ Simultaneously, the platform features a full **B2B Hotel Resource & ESG Complian
 
 ---
 
-## 🎯 Problem Statement & Alignment
+## Problem Statement & Alignment
 
 | Challenge Dimension | Industry Pain Point | UrbanPulse Implementation |
 | :--- | :--- | :--- |
@@ -38,81 +38,81 @@ Simultaneously, the platform features a full **B2B Hotel Resource & ESG Complian
 
 ---
 
-## 🏗️ System Architecture
+## ️ System Architecture
 
 ```mermaid
 graph TD
-    A[Traveler / Hotelier] -->|Voice / Chat / UI Interaction| B[Presentation Layer: Jetpack Compose & Material 3]
-    B --> C[ViewModel & State Layer: Kotlin Coroutines + StateFlow]
-    C --> D[Domain & Intelligence Layer]
-    
-    subgraph Intelligence & Optimization Engine
-        D --> E[Yatri AI Agent: Gemini 1.5 Flash Function Calling]
-        D --> F[Multi-Objective Pareto Optimizer: Carbon vs Time vs Cost vs Step-Free]
-        D --> G[Live City Intelligence Service]
-    end
+ A[Traveler / Hotelier] -->|Voice / Chat / UI Interaction| B[Presentation Layer: Jetpack Compose & Material 3]
+ B --> C[ViewModel & State Layer: Kotlin Coroutines + StateFlow]
+ C --> D[Domain & Intelligence Layer]
+ 
+ subgraph Intelligence & Optimization Engine
+ D --> E[Yatri AI Agent: Gemini 1.5 Flash Function Calling]
+ D --> F[Multi-Objective Pareto Optimizer: Carbon vs Time vs Cost vs Step-Free]
+ D --> G[Live City Intelligence Service]
+ end
 
-    subgraph External Grounding APIs
-        G --> H[TomTom POI Search & Geocoding]
-        G --> I[TomTom Traffic Flow & Routing API]
-        G --> J[TomTom Model Context Protocol MCP]
-        G --> K[Open-Meteo Live Air Quality & Weather API]
-        G --> L[FusedLocation GPS Provider]
-    end
+ subgraph External Grounding APIs
+ G --> H[TomTom POI Search & Geocoding]
+ G --> I[TomTom Traffic Flow & Routing API]
+ G --> J[TomTom Model Context Protocol MCP]
+ G --> K[Open-Meteo Live Air Quality & Weather API]
+ G --> L[FusedLocation GPS Provider]
+ end
 
-    subgraph Dual-Sided Solutions
-        D --> M[B2C Green Travel Passport & Carbon Wallet]
-        D --> N[B2B Hotel Resource & ESG Compliance Engine]
-        D --> O[AI Eco & Inclusive Itinerary Generator]
-        D --> P[Citizen SOS & Trauma Response Network]
-    end
+ subgraph Dual-Sided Solutions
+ D --> M[B2C Green Travel Passport & Carbon Wallet]
+ D --> N[B2B Hotel Resource & ESG Compliance Engine]
+ D --> O[AI Eco & Inclusive Itinerary Generator]
+ D --> P[Citizen SOS & Trauma Response Network]
+ end
 ```
 
 ---
 
-## 🌟 Core Modules & Capabilities
+## Core Modules & Capabilities
 
-### 1. 🤖 Yatri AI — Agentic Assistant with Live MCP Tool Calling
+### 1. Yatri AI — Agentic Assistant with Live MCP Tool Calling
 - **Grounding Without Guesswork**: Powered by **Google Gemini 1.5 Flash** with live autonomous function calling (`get_user_location`, `get_accessibility_profile`, `tomtom-routing`, `tomtom-poi-search`, `tomtom-reverse-geocode`, `tomtom-traffic`).
 - **Zero Hardcoding**: Dynamically resolves nearby hospitals, EV stations, eco-resorts, and weather metrics strictly through live API responses.
 - **Location-Aware Context**: Injects fine-location GPS coordinates `(19.1775° N, 72.9544° E)` directly into system instructions to prioritize nearby emergency trauma and hospitality hubs.
 
-### 2. 🗺️ Simultaneous Dual-Route Map Canvas
-- **Live Visual Comparison**: Plots the **🌿 Green Path (Neon Emerald `#10B981`)** alongside the **🚗 Standard Route (Dashed Coral `#EF4444`)** on an interactive Leaflet/TomTom canvas.
+### 2. ️ Simultaneous Dual-Route Map Canvas
+- **Live Visual Comparison**: Plots the ** Green Path (Neon Emerald `#10B981`)** alongside the ** Standard Route (Dashed Coral `#EF4444`)** on an interactive Leaflet/TomTom canvas.
 - **Floating Difference Matrix**:
-  - *Green Metro Corridor*: `22 mins` • `₹30` • `45g CO2e` • `100% Step-Free`
-  - *Standard Petrol Cab*: `34 mins` • `₹240` • `480g CO2e` • `High Traffic Delay`
-  - *Net Benefit*: **`-435g CO2 (91% Cleaner) • ₹210 Saved • 12 mins Faster`**.
+ - *Green Metro Corridor*: `22 mins` • `₹30` • `45g CO2e` • `100% Step-Free`
+ - *Standard Petrol Cab*: `34 mins` • `₹240` • `480g CO2e` • `High Traffic Delay`
+ - *Net Benefit*: **`-435g CO2 (91% Cleaner) • ₹210 Saved • 12 mins Faster`**.
 
-### 3. 🎛️ Multimodal Tradeoff Optimizer (Pareto Decision Engine)
+### 3. ️ Multimodal Tradeoff Optimizer (Pareto Decision Engine)
 - Four dynamic priority modes:
-  - 🌿 **Lowest Carbon Impact**: Ranks zero-emission Electric Metro Line 3 at #1.
-  - ♿ **100% Step-Free Accessible**: Elevates level-boarding and elevator-equipped transit concourses.
-  - ⚡ **Fastest Travel Time**: Prioritizes direct Shared EV Cab options.
-  - 💰 **Lowest Budget**: Ranks BEST Electric AC Low-Floor Bus (₹15 fare) at #1.
+ - **Lowest Carbon Impact**: Ranks zero-emission Electric Metro Line 3 at #1.
+ - **100% Step-Free Accessible**: Elevates level-boarding and elevator-equipped transit concourses.
+ - **Fastest Travel Time**: Prioritizes direct Shared EV Cab options.
+ - **Lowest Budget**: Ranks BEST Electric AC Low-Floor Bus (₹15 fare) at #1.
 
-### 4. 📅 AI Green & Inclusive Itinerary Generator
+### 4. AI Green & Inclusive Itinerary Generator
 - Generates structured, chronological day plans (**Half-Day [4h]**, **Full-Day [8h]**, **Weekend Eco Retreat [2-Day]**) tailored to traveler personas (*Wheelchair Step-Free, Organic Farm-to-Fork, Sensory Heritage*).
 - Live cumulative carbon ledger tracking with **+120 to +250 PULSE Carbon Credits** awarded on itinerary completion.
 
-### 5. 🏨 B2B Hotel Resource Optimizer & Verified ESG Export
+### 5. B2B Hotel Resource Optimizer & Verified ESG Export
 - **Dynamic Property Scale Slider**: Real-time recalculation of facility power load (kWh), water recycling (Liters), and kitchen buffet surplus (kg) based on active room occupancy (20%–100%).
 - **Automated HVAC Eco Setpoint**: 1-tap command scheduling vacant wing cooling to 26°C, projecting daily savings of 180 kWh (₹1,620 / 126 kg $\text{CO}_2\text{e}$).
 - **1-Tap Food Shelter Dispatch**: Auto-dispatches surplus food alerts with driver tracking to Roti Bank & Feeding India Mumbai.
 - **Verified ESG Audit Export**: Compiles signed LEED Platinum and BEE 4.8/5.0 Star audit sheets with native Android sharing (`Intent.ACTION_SEND`).
 
-### 6. 🚨 Broader Urban Safety & Citizen Backbone
+### 6. Broader Urban Safety & Citizen Backbone
 - **Emergency SOS Network**: 1-tap broadcast of coordinates to emergency dispatch and pre-configured trusted contacts.
 - **24/7 Medical Trauma Directory**: Direct dialing and step-free ambulance bay routing to Level 1 trauma facilities.
 - **Community Incident Feeds**: Real-time citizen reports on road hazards, flooding, and wheelchair elevator outages.
 - **Health Connect Integration**: Syncs physical steps, active calories, and low-carbon walking streaks.
 
-### 7. ⚡ 1-Tap Judge & Demo Access Mode
+### 7. 1-Tap Judge & Demo Access Mode
 - Instant evaluation bypass buttons on **Welcome** and **Sign In** screens to allow hackathon judges to test full end-to-end functionality in 1 second.
 
 ---
 
-## 🛠️ Technology Stack
+## ️ Technology Stack
 
 | Layer | Technologies Used |
 | :--- | :--- |
@@ -126,7 +126,7 @@ graph TD
 
 ---
 
-## 📊 Feature Comparison: Existing Solutions vs. UrbanPulse
+## Feature Comparison: Existing Solutions vs. UrbanPulse
 
 | Feature | Standard Travel Apps (Google Maps, MakeMyTrip) | Typical Eco Badge Apps | **UrbanPulse (Our Solution)** |
 | :--- | :---: | :---: | :---: |
@@ -140,7 +140,7 @@ graph TD
 
 ---
 
-## 🚀 Getting Started & Installation
+## Getting Started & Installation
 
 ### Prerequisites
 - Android Studio Iguana / Jellyfish or newer
@@ -150,33 +150,33 @@ graph TD
 ### Installation Steps
 
 1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
-   cd Urban-Pulse
-   ```
+ ```bash
+ git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
+ cd Urban-Pulse
+ ```
 
 2. **Configure API Keys** in `Urbanpulse/local.properties`:
-   ```properties
-   sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
-   TOMTOM_API_KEY=v2eR2zca1XkbbMm51PYvM2b81y6soEi5
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
+ ```properties
+ sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
+ TOMTOM_API_KEY=v2eR2zca1XkbbMm51PYvM2b81y6soEi5
+ GEMINI_API_KEY=your_gemini_api_key_here
+ ```
 
 3. **Build and install on device**:
-   ```powershell
-   cd Urbanpulse
-   .\gradlew.bat assembleDebug
-   adb install -r app/build/outputs/apk/debug/app-debug.apk
-   ```
+ ```powershell
+ cd Urbanpulse
+ .\gradlew.bat assembleDebug
+ adb install -r app/build/outputs/apk/debug/app-debug.apk
+ ```
 
 4. **Launch the application**:
-   ```powershell
-   adb shell am start -n com.urbanpulse.app/.SplashActivity
-   ```
+ ```powershell
+ adb shell am start -n com.urbanpulse.app/.SplashActivity
+ ```
 
 ---
 
-## 👥 Team: UntrainedModels
+## Team: UntrainedModels
 - **Project**: UrbanPulse (Smart Sustainable & Accessible Hospitality Platform)
 - **Institution**: Pillai University — HackCelestial 3.0
 - **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
