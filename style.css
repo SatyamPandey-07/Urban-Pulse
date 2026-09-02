@@ -953,12 +953,49 @@ body.app-body {
  cursor: pointer;
 }
 
+/* Brand Logo SVG */
+.brand-logo-svg {
+    filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.45));
+    transition: transform 0.3s ease;
+}
+
+.brand-logo-svg:hover {
+    transform: scale(1.06) rotate(3deg);
+}
+
 /* Responsive */
 @media (max-width: 992px) {
- .app-layout {
- grid-template-columns: 1fr;
- }
- .app-device-frame {
- height: 600px;
- }
+    .app-layout {
+        grid-template-columns: 1fr;
+    }
+    .app-device-frame {
+        height: 650px;
+    }
+    .nav-content {
+        padding: 0 16px;
+    }
+    .hero-title {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-pill-menu {
+        display: none;
+    }
+    .app-device-frame {
+        height: 620px;
+    }
+    .map-container {
+        min-height: 340px;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-subtext {
+        display: none;
+    }
+    .glass-btn {
+        display: none;
+    }
 }

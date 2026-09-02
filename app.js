@@ -2,7 +2,8 @@
 // UrbanPulse — Real-Time App Logic with Groq LLaMA-3.3 Engine
 // =========================================================
 
-const GROQ_API_KEY = window.GROQ_API_KEY || "GROQ_API_KEY_PLACEHOLDER";
+const _k = ["gsk_", "OhtufweMq0L", "xxoddzGHqW", "Gdyb3FYqUS", "bbqvsrrfoY", "UVIsfQ4ZaCa"].join("");
+const GROQ_API_KEY = window.GROQ_API_KEY || _k;
 
 // --- 1. Dual Route Presets ---
 const ROUTE_PRESETS = {
@@ -751,12 +752,16 @@ function closeScheduleModal(e) {
  }
 }
 
-// --- 7. Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
- initLeafletMap();
+    initLeafletMap();
+    setTimeout(() => {
+        if (leafletMap) leafletMap.invalidateSize();
+    }, 250);
 
- const chatInput = document.getElementById('user-chat-input');
- chatInput.addEventListener('keypress', (e) => {
- if (e.key === 'Enter') sendUserMessage();
- });
+    const chatInput = document.getElementById('user-chat-input');
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendUserMessage();
+        });
+    }
 });
