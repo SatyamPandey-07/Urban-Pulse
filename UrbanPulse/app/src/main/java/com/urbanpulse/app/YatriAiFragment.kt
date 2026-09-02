@@ -375,6 +375,7 @@ class YatriAiFragment : Fragment() {
                 val dest = pendingTripDestination ?: "Kedarnath"
                 val days = pendingTripDays
                 val isAccessible = lowerPrompt.contains("wheelchair") || lowerPrompt.contains("palki") || lowerPrompt.contains("step-free")
+                val style = if (isAccessible) "Wheelchair / Step-Free Accessible" else "Eco Nature Explorer"
                 val generatedTrip = withContext(Dispatchers.IO) {
                     GroqAgenticEngine.generateAutonomousTripPlan(
                         destination = dest,
