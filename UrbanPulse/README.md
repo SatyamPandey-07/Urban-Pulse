@@ -1,182 +1,133 @@
-# UrbanPulse — Smart Sustainable & Accessible Travel Platform
+# UrbanPulse — Autonomous Green Mobility, Accessible Navigation & B2B Hospitality Intelligence Platform
 
-[![Android Version](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![TomTom Maps & MCP](https://img.shields.io/badge/TomTom-Maps%20%26%20MCP%20Tools-DF1B12?logo=tomtom&logoColor=white)](https://developer.tomtom.com/)
-[![Open-Meteo](https://img.shields.io/badge/Open--Meteo-Live%20AQI%20%26%20Weather-F59E0B)](https://open-meteo.com/)
-[![Gemini AI](https://img.shields.io/badge/Gemini%201.5%20Flash-Function%20Calling-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-10B981.svg)](LICENSE)
-
-> **HackCelestial 3.0 — Mahatma Education Society’s Pillai University** 
-> **Challenge Track**: *Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality* 
-> **Team**: *UntrainedModels* 
-> **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
+**Track:** Smart Mobility & Sustainable Tourism | **Hackathon:** HackCelestial 3.0 (Pillai University)  
+**Target Region:** Mumbai Metropolitan Region, Western Ghats, Himalayan Pilgrimage Corridors & Global Destinations  
+**AI & Cloud Tech:** Groq LPU AI Engine (`openai/gpt-oss-120b` & `groq/compound` models), TomTom Traffic & Dual-Route MCP, Open-Meteo Environmental Intelligence API, Android Native PDF Engine (`PdfDocument` + `FileProvider`).
 
 ---
 
 ## Executive Summary
 
-**UrbanPulse** is an AI-powered, evidence-grounded sustainability and accessibility platform that bridges the gap between green, inclusive traveler mobility and hospitality business resource optimization.
+UrbanPulse is an end-to-end intelligent urban mobility and sustainable hospitality platform. It addresses urban transport emissions and accessibility barriers by combining real-time routing engines, multimodal carbon estimators, autonomous AI travel planners powered by **Groq LPU Inference**, and B2B hotel resource optimization with verifiable ISO 14064 ESG compliance reporting.
 
-Built natively for Android, UrbanPulse replaces static badges with **live TomTom routing, geodesic proximity ranking, sensor-level Open-Meteo environmental telemetry, and real-time multi-objective Pareto trade-off optimization**—delivering provable carbon avoidance and step-free travel recommendations with zero hardcoded assumptions.
-
-Simultaneously, the platform features a full **B2B Hotel Resource & ESG Compliance Engine** enabling hoteliers to forecast buffet food surplus, auto-dispatch meals to local shelters, automate HVAC eco setpoints, and generate signed LEED/BEE compliance audit sheets.
+Unlike static trip planners, UrbanPulse anchors all calculations to the traveler's live detected GPS origin city (e.g., Mumbai, Navi Mumbai, Thane), calculates simultaneous dual-path routes (standard vehicle vs. eco-transit corridor) using verified municipal taxi fare formulas, dynamically queries live air quality indexes (AQI), and deploys autonomous Groq AI agents to construct complete, step-free, low-carbon itineraries for any destination worldwide.
 
 ---
 
-## Problem Statement & Alignment
+## System Architecture
 
-| Challenge Dimension | Industry Pain Point | UrbanPulse Implementation |
-| :--- | :--- | :--- |
-| **Green Travel Recommendations** | Travelers lack transparent, multimodal carbon footprint metrics across transit options. | **Multimodal Carbon Estimator** comparing Metro Line 3, BEST Electric Buses, Shared EV Cabs, and Petrol Taxis with grams of $\text{CO}_2\text{e}$ avoided. |
-| **Accessible Mobility Planning** | Inaccurate or binary accessibility data forces travelers with mobility/sensory needs into inaccessible situations. | **Evidence-Grounded Accessibility Matrix** with verified level boarding, elevator concourses, tactile paving indicators, and sensory alert preferences. |
-| **Simultaneous Dual-Route Map** | Maps show only standard car navigation without contextual green alternatives. | **Simultaneous Dual-Route Canvas** rendering the Glowing Green Corridor (`#10B981`) and Standard Congested Corridor (`#EF4444`) with live difference HUD. |
-| **Sustainable Hospitality Discovery** | Hotels lack verified environmental accountability; travelers struggle to find genuine eco-resorts. | **Verified Eco-Stay Directory** scoring solar energy mix, greywater recycling rate, zero single-use plastic, and verified step-free audits. |
-| **Hotel Resource Optimization (B2B)** | Hotels lack predictive tools to prevent kitchen surplus waste and optimize HVAC energy loads. | **B2B Hotel Resource Hub** with live occupancy sliders, AI buffet food surplus forecasting, 1-tap shelter dispatch (Feeding India/Roti Bank), and automated 26°C eco setpoint. |
-| **Verified ESG Compliance** | Preparing sustainability audit sheets for LEED/BEE star ratings is manual and tedious. | **1-Tap Dynamic ESG Audit Sheet Generator** exporting signed compliance reports via native Android share sheets (CSV/PDF). |
-| **Citizen Safety & Urban Resilience** | Travel apps lack emergency trauma grounding and real-time hazard detours. | **Integrated SOS Emergency Network**, 24/7 Level 1 Trauma calling, and citizen incident reporting feeds. |
-
----
-
-## ️ System Architecture
-
-```mermaid
-graph TD
- A[Traveler / Hotelier] -->|Voice / Chat / UI Interaction| B[Presentation Layer: Jetpack Compose & Material 3]
- B --> C[ViewModel & State Layer: Kotlin Coroutines + StateFlow]
- C --> D[Domain & Intelligence Layer]
- 
- subgraph Intelligence & Optimization Engine
- D --> E[Yatri AI Agent: Gemini 1.5 Flash Function Calling]
- D --> F[Multi-Objective Pareto Optimizer: Carbon vs Time vs Cost vs Step-Free]
- D --> G[Live City Intelligence Service]
- end
-
- subgraph External Grounding APIs
- G --> H[TomTom POI Search & Geocoding]
- G --> I[TomTom Traffic Flow & Routing API]
- G --> J[TomTom Model Context Protocol MCP]
- G --> K[Open-Meteo Live Air Quality & Weather API]
- G --> L[FusedLocation GPS Provider]
- end
-
- subgraph Dual-Sided Solutions
- D --> M[B2C Green Travel Passport & Carbon Wallet]
- D --> N[B2B Hotel Resource & ESG Compliance Engine]
- D --> O[AI Eco & Inclusive Itinerary Generator]
- D --> P[Citizen SOS & Trauma Response Network]
- end
+```
++-----------------------------------------------------------------------------------+
+|                                 UrbanPulse Client                                 |
+|   (Android Native App - Kotlin / Material 3  +  Web App - Vanilla ES6 / Leaflet)  |
++----------------------------------------+------------------------------------------+
+                                         |
+               +-------------------------+-------------------------+
+               |                                                   |
+               v                                                   v
++-----------------------------+                           +-----------------------------+
+|    Groq AI Agentic Engine   |                           |    TomTom Routing & Traffic |
+|  (OpenAI / Groq Compound)   |                           |    (Fastest Car vs. Eco)    |
+| - Autonomous Itinerary Gen  |                           | - Real Dual-Path Geometry   |
+| - Interactive MCQ Dialogue  |                           | - Turn-by-Turn Waypoints    |
+| - Dynamic Origin Anchoring  |                           | - Bottleneck Delay Insights |
++--------------+--------------+                           +--------------+--------------+
+               |                                                         |
+               +-------------------------+-------------------------------+
+                                         |
+                                         v
++-----------------------------------------------------------------------------------+
+|                             Core Intelligence Modules                             |
+|  - Dynamic Trip Planner (Day-by-Day Timeline, Origin-to-Destination Transit)      |
+|  - Multimodal Carbon Calculator (CO2e avoided vs. Regional Baseline)              |
+|  - Open-Meteo Environmental Intelligence (PM2.5, PM10, European/US AQI)           |
+|  - B2B Hotel Sustainability Hub (Dynamic Occupancy, HVAC Setback, Food Rescue)    |
+|  - Official ISO 14064 A4 PDF Compliance Audit Generator                           |
++-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-## Core Modules & Capabilities
+## Key Features & Technological Innovation
 
-### 1. Yatri AI — Agentic Assistant with Live MCP Tool Calling
-- **Grounding Without Guesswork**: Powered by **Google Gemini 1.5 Flash** with live autonomous function calling (`get_user_location`, `get_accessibility_profile`, `tomtom-routing`, `tomtom-poi-search`, `tomtom-reverse-geocode`, `tomtom-traffic`).
-- **Zero Hardcoding**: Dynamically resolves nearby hospitals, EV stations, eco-resorts, and weather metrics strictly through live API responses.
-- **Location-Aware Context**: Injects fine-location GPS coordinates `(19.1775° N, 72.9544° E)` directly into system instructions to prioritize nearby emergency trauma and hospitality hubs.
+### 1. Groq LPU Autonomous Yatri AI Engine (Zero Hardcoding)
+- **Real Groq Model Suite:** Connects directly to Groq active models (`openai/gpt-oss-120b`, `groq/compound`) for ultra-low latency sub-second reasoning.
+- **Interactive Multi-Turn Dialogue:** Guides travelers through multiple-choice questions (duration: 1-7 days, travel styles: Step-Free Wheelchair, Eco Pilgrim Trek, Budget Explorer, Luxury Heritage).
+- **Dynamic Origin Anchoring:** Automatically resolves the traveler's GPS location via native reverse geocoding so that Day 1 transit originates realistically from their current locality.
+- **Universal Destination Intelligence:** Generates complete multi-day timelines for any destination globally (Matheran, Kedarnath Dham, Lonavala, Alibaug, Manali, Goa, Jaipur, Tokyo).
 
-### 2. ️ Simultaneous Dual-Route Map Canvas
-- **Live Visual Comparison**: Plots the ** Green Path (Neon Emerald `#10B981`)** alongside the ** Standard Route (Dashed Coral `#EF4444`)** on an interactive Leaflet/TomTom canvas.
-- **Floating Difference Matrix**:
- - *Green Metro Corridor*: `22 mins` • `₹30` • `45g CO2e` • `100% Step-Free`
- - *Standard Petrol Cab*: `34 mins` • `₹240` • `480g CO2e` • `High Traffic Delay`
- - *Net Benefit*: **`-435g CO2 (91% Cleaner) • ₹210 Saved • 12 mins Faster`**.
+### 2. Live Dual-Route Comparison Engine
+- **Simultaneous Visualization:** Renders both the Standard Route (Fastest vehicle path, high emissions) and the Green Path (Electric rail, AC e-bus, ferry, or step-free pedestrian transit) side-by-side on an interactive vector map.
+- **Accurate Fare Computation:** Implements authentic regional transport formulas (Maharashtra Motor Vehicle Department formula: Base fare Rs 28 + Rs 18.50/km for standard cabs vs. tiered electric public transit).
+- **Environmental Grounding:** Integrates live Open-Meteo sensor readings for real-time Air Quality Index (AQI) along travel corridors.
 
-### 3. ️ Multimodal Tradeoff Optimizer (Pareto Decision Engine)
-- Four dynamic priority modes:
- - **Lowest Carbon Impact**: Ranks zero-emission Electric Metro Line 3 at #1.
- - **100% Step-Free Accessible**: Elevates level-boarding and elevator-equipped transit concourses.
- - **Fastest Travel Time**: Prioritizes direct Shared EV Cab options.
- - **Lowest Budget**: Ranks BEST Electric AC Low-Floor Bus (₹15 fare) at #1.
+### 3. Dedicated Trips Hub & Carbon Passport
+- **Itinerary Management:** Save generated trips to local storage with instant one-tap schedule inspections.
+- **Detailed Schedule Viewer:** Comprehensive timeline inspection showing transit segments, check-ins, attractions, and accessibility details.
+- **Carbon Rewards:** Accumulate PULSE points for choosing low-emission transit alternatives.
 
-### 4. AI Green & Inclusive Itinerary Generator
-- Generates structured, chronological day plans (**Half-Day [4h]**, **Full-Day [8h]**, **Weekend Eco Retreat [2-Day]**) tailored to traveler personas (*Wheelchair Step-Free, Organic Farm-to-Fork, Sensory Heritage*).
-- Live cumulative carbon ledger tracking with **+120 to +250 PULSE Carbon Credits** awarded on itinerary completion.
-
-### 5. B2B Hotel Resource Optimizer & Verified ESG Export
-- **Dynamic Property Scale Slider**: Real-time recalculation of facility power load (kWh), water recycling (Liters), and kitchen buffet surplus (kg) based on active room occupancy (20%–100%).
-- **Automated HVAC Eco Setpoint**: 1-tap command scheduling vacant wing cooling to 26°C, projecting daily savings of 180 kWh (₹1,620 / 126 kg $\text{CO}_2\text{e}$).
-- **1-Tap Food Shelter Dispatch**: Auto-dispatches surplus food alerts with driver tracking to Roti Bank & Feeding India Mumbai.
-- **Verified ESG Audit Export**: Compiles signed LEED Platinum and BEE 4.8/5.0 Star audit sheets with native Android sharing (`Intent.ACTION_SEND`).
-
-### 6. Broader Urban Safety & Citizen Backbone
-- **Emergency SOS Network**: 1-tap broadcast of coordinates to emergency dispatch and pre-configured trusted contacts.
-- **24/7 Medical Trauma Directory**: Direct dialing and step-free ambulance bay routing to Level 1 trauma facilities.
-- **Community Incident Feeds**: Real-time citizen reports on road hazards, flooding, and wheelchair elevator outages.
-- **Health Connect Integration**: Syncs physical steps, active calories, and low-carbon walking streaks.
-
-### 7. 1-Tap Judge & Demo Access Mode
-- Instant evaluation bypass buttons on **Welcome** and **Sign In** screens to allow hackathon judges to test full end-to-end functionality in 1 second.
+### 4. B2B Hotel Resource & ESG Optimizer
+- **Dynamic Occupancy Modeling:** Real-time forecasting of electricity, water consumption, and food surplus diversion based on active room inventory.
+- **Automated HVAC Setback:** One-tap temperature setback scheduling for unoccupied wings to avoid unnecessary power consumption.
+- **Surplus Food Rescue:** Automated dispatch trigger connecting hotel kitchens with verified food recovery organizations.
+- **Official ISO 14064 PDF Generator:** Generates verifiable, cryptographic, A4-sized compliance audit reports ready for SEBI BRSR and LEED Platinum documentation via Android `FileProvider`.
 
 ---
 
-## ️ Technology Stack
+## Technical Specifications
 
-| Layer | Technologies Used |
-| :--- | :--- |
-| **Language & Core** | Kotlin 1.9, Java 17, Android SDK 34 (Android 14) |
-| **UI Framework** | Material Design 3 (Material You), Smooth Custom Geometry, Dynamic Dark Slate Palette (`#0F172A`) |
-| **Maps & Spatial** | TomTom Maps SDK, TomTom Online Search & Routing APIs, Leaflet.js Vector Engine |
-| **Agentic AI & LLM** | Google Gemini 1.5 Flash (Function Calling / Tool Execution), TomTom MCP Maps Server |
-| **Environmental Telemetry** | Open-Meteo Weather Forecast API, Open-Meteo Air Quality Index (PM2.5 / PM10 / US AQI) |
-| **Networking & Async** | OkHttp 4.12, Retrofit 2.9, Gson, Kotlin Coroutines, StateFlow, LiveData |
-| **Hardware & Location** | Google Play Services Location (`FusedLocationProviderClient`), Android Speech Recognizer |
-
----
-
-## Feature Comparison: Existing Solutions vs. UrbanPulse
-
-| Feature | Standard Travel Apps (Google Maps, MakeMyTrip) | Typical Eco Badge Apps | **UrbanPulse (Our Solution)** |
-| :--- | :---: | :---: | :---: |
-| **Accessibility Verification** | Binary yes/no, often outdated | Self-reported by property | **Evidence-grounded audit matrix with elevator/step-free verification** |
-| **Route Visualization** | Shows single fastest road route | Static text recommendations | **Simultaneous Dual-Route Canvas (Green vs Normal) with live difference HUD** |
-| **Multi-Objective Optimization** | Optimizes solely for time/speed | Static filter lists | **Dynamic Pareto Tradeoff Engine (Carbon vs Time vs Budget vs Accessibility)** |
-| **AI Tool Grounding** | Generic chatbot without tools | None | **Autonomous Function Calling with live TomTom MCP & GPS telemetry** |
-| **B2B Hotel Resource Management** | None | Generic sustainability checklists | **Live occupancy simulation, automated HVAC eco setpoints & surplus food shelter dispatch** |
-| **ESG Audit Compliance** | None | Manual survey entry | **1-Tap exportable LEED & BEE compliance sheets via Android share sheet** |
-| **Urban Safety & SOS** | None | None | **Integrated SOS Emergency Network, Trauma Calling & Incident Feeds** |
+| Component | Technology / Implementation |
+|---|---|
+| **AI Inference** | Groq LPU Cloud (OpenAI GPT-OSS / Groq Compound models) |
+| **Mobile Client** | Android SDK 34 (Kotlin, Jetpack Compose, Material 3, Coroutines) |
+| **Web Platform** | HTML5, Vanilla ES6 JavaScript, CSS3 Design System, Leaflet.js |
+| **Mapping Engine** | TomTom Maps SDK (Android) / Leaflet.js (Web) |
+| **Environmental Data** | Open-Meteo Air Quality & Weather API |
+| **Document Engine** | Android Native `PdfDocument` + `FileProvider` (A4 Vector PDF) |
+| **Persistence** | Room SQLite Database / Encrypted SharedPreferences |
 
 ---
 
-## Getting Started & Installation
+## Installation & Setup
 
 ### Prerequisites
-- Android Studio Iguana / Jellyfish or newer
-- Android SDK Platform 34
-- Connected Android Device or Emulator (Android 8.0+ / API 26+)
+- Android Studio Hedgehog or newer
+- Android SDK 34
+- JDK 17
+- Physical Android device with USB Debugging enabled or Android Emulator
 
-### Installation Steps
+### Android Build Steps
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
+   cd Urban-Pulse/UrbanPulse
+   ```
+2. Configure Groq API key in `local.properties`:
+   ```properties
+   GROQ_API_KEY=your_groq_api_key
+   TOMTOM_API_KEY=your_tomtom_api_key
+   ```
+3. Build and install the debug APK:
+   ```bash
+   ./gradlew assembleDebug
+   adb install -r app/build/outputs/apk/debug/app-debug.apk
+   ```
 
-1. **Clone the repository**:
- ```bash
- git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
- cd Urban-Pulse
- ```
-
-2. **Configure API Keys** in `Urbanpulse/local.properties`:
- ```properties
- sdk.dir=C\:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
- TOMTOM_API_KEY=v2eR2zca1XkbbMm51PYvM2b81y6soEi5
- GEMINI_API_KEY=your_gemini_api_key_here
- ```
-
-3. **Build and install on device**:
- ```powershell
- cd Urbanpulse
- .\gradlew.bat assembleDebug
- adb install -r app/build/outputs/apk/debug/app-debug.apk
- ```
-
-4. **Launch the application**:
- ```powershell
- adb shell am start -n com.urbanpulse.app/.SplashActivity
- ```
+### Running the Web Platform
+Serve the root directory with any HTTP server:
+```bash
+npx serve .
+```
+Open `http://localhost:3000` in any web browser.
 
 ---
 
-## Team: UntrainedModels
-- **Project**: UrbanPulse (Smart Sustainable & Accessible Hospitality Platform)
-- **Institution**: Pillai University — HackCelestial 3.0
-- **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
+## Verification & Deployment
+- **Live APK Download:** Available under [GitHub Releases](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial).
+- **Demonstration Account:** 1-tap demo login is provided directly on the Welcome and Login screens for instant reviewer evaluation.
+
+---
+
+## License & Team
+Developed for **HackCelestial 3.0** by the UrbanPulse Engineering Team.
+Licensed under the Apache 2.0 License.

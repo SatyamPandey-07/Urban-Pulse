@@ -1,106 +1,133 @@
-# UrbanPulse — Smart Sustainable & Accessible Travel Platform
+# UrbanPulse — Autonomous Green Mobility, Accessible Navigation & B2B Hospitality Intelligence Platform
 
-[![Android Version](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![TomTom Maps & MCP](https://img.shields.io/badge/TomTom-Maps%20%26%20MCP%20Tools-DF1B12?logo=tomtom&logoColor=white)](https://developer.tomtom.com/)
-[![Open-Meteo](https://img.shields.io/badge/Open--Meteo-Live%20AQI%20%26%20Weather-F59E0B)](https://open-meteo.com/)
-[![Gemini AI](https://img.shields.io/badge/Gemini%201.5%20Flash-Function%20Calling-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-10B981.svg)](LICENSE)
-
-> **HackCelestial 3.0 — Mahatma Education Society’s Pillai University** 
-> **Challenge Track**: *Green & Inclusive Travel — Smart Sustainable and Accessible Hospitality* 
-> **Team**: *UntrainedModels* 
-> **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse) 
-> **Release Download**: [v1.0.0-hackcelestial](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial)
+**Track:** Smart Mobility & Sustainable Tourism | **Hackathon:** HackCelestial 3.0 (Pillai University)  
+**Target Region:** Mumbai Metropolitan Region, Western Ghats, Himalayan Pilgrimage Corridors & Global Destinations  
+**AI & Cloud Tech:** Groq LPU AI Engine (`openai/gpt-oss-120b` & `groq/compound` models), TomTom Traffic & Dual-Route MCP, Open-Meteo Environmental Intelligence API, Android Native PDF Engine (`PdfDocument` + `FileProvider`).
 
 ---
 
 ## Executive Summary
 
-**UrbanPulse** is an AI-powered, evidence-grounded sustainability and accessibility platform that transforms how travelers make low-carbon, inclusive journeys and empowers hospitality businesses with real-time resource optimization and verified ESG compliance tools.
+UrbanPulse is an end-to-end intelligent urban mobility and sustainable hospitality platform. It addresses urban transport emissions and accessibility barriers by combining real-time routing engines, multimodal carbon estimators, autonomous AI travel planners powered by **Groq LPU Inference**, and B2B hotel resource optimization with verifiable ISO 14064 ESG compliance reporting.
 
-Built natively for Android, UrbanPulse replaces static badges with **live TomTom routing, geodesic proximity ranking, sensor-level Open-Meteo environmental telemetry, and real-time multi-objective Pareto trade-off optimization**—delivering provable carbon avoidance and step-free travel recommendations with zero hardcoded assumptions.
-
----
-
-## What’s New in Latest Release:
-
-1. ** Interactive MCQ Trip Planner in Yatri AI**:
- - Multi-turn conversational trip builder that asks structured MCQ chips right in the chat (e.g., *"How many days?"*, *"Travel Style & Accessibility?"*).
- - Generates complete, rich itineraries with real hotels (e.g., *The Machan Solar Resort*), electric rail transit (*Indrayani Express*), step-free access status, and 1-tap **"Save to My Trips"** / **"View Full Plan"** actions!
-
-2. ** Dedicated Sustainable Trips Hub (Replacing Digital Twin)**:
- - Dedicated **Trips** tab in the main navigation.
- - Live insights into **Upcoming Trips**, **Completed / Carbon Certified Trips**, and **1-Tap AI Getaway Planners** for nearby destinations (*Lonavala*, *Alibaug*, *Mahabaleshwar*, *Matheran*).
- - Full-screen **Trip Detail Activity** with day-by-day timetables, step-free access verification, transit comparisons, and budget breakdowns.
-
-3. **️ Authentic Dual-Route TomTom Engine & Open-Meteo AQI Grounding**:
- - **Real Red Route**: Queries TomTom `calculateRoute` with `routeType=fastest&traffic=true` for actual congested road geometry.
- - **Real Green Route**: Queries TomTom `calculateRoute` with `routeType=eco` for actual low-emission transit corridor geometry.
- - **Real Open-Meteo AQI**: Live localized US AQI and PM2.5 sensor telemetry.
- - **Authentic Maharashtra Fare Formulas**: Standard taxi base ₹28 + ₹18.5/km ($160\text{g CO}_2/\text{km}$) vs. Electric Metro/Rail ₹10-₹45 ($14\text{g CO}_2/\text{km}$).
-
-4. ** B2B Hotel Resource Hub & ESG Compliance Export**:
- - Dynamic facility slider (20% to 100% occupancy) recalculating power load, water recycling, and kitchen buffet surplus in real-time.
- - 1-tap dispatch to local food shelters (*Roti Bank / Feeding India*).
- - 1-tap export of signed LEED Platinum and BEE 4.8/5.0 Star compliance audit sheets.
+Unlike static trip planners, UrbanPulse anchors all calculations to the traveler's live detected GPS origin city (e.g., Mumbai, Navi Mumbai, Thane), calculates simultaneous dual-path routes (standard vehicle vs. eco-transit corridor) using verified municipal taxi fare formulas, dynamically queries live air quality indexes (AQI), and deploys autonomous Groq AI agents to construct complete, step-free, low-carbon itineraries for any destination worldwide.
 
 ---
 
-## ️ System Architecture
+## System Architecture
 
-```mermaid
-graph TD
- A[Traveler / Hotelier] -->|Voice / Chat / UI Interaction| B[Presentation Layer: Jetpack Compose & Material 3]
- B --> C[ViewModel & State Layer: Kotlin Coroutines + StateFlow]
- C --> D[Domain & Intelligence Layer]
- 
- subgraph Intelligence & Optimization Engine
- D --> E[Yatri AI Agent: Interactive MCQ Trip Planner]
- D --> F[Multi-Objective Pareto Optimizer: Carbon vs Time vs Cost vs Step-Free]
- D --> G[Live City Intelligence Service]
- end
-
- subgraph External Grounding APIs
- G --> H[TomTom POI Search & Geocoding]
- G --> I[TomTom Real Multi-Routing API: Fastest vs Eco]
- G --> J[TomTom Model Context Protocol MCP]
- G --> K[Open-Meteo Live Air Quality & Weather API]
- G --> L[FusedLocation GPS Provider]
- end
-
- subgraph Dual-Sided Solutions
- D --> M[B2C Sustainable Trips Hub & Carbon Wallet]
- D --> N[B2B Hotel Resource & ESG Compliance Engine]
- D --> O[AI Eco & Inclusive Itinerary Generator]
- D --> P[Citizen SOS & Trauma Response Network]
- end
+```
++-----------------------------------------------------------------------------------+
+|                                 UrbanPulse Client                                 |
+|   (Android Native App - Kotlin / Material 3  +  Web App - Vanilla ES6 / Leaflet)  |
++----------------------------------------+------------------------------------------+
+                                         |
+               +-------------------------+-------------------------+
+               |                                                   |
+               v                                                   v
++-----------------------------+                           +-----------------------------+
+|    Groq AI Agentic Engine   |                           |    TomTom Routing & Traffic |
+|  (OpenAI / Groq Compound)   |                           |    (Fastest Car vs. Eco)    |
+| - Autonomous Itinerary Gen  |                           | - Real Dual-Path Geometry   |
+| - Interactive MCQ Dialogue  |                           | - Turn-by-Turn Waypoints    |
+| - Dynamic Origin Anchoring  |                           | - Bottleneck Delay Insights |
++--------------+--------------+                           +--------------+--------------+
+               |                                                         |
+               +-------------------------+-------------------------------+
+                                         |
+                                         v
++-----------------------------------------------------------------------------------+
+|                             Core Intelligence Modules                             |
+|  - Dynamic Trip Planner (Day-by-Day Timeline, Origin-to-Destination Transit)      |
+|  - Multimodal Carbon Calculator (CO2e avoided vs. Regional Baseline)              |
+|  - Open-Meteo Environmental Intelligence (PM2.5, PM10, European/US AQI)           |
+|  - B2B Hotel Sustainability Hub (Dynamic Occupancy, HVAC Setback, Food Rescue)    |
+|  - Official ISO 14064 A4 PDF Compliance Audit Generator                           |
++-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-## ️ Technology Stack
+## Key Features & Technological Innovation
 
-| Layer | Technologies Used |
-| :--- | :--- |
-| **Language & Core** | Kotlin 1.9, Java 17, Android SDK 34 (Android 14) |
-| **UI Framework** | Material Design 3 (Material You), Smooth Custom Geometry, Dynamic Dark Slate Palette (`#0F172A`) |
-| **Maps & Spatial** | TomTom Maps SDK, TomTom Real Dual-Routing & POI Search APIs, Leaflet.js Vector Engine |
-| **Agentic AI & LLM** | Google Gemini 1.5 Flash (Function Calling / Tool Execution), TomTom MCP Maps Server |
-| **Environmental Telemetry** | Open-Meteo Weather Forecast API, Open-Meteo Air Quality Index (PM2.5 / PM10 / US AQI) |
-| **Networking & Async** | OkHttp 4.12, Retrofit 2.9, Gson, Kotlin Coroutines, StateFlow, LiveData |
-| **Hardware & Location** | Google Play Services Location (`FusedLocationProviderClient`), Android Speech Recognizer |
+### 1. Groq LPU Autonomous Yatri AI Engine (Zero Hardcoding)
+- **Real Groq Model Suite:** Connects directly to Groq active models (`openai/gpt-oss-120b`, `groq/compound`) for ultra-low latency sub-second reasoning.
+- **Interactive Multi-Turn Dialogue:** Guides travelers through multiple-choice questions (duration: 1-7 days, travel styles: Step-Free Wheelchair, Eco Pilgrim Trek, Budget Explorer, Luxury Heritage).
+- **Dynamic Origin Anchoring:** Automatically resolves the traveler's GPS location via native reverse geocoding so that Day 1 transit originates realistically from their current locality.
+- **Universal Destination Intelligence:** Generates complete multi-day timelines for any destination globally (Matheran, Kedarnath Dham, Lonavala, Alibaug, Manali, Goa, Jaipur, Tokyo).
+
+### 2. Live Dual-Route Comparison Engine
+- **Simultaneous Visualization:** Renders both the Standard Route (Fastest vehicle path, high emissions) and the Green Path (Electric rail, AC e-bus, ferry, or step-free pedestrian transit) side-by-side on an interactive vector map.
+- **Accurate Fare Computation:** Implements authentic regional transport formulas (Maharashtra Motor Vehicle Department formula: Base fare Rs 28 + Rs 18.50/km for standard cabs vs. tiered electric public transit).
+- **Environmental Grounding:** Integrates live Open-Meteo sensor readings for real-time Air Quality Index (AQI) along travel corridors.
+
+### 3. Dedicated Trips Hub & Carbon Passport
+- **Itinerary Management:** Save generated trips to local storage with instant one-tap schedule inspections.
+- **Detailed Schedule Viewer:** Comprehensive timeline inspection showing transit segments, check-ins, attractions, and accessibility details.
+- **Carbon Rewards:** Accumulate PULSE points for choosing low-emission transit alternatives.
+
+### 4. B2B Hotel Resource & ESG Optimizer
+- **Dynamic Occupancy Modeling:** Real-time forecasting of electricity, water consumption, and food surplus diversion based on active room inventory.
+- **Automated HVAC Setback:** One-tap temperature setback scheduling for unoccupied wings to avoid unnecessary power consumption.
+- **Surplus Food Rescue:** Automated dispatch trigger connecting hotel kitchens with verified food recovery organizations.
+- **Official ISO 14064 PDF Generator:** Generates verifiable, cryptographic, A4-sized compliance audit reports ready for SEBI BRSR and LEED Platinum documentation via Android `FileProvider`.
 
 ---
 
-## Installation & Direct Download
+## Technical Specifications
 
-- **Direct Release APK**: Download the pre-built APK from [Releases](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial) or [`release/UrbanPulse-v1.0.0.apk`](https://github.com/SatyamPandey-07/Urban-Pulse/blob/main/release/UrbanPulse-v1.0.0.apk).
-- **1-Tap Judge Access**: Instant evaluation bypass button on Welcome and Login screens.
+| Component | Technology / Implementation |
+|---|---|
+| **AI Inference** | Groq LPU Cloud (OpenAI GPT-OSS / Groq Compound models) |
+| **Mobile Client** | Android SDK 34 (Kotlin, Jetpack Compose, Material 3, Coroutines) |
+| **Web Platform** | HTML5, Vanilla ES6 JavaScript, CSS3 Design System, Leaflet.js |
+| **Mapping Engine** | TomTom Maps SDK (Android) / Leaflet.js (Web) |
+| **Environmental Data** | Open-Meteo Air Quality & Weather API |
+| **Document Engine** | Android Native `PdfDocument` + `FileProvider` (A4 Vector PDF) |
+| **Persistence** | Room SQLite Database / Encrypted SharedPreferences |
 
 ---
 
-## Team: UntrainedModels
-- **Project**: UrbanPulse (Smart Sustainable & Accessible Hospitality Platform)
-- **Institution**: Pillai University — HackCelestial 3.0
-- **Repository**: [https://github.com/SatyamPandey-07/Urban-Pulse](https://github.com/SatyamPandey-07/Urban-Pulse)
+## Installation & Setup
+
+### Prerequisites
+- Android Studio Hedgehog or newer
+- Android SDK 34
+- JDK 17
+- Physical Android device with USB Debugging enabled or Android Emulator
+
+### Android Build Steps
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
+   cd Urban-Pulse/UrbanPulse
+   ```
+2. Configure Groq API key in `local.properties`:
+   ```properties
+   GROQ_API_KEY=your_groq_api_key
+   TOMTOM_API_KEY=your_tomtom_api_key
+   ```
+3. Build and install the debug APK:
+   ```bash
+   ./gradlew assembleDebug
+   adb install -r app/build/outputs/apk/debug/app-debug.apk
+   ```
+
+### Running the Web Platform
+Serve the root directory with any HTTP server:
+```bash
+npx serve .
+```
+Open `http://localhost:3000` in any web browser.
+
+---
+
+## Verification & Deployment
+- **Live APK Download:** Available under [GitHub Releases](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial).
+- **Demonstration Account:** 1-tap demo login is provided directly on the Welcome and Login screens for instant reviewer evaluation.
+
+---
+
+## License & Team
+Developed for **HackCelestial 3.0** by the UrbanPulse Engineering Team.
+Licensed under the Apache 2.0 License.
