@@ -435,7 +435,7 @@ class YatriAiFragment : Fragment() {
                     title = "Kedarnath Dham Holy Eco-Yatra",
                     durationDays = days,
                     travelDates = "Upcoming Spiritual Journey ($days Days)",
-                    travelMode = "Electric Pilgrim AC Coach (Rishikesh) + Gaurikund Shuttle",
+                    travelMode = "Mumbai-Haridwar Superfast Rail + Electric Pilgrim Shuttle",
                     co2SavedKg = (14.2 * days),
                     pulsePointsEarned = (160 * days),
                     isCompleted = false,
@@ -444,24 +444,42 @@ class YatriAiFragment : Fragment() {
                     isStepFreeAccessible = isAccessible,
                     totalBudgetInr = (2800 * days),
                     aqiStatus = "Pristine Himalayan Alpine Air (AQI 18)",
-                    transitCostInr = 650,
+                    transitCostInr = 1450,
                     dailyItinerary = listOf(
                         TripDaySchedule(
                             dayNumber = 1,
-                            dayTitle = "Rishikesh to Sonprayag Scenic Valley",
+                            dayTitle = "Mumbai (CSMT/Bandra) Departure to Haridwar Hub",
                             activities = listOf(
-                                TripActivity("06:00 AM", "Vande Bharat / Electric Bus", "Haridwar/Rishikesh to Sonprayag (Zero Emission)", "E-Bus", true, 45, 650),
-                                TripActivity("02:00 PM", "Electric Local Shuttle", "Sonprayag to Gaurikund Base (Govt E-Shuttle)", "E-Bus", true, 10, 50),
-                                TripActivity("04:30 PM", "Eco Rest House Check-in", "GMVN Mandakini Solar Guest House (Heated Step-Free)", "Hotel", true, 0, 0)
+                                TripActivity("08:30 AM", "Haridwar AC Superfast Express", "Mumbai CSMT/Bandra to Haridwar Jn (100% Electric Rail • Level Boarding)", "Train", true, 280, 1450),
+                                TripActivity("03:00 PM", "Solar Eco Guest House Check-in", "Haridwar GMVN Alaknanda Rest House (Step-Free Concourse)", "Hotel", true, 0, 0),
+                                TripActivity("06:30 PM", "Har Ki Pauri Ganga Aarti", "Paved accessible riverside walkway & bio-toilets", "Walk", true, 0, 0)
                             )
                         ),
                         TripDaySchedule(
                             dayNumber = 2,
+                            dayTitle = "Haridwar to Sonprayag & Gaurikund Base",
+                            activities = listOf(
+                                TripActivity("06:00 AM", "AC Electric Pilgrim Coach", "Haridwar to Sonprayag Hub (Low-Carbon Scenic Valley)", "E-Bus", true, 45, 650),
+                                TripActivity("02:30 PM", "Govt Electric Local Shuttle", "Sonprayag to Gaurikund Base (Zero Emission E-Shuttle)", "E-Bus", true, 10, 50),
+                                TripActivity("04:30 PM", "Eco Rest House Check-in", "GMVN Mandakini Solar Guest House (Heated Step-Free)", "Hotel", true, 0, 0)
+                            )
+                        ),
+                        TripDaySchedule(
+                            dayNumber = 3,
                             dayTitle = "Gaurikund to Shri Kedarnath Dham",
                             activities = listOf(
-                                TripActivity("05:30 AM", "Eco Pilgrim Ascent", if (isAccessible) "Step-free Palki / Assisted Wheelchair Hoist route" else "Paved Himalayan Walking Trail", "Walk", true, 0, 0),
+                                TripActivity("05:30 AM", "Eco Pilgrim Ascent", if (isAccessible) "Assisted Step-free Palki / Wheelchair Hoist route" else "Paved Himalayan Walking Trail", "Walk", true, 0, 0),
                                 TripActivity("01:00 PM", "Shri Kedarnath Temple Darshan", "12th Jyotirlinga Darshan & Zero-Plastic Eco Zone", "Walk", true, 0, 0),
                                 TripActivity("06:30 PM", "Evening Mandakini Aarti", "Solar lit temple complex with bio-toilets", "Walk", true, 0, 0)
+                            )
+                        ),
+                        TripDaySchedule(
+                            dayNumber = 4,
+                            dayTitle = "Bhairavnath Ridge & Return Journey to Mumbai",
+                            activities = listOf(
+                                TripActivity("07:00 AM", "Bhairavnath Panoramic Shrine", "Morning alpine view overlooking Kedarnath temple", "Walk", true, 0, 0),
+                                TripActivity("11:30 AM", "Descent to Gaurikund Base", "Govt E-Shuttle back to Sonprayag", "E-Bus", true, 10, 50),
+                                TripActivity("06:00 PM", "Return Superfast Express", "Haridwar Junction to Mumbai CSMT", "Train", true, 280, 1450)
                             )
                         )
                     )

@@ -608,18 +608,28 @@ function exportEsgCsv() {
 // --- 6. Schedule Modal ---
 const SCHEDULE_TEMPLATES = {
     kedarnath: {
-        title: "Kedarnath Holy Eco-Yatra Schedule",
+        title: "Kedarnath Holy Eco-Yatra Schedule (From Mumbai)",
         html: `
             <div style="font-size:13px; line-height:1.6; color:#94A3B8;">
-                <h4 style="color:#10B981; margin-bottom:6px;">DAY 1: Rishikesh to Sonprayag Scenic Valley</h4>
-                <p>• <strong>06:00 AM</strong> — Vande Bharat / Electric Pilgrim Coach [Haridwar/Rishikesh to Sonprayag • ₹650]</p>
-                <p>• <strong>02:00 PM</strong> — Sonprayag to Gaurikund Base (Electric Govt Shuttle) [₹50]</p>
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 1: Mumbai Departure to Haridwar Hub</h4>
+                <p>• <strong>08:30 AM</strong> — Haridwar AC Superfast Express (Mumbai CSMT/Bandra to Haridwar Jn) [Train • ♿ Level Boarding • ₹1,450]</p>
+                <p>• <strong>03:00 PM</strong> — Haridwar GMVN Alaknanda Rest House Check-in (Solar Powered)</p>
+                <p>• <strong>06:30 PM</strong> — Har Ki Pauri Ganga Aarti (Paved accessible walkway)</p>
+                <hr style="border-color:rgba(255,255,255,0.1); margin:12px 0;">
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 2: Haridwar to Sonprayag &amp; Gaurikund Base</h4>
+                <p>• <strong>06:00 AM</strong> — AC Electric Pilgrim Coach (Haridwar to Sonprayag) [₹650]</p>
+                <p>• <strong>02:30 PM</strong> — Sonprayag to Gaurikund Base (Govt E-Shuttle) [₹50]</p>
                 <p>• <strong>04:30 PM</strong> — GMVN Mandakini Solar Guest House Check-in (Heated Step-Free Rooms)</p>
                 <hr style="border-color:rgba(255,255,255,0.1); margin:12px 0;">
-                <h4 style="color:#10B981; margin-bottom:6px;">DAY 2: Gaurikund to Shri Kedarnath Dham</h4>
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 3: Gaurikund to Shri Kedarnath Dham</h4>
                 <p>• <strong>05:30 AM</strong> — Eco-Pilgrim Ascent (Step-free assisted Palki / Paved Himalayan walking trail)</p>
                 <p>• <strong>01:00 PM</strong> — Shri Kedarnath Temple Darshan (12th Jyotirlinga • Zero Plastic Eco-Zone)</p>
                 <p>• <strong>06:30 PM</strong> — Evening Mandakini Aarti (Solar illuminated temple complex with bio-toilets)</p>
+                <hr style="border-color:rgba(255,255,255,0.1); margin:12px 0;">
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 4: Bhairavnath Ridge &amp; Return to Mumbai</h4>
+                <p>• <strong>07:00 AM</strong> — Bhairavnath Panoramic Viewpoint</p>
+                <p>• <strong>11:30 AM</strong> — Descent &amp; E-Shuttle to Sonprayag</p>
+                <p>• <strong>06:00 PM</strong> — Return Superfast Express Haridwar to Mumbai CSMT [₹1,450]</p>
             </div>
         `
     },
