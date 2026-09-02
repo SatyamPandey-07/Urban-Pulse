@@ -3,11 +3,20 @@ package com.urbanpulse.app
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 
-class ChatAdapter(private val messages: MutableList<ChatMessage>) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatAdapter(
+    private val messages: MutableList<ChatMessage>,
+    private val onMcqOptionSelected: ((String) -> Unit)? = null,
+    private val onSaveTripClicked: ((TripPlan) -> Unit)? = null,
+    private val onViewTripClicked: ((TripPlan) -> Unit)? = null
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_USER = 1
@@ -19,6 +28,14 @@ class ChatAdapter(private val messages: MutableList<ChatMessage>) :
         val aiMessageLayout: View = itemView.findViewById(R.id.aiMessageLayout)
         val aiMessageText: TextView = itemView.findViewById(R.id.aiMessageText)
         val userMessageText: TextView = itemView.findViewById(R.id.userMessageText)
+        val mcqContainer: HorizontalScrollView = itemView.findViewById(R.id.mcqContainer)
+        val chipGroupMcq: ChipGroup = itemView.findViewById(R.id.chipGroupMcq)
+        val cardTripPreview: MaterialCardView = itemView.findViewById(R.id.cardTripPreview)
+        val tvTripCardTitle: TextView = itemView.findViewById(R.id.tvTripCardTitle)
+        val tvTripCardCo2: TextView = itemView.findViewById(R.id.tvTripCardCo2)
+        val tvTripCardDetails: TextView = itemView.findViewById(R.id.tvTripCardDetails)
+        val btnSaveTrip: MaterialButton = itemView.findViewById(R.id.btnSaveTrip)
+        val btnViewItinerary: MaterialButton = itemView.findViewById(R.id.btnViewItinerary)
     }
 
     class TypingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -55,6 +72,41 @@ class ChatAdapter(private val messages: MutableList<ChatMessage>) :
                 holder.aiMessageLayout.visibility = View.VISIBLE
                 holder.userMessageText.visibility = View.GONE
                 holder.aiMessageText.text = message.message
+
+                // Bind MCQ Chips
+                if (message.mcqQuestion != null && message.mcqQuestion.options.isNotEmpty()) {
+                    holder.mcqContainer.visibility = View.VISIBLE
+                    holder.chipGroupMcq.removeAllViews()
+                    for (option in message.mcqQuestion.options) {
+                        val chip = LayoutInflater.from(holder.itemView.context)
+                            .inflate(R.layout.item_filter_chip, holder.chipGroupMcq, false) as Chip
+                        chip.text = option
+                        chip.isCheckable = false
+                        chip.setOnClickListener {
+                            onMcqOptionSelected?.invoke(option)
+                        }
+                        holder.chipGroupMcq.addView(chip)
+                    }
+                } else {
+                    holder.mcqContainer.visibility = View.GONE
+                }
+
+                // Bind Generated Trip Preview Card
+                if (message.generatedTrip != null) {
+                    val trip = message.generatedTrip
+                    holder.cardTripPreview.visibility = View.VISIBLE
+                    holder.tvTripCardTitle.text = trip.title
+                    holder.tvTripCardCo2.text = "-${trip.co2SavedKg} kg CO2"
+                    holder.tvTripCardDetails.text = "🚆 ${trip.travelMode} • 🏨 ${trip.hotelName} • 💰 ₹${trip.totalBudgetInr}"
+                    holder.btnSaveTrip.setOnClickListener {
+                        onSaveTripClicked?.invoke(trip)
+                    }
+                    holder.btnViewItinerary.setOnClickListener {
+                        onViewTripClicked?.invoke(trip)
+                    }
+                } else {
+                    holder.cardTripPreview.visibility = View.GONE
+                }
             }
         }
     }

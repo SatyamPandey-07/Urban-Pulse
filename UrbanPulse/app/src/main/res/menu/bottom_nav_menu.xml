@@ -9,9 +9,9 @@
         android:icon="@drawable/ic_map"
         android:title="Live Map" />
     <item
-        android:id="@+id/navigation_digital_twin"
-        android:icon="@drawable/ic_digital_twin"
-        android:title="Digital Twin" />
+        android:id="@+id/navigation_trips"
+        android:icon="@drawable/ic_route"
+        android:title="Trips" />
     <item
         android:id="@+id/navigation_yatri_ai"
         android:icon="@drawable/ic_yatri_ai"

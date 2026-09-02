@@ -40,7 +40,7 @@ class MainActivity : BaseActivity() {
                     viewPager.setCurrentItem(1, false)
                     true
                 }
-                R.id.navigation_digital_twin -> {
+                R.id.navigation_trips -> {
                     viewPager.setCurrentItem(2, false)
                     true
                 }

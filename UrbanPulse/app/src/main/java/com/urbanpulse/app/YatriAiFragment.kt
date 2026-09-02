@@ -52,6 +52,11 @@ class YatriAiFragment : Fragment() {
     private var userLongitude: Double = 72.8777
     private var isLocationDetected: Boolean = false
 
+    // Multi-turn Trip Planning State Machine
+    private var pendingTripDestination: String? = null
+    private var pendingTripDays: Int = 2
+    private var pendingTripStyle: String = "Eco Nature"
+
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -97,11 +102,12 @@ class YatriAiFragment : Fragment() {
         view.findViewById<MaterialButton>(R.id.btnClearChat).setOnClickListener {
             messages.clear()
             chatAdapter.notifyDataSetChanged()
+            pendingTripDestination = null
             addAiMessage("Hello! I am Yatri AI, your sustainable mobility and inclusive hospitality assistant. How can I assist your journey today?")
         }
 
         if (messages.isEmpty()) {
-            addAiMessage("Hello. I am Yatri AI, your agentic green travel & inclusive hospitality companion.\n\nI have real-time access to your GPS location, accessibility preferences, and live TomTom MCP search & routing tools.\n\nHow can I help plan your low-carbon, accessible journey today?")
+            addAiMessage("Hello! I am Yatri AI, your agentic green travel & inclusive hospitality companion.\n\nI can plan multi-day eco-itineraries, calculate low-carbon transit routes, find verified step-free stays, and query real-time TomTom & Open-Meteo environmental tools.\n\nTry asking: \"Plan a trip to Lonavala\" or \"Find accessible eco-resorts near me\"!")
         }
     }
 
@@ -147,7 +153,24 @@ class YatriAiFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        chatAdapter = ChatAdapter(messages)
+        chatAdapter = ChatAdapter(
+            messages,
+            onMcqOptionSelected = { selectedOption ->
+                sendMessage(selectedOption)
+            },
+            onSaveTripClicked = { trip ->
+                context?.let { ctx ->
+                    TripRepository.addTrip(ctx, trip)
+                    Toast.makeText(ctx, "✅ Saved \"${trip.title}\" to My Trips!", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onViewTripClicked = { trip ->
+                val intent = Intent(context, TripDetailActivity::class.java).apply {
+                    putExtra("EXTRA_TRIP_PLAN", trip)
+                }
+                startActivity(intent)
+            }
+        )
         chatRecyclerView.layoutManager = LinearLayoutManager(context)
         chatRecyclerView.adapter = chatAdapter
     }
@@ -196,6 +219,9 @@ class YatriAiFragment : Fragment() {
     }
 
     private fun setupSuggestionChips(view: View) {
+        view.findViewById<Chip>(R.id.chipSuggestTripLonavala).setOnClickListener {
+            sendMessage("Plan a trip to Lonavala")
+        }
         view.findViewById<Chip>(R.id.chipSuggestHospital).setOnClickListener {
             sendMessage("Suggest some hospital near me")
         }
@@ -224,8 +250,8 @@ class YatriAiFragment : Fragment() {
         generateResponse(text)
     }
 
-    private fun addAiMessage(text: String) {
-        val aiMsg = ChatMessage(text, isUser = false)
+    private fun addAiMessage(text: String, mcq: QuickMcqQuestion? = null, trip: TripPlan? = null) {
+        val aiMsg = ChatMessage(text, isUser = false, mcqQuestion = mcq, generatedTrip = trip)
         chatAdapter.addMessage(aiMsg)
         scrollToBottom()
     }
@@ -243,313 +269,208 @@ class YatriAiFragment : Fragment() {
             chatAdapter.showTypingIndicator()
             scrollToBottom()
 
-            val apiKey = BuildConfig.GEMINI_API_KEY
-            val accessMgr = context?.let { AccessibilityManager.getInstance(it) }
-            val isWheelchair = accessMgr?.isWheelchairModeEnabled == true
-            val isVisual = accessMgr?.isVisualAssistanceEnabled == true
-            val isHearing = accessMgr?.isHearingAssistanceEnabled == true
+            val lowerPrompt = prompt.lowercase()
 
-            var answer: String? = null
-
-            if (apiKey.isNotEmpty() && apiKey != "DEMO_GEMINI_KEY" && apiKey != "null") {
-                try {
-                    val userLocationTool = FunctionDeclaration(
-                        name = "get_user_location",
-                        description = "Returns the user's real-time GPS coordinates, city, and location accuracy",
-                        parameters = emptyList(),
-                        requiredParameters = emptyList()
-                    )
-
-                    val accessibilityTool = FunctionDeclaration(
-                        name = "get_accessibility_profile",
-                        description = "Returns user's mobility and sensory assistance preferences (wheelchair step-free, visual, hearing)",
-                        parameters = emptyList(),
-                        requiredParameters = emptyList()
-                    )
-
-                    val geocodeTool = FunctionDeclaration(
-                        name = "tomtom-geocode",
-                        description = "Convert street addresses or landmarks to coordinates",
-                        parameters = listOf(Schema(name = "query", description = "Address or Place name", type = FunctionType.STRING, nullable = false)),
-                        requiredParameters = listOf("query")
-                    )
-
-                    val reverseGeocodeTool = FunctionDeclaration(
-                        name = "tomtom-reverse-geocode",
-                        description = "Convert GPS coordinates into a verified street address",
-                        parameters = listOf(
-                            Schema(name = "latitude", description = "Latitude", type = FunctionType.NUMBER, nullable = false),
-                            Schema(name = "longitude", description = "Longitude", type = FunctionType.NUMBER, nullable = false)
-                        ),
-                        requiredParameters = listOf("latitude", "longitude")
-                    )
-
-                    val poiSearchTool = FunctionDeclaration(
-                        name = "tomtom-poi-search",
-                        description = "Search verified hospitals, sustainable resorts, and EV stations near the user",
-                        parameters = listOf(
-                            Schema(name = "query", description = "Category or Name", type = FunctionType.STRING, nullable = false)
-                        ),
-                        requiredParameters = listOf("query")
-                    )
-
-                    val routingTool = FunctionDeclaration(
-                        name = "tomtom-routing",
-                        description = "Calculate distance, travel time, and route between two coordinates",
-                        parameters = listOf(
-                            Schema(name = "origin_lat", description = "Origin Latitude", type = FunctionType.NUMBER, nullable = false),
-                            Schema(name = "origin_lon", description = "Origin Longitude", type = FunctionType.NUMBER, nullable = false),
-                            Schema(name = "dest_lat", description = "Destination Latitude", type = FunctionType.NUMBER, nullable = false),
-                            Schema(name = "dest_lon", description = "Destination Longitude", type = FunctionType.NUMBER, nullable = false)
-                        ),
-                        requiredParameters = listOf("origin_lat", "origin_lon", "dest_lat", "dest_lon")
-                    )
-
-                    val trafficTool = FunctionDeclaration(
-                        name = "tomtom-traffic",
-                        description = "Fetch real-time traffic flow and road incidents in an area",
-                        parameters = listOf(
-                            Schema(name = "minLat", description = "Min Latitude", type = FunctionType.NUMBER, nullable = false),
-                            Schema(name = "minLon", description = "Min Longitude", type = FunctionType.NUMBER, nullable = false),
-                            Schema(name = "maxLat", description = "Max Latitude", type = FunctionType.NUMBER, nullable = false),
-                            Schema(name = "maxLon", description = "Max Longitude", type = FunctionType.NUMBER, nullable = false)
-                        ),
-                        requiredParameters = listOf("minLat", "minLon", "maxLat", "maxLon")
-                    )
-
-                    val mcpTool = Tool(listOf(userLocationTool, accessibilityTool, geocodeTool, reverseGeocodeTool, poiSearchTool, routingTool, trafficTool))
-
-                    val systemPrompt = "You are Yatri AI, an agentic green mobility and inclusive hospitality companion on the UrbanPulse platform. " +
-                            "User's real-time detected GPS Location is Latitude: $userLatitude, Longitude: $userLongitude. " +
-                            "Traveler Accessibility Profile: Wheelchair/Step-Free: $isWheelchair, Visual Assistance: $isVisual, Hearing Assistance: $isHearing. " +
-                            "Always prioritize the closest facilities relative to the user's real GPS coordinates ($userLatitude, $userLongitude). " +
-                            "Use your available tools to ground your responses with live location, routing, and search data."
-
-                    val model = GenerativeModel(
-                        modelName = "gemini-1.5-flash",
-                        apiKey = apiKey,
-                        tools = listOf(mcpTool),
-                        systemInstruction = content { text(systemPrompt) }
-                    )
-
-                    val chatHistory = messages.filter { !it.isLoading }.map {
-                        content(if (it.isUser) "user" else "model") { text(it.message) }
-                    }.toMutableList()
-
-                    val chat = model.startChat(history = chatHistory)
-                    var response = chat.sendMessage(prompt)
-
-                    while (response.functionCalls.isNotEmpty()) {
-                        val functionCall = response.functionCalls.first()
-                        val toolName = functionCall.name
-                        val args = functionCall.args
-
-                        val toolResultJson = when (toolName) {
-                            "get_user_location" -> {
-                                JSONObject().apply {
-                                    put("latitude", userLatitude)
-                                    put("longitude", userLongitude)
-                                    put("isGpsActive", isLocationDetected)
-                                }
-                            }
-                            "get_accessibility_profile" -> {
-                                JSONObject().apply {
-                                    put("wheelchairMode", isWheelchair)
-                                    put("visualAssistance", isVisual)
-                                    put("hearingAssistance", isHearing)
-                                }
-                            }
-                            "tomtom-routing" -> {
-                                val originLat = args["origin_lat"]?.toString()?.toDoubleOrNull() ?: userLatitude
-                                val originLon = args["origin_lon"]?.toString()?.toDoubleOrNull() ?: userLongitude
-                                val destLat = args["dest_lat"]?.toString()?.toDoubleOrNull()
-                                val destLon = args["dest_lon"]?.toString()?.toDoubleOrNull()
-
-                                if (destLat != null && destLon != null) {
-                                    val mcpArgs = mapOf(
-                                        "origin" to mapOf("lat" to originLat, "lon" to originLon),
-                                        "destination" to mapOf("lat" to destLat, "lon" to destLon)
-                                    )
-                                    val res = withContext(Dispatchers.IO) { TomTomMcpClient.callTool(toolName, mcpArgs) }
-                                    JSONObject().put("routeData", res)
-                                } else {
-                                    JSONObject().put("error", "Invalid destination coordinates")
-                                }
-                            }
-                            "tomtom-poi-search" -> {
-                                val query = args["query"]?.toString() ?: ""
-                                val mcpArgs = mapOf(
-                                    "query" to query,
-                                    "position" to mapOf("lat" to userLatitude, "lon" to userLongitude)
-                                )
-                                val res = withContext(Dispatchers.IO) { TomTomMcpClient.callTool(toolName, mcpArgs) }
-                                JSONObject().put("poiResults", res)
-                            }
-                            "tomtom-reverse-geocode" -> {
-                                val lat = args["latitude"]?.toString()?.toDoubleOrNull() ?: userLatitude
-                                val lon = args["longitude"]?.toString()?.toDoubleOrNull() ?: userLongitude
-                                val mcpArgs = mapOf("point" to mapOf("lat" to lat, "lon" to lon))
-                                val res = withContext(Dispatchers.IO) { TomTomMcpClient.callTool(toolName, mcpArgs) }
-                                JSONObject().put("address", res)
-                            }
-                            else -> {
-                                val argMap = args.entries.associate { it.key to it.value }
-                                val res = withContext(Dispatchers.IO) { TomTomMcpClient.callTool(toolName, argMap) }
-                                JSONObject().put("result", res)
-                            }
-                        }
-
-                        response = chat.sendMessage(
-                            content("function") {
-                                part(com.google.ai.client.generativeai.type.FunctionResponsePart(toolName, toolResultJson))
-                            }
-                        )
-                    }
-
-                    answer = response.text
-                } catch (e: Exception) {
-                    // Fall back to live context-aware local engine
+            // 1. Check if user is answering a pending Days MCQ question
+            if (pendingTripDestination != null && (lowerPrompt.contains("day") || lowerPrompt.contains("express") || lowerPrompt.contains("weekend") || lowerPrompt.contains("leisure") || lowerPrompt.matches(Regex(".*\\b[1-7]\\b.*")))) {
+                chatAdapter.removeTypingIndicator()
+                val days = when {
+                    lowerPrompt.contains("1") || lowerPrompt.contains("express") -> 1
+                    lowerPrompt.contains("3") || lowerPrompt.contains("leisure") -> 3
+                    else -> 2
                 }
+                pendingTripDays = days
+                val dest = pendingTripDestination ?: "Lonavala"
+
+                addAiMessage(
+                    text = "Got it! A **$days-Day trip to $dest** is selected.\n\nNow, what is your preferred travel style and accessibility requirement?",
+                    mcq = QuickMcqQuestion(
+                        questionId = "style_mcq",
+                        questionText = "Select travel style",
+                        options = listOf(
+                            "Wheelchair Step-Free ♿",
+                            "Eco Nature & Farm 🌿",
+                            "Budget Explorer 🎒",
+                            "Luxury Heritage 🏰"
+                        )
+                    )
+                )
+                return@launch
             }
 
-            if (answer.isNullOrEmpty()) {
-                answer = getLiveContextAwareResponse(prompt)
+            // 2. Check if user is answering the Style MCQ question
+            if (pendingTripDestination != null && (lowerPrompt.contains("wheelchair") || lowerPrompt.contains("step-free") || lowerPrompt.contains("eco") || lowerPrompt.contains("nature") || lowerPrompt.contains("budget") || lowerPrompt.contains("luxury") || lowerPrompt.contains("heritage"))) {
+                chatAdapter.removeTypingIndicator()
+                val dest = pendingTripDestination ?: "Lonavala"
+                val days = pendingTripDays
+                val isAccessible = lowerPrompt.contains("wheelchair") || lowerPrompt.contains("step-free")
+                val style = if (isAccessible) "Wheelchair Step-Free" else "Eco Nature"
+
+                val generatedTrip = buildDynamicTrip(dest, days, isAccessible, style)
+
+                addAiMessage(
+                    text = "🌿 **Your $days-Day Sustainable & Accessible Itinerary for $dest is Ready!**\n\n" +
+                            "• 🚆 **Transit Option**: ${generatedTrip.travelMode} (Cost: ₹${generatedTrip.transitCostInr})\n" +
+                            "• 🏨 **Verified Eco Stay**: ${generatedTrip.hotelName} (Rating: ★ ${generatedTrip.hotelRating})\n" +
+                            "• ♿ **Accessibility**: ${if (generatedTrip.isStepFreeAccessible) "100% Level Boarding & Elevator Concourses" else "Standard Concourse"}\n" +
+                            "• 💨 **Air Quality**: ${generatedTrip.aqiStatus}\n" +
+                            "• 💰 **Estimated Budget**: ₹${generatedTrip.totalBudgetInr}\n" +
+                            "• 🌱 **Carbon Avoided**: -${generatedTrip.co2SavedKg} kg CO2e vs petrol taxi!\n\n" +
+                            "You can save this trip to your **Trips tab** or open the full timeline below:",
+                    trip = generatedTrip
+                )
+                pendingTripDestination = null
+                return@launch
+            }
+
+            // 3. Check if user is asking to plan a trip to a destination
+            if (lowerPrompt.contains("plan") || lowerPrompt.contains("trip") || lowerPrompt.contains("itinerary") || lowerPrompt.contains("lonavala") || lowerPrompt.contains("alibaug") || lowerPrompt.contains("mahabaleshwar") || lowerPrompt.contains("matheran")) {
+                chatAdapter.removeTypingIndicator()
+                val dest = when {
+                    lowerPrompt.contains("alibaug") -> "Alibaug"
+                    lowerPrompt.contains("mahabaleshwar") -> "Mahabaleshwar"
+                    lowerPrompt.contains("matheran") -> "Matheran"
+                    lowerPrompt.contains("pune") -> "Pune"
+                    lowerPrompt.contains("goa") -> "Goa"
+                    else -> "Lonavala"
+                }
+                pendingTripDestination = dest
+
+                addAiMessage(
+                    text = "I would be happy to design a smart, low-carbon, and accessible itinerary to **$dest**! 🌲\n\nHow many days are you planning for this trip?",
+                    mcq = QuickMcqQuestion(
+                        questionId = "days_mcq",
+                        questionText = "Select trip duration",
+                        options = listOf(
+                            "1 Day Express (Same Day)",
+                            "2 Days Weekend",
+                            "3 Days Leisure",
+                            "Custom Duration"
+                        )
+                    )
+                )
+                return@launch
+            }
+
+            // 4. Intelligent Local Grounded Engine
+            val isWheelchair = context?.let { AccessibilityManager.getInstance(it) }?.isWheelchairModeEnabled == true
+            val localResponse = withContext(Dispatchers.IO) {
+                LiveCityIntelligenceService.queryGroundedIntelligence(
+                    userPrompt = prompt,
+                    userLat = userLatitude,
+                    userLon = userLongitude,
+                    isWheelchair = isWheelchair
+                )
             }
 
             chatAdapter.removeTypingIndicator()
-            addAiMessage(answer)
+            addAiMessage(localResponse)
         }
     }
 
-    private suspend fun getLiveContextAwareResponse(input: String): String {
-        val q = input.lowercase()
-        val accessMgr = context?.let { AccessibilityManager.getInstance(it) }
-        val wheelchairMode = accessMgr?.isWheelchairModeEnabled == true
-
-        val locContext = if (isLocationDetected) {
-            "Current GPS: (${String.format("%.4f", userLatitude)}° N, ${String.format("%.4f", userLongitude)}° E)"
-        } else {
-            "Location: Mumbai Metropolitan Area"
-        }
-
+    private fun buildDynamicTrip(destination: String, days: Int, isAccessible: Boolean, style: String): TripPlan {
         return when {
-            q.contains("hospital") || q.contains("doctor") || q.contains("medical") || q.contains("clinic") || q.contains("emergency") -> {
-                // Query LIVE TomTom Search API around the user's real GPS coordinates!
-                val liveHospitals = LiveCityIntelligenceService.searchNearbyPoi("hospital", userLatitude, userLongitude, radiusMeters = 15000)
-
-                if (liveHospitals.isNotEmpty()) {
-                    val sb = StringBuilder()
-                    liveHospitals.take(4).forEachIndexed { index, h ->
-                        val distKm = h.distanceMeters / 1000.0
-                        val phoneInfo = if (!h.phone.isNullOrEmpty()) " • Tel: ${h.phone}" else ""
-                        sb.append("${index + 1}. ${h.name} (${String.format("%.1f", distKm)} km away)\n")
-                        sb.append("   • Address: ${h.address}\n")
-                        sb.append("   • Accessibility: Step-Free Ambulance Bay, Porter Assistance$phoneInfo\n\n")
-                    }
-                    "Live Nearby Medical Facilities ($locContext via TomTom Online Search):\n\n" +
-                    sb.toString() +
-                    "Tap any facility in the Medical Directory to start turn-by-turn navigation or direct emergency dialing."
-                } else {
-                    "Live medical search queried at $locContext. Please check your network connection or tap Medical Directory on Dashboard."
-                }
+            destination.contains("Alibaug", true) -> {
+                TripPlan(
+                    id = "trip_dyn_alibaug_${System.currentTimeMillis()}",
+                    destination = "Alibaug",
+                    title = "Alibaug Coastal & Marine Eco-Trail",
+                    durationDays = days,
+                    travelDates = "Upcoming Weekend ($days Days)",
+                    travelMode = "Ro-Pax Electric Hybrid Ferry (Bhaucha Dhakka)",
+                    co2SavedKg = (12.2 * days),
+                    pulsePointsEarned = (100 * days),
+                    isCompleted = false,
+                    hotelName = "Radisson Blu Resort (LEED Gold Certified)",
+                    hotelRating = 4.7,
+                    isStepFreeAccessible = true,
+                    totalBudgetInr = (2400 * days),
+                    aqiStatus = "Pristine Coastal Breeze (AQI 34)",
+                    transitCostInr = 380,
+                    dailyItinerary = listOf(
+                        TripDaySchedule(
+                            dayNumber = 1,
+                            dayTitle = "Mandwa Port & Coastal Heritage",
+                            activities = listOf(
+                                TripActivity("08:30 AM", "Ro-Pax Level-Boarding Ferry", "Ferry Wharf Mumbai to Mandwa Port (Low Emission)", "Train", true, 45, 380),
+                                TripActivity("10:30 AM", "Electric Feeder Shuttle", "Mandwa to Radisson Blu Resort", "E-Bus", true, 20, 40),
+                                TripActivity("01:00 PM", "Kolaba Marine Fort Viewing", "Step-free ramp concourse with solar audio guide", "Walk", true, 0, 50),
+                                TripActivity("05:30 PM", "Varsoli Beach Sunset Trail", "Zero-plastic mangrove pedestrian trail", "Walk", true, 0, 0)
+                            )
+                        )
+                    )
+                )
             }
-
-            q.contains("hotel") || q.contains("stay") || q.contains("resort") || q.contains("accommodation") || q.contains("dining") -> {
-                // Query LIVE TomTom Search API for hotels around the user's GPS coordinates!
-                val liveHotels = LiveCityIntelligenceService.searchNearbyPoi("hotel", userLatitude, userLongitude, radiusMeters = 15000)
-
-                if (liveHotels.isNotEmpty()) {
-                    val sb = StringBuilder()
-                    liveHotels.take(4).forEachIndexed { index, stay ->
-                        val distKm = stay.distanceMeters / 1000.0
-                        sb.append("${index + 1}. ${stay.name} (${String.format("%.1f", distKm)} km away)\n")
-                        sb.append("   • Address: ${stay.address}\n")
-                        sb.append("   • Eco & Accessibility: Solar Powered Grid, Wheelchair Ramp & Braille Access\n\n")
-                    }
-                    "Live Sustainable & Accessible Accommodations ($locContext):\n\n" +
-                    sb.toString() +
-                    "Tap 'Eco Stays' on your Dashboard to view environmental audits and direct venue contact."
-                } else {
-                    "Live hospitality search queried at $locContext. Open 'Eco Stays' on Dashboard for verified partners."
-                }
+            destination.contains("Mahabaleshwar", true) -> {
+                TripPlan(
+                    id = "trip_dyn_mahabaleshwar_${System.currentTimeMillis()}",
+                    destination = "Mahabaleshwar",
+                    title = "Mahabaleshwar Strawberry & Agro-Retreat",
+                    durationDays = days,
+                    travelDates = "Upcoming Weekend ($days Days)",
+                    travelMode = "MSRTC Electric AC Shivshahi Bus",
+                    co2SavedKg = (24.0 * days),
+                    pulsePointsEarned = (120 * days),
+                    isCompleted = false,
+                    hotelName = "Courtyard by Marriott Eco Valley",
+                    hotelRating = 4.8,
+                    isStepFreeAccessible = true,
+                    totalBudgetInr = (3200 * days),
+                    aqiStatus = "Fresh Mountain Valley (AQI 22)",
+                    transitCostInr = 450,
+                    dailyItinerary = listOf(
+                        TripDaySchedule(
+                            dayNumber = 1,
+                            dayTitle = "Organic Berry Farms & Viewpoints",
+                            activities = listOf(
+                                TripActivity("07:00 AM", "MSRTC Electric AC Coach", "Mumbai Dadar to Mahabaleshwar Bus Stand", "E-Bus", true, 60, 450),
+                                TripActivity("12:30 PM", "Mapro Organic Farm Tour", "Zero-waste agro-tourism with level pathways", "Walk", true, 0, 0),
+                                TripActivity("04:30 PM", "Venna Lake Solar Boat Ride", "Electric propelled boat with wheelchair hoist", "Walk", true, 5, 150)
+                            )
+                        )
+                    )
+                )
             }
-
-            q.contains("traffic") || q.contains("congestion") || q.contains("jam") || q.contains("speed") || q.contains("road") -> {
-                // Query LIVE TomTom Flow Segment API at user coordinates!
-                val liveTraffic = LiveCityIntelligenceService.getLiveTraffic(userLatitude, userLongitude)
-
-                if (liveTraffic != null) {
-                    val delayMin = liveTraffic.delaySeconds / 60
-                    val delayText = if (delayMin > 0) "~$delayMin min delay" else "No significant delays"
-                    val flowState = if (liveTraffic.currentSpeedKmh < liveTraffic.freeFlowSpeedKmh * 0.6) "Heavy Congestion" else "Normal Flow"
-
-                    "Live TomTom Traffic Intelligence ($locContext):\n\n" +
-                    "- Sector: ${liveTraffic.roadName}\n" +
-                    "- Flow Status: $flowState\n" +
-                    "- Current Speed: ${liveTraffic.currentSpeedKmh} km/h (Free-flow: ${liveTraffic.freeFlowSpeedKmh} km/h)\n" +
-                    "- Traffic Delay: $delayText\n\n" +
-                    "Green recommendation: Consider Metro or shared EV transit for low-carbon travel."
-                } else {
-                    "Live TomTom traffic is active across all arterial corridors in your sector ($locContext)."
-                }
-            }
-
-            q.contains("aqi") || q.contains("air") || q.contains("pollution") || q.contains("weather") || q.contains("temp") -> {
-                // Query LIVE Open-Meteo Weather & AQI APIs at user coordinates!
-                val liveEnv = LiveCityIntelligenceService.getLiveWeatherAndAqi(userLatitude, userLongitude)
-
-                if (liveEnv != null) {
-                    val aqiLevel = when {
-                        liveEnv.usAqi <= 50 -> "Good"
-                        liveEnv.usAqi <= 100 -> "Moderate"
-                        liveEnv.usAqi <= 150 -> "Unhealthy for Sensitive Groups"
-                        else -> "Unhealthy"
-                    }
-
-                    "Live Environmental Sensor Matrix ($locContext):\n\n" +
-                    "- Weather: ${liveEnv.temperatureC}°C • ${liveEnv.condition} • Humidity ${liveEnv.humidityPercent}%\n" +
-                    "- Wind: ${liveEnv.windSpeedKmh} km/h\n" +
-                    "- Air Quality Index: ${liveEnv.usAqi} ($aqiLevel)\n" +
-                    "- PM2.5 Concentration: ${liveEnv.pm25} µg/m³\n" +
-                    "- PM10: ${liveEnv.pm10} µg/m³\n\n" +
-                    "Health recommendation: ${if (liveEnv.usAqi > 100) "Sensitive travelers are advised to wear a protective mask during peak transit hours." else "Air quality is favorable for outdoor activities."}"
-                } else {
-                    "Live weather and environmental sensors active at $locContext."
-                }
-            }
-
-            q.contains("route") || q.contains("metro") || q.contains("transit") || q.contains("bus") || q.contains("travel") -> {
-                val accessibilityNote = if (wheelchairMode) {
-                    "Accessibility Preference: Route is 100% Step-Free via station elevators."
-                } else {
-                    "Step-Free Access: Elevators available at all transit concourses."
-                }
-
-                "Multimodal Green Journey from your position ($locContext):\n\n" +
-                "- Mode 1 (Recommended): Rapid Electric Transit / Metro\n" +
-                "  • Estimated Travel Time: ~20-25 mins • Fare: ₹30\n" +
-                "  • Estimated Emissions: 45g CO2e (-435g CO2 vs Petrol Taxi)\n" +
-                "  • $accessibilityNote\n\n" +
-                "- Mode 2: BEST Electric Low-Floor AC Bus\n" +
-                "  • Estimated Travel Time: ~32-38 mins • Fare: ₹15 • Emissions: 70g CO2e\n" +
-                "  • Hydraulic wheelchair ramp equipped.\n\n" +
-                "Earn +40 PULSE Carbon Credits by choosing the Electric Transit option!"
-            }
-
-            q.contains("sos") || q.contains("emergency") || q.contains("help") || q.contains("police") || q.contains("danger") -> {
-                "Emergency Assistance Helplines ($locContext):\n\n" +
-                "- National Emergency Helpline: 112\n" +
-                "- Police Control: 100\n" +
-                "- Ambulance Services: 108 / 102\n" +
-                "- Women Safety Helpline: 1091\n\n" +
-                "Your exact GPS coordinates are ready for emergency broadcast via the SOS button in the top navigation bar."
-            }
-
             else -> {
-                "Analysis for \"$input\" at $locContext:\n\n" +
-                "- Urban Status: Real-time traffic, environmental sensors, and TomTom search matrix are online.\n" +
-                "- Active Accessibility Mode: ${if (wheelchairMode) "Wheelchair (Step-Free Rerouting)" else "Standard"}\n\n" +
-                "Ask me about nearest hospitals, hotels, live traffic, weather & AQI, or step-free green routes!"
+                // Lonavala & default
+                TripPlan(
+                    id = "trip_dyn_lonavala_${System.currentTimeMillis()}",
+                    destination = "Lonavala",
+                    title = "Lonavala $days-Day Green & Inclusive Retreat",
+                    durationDays = days,
+                    travelDates = "Upcoming Weekend ($days Days)",
+                    travelMode = "Electric Express Train (Indrayani / Deccan Exp)",
+                    co2SavedKg = (9.2 * days),
+                    pulsePointsEarned = (125 * days),
+                    isCompleted = false,
+                    hotelName = "The Machan Solar Resort (100% Green Energy)",
+                    hotelRating = 4.8,
+                    isStepFreeAccessible = true,
+                    totalBudgetInr = (2100 * days),
+                    aqiStatus = "Clean Western Ghats Air (AQI 28)",
+                    transitCostInr = 150,
+                    dailyItinerary = listOf(
+                        TripDaySchedule(
+                            dayNumber = 1,
+                            dayTitle = "Scenic Ridge & Heritage Caves",
+                            activities = listOf(
+                                TripActivity("07:10 AM", "Indrayani Express Electric Train", "Dadar to Lonavala (Electric Rail • Level Boarding)", "Train", true, 28, 75),
+                                TripActivity("09:45 AM", "Step-Free Check-in", "The Machan Solar Treehouse Resort", "Hotel", true, 0, 0),
+                                TripActivity("11:30 AM", "Karla Caves Accessible Plaza", "Ancient rock-cut Buddhist shrine with paved lower ramp", "E-Bus", true, 40, 50),
+                                TripActivity("04:00 PM", "Bhushi Dam Walking Corridor", "Rainwater conservation reserve with clean pedestrian pathway", "Walk", true, 0, 0)
+                            )
+                        ),
+                        TripDaySchedule(
+                            dayNumber = 2,
+                            dayTitle = "Tiger's Leap & Ryewood Botanical Garden",
+                            activities = listOf(
+                                TripActivity("09:00 AM", "Ryewood Botanical Garden", "Step-free paved floral trail and sensory herb garden", "Walk", true, 0, 0),
+                                TripActivity("01:30 PM", "Tiger's Leap Panoramic View", "Electric tourist shuttle to cliffside platform", "E-Bus", true, 30, 60),
+                                TripActivity("06:15 PM", "Deccan Express Return Rail", "Lonavala Station to Mumbai CSMT", "Train", true, 28, 75)
+                            )
+                        )
+                    )
+                )
             }
         }
     }
