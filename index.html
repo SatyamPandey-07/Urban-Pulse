@@ -1,353 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>UrbanPulse — Smart Green & Inclusive Travel Platform</title>
- <meta name="description" content="UrbanPulse: Real-Time Dual-Route Mapping, Groq LLaMA-3.3 AI Trip Planner, and B2B Hotel Sustainability Hub.">
- <link rel="preconnect" href="https://fonts.googleapis.com">
- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
- <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
- <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UrbanPulse — Smart Green Mobility & Autonomous Travel Platform</title>
+    <meta name="description" content="UrbanPulse: Real-Time Dual-Route Mapping, Groq AI Trip Planner with Interactive MCQ Questions, and B2B Hotel Sustainability Hub.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="app-body">
 
- <!-- Glowing Background Ambient Spheres -->
- <div class="ambient-glow glow-1"></div>
- <div class="ambient-glow glow-2"></div>
- <div class="ambient-glow glow-3"></div>
+    <!-- Ambient Glowing Spheres -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
 
- <!-- Top App Bar -->
- <header class="top-nav">
- <div class="nav-content">
- <div class="brand-group">
- <div class="brand-logo-icon"></div>
- <div>
- <div class="brand-text">UrbanPulse</div>
- <div class="brand-subtext">HackCelestial 3.0 • Pillai University</div>
- </div>
- </div>
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="nav-content">
+            <div class="brand-group">
+                <div class="brand-logo-icon">UP</div>
+                <div>
+                    <div class="brand-text">UrbanPulse</div>
+                    <div class="brand-subtext">HackCelestial 3.0 • Pillai University</div>
+                </div>
+            </div>
 
- <div class="nav-pill-menu">
- <button class="nav-pill-btn active" onclick="switchAppTab('map-view')">️ Live Map</button>
- <button class="nav-pill-btn" onclick="switchAppTab('chat-view')"> Yatri Groq AI</button>
- <button class="nav-pill-btn" onclick="switchAppTab('trips-view')"> Trips Hub</button>
- <button class="nav-pill-btn" onclick="switchAppTab('hotel-view')"> Hotel B2B</button>
- </div>
+            <div class="nav-pill-menu">
+                <button class="nav-pill-btn active" onclick="switchAppTab('map-view')">Live Map</button>
+                <button class="nav-pill-btn" onclick="switchAppTab('chat-view')">Yatri AI Agent</button>
+                <button class="nav-pill-btn" onclick="switchAppTab('trips-view')">My Trips</button>
+                <button class="nav-pill-btn" onclick="switchAppTab('hotel-view')">Hotel ESG Optimizer</button>
+            </div>
 
- <div class="nav-cta-group">
- <a href="https://github.com/SatyamPandey-07/Urban-Pulse" target="_blank" class="glass-btn">
- <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
- GitHub
- </a>
- <a href="https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial" target="_blank" class="glow-download-btn">
- <span> Get APK v1.0.0</span>
- </a>
- </div>
- </div>
- </header>
+            <div class="nav-cta-group">
+                <a href="https://github.com/SatyamPandey-07/Urban-Pulse" target="_blank" class="glass-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub
+                </a>
+                <a href="https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial" target="_blank" class="glow-download-btn">
+                    <span>Download APK v1.0.0</span>
+                </a>
+            </div>
+        </div>
+    </header>
 
- <!-- Main App Container -->
- <main class="app-layout">
+    <!-- Main Container -->
+    <main class="app-layout">
 
- <!-- Left: App Live Hero & Interactive Device Mockup -->
- <div class="app-hero-panel">
- <div class="hero-chip"> Powered by Groq LLaMA-3.3-70B &amp; TomTom MCP</div>
- <h1 class="hero-title">
- Sustainable Travel.<br>
- <span class="gradient-text">Zero Compromises.</span>
- </h1>
- <p class="hero-desc">
- Live multi-modal transit comparisons, autonomous conversational trip building with MCQ questions, and B2B hotel resource optimization with verified ISO 14064 ESG audits.
- </p>
+        <!-- Left: Hero Feature Overview -->
+        <div class="app-hero-panel">
+            <div class="hero-chip">Powered by Groq AI &amp; TomTom Routing</div>
+            <h1 class="hero-title">
+                Smart Mobility.<br>
+                <span class="gradient-text">Accessible Tourism.</span>
+            </h1>
+            <p class="hero-desc">
+                Live dual-mode route planning, autonomous Groq AI itineraries with interactive MCQ questions, and B2B hotel resource optimization with verified ISO 14064 ESG audit reports.
+            </p>
 
- <div class="metrics-grid">
- <div class="metric-card">
- <div class="metric-icon"></div>
- <div class="metric-number text-emerald">37.4 kg</div>
- <div class="metric-label">Avg. CO₂e Avoided</div>
- </div>
- <div class="metric-card">
- <div class="metric-icon"></div>
- <div class="metric-number text-cyan">100%</div>
- <div class="metric-label">Step-Free Verified</div>
- </div>
- <div class="metric-card">
- <div class="metric-icon"></div>
- <div class="metric-number text-purple">0.3s</div>
- <div class="metric-label">Groq AI Latency</div>
- </div>
- <div class="metric-card">
- <div class="metric-icon"></div>
- <div class="metric-number text-amber">4.8</div>
- <div class="metric-label">LEED Platinum ESG</div>
- </div>
- </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-number text-emerald">37.4 kg</div>
+                    <div class="metric-label">Avg. CO2e Avoided</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number text-cyan">100%</div>
+                    <div class="metric-label">Step-Free Access</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number text-purple">0.3s</div>
+                    <div class="metric-label">Groq AI Speed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number text-amber">4.8</div>
+                    <div class="metric-label">BEE / LEED Star</div>
+                </div>
+            </div>
 
- <!-- Quick Action Links -->
- <div class="quick-links-box">
- <div class="quick-title">Quick Try:</div>
- <div class="quick-chips">
- <button class="chip-action" onclick="planQuickTrip('Kedarnath')">️ Kedarnath Dham Yatra</button>
- <button class="chip-action" onclick="planQuickTrip('Lonavala')"> Lonavala Eco-Trail</button>
- <button class="chip-action" onclick="planQuickTrip('Alibaug')"> Alibaug Hybrid Ferry</button>
- <button class="chip-action" onclick="planQuickTrip('Manali')">️ Manali Pine Forest</button>
- </div>
- </div>
- </div>
+            <!-- Quick Action Links -->
+            <div class="quick-links-box">
+                <div class="quick-title">Explore Itinerary Routes:</div>
+                <div class="quick-chips">
+                    <button class="chip-action" onclick="planQuickTrip('Kedarnath')">Kedarnath Dham</button>
+                    <button class="chip-action" onclick="planQuickTrip('Lonavala')">Lonavala Eco-Trail</button>
+                    <button class="chip-action" onclick="planQuickTrip('Alibaug')">Alibaug Ferry</button>
+                    <button class="chip-action" onclick="planQuickTrip('Matheran')">Matheran Eco-Zone</button>
+                </div>
+            </div>
+        </div>
 
- <!-- Right: Interactive Live App Screen / Canvas -->
- <div class="app-device-frame">
- <div class="device-notch"></div>
- 
- <!-- View 1: Live Dual Route Map View -->
- <div id="view-map" class="app-view active">
- <div class="app-view-header">
- <div>
- <div class="app-header-title">Live Dual-Route Canvas</div>
- <div class="app-header-sub">TomTom Multi-Routing + Open-Meteo AQI</div>
- </div>
- <select id="select-destination" class="glass-select" onchange="renderSelectedRoute(this.value)">
- <option value="kedarnath">️ Kedarnath Valley Transit Corridor</option>
- <option value="lonavala" selected> Lonavala Scenic Ridge (83 km)</option>
- <option value="fortis"> Fortis Hospital Mulund (Step-Free)</option>
- <option value="powai"> Powai EV Fast Charging Hub</option>
- <option value="csmt">️ CSMT South Mumbai Heritage Loop</option>
- <option value="alibaug">️ Alibaug Coastal Trail (Hybrid Ferry)</option>
- </select>
- </div>
+        <!-- Right: Mobile Device Simulator / Interactive App Shell -->
+        <div class="app-simulator-shell">
+            <div class="phone-frame">
+                <!-- Status Bar -->
+                <div class="phone-top-bar">
+                    <span class="phone-time">09:41</span>
+                    <div class="phone-camera-notch"></div>
+                    <div class="phone-icons">
+                        <span>5G</span>
+                        <span>100%</span>
+                    </div>
+                </div>
 
- <div class="map-container">
- <div id="leaflet-map"></div>
+                <!-- Tab Views -->
+                <div class="phone-viewport">
+                    <!-- View 1: Live Dual-Route Map -->
+                    <div id="view-map" class="app-view active">
+                        <div class="app-view-header">
+                            <div>
+                                <div class="app-header-title">Live Green Route</div>
+                                <div class="app-header-sub">TomTom Dual Routing &amp; Open-Meteo AQI</div>
+                            </div>
+                            <div class="aqi-badge-pill" id="aqi-status-badge">AQI 42 • Good</div>
+                        </div>
 
- <!-- Floating Difference HUD -->
- <div class="map-hud">
- <div class="hud-top-bar">
- <span class="hud-dest-name" id="hud-dest-title">Lonavala Scenic Ridge</span>
- <span class="hud-badge" id="hud-savings-badge">Save 18.4 kg CO₂ • Save ₹3,125</span>
- </div>
- <div class="hud-aqi-indicator" id="hud-aqi-text"> Indrayani Electric Express (AQI: 28) vs Petrol Cab</div>
+                        <!-- Interactive Leaflet Map Container -->
+                        <div id="leaflet-map-canvas" class="map-canvas-container"></div>
 
- <div class="hud-dual-columns">
- <div class="hud-card green-hud">
- <div class="hud-card-label"> GREEN ROUTE</div>
- <div class="hud-card-val" id="green-time-fare">2h 05m • ₹75</div>
- <div class="hud-card-sub" id="green-details"> Indrayani Electric Express • Step-Free</div>
- </div>
- <div class="hud-card red-hud">
- <div class="hud-card-label"> PETROL CAB</div>
- <div class="hud-card-val" id="normal-time-fare">2h 45m • ₹3,200</div>
- <div class="hud-card-sub" id="normal-details"> MH Taxi Rate: Base ₹28 + ₹18.5/km</div>
- </div>
- </div>
- </div>
- </div>
- </div>
+                        <!-- Route Selector Chips -->
+                        <div class="route-chips-scroll">
+                            <button class="map-route-chip active" onclick="selectMapRoute('lonavala')">Lonavala (Eco Rail)</button>
+                            <button class="map-route-chip" onclick="selectMapRoute('kedarnath')">Kedarnath (Pilgrim)</button>
+                            <button class="map-route-chip" onclick="selectMapRoute('powai')">Powai EV Hub</button>
+                            <button class="map-route-chip" onclick="selectMapRoute('mulund')">Fortis Hospital</button>
+                        </div>
 
- <!-- View 2: Yatri Groq AI Interactive Chat View -->
- <div id="view-chat" class="app-view">
- <div class="app-view-header">
- <div class="ai-header-info">
- <div class="ai-status-pulse"></div>
- <div>
- <div class="app-header-title">Yatri AI Assistant</div>
- <div class="app-header-sub">Powered by Groq LLaMA-3.3-70B • 100% Real-Time</div>
- </div>
- </div>
- <button class="glass-icon-btn" onclick="resetChat()" title="Reset Dialogue"></button>
- </div>
+                        <!-- Route Comparison Drawer -->
+                        <div class="route-metrics-card">
+                            <div class="metric-col green-col">
+                                <div class="metric-tag">GREEN PATH</div>
+                                <div class="metric-val" id="green-mode-text">Electric Train + E-Bus</div>
+                                <div class="metric-sub" id="green-cost-text">Rs 65 • -24.8 kg CO2e</div>
+                            </div>
+                            <div class="col-divider"></div>
+                            <div class="metric-col red-col">
+                                <div class="metric-tag">STANDARD CAB</div>
+                                <div class="metric-val" id="red-mode-text">Petrol Taxi</div>
+                                <div class="metric-sub" id="red-cost-text">Rs 1,480 • +38.2 kg CO2e</div>
+                            </div>
+                        </div>
+                    </div>
 
- <div class="chat-viewport" id="chat-viewport">
- <div class="chat-msg ai-msg">
- <div class="ai-badge-avatar"></div>
- <div class="msg-bubble-wrap">
- <div class="msg-bubble">
- Namaste! I am <strong>Yatri AI</strong>, powered by ultra-fast <strong>Groq LLaMA-3.3</strong>.<br><br>
- I can plan custom low-carbon itineraries to <strong>Kedarnath, Manali, Lonavala, Alibaug, or any global destination</strong> with step-free accessibility verification.<br><br>
- Where would you like to travel?
- </div>
- <div class="mcq-chips-container" id="initial-mcq-chips">
- <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Kedarnath')">️ Plan Kedarnath Yatra</button>
- <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Lonavala')"> Plan Lonavala Weekend</button>
- <button class="mcq-chip" onclick="handleChatPrompt('Plan Coastal Alibaug')">️ Plan Coastal Alibaug</button>
- <button class="mcq-chip" onclick="handleChatPrompt('Nearest accessible hospitals')"> Nearest Hospitals</button>
- </div>
- </div>
- </div>
- </div>
+                    <!-- View 2: Yatri Groq AI Chat & Trip Planner -->
+                    <div id="view-chat" class="app-view">
+                        <div class="app-view-header">
+                            <div>
+                                <div class="app-header-title">Yatri AI Trip Planner</div>
+                                <div class="app-header-sub">Groq Agentic Reasoning Engine</div>
+                            </div>
+                            <span class="online-indicator-pill">Groq Active</span>
+                        </div>
 
- <div class="chat-input-row">
- <input type="text" id="user-chat-input" class="app-text-input" placeholder="Type destination or prompt (e.g. 'Planning a trip to Kedarnath')...">
- <button class="send-action-btn" id="btn-send-chat" onclick="sendUserMessage()">
- <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
- </button>
- </div>
- </div>
+                        <!-- Chat Messages Scroll Container -->
+                        <div id="chat-messages-container" class="chat-messages-list">
+                            <div class="chat-msg ai-msg">
+                                <div class="msg-avatar">AI</div>
+                                <div class="msg-bubble">
+                                    Welcome to Yatri AI! Where would you like to plan your next low-carbon, accessible journey?
+                                </div>
+                            </div>
+                        </div>
 
- <!-- View 3: Trips Hub View -->
- <div id="view-trips" class="app-view">
- <div class="app-view-header">
- <div>
- <div class="app-header-title">My Trips &amp; Carbon Passport</div>
- <div class="app-header-sub">Saved Itineraries &amp; Verified Carbon Credits</div>
- </div>
- <button class="glass-pill-btn" onclick="switchAppTab('chat-view')">+ Plan New Trip</button>
- </div>
+                        <!-- Interactive MCQ Options Area -->
+                        <div id="mcq-options-container" class="mcq-container">
+                            <div class="mcq-prompt-text">Choose Travel Destination:</div>
+                            <div class="mcq-buttons-grid">
+                                <button class="mcq-btn" onclick="sendMcqChoice('Matheran Eco-Zone')">Matheran Eco-Zone</button>
+                                <button class="mcq-btn" onclick="sendMcqChoice('Kedarnath Dham')">Kedarnath Dham</button>
+                                <button class="mcq-btn" onclick="sendMcqChoice('Lonavala Hills')">Lonavala Hills</button>
+                                <button class="mcq-btn" onclick="sendMcqChoice('Alibaug Beach')">Alibaug Beach</button>
+                            </div>
+                        </div>
 
- <div class="trips-scroll-content">
- <!-- Kedarnath Trip Card -->
- <div class="app-trip-card">
- <div class="trip-top-row">
- <div>
- <div class="trip-dest-name">Kedarnath Holy Eco-Yatra</div>
- <div class="trip-date-str">Upcoming: Sep 18 - Sep 21, 2026 • 4 Days</div>
- </div>
- <span class="trip-carbon-tag">-42.8 kg CO₂</span>
- </div>
- <div class="trip-specs-list">
- <div> <strong>Transit:</strong> Electric Pilgrim Coach + Gaurikund E-Shuttle</div>
- <div> <strong>Stay:</strong> GMVN Mandakini Eco Tourist Rest House ( 4.8)</div>
- <div> <strong>Accessibility:</strong> Assisted Palki &amp; Accessible Concourse</div>
- <div> <strong>Budget:</strong> ₹8,400 Total (Transit: ₹650)</div>
- </div>
- <div class="trip-bottom-row">
- <span class="pulse-pts-pill">+320 PULSE PTS</span>
- <button class="view-itinerary-btn" onclick="openScheduleModal('kedarnath')">View Full Schedule</button>
- </div>
- </div>
+                        <!-- Text Input Bar -->
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-input-field" placeholder="Ask Yatri AI (e.g. Plan 3 days in Matheran)..." onkeypress="handleChatKeyPress(event)">
+                            <button class="chat-send-btn" onclick="sendUserMessage()">Send</button>
+                        </div>
+                    </div>
 
- <!-- Lonavala Trip Card -->
- <div class="app-trip-card">
- <div class="trip-top-row">
- <div>
- <div class="trip-dest-name">Lonavala Monsoon Eco-Retreat</div>
- <div class="trip-date-str">Upcoming Weekend • 2 Days</div>
- </div>
- <span class="trip-carbon-tag">-18.4 kg CO₂</span>
- </div>
- <div class="trip-specs-list">
- <div> <strong>Transit:</strong> Indrayani Electric Express (Level Boarding)</div>
- <div> <strong>Stay:</strong> The Machan Solar Treehouse (100% Green Power)</div>
- <div> <strong>Accessibility:</strong> 100% Step-Free Ramps</div>
- <div> <strong>Budget:</strong> ₹4,200 Total (Transit: ₹150)</div>
- </div>
- <div class="trip-bottom-row">
- <span class="pulse-pts-pill">+250 PULSE PTS</span>
- <button class="view-itinerary-btn" onclick="openScheduleModal('lonavala')">View Full Schedule</button>
- </div>
- </div>
- </div>
- </div>
+                    <!-- View 3: Trips Hub & Carbon Passport -->
+                    <div id="view-trips" class="app-view">
+                        <div class="app-view-header">
+                            <div>
+                                <div class="app-header-title">My Saved Trips</div>
+                                <div class="app-header-sub">Verified Itineraries &amp; Carbon Credits</div>
+                            </div>
+                            <button class="glass-pill-btn" onclick="switchAppTab('chat-view')">+ Plan New Trip</button>
+                        </div>
 
- <!-- View 4: Hotel B2B Sustainability Optimizer View -->
- <div id="view-hotel" class="app-view">
- <div class="app-view-header">
- <div>
- <div class="app-header-title">Hotel ESG Resource Hub</div>
- <div class="app-header-sub">Dynamic Occupancy Forecasting &amp; ISO 14064 Audit</div>
- </div>
- <div style="display: flex; gap: 6px;">
- <button class="glass-pill-btn" onclick="exportEsgPdf()"> Download PDF</button>
- <button class="glass-pill-btn" onclick="exportEsgCsv()"> CSV</button>
- </div>
- </div>
+                        <div class="trips-scroll-content">
+                            <!-- Kedarnath Trip Card -->
+                            <div class="app-trip-card">
+                                <div class="trip-top-row">
+                                    <div>
+                                        <div class="trip-dest-name">Kedarnath Holy Yatra</div>
+                                        <div class="trip-date-str">Upcoming: 4 Days</div>
+                                    </div>
+                                    <span class="trip-carbon-tag">-42.8 kg CO2</span>
+                                </div>
+                                <div class="trip-specs-list">
+                                    <div><strong>Transit:</strong> Electric Pilgrim Coach + E-Shuttle</div>
+                                    <div><strong>Stay:</strong> GMVN Mandakini Eco Rest House (4.8 Star)</div>
+                                    <div><strong>Accessibility:</strong> Level Boarding &amp; Assisted Palki</div>
+                                    <div><strong>Budget:</strong> Rs 8,400 Total</div>
+                                </div>
+                                <div class="trip-bottom-row">
+                                    <span class="pulse-pts-pill">+320 PULSE PTS</span>
+                                    <button class="view-itinerary-btn" onclick="openScheduleModal('kedarnath')">View Schedule</button>
+                                </div>
+                            </div>
 
- <div class="hotel-scroll-content">
- <div class="hotel-slider-box">
- <div class="slider-header-row">
- <span>Facility Occupancy Scale:</span>
- <span class="slider-badge" id="occupancy-val-badge">75% (150 Rooms)</span>
- </div>
- <input type="range" id="slider-occupancy" min="20" max="100" value="75" class="app-range-slider" oninput="updateHotelKpis(this.value)">
- <div class="slider-markers">
- <span>20% Low</span>
- <span>50% Mid</span>
- <span>75% High</span>
- <span>100% Peak</span>
- </div>
- </div>
+                            <!-- Lonavala Trip Card -->
+                            <div class="app-trip-card">
+                                <div class="trip-top-row">
+                                    <div>
+                                        <div class="trip-dest-name">Lonavala Monsoon Retreat</div>
+                                        <div class="trip-date-str">Upcoming Weekend • 2 Days</div>
+                                    </div>
+                                    <span class="trip-carbon-tag">-18.4 kg CO2</span>
+                                </div>
+                                <div class="trip-specs-list">
+                                    <div><strong>Transit:</strong> Indrayani Electric Express</div>
+                                    <div><strong>Stay:</strong> The Machan Solar Eco Resort (4.9 Star)</div>
+                                    <div><strong>Accessibility:</strong> 100% Step-Free Concourse</div>
+                                    <div><strong>Budget:</strong> Rs 4,200 Total</div>
+                                </div>
+                                <div class="trip-bottom-row">
+                                    <span class="pulse-pts-pill">+180 PULSE PTS</span>
+                                    <button class="view-itinerary-btn" onclick="openScheduleModal('lonavala')">View Schedule</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
- <div class="hotel-kpis-grid">
- <div class="kpi-glass-card">
- <div class="kpi-mini-label">POWER CONSUMPTION</div>
- <div class="kpi-big-val text-purple" id="kpi-power">1,820 kWh</div>
- <div class="kpi-tiny-sub" id="kpi-power-sub">HVAC load: 950 kWh • Solar: 38%</div>
- </div>
- <div class="kpi-glass-card">
- <div class="kpi-mini-label">WATER RECYCLED</div>
- <div class="kpi-big-val text-cyan" id="kpi-water">14,250 L</div>
- <div class="kpi-tiny-sub">Zero Liquid Discharge (ZLD)</div>
- </div>
- <div class="kpi-glass-card">
- <div class="kpi-mini-label">FOOD SURPLUS RESCUE</div>
- <div class="kpi-big-val text-amber" id="kpi-food">42 kg (84 Meals)</div>
- <div class="kpi-tiny-sub text-emerald">Shelter vehicle en route</div>
- </div>
- <div class="kpi-glass-card esg-card-highlight">
- <div class="kpi-mini-label">ESG COMPLIANCE RATING</div>
- <div class="kpi-big-val text-emerald">LEED Platinum • BEE 4.8</div>
- <div class="kpi-tiny-sub">Audited ISO 14064 Greenhouse Protocol</div>
- </div>
- </div>
+                    <!-- View 4: Hotel B2B Sustainability Optimizer -->
+                    <div id="view-hotel" class="app-view">
+                        <div class="app-view-header">
+                            <div>
+                                <div class="app-header-title">Hotel ESG Resource Hub</div>
+                                <div class="app-header-sub">Occupancy Forecasting &amp; ISO 14064 Audit</div>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button class="glass-pill-btn" onclick="exportEsgPdf()">Download PDF</button>
+                                <button class="glass-pill-btn" onclick="exportEsgCsv()">CSV</button>
+                            </div>
+                        </div>
 
- <div class="hotel-actions-row">
- <button class="hotel-action-tile" onclick="triggerHvacOptimization()">
- <span class="tile-icon">️</span>
- <div>
- <div class="tile-title">Automate HVAC Setpoint (26°C)</div>
- <div class="tile-sub">Schedules vacant wing setback (-180 kWh)</div>
- </div>
- </button>
- <button class="hotel-action-tile" onclick="triggerFoodRescue()">
- <span class="tile-icon"></span>
- <div>
- <div class="tile-title">1-Tap Food Shelter Rescue</div>
- <div class="tile-sub">Dispatches driver to Roti Bank / Feeding India</div>
- </div>
- </button>
- </div>
- </div>
- </div>
+                        <div class="hotel-scroll-content">
+                            <div class="hotel-slider-box">
+                                <div class="slider-header-row">
+                                    <span>Facility Occupancy Scale:</span>
+                                    <span class="slider-badge" id="occupancy-val-badge">75% (150 Rooms)</span>
+                                </div>
+                                <input type="range" id="slider-occupancy" min="20" max="100" value="75" class="app-range-slider" oninput="updateHotelKpis(this.value)">
+                                <div class="slider-markers">
+                                    <span>20% Low</span>
+                                    <span>50% Mid</span>
+                                    <span>75% High</span>
+                                    <span>100% Peak</span>
+                                </div>
+                            </div>
 
- <!-- Bottom Floating App Dock -->
- <div class="app-bottom-dock">
- <button class="dock-tab active" id="dock-map" onclick="switchAppTab('map-view')">
- <span class="dock-icon">️</span>
- <span class="dock-label">Live Map</span>
- </button>
- <button class="dock-tab" id="dock-chat" onclick="switchAppTab('chat-view')">
- <span class="dock-icon"></span>
- <span class="dock-label">Yatri AI</span>
- </button>
- <button class="dock-tab" id="dock-trips" onclick="switchAppTab('trips-view')">
- <span class="dock-icon"></span>
- <span class="dock-label">Trips</span>
- </button>
- <button class="dock-tab" id="dock-hotel" onclick="switchAppTab('hotel-view')">
- <span class="dock-icon"></span>
- <span class="dock-label">Hotel B2B</span>
- </button>
- </div>
+                            <div class="kpi-cards-grid">
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Power Usage</div>
+                                    <div class="kpi-value text-amber" id="kpi-power">1,895 kWh</div>
+                                    <div class="kpi-sub">BEE 5-Star Benchmarked</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Water Recycled</div>
+                                    <div class="kpi-value text-cyan" id="kpi-water">14,250 L</div>
+                                    <div class="kpi-sub">85% Greywater Reused</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Food Surplus</div>
+                                    <div class="kpi-value text-emerald" id="kpi-food">42 kg</div>
+                                    <div class="kpi-sub">R2 = 0.94 Predictor Model</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Shelter Meals</div>
+                                    <div class="kpi-value text-purple" id="kpi-meals">84 Meals</div>
+                                    <div class="kpi-sub">Feeding India Verified</div>
+                                </div>
+                            </div>
 
- </div>
+                            <div class="hotel-actions-column">
+                                <button class="action-btn primary-action" onclick="triggerHvacOptimization()">
+                                    Automate 26°C Setback (Avoids 180 kWh)
+                                </button>
+                                <button class="action-btn secondary-action" onclick="triggerFoodRescue()">
+                                    Dispatch Food Shelter Driver
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
- </main>
+                <!-- Phone Bottom Navigation Bar (Matches Android App) -->
+                <div class="phone-bottom-nav">
+                    <button class="nav-tab-btn active" id="tab-map-btn" onclick="switchAppTab('map-view')">
+                        <div class="tab-dot"></div>
+                        <span>Live Map</span>
+                    </button>
+                    <button class="nav-tab-btn" id="tab-chat-btn" onclick="switchAppTab('chat-view')">
+                        <div class="tab-dot"></div>
+                        <span>Yatri AI</span>
+                    </button>
+                    <button class="nav-tab-btn" id="tab-trips-btn" onclick="switchAppTab('trips-view')">
+                        <div class="tab-dot"></div>
+                        <span>My Trips</span>
+                    </button>
+                    <button class="nav-tab-btn" id="tab-hotel-btn" onclick="switchAppTab('hotel-view')">
+                        <div class="tab-dot"></div>
+                        <span>Hotel B2B</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
 
- <!-- Schedule Modal -->
- <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)">
- <div class="modal-sheet">
- <div class="modal-sheet-header">
- <h3 id="modal-title">Trip Schedule</h3>
- <button class="close-modal-btn" onclick="closeScheduleModalDirect()"></button>
- </div>
- <div class="modal-sheet-body" id="modal-body">
- <!-- Content injected via JS -->
- </div>
- </div>
- </div>
+    <!-- Schedule Inspection Modal -->
+    <div id="schedule-modal" class="app-modal">
+        <div class="modal-backdrop" onclick="closeScheduleModal()"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-schedule-title">Detailed Trip Itinerary</div>
+                <button class="modal-close-btn" onclick="closeScheduleModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-schedule-body">
+                <!-- Dynamic Schedule Content Inserted via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button class="glass-pill-btn" onclick="closeScheduleModal()">Close Schedule</button>
+            </div>
+        </div>
+    </div>
 
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
- <script src="app.js"></script>
+    <!-- External Leaflet & Application Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
