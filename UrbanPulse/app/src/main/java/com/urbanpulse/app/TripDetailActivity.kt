@@ -33,6 +33,45 @@ class TripDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvDetailHotelName).text = trip.hotelName
         findViewById<TextView>(R.id.tvDetailHotelRating).text = "★ ${trip.hotelRating} / 5.0"
 
+        // Dynamic Transit Comparison
+        val dest = trip.destination.lowercase()
+        val tvOpt1Name = findViewById<TextView>(R.id.tvTransitOpt1Name)
+        val tvOpt1Metrics = findViewById<TextView>(R.id.tvTransitOpt1Metrics)
+        val tvOpt2Name = findViewById<TextView>(R.id.tvTransitOpt2Name)
+        val tvOpt2Metrics = findViewById<TextView>(R.id.tvTransitOpt2Metrics)
+        val tvOpt3Name = findViewById<TextView>(R.id.tvTransitOpt3Name)
+        val tvOpt3Metrics = findViewById<TextView>(R.id.tvTransitOpt3Metrics)
+
+        if (dest.contains("kedar")) {
+            tvOpt1Name?.text = "🚆 Mumbai-Haridwar Superfast + E-Shuttle"
+            tvOpt1Metrics?.text = "₹1,450 • Level Boarding • 280g CO2"
+            tvOpt2Name?.text = "⚡ AC Pilgrim Express Coach"
+            tvOpt2Metrics?.text = "₹2,200 • AC Seater • 350g CO2"
+            tvOpt3Name?.text = "🚗 Private Highway Diesel SUV Taxi"
+            tvOpt3Metrics?.text = "₹18,500 • High Emissions • 24,000g CO2"
+        } else if (dest.contains("alibaug")) {
+            tvOpt1Name?.text = "🚢 M2M Electric Hybrid Ro-Pax Ferry"
+            tvOpt1Metrics?.text = "₹380 • 1h 15m • 45g CO2"
+            tvOpt2Name?.text = "⚡ Mandwa Electric Feeder Bus"
+            tvOpt2Metrics?.text = "₹40 • 20m • 10g CO2"
+            tvOpt3Name?.text = "🚗 Standard Petrol Taxi (via Pen)"
+            tvOpt3Metrics?.text = "₹2,800 • 3h 30m • 1,900g CO2"
+        } else if (dest.contains("manali")) {
+            tvOpt1Name?.text = "🚆 Vande Bharat + HRTC E-Coach"
+            tvOpt1Metrics?.text = "₹1,850 • Electric Transit • 310g CO2"
+            tvOpt2Name?.text = "⚡ AC Electric Sleeper Coach"
+            tvOpt2Metrics?.text = "₹2,400 • Overnight • 380g CO2"
+            tvOpt3Name?.text = "🚗 Private Mountain Petrol Cab"
+            tvOpt3Metrics?.text = "₹16,000 • Mountain Ghats • 22,000g CO2"
+        } else {
+            tvOpt1Name?.text = "🚆 Indrayani Electric Express"
+            tvOpt1Metrics?.text = "₹75 • 2h 05m • 28g CO2"
+            tvOpt2Name?.text = "⚡ MSRTC AC Shivneri E-Bus"
+            tvOpt2Metrics?.text = "₹210 • 2h 20m • 54g CO2"
+            tvOpt3Name?.text = "🚗 Standard Petrol Taxi"
+            tvOpt3Metrics?.text = "₹3,200 • 2h 45m • 2,400g CO2"
+        }
+
         val timelineContainer = findViewById<LinearLayout>(R.id.layoutTimelineContainer)
         timelineContainer.removeAllViews()
 

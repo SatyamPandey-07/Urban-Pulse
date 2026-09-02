@@ -284,6 +284,7 @@
                         android:gravity="center_vertical">
 
                         <TextView
+                            android:id="@+id/tvTransitOpt1Name"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -293,6 +294,7 @@
                             android:textColor="#10B981" />
 
                         <TextView
+                            android:id="@+id/tvTransitOpt1Metrics"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₹75 • 2h 05m • 28g CO2"
@@ -310,6 +312,7 @@
                         android:gravity="center_vertical">
 
                         <TextView
+                            android:id="@+id/tvTransitOpt2Name"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -318,6 +321,7 @@
                             android:textColor="?attr/colorOnSurface" />
 
                         <TextView
+                            android:id="@+id/tvTransitOpt2Metrics"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₹210 • 2h 20m • 54g CO2"
@@ -334,6 +338,7 @@
                         android:gravity="center_vertical">
 
                         <TextView
+                            android:id="@+id/tvTransitOpt3Name"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -342,6 +347,7 @@
                             android:textColor="#EF4444" />
 
                         <TextView
+                            android:id="@+id/tvTransitOpt3Metrics"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₹3,200 • 2h 45m • 2,400g CO2"
