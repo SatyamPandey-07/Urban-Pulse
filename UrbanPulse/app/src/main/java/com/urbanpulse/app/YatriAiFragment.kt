@@ -246,8 +246,17 @@ class YatriAiFragment : Fragment() {
         view.findViewById<Chip>(R.id.chipMicroExperience).setOnClickListener {
             sendMessage("Find local micro-experiences within 2 hours near my location")
         }
+        view.findViewById<Chip>(R.id.chipAdaptPlan).setOnClickListener {
+            sendMessage("Adapt my plan: It started raining and I only have 90 minutes")
+        }
+        view.findViewById<Chip>(R.id.chipFamilyFriendly).setOnClickListener {
+            sendMessage("Find family and child-friendly cultural experiences near me")
+        }
         view.findViewById<Chip>(R.id.chipListExperience).setOnClickListener {
             showAddExperienceDialog()
+        }
+        view.findViewById<Chip>(R.id.chipProviderDashboard).setOnClickListener {
+            showProviderDashboardDialog()
         }
         view.findViewById<Chip>(R.id.chipSuggestTripLonavala).setOnClickListener {
             sendMessage("Plan a trip to Kedarnath")
@@ -270,6 +279,83 @@ class YatriAiFragment : Fragment() {
         view.findViewById<Chip>(R.id.chipSuggestSos).setOnClickListener {
             sendMessage("Emergency assistance at my location")
         }
+    }
+
+    private fun showProviderDashboardDialog() {
+        val ctx = context ?: return
+        val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_provider_dashboard, null)
+        val dialog = MaterialAlertDialogBuilder(ctx)
+            .setView(dialogView)
+            .create()
+
+        val container = dialogView.findViewById<android.widget.LinearLayout>(R.id.providerListingsContainer)
+        val btnClose = dialogView.findViewById<MaterialButton>(R.id.btnCloseDashboard)
+        val btnAdd = dialogView.findViewById<MaterialButton>(R.id.btnAddNewFromDashboard)
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        btnAdd.setOnClickListener {
+            dialog.dismiss()
+            showAddExperienceDialog()
+        }
+
+        lifecycleScope.launch {
+            val allExp = withContext(Dispatchers.IO) {
+                try { ExperienceRepository(ctx).getAllExperiences() } catch (e: Exception) { emptyList() }
+            }
+
+            container.removeAllViews()
+            allExp.forEach { exp ->
+                val card = com.google.android.material.card.MaterialCardView(ctx).apply {
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { setMargins(0, 0, 0, 16) }
+                    radius = 24f
+                    strokeWidth = 2
+                    setContentPadding(24, 20, 24, 20)
+                }
+
+                val row = android.widget.LinearLayout(ctx).apply {
+                    orientation = android.widget.LinearLayout.VERTICAL
+                }
+
+                val title = android.widget.TextView(ctx).apply {
+                    text = exp.name
+                    textSize = 16f
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                }
+
+                val details = android.widget.TextView(ctx).apply {
+                    text = "${exp.category} • ${exp.location} • ${exp.durationHours}h • ${exp.pricePerPerson}"
+                    textSize = 12f
+                }
+
+                val metrics = android.widget.TextView(ctx).apply {
+                    text = "👁️ ${exp.viewsCount} Traveler Views • 42 Direct Route Requests"
+                    textSize = 12f
+                    setPadding(0, 8, 0, 8)
+                }
+
+                val switchAvailability = MaterialSwitch(ctx).apply {
+                    text = if (exp.isAvailableToday) "Available Today (Accepting Travelers)" else "Booked Out / Paused"
+                    isChecked = exp.isAvailableToday
+                    setOnCheckedChangeListener { _, isChecked ->
+                        ExperienceRepository(ctx).toggleAvailability(exp.id, isChecked)
+                        text = if (isChecked) "Available Today (Accepting Travelers)" else "Booked Out / Paused"
+                        Toast.makeText(ctx, "${exp.name} availability updated!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                row.addView(title)
+                row.addView(details)
+                row.addView(metrics)
+                row.addView(switchAvailability)
+                card.addView(row)
+                container.addView(card)
+            }
+        }
+
+        dialog.show()
     }
 
     private fun showAddExperienceDialog() {
@@ -522,7 +608,75 @@ class YatriAiFragment : Fragment() {
                 return@launch
             }
 
-            // 2. Micro-Experience Time Crunch Filter ("2 hours", "micro experience", "short on time")
+            // 2. Circumstance Adaptation Filter (Rain, Bad Weather, Sudden Delays)
+            if (lowerPrompt.contains("adapt") || lowerPrompt.contains("rain") || lowerPrompt.contains("weather") || lowerPrompt.contains("delay")) {
+                chatAdapter.removeTypingIndicator()
+                val ctx = context
+                if (ctx != null) {
+                    val adaptive = withContext(Dispatchers.IO) {
+                        ExperienceRepository(ctx).getAdaptiveExperiences(isRain = true, maxDuration = 2.0)
+                    }
+                    val ranked = ExperienceOptimizer.rank(adaptive)
+                    val builder = StringBuilder("☔ **Real-Time Circumstance Adaptation Triggered**\n\n")
+                    builder.append("Detected weather change (rain/storm) or schedule delay! We have dynamically adapted your itinerary, swapping outdoor cycling and treks for covered, indoor cultural workshops & tactile galleries:\n\n")
+
+                    ranked.take(3).forEachIndexed { index, r ->
+                        val exp = r.experience
+                        val badgeText = if (r.badges.isNotEmpty()) " [${r.badges.first().label}]" else ""
+                        builder.append("${index + 1}. **${exp.name}**$badgeText\n")
+                        builder.append("   • **Type**: 🏛️ Indoor / Covered • ${exp.location}\n")
+                        builder.append("   • **Duration**: ${exp.durationHours}h • **Price**: ${exp.pricePerPerson}\n")
+                        builder.append("   • **Accessibility**: ${exp.accessibilityRating}% (${exp.accessibilityTags.joinToString()})\n")
+                        builder.append("   • **Status**: ${if (exp.isAvailableToday) "✅ Available Today" else "⚠️ Busy"}\n\n")
+                    }
+                    builder.append("Would you like to route transit to the nearest covered indoor workshop?")
+                    addAiMessage(
+                        builder.toString(),
+                        mcq = QuickMcqQuestion(
+                            questionId = "adapt_mcq",
+                            questionText = "Select rain-adapted experience",
+                            options = ranked.take(3).map { it.experience.name } + listOf("Check Live AQI & Transit")
+                        )
+                    )
+                    return@launch
+                }
+            }
+
+            // 3. Family & Child-Friendly Filter
+            if (lowerPrompt.contains("family") || lowerPrompt.contains("child") || lowerPrompt.contains("kid")) {
+                chatAdapter.removeTypingIndicator()
+                val ctx = context
+                if (ctx != null) {
+                    val familyExp = withContext(Dispatchers.IO) {
+                        ExperienceRepository(ctx).getAdaptiveExperiences(isRain = false, maxDuration = 3.0, familyOnly = true)
+                    }
+                    val ranked = ExperienceOptimizer.rank(familyExp)
+                    val builder = StringBuilder("👨‍👩‍👧‍👦 **Family & Child-Friendly Recommendations**\n\n")
+                    builder.append("Filtered for safe, interactive, and family-appropriate activities with step-free stroller/ramp concourses:\n\n")
+
+                    ranked.take(4).forEachIndexed { index, r ->
+                        val exp = r.experience
+                        val badgeText = if (r.badges.isNotEmpty()) " [${r.badges.first().label}]" else ""
+                        builder.append("${index + 1}. **${exp.name}**$badgeText\n")
+                        builder.append("   • **Category**: ${exp.category} (${exp.location})\n")
+                        builder.append("   • **Tags**: ${exp.travelerTags.joinToString(", ")}\n")
+                        builder.append("   • **Duration**: ${exp.durationHours}h • **Price**: ${exp.pricePerPerson}\n")
+                        builder.append("   • **Accessibility**: ${exp.accessibilityRating}% (${exp.accessibilityTags.joinToString()})\n\n")
+                    }
+                    builder.append("Select an activity to view family group pricing and step-free transit directions:")
+                    addAiMessage(
+                        builder.toString(),
+                        mcq = QuickMcqQuestion(
+                            questionId = "family_mcq",
+                            questionText = "Select family activity",
+                            options = ranked.take(3).map { it.experience.name } + listOf("Explore Eco Stays")
+                        )
+                    )
+                    return@launch
+                }
+            }
+
+            // 4. Micro-Experience Time Crunch Filter ("2 hours", "micro experience", "short on time")
             if (lowerPrompt.contains("2 hour") || lowerPrompt.contains("2 hr") || lowerPrompt.contains("micro-experience") || lowerPrompt.contains("micro experience") || lowerPrompt.contains("time crunch") || lowerPrompt.contains("short time")) {
                 chatAdapter.removeTypingIndicator()
                 val ctx = context

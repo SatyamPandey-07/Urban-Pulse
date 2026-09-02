@@ -26,24 +26,53 @@ class ExperienceRepository(context: Context) {
                 val priceRupees = it.getInt(it.getColumnIndexOrThrow("price_rupees"))
                 val belowAvgPct = (((categoryAverageCarbonKg - carbonKg) / categoryAverageCarbonKg) * 100).roundToInt().coerceAtLeast(0)
 
+                val id = it.getString(it.getColumnIndexOrThrow("id"))
+                val name = it.getString(it.getColumnIndexOrThrow("name"))
+                val category = it.getString(it.getColumnIndexOrThrow("category"))
+                val isIndoor = category.contains("Culinary", true) || category.contains("Craft", true) || 
+                    category.contains("Workshop", true) || category.contains("Art", true) || category.contains("Heritage", true)
+                val tags = if (isIndoor) listOf("Child-Friendly", "Family", "Indoor", "Rain-Safe") else listOf("Family", "Outdoor", "Nature")
+                val isAvailable = availabilityOverrides[id] ?: true
+
                 experiences += ExperienceListing(
-                    id = it.getString(it.getColumnIndexOrThrow("id")),
-                    name = it.getString(it.getColumnIndexOrThrow("name")),
-                    category = it.getString(it.getColumnIndexOrThrow("category")),
-                    location = it.getString(it.getColumnIndexOrThrow("location")),
-                    sustainabilityPractice = it.getString(it.getColumnIndexOrThrow("sustainability_practice")),
-                    ecoScore = it.getInt(it.getColumnIndexOrThrow("eco_score")),
-                    accessibilityRating = it.getInt(it.getColumnIndexOrThrow("accessibility_rating")),
-                    accessibilityTags = it.getString(it.getColumnIndexOrThrow("accessibility_tags")).split("|"),
-                    carbonFootprintPerVisit = String.format(
-                        Locale.US, "%.1f kg CO2e / visit (%d%% below category avg)", carbonKg, belowAvgPct
-                    ),
-                    pricePerPerson = String.format(Locale.US, "₹%,d / person", priceRupees),
-                    durationHours = it.getDouble(it.getColumnIndexOrThrow("duration_hours"))
-                )
+                    id = id,
+                    name = name,
+                    category = category,
+                        location = it.getString(it.getColumnIndexOrThrow("location")),
+                        sustainabilityPractice = it.getString(it.getColumnIndexOrThrow("sustainability_practice")),
+                        ecoScore = it.getInt(it.getColumnIndexOrThrow("eco_score")),
+                        accessibilityRating = it.getInt(it.getColumnIndexOrThrow("accessibility_rating")),
+                        accessibilityTags = it.getString(it.getColumnIndexOrThrow("accessibility_tags")).split("|"),
+                        carbonFootprintPerVisit = String.format(
+                            Locale.US, "%.1f kg CO2e / visit (%d%% below category avg)", carbonKg, belowAvgPct
+                        ),
+                        pricePerPerson = String.format(Locale.US, "₹%,d / person", priceRupees),
+                        durationHours = it.getDouble(it.getColumnIndexOrThrow("duration_hours")),
+                        isAvailableToday = isAvailable,
+                        travelerTags = tags,
+                        viewsCount = 110 + (Math.abs(id.hashCode()) % 85)
+                    )
+                }
             }
+            experiences
         }
-        experiences
+
+    fun toggleAvailability(id: String, available: Boolean) {
+        availabilityOverrides[id] = available
+    }
+
+    suspend fun getAdaptiveExperiences(
+        isRain: Boolean = false,
+        maxDuration: Double = 3.0,
+        familyOnly: Boolean = false
+    ): List<ExperienceListing> {
+        val all = getAllExperiences().filter { it.isAvailableToday }
+        return all.filter { exp ->
+            val matchRain = !isRain || exp.travelerTags.contains("Indoor") || exp.travelerTags.contains("Rain-Safe")
+            val matchDuration = exp.durationHours <= maxDuration
+            val matchFamily = !familyOnly || exp.travelerTags.contains("Child-Friendly")
+            matchRain && matchDuration && matchFamily
+        }
     }
 
     suspend fun addExperience(
@@ -78,5 +107,9 @@ class ExperienceRepository(context: Context) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    companion object {
+        private val availabilityOverrides = mutableMapOf<String, Boolean>()
     }
 }

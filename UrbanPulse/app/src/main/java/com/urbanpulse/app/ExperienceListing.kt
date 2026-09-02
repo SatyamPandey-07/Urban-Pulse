@@ -11,5 +11,8 @@ data class ExperienceListing(
     val accessibilityTags: List<String>,
     val carbonFootprintPerVisit: String, // e.g. "0.8 kg CO2e / visit"
     val pricePerPerson: String, // e.g. "₹610 / person"
-    val durationHours: Double
+    val durationHours: Double,
+    var isAvailableToday: Boolean = true,
+    val travelerTags: List<String> = listOf("Child-Friendly", "Family", "Indoor"),
+    var viewsCount: Int = 142
 )

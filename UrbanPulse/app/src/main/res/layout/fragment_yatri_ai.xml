@@ -99,12 +99,51 @@
                     app:chipCornerRadius="16dp" />
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAdaptPlan"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Adapt Plan (Rain / Delay)"
+                    app:chipIcon="@drawable/ic_dashboard"
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFamilyFriendly"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Family &amp; Child-Friendly"
+                    app:chipIcon="@drawable/ic_layers"
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/chipListExperience"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="+ List Experience (Provider)"
+                    android:text="+ List Experience"
                     app:chipIcon="@drawable/ic_add"
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipProviderDashboard"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Provider Hub (My Listings)"
+                    app:chipIcon="@drawable/ic_dashboard"
                     app:chipIconTint="?attr/colorPrimary"
                     android:textColor="?attr/colorOnSurface"
                     app:chipBackgroundColor="?attr/colorSurfaceContainerLow"

@@ -172,14 +172,15 @@
  Namaste! I am <strong>Yatri AI</strong>, powered by ultra-fast <strong>Groq LLaMA-3.3</strong>.<br><br>
  I can plan custom low-carbon itineraries to <strong>Kedarnath, Manali, Lonavala, Alibaug, or any global destination</strong> with step-free accessibility verification.<br><br>
  Where would you like to travel?
- </div>
- <div class="mcq-chips-container" id="initial-mcq-chips">
- <button class="mcq-chip" onclick="handleChatPrompt('Find local micro-experiences within 2 hours near my location')">⏱️ 2-Hour Micro Experiences</button>
- <button class="mcq-chip" onclick="openAddExperienceModal()">+ List Experience (Provider)</button>
- <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Kedarnath')">️ Plan Kedarnath Yatra</button>
- <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Lonavala')"> Plan Lonavala Weekend</button>
- <button class="mcq-chip" onclick="handleChatPrompt('Plan Coastal Alibaug')">️ Plan Coastal Alibaug</button>
- <button class="mcq-chip" onclick="handleChatPrompt('Nearest accessible hospitals')"> Nearest Hospitals</button>
+                                <div class="mcq-chips-container" id="initial-mcq-chips">
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Find local micro-experiences within 2 hours near my location')">⏱️ 2-Hour Micro Experiences</button>
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Adapt my plan: It started raining and I only have 90 minutes')">☔ Adapt Plan (Rain / Delay)</button>
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Find family and child-friendly cultural experiences near me')">👨‍👩‍👧‍👦 Family &amp; Child-Friendly</button>
+                                    <button class="mcq-chip" onclick="openAddExperienceModal()">+ List Experience</button>
+                                    <button class="mcq-chip" onclick="openProviderDashboardModal()">📊 Provider Hub (My Listings)</button>
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Kedarnath')">️ Plan Kedarnath Yatra</button>
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Lonavala')"> Plan Lonavala Weekend</button>
+                                </div>
  </div>
  </div>
  </div>
@@ -337,10 +338,9 @@
  <span class="dock-label">Hotel B2B</span>
  </button>
  </div>
-
- </div>
-
- </main>
+        </div>
+    </div>
+</main>
 
     <!-- Schedule Modal -->
     <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)">
@@ -415,7 +415,28 @@
         </div>
     </div>
 
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
- <script src="app.js"></script>
+    <!-- Provider Dashboard Modal -->
+    <div id="modal-provider-dashboard" class="modal-overlay" onclick="closeProviderDashboardModal(event)">
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <h3>Provider Hub &amp; Listings</h3>
+                <button class="close-modal-btn" onclick="closeProviderDashboardModalDirect()">✕</button>
+            </div>
+            <div class="modal-sheet-body">
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                    Manage real-time availability and view traveler routing demand for your workshops.
+                </p>
+                <div id="web-provider-listings" style="display: flex; flex-direction: column; gap: 12px; max-height: 380px; overflow-y: auto;">
+                    <!-- Populated via JS -->
+                </div>
+                <button class="glass-pill-btn" style="width: 100%; margin-top: 14px; justify-content: center;" onclick="openAddExperienceModal()">
+                    + List Another Experience
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

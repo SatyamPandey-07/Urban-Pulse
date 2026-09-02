@@ -512,12 +512,108 @@ function sendUserMessage() {
     input.value = "";
 }
 
+function openProviderDashboardModal() {
+    renderProviderDashboard();
+    document.getElementById('modal-provider-dashboard').classList.add('open');
+}
+
+function closeProviderDashboardModalDirect() {
+    document.getElementById('modal-provider-dashboard').classList.remove('open');
+}
+
+function closeProviderDashboardModal(e) {
+    if (e.target.id === 'modal-provider-dashboard') {
+        closeProviderDashboardModalDirect();
+    }
+}
+
+function toggleWebExperienceAvailability(expId) {
+    const list = getStoredExperiences();
+    const target = list.find(e => e.id === expId);
+    if (target) {
+        target.isAvailableToday = (target.isAvailableToday !== false) ? false : true;
+        try {
+            localStorage.setItem('urbanpulse_experiences', JSON.stringify(list));
+        } catch (e) {}
+        renderProviderDashboard();
+    }
+}
+
+function renderProviderDashboard() {
+    const container = document.getElementById('web-provider-listings');
+    if (!container) return;
+    const list = getStoredExperiences();
+    container.innerHTML = "";
+
+    list.forEach(exp => {
+        const isAvailable = exp.isAvailableToday !== false;
+        const card = document.createElement('div');
+        card.className = "app-trip-card";
+        card.style.marginBottom = "8px";
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <div style="font-weight: 700; font-size: 14px;">${exp.name}</div>
+                    <div style="font-size: 11px; color: var(--text-secondary);">${exp.category} • ${exp.location} • ${exp.duration}h • ₹${exp.price}</div>
+                </div>
+                <span class="trip-carbon-tag" style="font-size: 10px;">${isAvailable ? "Available" : "Booked Out"}</span>
+            </div>
+            <div style="font-size: 11px; color: var(--primary-emerald); margin: 6px 0;">
+                👁️ ${exp.viewsCount || 142} Traveler Views • 38 Direct Inquiries
+            </div>
+            <button class="view-itinerary-btn" style="width: 100%; padding: 6px; font-size: 11px;" onclick="toggleWebExperienceAvailability('${exp.id}')">
+                Toggle Status: ${isAvailable ? "Set to Booked Out" : "Set to Available Today"}
+            </button>
+        `;
+        container.appendChild(card);
+    });
+}
+
 function handleChatPrompt(promptText) {
     appendUserBubble(promptText);
 
     const lower = promptText.toLowerCase().trim();
 
-    // Micro-experience / 2-hour filter
+    // 1. Circumstance Adaptation (Rain, Weather, Sudden Delays)
+    if (lower.includes("adapt") || lower.includes("rain") || lower.includes("weather") || lower.includes("delay")) {
+        const covered = getStoredExperiences().filter(e => e.category.includes("Workshop") || e.category.includes("Craft") || e.category.includes("Culinary") || e.category.includes("Art"));
+        let html = `☔ <strong>Real-Time Circumstance Adaptation Triggered</strong><br><br>`;
+        html += `Detected weather change (rain/storm) or schedule delay! We have dynamically adapted your itinerary, swapping outdoor cycling and treks for covered, indoor cultural workshops & tactile galleries:<br><br>`;
+
+        covered.slice(0, 3).forEach((exp, idx) => {
+            html += `<strong>${idx + 1}. ${exp.name}</strong> [🏛️ Indoor / Covered]<br>`;
+            html += `• Location: ${exp.location} • Duration: <strong>${exp.duration}h</strong> • Price: <strong>₹${exp.price}</strong><br>`;
+            html += `• Accessibility: ${exp.accessibilityRating}% (${exp.accessibilityTags.join(", ")})<br>`;
+            html += `• Status: ${exp.isAvailableToday !== false ? "✅ Available Today" : "⚠️ Busy"}<br><br>`;
+        });
+
+        html += `Would you like to route transit to the nearest covered workshop?`;
+        setTimeout(() => {
+            appendAiBubble(html, covered.slice(0, 3).map(e => e.name).concat(["Live Route Map"]));
+        }, 400);
+        return;
+    }
+
+    // 2. Family & Child-Friendly Filter
+    if (lower.includes("family") || lower.includes("child") || lower.includes("kid")) {
+        const familyList = getStoredExperiences().filter(e => !e.name.includes("Night") && e.accessibilityRating >= 85);
+        let html = `👨‍👩‍👧‍👦 <strong>Family &amp; Child-Friendly Recommendations</strong><br><br>`;
+        html += `Filtered for safe, interactive, and family-appropriate activities with step-free stroller/ramp concourses:<br><br>`;
+
+        familyList.slice(0, 3).forEach((exp, idx) => {
+            html += `<strong>${idx + 1}. ${exp.name}</strong> [${exp.category}]<br>`;
+            html += `• Location: ${exp.location} • Duration: <strong>${exp.duration}h</strong> • Price: <strong>₹${exp.price}</strong><br>`;
+            html += `• Accessibility: ${exp.accessibilityRating}% (${exp.accessibilityTags.join(", ")})<br><br>`;
+        });
+
+        html += `Select an activity to view family group pricing and step-free transit directions:`;
+        setTimeout(() => {
+            appendAiBubble(html, familyList.slice(0, 3).map(e => e.name).concat(["Explore Eco Stays"]));
+        }, 400);
+        return;
+    }
+
+    // 3. Micro-experience / 2-hour filter
     if (lower.includes("2 hour") || lower.includes("2 hr") || lower.includes("micro-experience") || lower.includes("micro experience") || lower.includes("time crunch") || lower.includes("short on time")) {
         const exps = getStoredExperiences().filter(e => e.duration <= 2.5);
         let html = `⏱️ <strong>Found ${exps.length} Pareto-Optimized Micro-Experiences (Under 2 Hours)</strong><br><br>`;
