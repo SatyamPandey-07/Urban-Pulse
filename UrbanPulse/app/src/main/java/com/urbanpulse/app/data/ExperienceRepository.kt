@@ -45,4 +45,38 @@ class ExperienceRepository(context: Context) {
         }
         experiences
     }
+
+    suspend fun addExperience(
+        name: String,
+        category: String,
+        location: String,
+        sustainabilityPractice: String,
+        accessibilityTags: List<String>,
+        accessibilityRating: Int = 90,
+        ecoScore: Int = 4,
+        carbonKg: Double = 0.5,
+        priceRupees: Int = 350,
+        durationHours: Double = 2.0
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val db = dbHelper.writableDatabase
+            val values = android.content.ContentValues().apply {
+                put("id", "exp_${System.currentTimeMillis()}")
+                put("name", name)
+                put("category", category)
+                put("location", location)
+                put("sustainability_practice", sustainabilityPractice)
+                put("eco_score", ecoScore)
+                put("accessibility_rating", accessibilityRating)
+                put("accessibility_tags", accessibilityTags.joinToString("|"))
+                put("carbon_kg_per_visit", carbonKg)
+                put("price_rupees", priceRupees)
+                put("duration_hours", durationHours)
+            }
+            val rowId = db.insert(AppDatabaseHelper.TABLE_EXPERIENCES, null, values)
+            rowId != -1L
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

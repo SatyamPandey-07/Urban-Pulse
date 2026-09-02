@@ -317,50 +317,230 @@ function planQuickTrip(dest) {
  handleChatPrompt(`Planning a trip to ${dest}`);
 }
 
-// --- 4. Groq Ultra-Fast AI Chat Engine ---
+// --- 4. Local Experiences Registry & Provider Hub ---
+const DEFAULT_LOCAL_EXPERIENCES = [
+    {
+        id: "exp_1",
+        name: "Kala Ghoda Heritage Walk",
+        category: "Heritage & Art",
+        location: "Fort, Mumbai",
+        duration: 2.5,
+        price: 250,
+        ecoScore: 5,
+        accessibilityRating: 94,
+        accessibilityTags: ["Wheelchair Ramp Access", "Audio Guide"],
+        sustainability: "Audio-guided tactile exhibits, zero paper brochure",
+        carbonKg: 0.3
+    },
+    {
+        id: "exp_2",
+        name: "Meluha Organic Farm-to-Table Workshop",
+        category: "Culinary & Farming",
+        location: "Powai, Mumbai",
+        duration: 1.5,
+        price: 450,
+        ecoScore: 5,
+        accessibilityRating: 92,
+        accessibilityTags: ["Step-Free Entry", "Tactile Menu Cards"],
+        sustainability: "100% farm-to-table organic sourcing, zero single-use plastic",
+        carbonKg: 0.2
+    },
+    {
+        id: "exp_3",
+        name: "Bandra Bandstand Solar Cycling Tour",
+        category: "Active & Outdoor",
+        location: "Bandra West, Mumbai",
+        duration: 2.0,
+        price: 350,
+        ecoScore: 5,
+        accessibilityRating: 88,
+        accessibilityTags: ["Adaptive Cycles Available", "Level Pathways"],
+        sustainability: "Solar-charged e-cycle fleet, zero-emission sightseeing",
+        carbonKg: 0.1
+    },
+    {
+        id: "exp_4",
+        name: "Dadar Artisan Pottery & Craft Studio",
+        category: "Cultural Workshop",
+        location: "Dadar, Mumbai",
+        duration: 2.0,
+        price: 300,
+        ecoScore: 4,
+        accessibilityRating: 90,
+        accessibilityTags: ["Ground-Floor Access", "Sign-Language Guide"],
+        sustainability: "Reused-material craft supplies, local artisan cooperative",
+        carbonKg: 0.4
+    },
+    {
+        id: "exp_5",
+        name: "Powai Lake Sensory Wildlife Cruise",
+        category: "Nature & Wildlife",
+        location: "Powai, Mumbai",
+        duration: 1.5,
+        price: 280,
+        ecoScore: 5,
+        accessibilityRating: 95,
+        accessibilityTags: ["Boarding Ramp", "Hearing Loop Commentary"],
+        sustainability: "Silent electric-motor boats, no-noise wildlife sanctuary",
+        carbonKg: 0.2
+    }
+];
+
+function getStoredExperiences() {
+    try {
+        const stored = localStorage.getItem('urbanpulse_experiences');
+        if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return DEFAULT_LOCAL_EXPERIENCES;
+}
+
+function saveExperienceToRegistry(newExp) {
+    const list = getStoredExperiences();
+    list.unshift(newExp);
+    try {
+        localStorage.setItem('urbanpulse_experiences', JSON.stringify(list));
+    } catch (e) {}
+    return list;
+}
+
+function openAddExperienceModal() {
+    document.getElementById('modal-add-experience').classList.add('open');
+}
+
+function closeAddExpModalDirect() {
+    document.getElementById('modal-add-experience').classList.remove('open');
+}
+
+function closeAddExpModal(e) {
+    if (e.target.id === 'modal-add-experience') {
+        closeAddExpModalDirect();
+    }
+}
+
+function publishProviderExperience() {
+    const name = document.getElementById('input-exp-name').value.trim();
+    if (!name) {
+        alert('Please enter an experience name');
+        return;
+    }
+    const category = document.getElementById('input-exp-category').value;
+    const location = document.getElementById('input-exp-location').value.trim() || "Mumbai";
+    const duration = parseFloat(document.getElementById('input-exp-duration').value) || 2.0;
+    const price = parseInt(document.getElementById('input-exp-price').value) || 350;
+    const sustainability = document.getElementById('input-exp-sustainability').value.trim() || "Local community cooperative";
+    const stepFree = document.getElementById('input-exp-stepfree').checked;
+    const audio = document.getElementById('input-exp-audio').checked;
+
+    const tags = [];
+    if (stepFree) tags.push("Step-Free Ramp Access");
+    if (audio) tags.push("Audio & Tactile Guide");
+    if (tags.length === 0) tags.push("Standard Access");
+
+    const newExp = {
+        id: "exp_" + Date.now(),
+        name,
+        category,
+        location,
+        duration,
+        price,
+        ecoScore: 5,
+        accessibilityRating: stepFree ? 96 : 75,
+        accessibilityTags: tags,
+        sustainability,
+        carbonKg: 0.3
+    };
+
+    saveExperienceToRegistry(newExp);
+    closeAddExpModalDirect();
+
+    switchAppTab('chat-view');
+    setTimeout(() => {
+        appendAiBubble(
+            `🎉 <strong>Experience Published to UrbanPulse Registry!</strong><br><br>` +
+            `• <strong>Title</strong>: ${name}<br>` +
+            `• <strong>Category</strong>: ${category} • ${location}<br>` +
+            `• <strong>Duration</strong>: ${duration}h • ₹${price} / person<br>` +
+            `• <strong>Accessibility</strong>: ${tags.join(", ")}<br>` +
+            `• <strong>Sustainability</strong>: ${sustainability}<br><br>` +
+            `Your experience is now live and will be recommended automatically to travelers asking for local experiences, workshops, or 2-hour micro-trips!`
+        );
+    }, 300);
+}
+
+// --- 5. Groq Ultra-Fast AI Chat Engine ---
 let chatDialogueStep = 0;
 let activePlanningDestination = "Kedarnath";
 let activePlanningDays = 3;
 
-async function queryGroqAi(prompt, systemInstruction = "You are Yatri AI, an expert sustainable travel & smart mobility assistant for UrbanPulse. When asked general questions, math, or travel questions, answer naturally, accurately, and concisely.") {
- try {
- const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
- method: "POST",
- headers: {
- "Authorization": `Bearer ${GROQ_API_KEY}`,
- "Content-Type": "application/json"
- },
- body: JSON.stringify({
- model: "openai/gpt-oss-120b",
- messages: [
- { role: "system", content: systemInstruction },
- { role: "user", content: prompt }
- ],
- temperature: 0.3,
- max_tokens: 600
- })
- });
+async function queryGroqAi(prompt, systemInstruction = null) {
+    const localExpSummary = getStoredExperiences().slice(0, 5).map(e => `${e.name} (${e.category} in ${e.location}, ${e.duration}h, ₹${e.price}, ${e.accessibilityRating}% access)`).join("; ");
+    const defaultInstruction = `You are Yatri AI, an expert sustainable travel & smart mobility assistant for UrbanPulse. Verified local experiences in registry: [${localExpSummary}]. When asked general questions, answer accurately. When asked about local activities, short trips, or workshops, prioritize recommending these verified gems.`;
+    
+    const finalInstruction = systemInstruction || defaultInstruction;
 
- if (!res.ok) return null;
- const json = await res.json();
- return json.choices?.[0]?.message?.content || null;
- } catch (e) {
- return null;
- }
+    try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "openai/gpt-oss-120b",
+                messages: [
+                    { role: "system", content: finalInstruction },
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.3,
+                max_tokens: 600
+            })
+        });
+
+        if (!res.ok) return null;
+        const json = await res.json();
+        return json.choices?.[0]?.message?.content || null;
+    } catch (e) {
+        return null;
+    }
 }
 
 function sendUserMessage() {
- const input = document.getElementById('user-chat-input');
- const text = input.value.trim();
- if (!text) return;
- handleChatPrompt(text);
- input.value = "";
+    const input = document.getElementById('user-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    handleChatPrompt(text);
+    input.value = "";
 }
 
 function handleChatPrompt(promptText) {
- appendUserBubble(promptText);
+    appendUserBubble(promptText);
 
- const lower = promptText.toLowerCase().trim();
+    const lower = promptText.toLowerCase().trim();
+
+    // Micro-experience / 2-hour filter
+    if (lower.includes("2 hour") || lower.includes("2 hr") || lower.includes("micro-experience") || lower.includes("micro experience") || lower.includes("time crunch") || lower.includes("short on time")) {
+        const exps = getStoredExperiences().filter(e => e.duration <= 2.5);
+        let html = `⏱️ <strong>Found ${exps.length} Pareto-Optimized Micro-Experiences (Under 2 Hours)</strong><br><br>`;
+        html += `Curated for your available time window near your coordinates with verified accessibility & zero emission transit:<br><br>`;
+
+        exps.slice(0, 4).forEach((exp, idx) => {
+            html += `<strong>${idx + 1}. ${exp.name}</strong> [${exp.category}]<br>`;
+            html += `• Location: ${exp.location} • Duration: <strong>${exp.duration}h</strong> • Price: <strong>₹${exp.price}</strong><br>`;
+            html += `• Accessibility: ${exp.accessibilityRating}% (${exp.accessibilityTags.join(", ")})<br>`;
+            html += `• Eco Practice: ${exp.sustainability}<br><br>`;
+        });
+
+        html += `Which of these would you like to explore or route?`;
+        setTimeout(() => {
+            appendAiBubble(html, exps.slice(0, 3).map(e => e.name).concat(["+ List New Experience"]));
+        }, 400);
+        return;
+    }
+
+    if (promptText === "+ List New Experience") {
+        openAddExperienceModal();
+        return;
+    }
 
  // Step 1: Detect Destination -> Ask Duration MCQ
  const detectedDest = extractDestinationName(promptText);

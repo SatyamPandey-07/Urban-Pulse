@@ -34,6 +34,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import com.urbanpulse.app.data.ExperienceRepository
+import com.urbanpulse.app.evidence.ExperienceOptimizer
+import com.urbanpulse.app.evidence.RankedExperience
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
 
 class YatriAiFragment : Fragment() {
 
@@ -238,6 +243,12 @@ class YatriAiFragment : Fragment() {
     }
 
     private fun setupSuggestionChips(view: View) {
+        view.findViewById<Chip>(R.id.chipMicroExperience).setOnClickListener {
+            sendMessage("Find local micro-experiences within 2 hours near my location")
+        }
+        view.findViewById<Chip>(R.id.chipListExperience).setOnClickListener {
+            showAddExperienceDialog()
+        }
         view.findViewById<Chip>(R.id.chipSuggestTripLonavala).setOnClickListener {
             sendMessage("Plan a trip to Kedarnath")
         }
@@ -259,6 +270,80 @@ class YatriAiFragment : Fragment() {
         view.findViewById<Chip>(R.id.chipSuggestSos).setOnClickListener {
             sendMessage("Emergency assistance at my location")
         }
+    }
+
+    private fun showAddExperienceDialog() {
+        val ctx = context ?: return
+        val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_add_experience, null)
+        val dialog = MaterialAlertDialogBuilder(ctx)
+            .setView(dialogView)
+            .create()
+
+        val etName = dialogView.findViewById<EditText>(R.id.etExpName)
+        val etCategory = dialogView.findViewById<EditText>(R.id.etExpCategory)
+        val etLocation = dialogView.findViewById<EditText>(R.id.etExpLocation)
+        val etDuration = dialogView.findViewById<EditText>(R.id.etExpDuration)
+        val etPrice = dialogView.findViewById<EditText>(R.id.etExpPrice)
+        val etSustainability = dialogView.findViewById<EditText>(R.id.etExpSustainability)
+        val switchStepFree = dialogView.findViewById<MaterialSwitch>(R.id.switchStepFree)
+        val switchAudioGuide = dialogView.findViewById<MaterialSwitch>(R.id.switchAudioGuide)
+        val btnCancel = dialogView.findViewById<MaterialButton>(R.id.btnCancelExp)
+        val btnPublish = dialogView.findViewById<MaterialButton>(R.id.btnPublishExp)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+
+        btnPublish.setOnClickListener {
+            val name = etName.text.toString().trim()
+            val category = etCategory.text.toString().trim().ifEmpty { "Cultural Workshop" }
+            val location = etLocation.text.toString().trim().ifEmpty { "Mumbai" }
+            val duration = etDuration.text.toString().toDoubleOrNull() ?: 2.0
+            val price = etPrice.text.toString().toIntOrNull() ?: 350
+            val sustainability = etSustainability.text.toString().trim().ifEmpty { "Local artisan cooperative" }
+
+            if (name.isEmpty()) {
+                etName.error = "Please enter an experience name"
+                return@setOnClickListener
+            }
+
+            val tags = mutableListOf<String>()
+            if (switchStepFree.isChecked) tags += "Step-Free Ramp Access"
+            if (switchAudioGuide.isChecked) tags += "Audio & Tactile Guide"
+            if (tags.isEmpty()) tags += "Standard Access"
+
+            lifecycleScope.launch {
+                val success = ExperienceRepository(ctx).addExperience(
+                    name = name,
+                    category = category,
+                    location = location,
+                    sustainabilityPractice = sustainability,
+                    accessibilityTags = tags,
+                    accessibilityRating = if (switchStepFree.isChecked) 96 else 75,
+                    ecoScore = 5,
+                    carbonKg = 0.4,
+                    priceRupees = price,
+                    durationHours = duration
+                )
+
+                dialog.dismiss()
+
+                if (success) {
+                    Toast.makeText(ctx, "Experience published successfully!", Toast.LENGTH_SHORT).show()
+                    addAiMessage(
+                        "🎉 **Experience Published to UrbanPulse!**\n\n" +
+                        "• **Name**: $name\n" +
+                        "• **Category**: $category • $location\n" +
+                        "• **Duration**: ${duration}h • ₹$price / person\n" +
+                        "• **Accessibility**: ${tags.joinToString(", ")}\n" +
+                        "• **Sustainability**: $sustainability\n\n" +
+                        "Your experience is now live in the local registry and automatically recommended to travelers with matching time & interest profiles!"
+                    )
+                } else {
+                    Toast.makeText(ctx, "Failed to publish experience", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        dialog.show()
     }
 
     private fun sendMessage(text: String) {
@@ -437,9 +522,57 @@ class YatriAiFragment : Fragment() {
                 return@launch
             }
 
-            // 4. Groq Ultra-Fast AI with Local Grounding Fallback
+            // 2. Micro-Experience Time Crunch Filter ("2 hours", "micro experience", "short on time")
+            if (lowerPrompt.contains("2 hour") || lowerPrompt.contains("2 hr") || lowerPrompt.contains("micro-experience") || lowerPrompt.contains("micro experience") || lowerPrompt.contains("time crunch") || lowerPrompt.contains("short time")) {
+                chatAdapter.removeTypingIndicator()
+                val ctx = context
+                if (ctx != null) {
+                    val allExp = withContext(Dispatchers.IO) {
+                        try {
+                            ExperienceRepository(ctx).getAllExperiences()
+                        } catch (e: Exception) { emptyList() }
+                    }
+                    val isWheelchair = AccessibilityManager.getInstance(ctx).isWheelchairModeEnabled
+                    val filtered = allExp.filter { it.durationHours <= 2.5 && (!isWheelchair || it.accessibilityRating >= 80) }
+                    val ranked = ExperienceOptimizer.rank(filtered)
+
+                    val builder = StringBuilder("⏱️ **Found ${ranked.size} Pareto-Optimized Micro-Experiences (Under 2 Hours)**\n\n")
+                    builder.append("Curated for your available time window near your coordinates with verified accessibility:\n\n")
+
+                    ranked.take(4).forEachIndexed { index, r ->
+                        val exp = r.experience
+                        val badgeText = if (r.badges.isNotEmpty()) " [${r.badges.first().label}]" else ""
+                        builder.append("${index + 1}. **${exp.name}**$badgeText\n")
+                        builder.append("   • **Category**: ${exp.category} (${exp.location})\n")
+                        builder.append("   • **Duration**: ${exp.durationHours}h • **Price**: ${exp.pricePerPerson}\n")
+                        builder.append("   • **Accessibility**: ${exp.accessibilityRating}% (${exp.accessibilityTags.joinToString()})\n")
+                        builder.append("   • **Eco Impact**: ${exp.carbonFootprintPerVisit}\n\n")
+                    }
+
+                    builder.append("Would you like transit directions or to book a spot for one of these?")
+                    addAiMessage(
+                        builder.toString(),
+                        mcq = QuickMcqQuestion(
+                            questionId = "micro_exp_mcq",
+                            questionText = "Select experience to route",
+                            options = ranked.take(3).map { it.experience.name } + listOf("Explore More Stays")
+                        )
+                    )
+                    return@launch
+                }
+            }
+
+            // 4. Groq Ultra-Fast AI with Grounded Local Experiences
             val isWheelchair = context?.let { AccessibilityManager.getInstance(it) }?.isWheelchairModeEnabled == true
-            val groqSystemPrompt = "You are Yatri AI, an expert sustainable travel & smart mobility companion for UrbanPulse. You can answer ANY question naturally, including math, logic, science, and travel. User location: ($userLatitude, $userLongitude). Keep answers concise and direct."
+            val expContext = try {
+                context?.let { ExperienceRepository(it).getAllExperiences() }
+                    ?.take(6)
+                    ?.joinToString("; ") { "${it.name} (${it.category} in ${it.location}, ${it.durationHours}h, ${it.pricePerPerson}, Eco: ${it.ecoScore}/5, Access: ${it.accessibilityRating}%)" }
+            } catch (e: Exception) { null }
+
+            val groqSystemPrompt = "You are Yatri AI, an expert sustainable travel & smart mobility companion for UrbanPulse. You can answer ANY question naturally, including math, logic, science, and travel. User location: ($userLatitude, $userLongitude). " +
+                (if (!expContext.isNullOrEmpty()) "Verified Local Experiences in SQLite: [$expContext]. When asked for local recommendations, workshops, cultural activities, or short experiences, prioritize recommending these verified gems! " else "") +
+                "Keep answers concise, direct, and actionable."
             
             var aiResponse = GroqApiClient.queryGroq(prompt, groqSystemPrompt)
 

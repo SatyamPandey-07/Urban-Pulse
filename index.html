@@ -174,6 +174,8 @@
  Where would you like to travel?
  </div>
  <div class="mcq-chips-container" id="initial-mcq-chips">
+ <button class="mcq-chip" onclick="handleChatPrompt('Find local micro-experiences within 2 hours near my location')">⏱️ 2-Hour Micro Experiences</button>
+ <button class="mcq-chip" onclick="openAddExperienceModal()">+ List Experience (Provider)</button>
  <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Kedarnath')">️ Plan Kedarnath Yatra</button>
  <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Lonavala')"> Plan Lonavala Weekend</button>
  <button class="mcq-chip" onclick="handleChatPrompt('Plan Coastal Alibaug')">️ Plan Coastal Alibaug</button>
@@ -340,18 +342,78 @@
 
  </main>
 
- <!-- Schedule Modal -->
- <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)">
- <div class="modal-sheet">
- <div class="modal-sheet-header">
- <h3 id="modal-title">Trip Schedule</h3>
- <button class="close-modal-btn" onclick="closeScheduleModalDirect()"></button>
- </div>
- <div class="modal-sheet-body" id="modal-body">
- <!-- Content injected via JS -->
- </div>
- </div>
- </div>
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)">
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <h3 id="modal-title">Trip Schedule</h3>
+                <button class="close-modal-btn" onclick="closeScheduleModalDirect()">✕</button>
+            </div>
+            <div class="modal-sheet-body" id="modal-body">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Provider Experience Listing Modal -->
+    <div id="modal-add-experience" class="modal-overlay" onclick="closeAddExpModal(event)">
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <h3>List Your Local Experience (Provider Hub)</h3>
+                <button class="close-modal-btn" onclick="closeAddExpModalDirect()">✕</button>
+            </div>
+            <div class="modal-sheet-body">
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                    Connect directly with travelers seeking authentic local workshops, heritage walks, and sustainable community activities.
+                </p>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom: 4px;">Experience / Workshop Title:</label>
+                    <input type="text" id="input-exp-name" class="app-text-input" placeholder="e.g. Dharavi Clay &amp; Pottery Studio">
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom: 4px;">Category:</label>
+                        <select id="input-exp-category" class="glass-select" style="width:100%;">
+                            <option value="Cultural Workshop">Cultural Workshop</option>
+                            <option value="Heritage &amp; Art">Heritage &amp; Art</option>
+                            <option value="Culinary &amp; Farming">Culinary &amp; Farming</option>
+                            <option value="Nature &amp; Wildlife">Nature &amp; Wildlife</option>
+                            <option value="Active &amp; Outdoor">Active &amp; Outdoor</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom: 4px;">Location / Area:</label>
+                        <input type="text" id="input-exp-location" class="app-text-input" placeholder="e.g. Bandra West, Mumbai">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom: 4px;">Duration (Hours):</label>
+                        <input type="number" id="input-exp-duration" class="app-text-input" value="2.0" step="0.5">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom: 4px;">Price (₹ / person):</label>
+                        <input type="number" id="input-exp-price" class="app-text-input" value="350">
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 11px; color: var(--text-secondary); display:block; margin-bottom: 4px;">Sustainability Practice:</label>
+                    <input type="text" id="input-exp-sustainability" class="app-text-input" value="Local artisan cooperative, zero single-use plastic">
+                </div>
+                <div style="margin: 12px 0; display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="input-exp-stepfree" checked> Step-Free Entrance &amp; Wheelchair Accessible
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="input-exp-audio" checked> Audio / Tactile Guide Available
+                    </label>
+                </div>
+                <button class="glow-download-btn" style="width: 100%; margin-top: 10px; justify-content: center;" onclick="publishProviderExperience()">
+                    <span>Publish Experience to UrbanPulse Registry</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
  <script src="app.js"></script>

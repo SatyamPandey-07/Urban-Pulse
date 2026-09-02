@@ -86,6 +86,32 @@
                 app:singleLine="true">
 
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMicroExperience"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2-Hour Micro Experiences"
+                    app:chipIcon="@drawable/ic_route"
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipListExperience"
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ List Experience (Provider)"
+                    app:chipIcon="@drawable/ic_add"
+                    app:chipIconTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnSurface"
+                    app:chipBackgroundColor="?attr/colorSurfaceContainerLow"
+                    app:chipStrokeWidth="0dp"
+                    app:chipCornerRadius="16dp" />
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/chipSuggestTripLonavala"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
