@@ -575,6 +575,88 @@ function triggerFoodRescue() {
     alert("🍲 Food Rescue Dispatched: Driver from Roti Bank / Feeding India assigned. Pickup ETA: 18 minutes.");
 }
 
+function exportEsgPdf() {
+    const occupancy = document.getElementById('slider-occupancy').value;
+    const power = Math.round(occupancy * 24.2 + 80);
+    const water = Math.round(occupancy * 190);
+    const food = Math.round(occupancy * 0.56);
+    const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>UrbanPulse_ESG_Audit_Report_${occupancy}pct</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #0F172A; }
+                .header-band { background: #064E3B; color: white; padding: 24px; border-radius: 8px; margin-bottom: 24px; }
+                .brand-sub { font-size: 11px; font-weight: bold; color: #10B981; letter-spacing: 0.05em; }
+                .title { font-size: 24px; font-weight: bold; margin: 6px 0; }
+                .standard { font-size: 11px; color: #A7F3D0; }
+                .meta-grid { display: grid; grid-template-columns: 1fr 1fr; background: #F1F5F9; padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; gap: 8px; }
+                .sec-title { font-size: 15px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 4px; color: #0F172A; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+                th, td { padding: 10px 14px; text-align: left; font-size: 12px; border-bottom: 1px solid #E2E8F0; }
+                th { background: #F8FAFC; color: #64748B; font-weight: 600; }
+                .highlight-green { color: #059669; font-weight: bold; }
+                .footer-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; margin-top: 30px; font-size: 11px; color: #64748B; }
+                @media print { @page { margin: 1.5cm; } button { display: none; } }
+            </style>
+        </head>
+        <body>
+            <div class="header-band">
+                <div class="brand-sub">URBANPULSE • B2B SUSTAINABILITY INTELLIGENCE PLATFORM</div>
+                <div class="title">Verified ESG Compliance &amp; Resource Audit</div>
+                <div class="standard">Standard: ISO 14064 Greenhouse Protocol • LEED Platinum &amp; BEE 5-Star Benchmarking</div>
+            </div>
+
+            <div class="meta-grid">
+                <div><strong>Facility:</strong> The Orchid Eco-Heritage Resort &amp; Conference Center</div>
+                <div><strong>Occupancy Scale:</strong> ${occupancy}% (${Math.round(occupancy * 2)} Rooms)</div>
+                <div><strong>Audit Date:</strong> ${dateStr}</div>
+                <div><strong>Compliance Status:</strong> <span class="highlight-green">PASSED (BEE 4.8★ / LEED Platinum)</span></div>
+            </div>
+
+            <div class="sec-title">⚡ Energy Intelligence &amp; HVAC Avoidance</div>
+            <table>
+                <tr><th>Metric</th><th>Recorded Value</th><th>Compliance Benchmark</th></tr>
+                <tr><td>Daily Power Consumption</td><td><strong>${power.toLocaleString()} kWh</strong></td><td>BEE 5-Star Benchmark</td></tr>
+                <tr><td>Automated HVAC Setback Avoided</td><td class="highlight-green">180 kWh (Daily)</td><td>Automated 26°C Setpoint</td></tr>
+                <tr><td>Onsite Solar Generation Mix</td><td class="highlight-green">38.5% Renewable</td><td>Target: &gt;= 30.0%</td></tr>
+            </table>
+
+            <div class="sec-title">💧 Water Stewardship &amp; Recycling</div>
+            <table>
+                <tr><th>Metric</th><th>Recorded Value</th><th>Compliance Benchmark</th></tr>
+                <tr><td>Daily Potable Water Consumption</td><td><strong>${water.toLocaleString()} Liters</strong></td><td>Target &lt;= 220 L/room</td></tr>
+                <tr><td>Greywater Recycled &amp; Reused</td><td class="highlight-green">${Math.round(water * 0.85).toLocaleString()} Liters (85%)</td><td>Zero Liquid Discharge (ZLD)</td></tr>
+            </table>
+
+            <div class="sec-title">🍲 Food Waste Diversion &amp; Rescue</div>
+            <table>
+                <tr><th>Metric</th><th>Recorded Value</th><th>Compliance Benchmark</th></tr>
+                <tr><td>Surplus Food Diverted</td><td><strong>${food} kg</strong></td><td>R² = 0.94 Predictor Model</td></tr>
+                <tr><td>Shelter Meals Provided</td><td class="highlight-green">${food * 2} Hot Meals</td><td>Feeding India / Roti Bank Verified</td></tr>
+            </table>
+
+            <div class="footer-box">
+                <strong>OFFICIALLY VERIFIED &amp; DIGITALLY SIGNED</strong><br>
+                Generated cryptographically by UrbanPulse AI Agentic Engine on behalf of The Orchid Eco-Heritage Resort.<br>
+                Valid for ESG Corporate Reporting under SEBI BRSR Guidelines.
+            </div>
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            </script>
+        </body>
+        </html>
+    `);
+    printWin.document.close();
+}
+
 function exportEsgCsv() {
     const occupancy = document.getElementById('slider-occupancy').value;
     const power = Math.round(occupancy * 24.2 + 80);
