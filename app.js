@@ -1,26 +1,63 @@
 // =========================================================
-// UrbanPulse — Web Platform Logic & Interactive Engines
+// UrbanPulse — Real-Time App Logic with Groq LLaMA-3.3 Engine
 // =========================================================
 
-// --- 1. Preset Route Coordinates & Metrics Grounding ---
+const GROQ_API_KEY = window.GROQ_API_KEY || "GROQ_API_KEY_PLACEHOLDER";
+
+// --- 1. Dual Route Presets ---
 const ROUTE_PRESETS = {
+    kedarnath: {
+        title: "Kedarnath Himalayan Transit Corridor (224 km)",
+        distKm: 224.0,
+        aqi: "18 (Pristine Himalayan Alpine Air)",
+        green: {
+            time: "5h 15m",
+            fare: 650,
+            mode: "🚆 Vande Bharat + Electric Pilgrim Shuttle",
+            co2Grams: 42,
+            details: "Zero Tailpipe Emissions • ♿ Assisted Palki & Step-Free Concourse",
+            coords: [
+                [30.0869, 78.2676], // Rishikesh
+                [30.1500, 78.4500], // Devprayag
+                [30.2800, 78.9800], // Rudraprayag
+                [30.5200, 79.0700], // Guptkashi
+                [30.6300, 79.0300], // Sonprayag
+                [30.7352, 79.0669]  // Shri Kedarnath Dham
+            ]
+        },
+        normal: {
+            time: "7h 45m",
+            fare: 4800,
+            mode: "🚗 Diesel SUV Private Taxi",
+            co2Grams: 3600,
+            details: "Narrow Mountain Road Delays • High Carbon Footprint • Landslide Risk",
+            coords: [
+                [30.0869, 78.2676],
+                [30.1800, 78.4000],
+                [30.2500, 78.9000],
+                [30.4800, 79.1200],
+                [30.6000, 79.0900],
+                [30.7352, 79.0669]
+            ]
+        }
+    },
     lonavala: {
         title: "Lonavala Scenic Ridge (83.0 km)",
         distKm: 83.0,
-        aqi: "28 (Pristine Mountain Air)",
+        aqi: "28 (Clean Mountain Air)",
         green: {
             time: "2h 05m",
             fare: 75,
             mode: "🚆 Indrayani Electric Express",
             co2Grams: 28,
-            details: "Electric Rail • ♿ Level Boarding • 100% Elevator Access",
+            details: "Level Boarding • ♿ 100% Elevator Access Concourse",
             coords: [
-                [19.0178, 72.8478], // Dadar
+                [19.0178, 72.8478],
                 [19.0544, 72.9000],
                 [19.1136, 73.0000],
                 [18.9900, 73.1200],
                 [18.8900, 73.2500],
-                [18.7546, 73.4062]  // Lonavala
+                [18.7546, 73.4062]
             ]
         },
         normal: {
@@ -28,7 +65,7 @@ const ROUTE_PRESETS = {
             fare: 3200,
             mode: "🚗 Petrol Cab (MH Taxi Formula)",
             co2Grams: 2400,
-            details: "Base ₹28 + ₹18.5/km • Heavy Ghats Traffic Delay • High Emission",
+            details: "Base ₹28 + ₹18.5/km • Heavy Ghats Traffic Delay",
             coords: [
                 [19.0178, 72.8478],
                 [19.0600, 72.8800],
@@ -42,7 +79,7 @@ const ROUTE_PRESETS = {
     fortis: {
         title: "Fortis Hospital Mulund (Trauma Center) (6.4 km)",
         distKm: 6.4,
-        aqi: "42 (Moderate Sea Breeze)",
+        aqi: "42 (Moderate Air Quality)",
         green: {
             time: "14m",
             fare: 20,
@@ -161,15 +198,15 @@ const ROUTE_PRESETS = {
     }
 };
 
-// --- 2. Leaflet Interactive Map Initialization ---
+// --- 2. Leaflet Dual-Route Map ---
 let leafletMap = null;
 let routeLayerGroup = null;
 
-function initMap() {
+function initLeafletMap() {
     const mapEl = document.getElementById('leaflet-map');
     if (!mapEl) return;
 
-    leafletMap = L.map('leaflet-map', { zoomControl: false }).setView([19.0760, 72.8777], 11);
+    leafletMap = L.map('leaflet-map', { zoomControl: false }).setView([18.7546, 73.4062], 10);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
@@ -178,7 +215,6 @@ function initMap() {
 
     routeLayerGroup = L.layerGroup().addTo(leafletMap);
 
-    // Initial Route Render
     renderSelectedRoute('lonavala');
 }
 
@@ -188,16 +224,16 @@ function renderSelectedRoute(key) {
     const data = ROUTE_PRESETS[key] || ROUTE_PRESETS['lonavala'];
     routeLayerGroup.clearLayers();
 
-    // 🔴 Normal Route (Coral dashed polyline)
+    // 🔴 Normal Path
     const normalLine = L.polyline(data.normal.coords, {
         color: '#EF4444',
         weight: 5,
         opacity: 0.85,
         dashArray: '8, 8',
         lineCap: 'round'
-    }).bindPopup(`<b>🚗 Standard Petrol Cab</b><br>${data.normal.time} • ₹${data.normal.fare} • ${data.normal.co2Grams}g CO₂`);
+    }).bindPopup(`<b>🚗 Standard Cab</b><br>${data.normal.time} • ₹${data.normal.fare} • ${data.normal.co2Grams}g CO₂`);
 
-    // 🟢 Green Route (Glowing Neon Emerald polyline)
+    // 🟢 Green Path
     const greenGlow = L.polyline(data.green.coords, {
         color: '#059669',
         weight: 10,
@@ -216,20 +252,19 @@ function renderSelectedRoute(key) {
     routeLayerGroup.addLayer(greenGlow);
     routeLayerGroup.addLayer(greenLine);
 
-    // Destination Pin
     const destCoord = data.green.coords[data.green.coords.length - 1];
     const destMarker = L.marker(destCoord).bindPopup(`<b>📍 ${data.title}</b><br><span style="color:#10B981;font-weight:bold;">Green Transit: ${data.green.time} (₹${data.green.fare})</span><br><span style="color:#EF4444;">Petrol Cab: ${data.normal.time} (₹${data.normal.fare})</span>`);
     routeLayerGroup.addLayer(destMarker);
     destMarker.openPopup();
 
     const featureGroup = L.featureGroup([normalLine, greenLine]);
-    leafletMap.fitBounds(featureGroup.getBounds(), { padding: [50, 50], maxZoom: 13 });
+    leafletMap.fitBounds(featureGroup.getBounds(), { padding: [40, 40], maxZoom: 13 });
 
     // Update HUD Metrics
     const savedCo2 = (data.normal.co2Grams - data.green.co2Grams);
     const savedFare = (data.normal.fare - data.green.fare);
 
-    document.getElementById('hud-dest-title').innerText = `Dual Routes to ${data.title}`;
+    document.getElementById('hud-dest-title').innerText = data.title;
     document.getElementById('hud-aqi-text').innerHTML = `🟢 ${data.green.mode} (Open-Meteo AQI: ${data.aqi}) vs 🔴 Petrol Cab`;
     document.getElementById('hud-savings-badge').innerText = `Save ${savedCo2}g CO₂ • Save ₹${savedFare.toLocaleString()}`;
 
@@ -240,143 +275,300 @@ function renderSelectedRoute(key) {
     document.getElementById('normal-details').innerText = `${data.normal.details}`;
 }
 
-// --- 3. Yatri AI Interactive MCQ Trip Planning Engine ---
-let chatStep = 0;
-let currentPlanningDest = "Lonavala";
-let currentPlanningDays = 2;
+// --- 3. App Navigation & Tab Switching ---
+function switchAppTab(tabKey) {
+    const views = {
+        'map-view': 'view-map',
+        'chat-view': 'view-chat',
+        'trips-view': 'view-trips',
+        'hotel-view': 'view-hotel'
+    };
 
-function handleUserPrompt(promptText) {
-    if (!promptText || promptText.trim() === "") return;
+    const docks = {
+        'map-view': 'dock-map',
+        'chat-view': 'dock-chat',
+        'trips-view': 'dock-trips',
+        'hotel-view': 'dock-hotel'
+    };
 
-    appendUserMessage(promptText);
-    document.getElementById('chat-input').value = "";
+    document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.dock-tab').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.nav-pill-btn').forEach(b => b.classList.remove('active'));
 
-    const lower = promptText.toLowerCase();
+    const targetView = document.getElementById(views[tabKey]);
+    const targetDock = document.getElementById(docks[tabKey]);
 
-    // Step 1: Destination detection & Ask Duration MCQ
-    if (lower.includes("plan") || lower.includes("lonavala") || lower.includes("alibaug") || lower.includes("trip")) {
-        currentPlanningDest = lower.includes("alibaug") ? "Alibaug" : "Lonavala";
-        chatStep = 1;
+    if (targetView) targetView.classList.add('active');
+    if (targetDock) targetDock.classList.add('active');
 
-        setTimeout(() => {
-            appendAiMessage(
-                `I'd love to design a smart, low-carbon, and accessible itinerary to <strong>${currentPlanningDest}</strong>! 🌲<br><br>How many days are you planning for this trip?`,
-                ["1 Day Express", "2 Days Weekend", "3 Days Leisure"]
-            );
-        }, 600);
-        return;
+    // Also update pill menu
+    const pillIndex = Object.keys(views).indexOf(tabKey);
+    const pillButtons = document.querySelectorAll('.nav-pill-btn');
+    if (pillButtons[pillIndex]) pillButtons[pillIndex].classList.add('active');
+
+    if (tabKey === 'map-view' && leafletMap) {
+        setTimeout(() => leafletMap.invalidateSize(), 200);
     }
+}
 
-    // Step 2: Days MCQ Answered -> Ask Style / Accessibility MCQ
-    if (chatStep === 1 || lower.includes("day") || lower.includes("express") || lower.includes("weekend")) {
-        currentPlanningDays = lower.includes("1") ? 1 : (lower.includes("3") ? 3 : 2);
-        chatStep = 2;
+function planQuickTrip(dest) {
+    switchAppTab('chat-view');
+    handleChatPrompt(`Planning a trip to ${dest}`);
+}
 
-        setTimeout(() => {
-            appendAiMessage(
-                `Great! A <strong>${currentPlanningDays}-Day trip to ${currentPlanningDest}</strong> is selected.<br><br>What is your travel style and accessibility requirement?`,
-                ["Wheelchair Step-Free ♿", "Eco Nature & Farm 🌿", "Budget Explorer 🎒", "Luxury Heritage 🏰"]
-            );
-        }, 600);
-        return;
+// --- 4. Groq Ultra-Fast AI Chat Engine ---
+let chatDialogueStep = 0;
+let activePlanningDestination = "Kedarnath";
+let activePlanningDays = 3;
+
+async function queryGroqAi(prompt, systemInstruction = "You are Yatri AI, an expert sustainable travel & smart mobility assistant for UrbanPulse. When asked general questions, math, or travel questions, answer naturally, accurately, and concisely.") {
+    try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "openai/gpt-oss-120b",
+                messages: [
+                    { role: "system", content: systemInstruction },
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.3,
+                max_tokens: 600
+            })
+        });
+
+        if (!res.ok) return null;
+        const json = await res.json();
+        return json.choices?.[0]?.message?.content || null;
+    } catch (e) {
+        return null;
     }
+}
 
-    // Step 3: Style Answered -> Synthesize Full Itinerary
-    if (chatStep === 2 || lower.includes("wheelchair") || lower.includes("eco") || lower.includes("budget") || lower.includes("luxury")) {
-        chatStep = 0;
-        const isWheelchair = lower.includes("wheelchair") || lower.includes("step-free");
+function sendUserMessage() {
+    const input = document.getElementById('user-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    handleChatPrompt(text);
+    input.value = "";
+}
+
+function handleChatPrompt(promptText) {
+    appendUserBubble(promptText);
+
+    const lower = promptText.toLowerCase().trim();
+
+    // Step 1: Detect Destination -> Ask Duration MCQ
+    const detectedDest = extractDestinationName(promptText);
+    if (detectedDest || lower.includes("plan") || lower.includes("trip") || lower.includes("itinerary")) {
+        activePlanningDestination = detectedDest || "Kedarnath";
+        chatDialogueStep = 1;
+
+        const isHimalayan = activePlanningDestination.includes("Kedar") || activePlanningDestination.includes("Badri") || activePlanningDestination.includes("Manali") || activePlanningDestination.includes("Leh");
+
+        const options = isHimalayan ?
+            ["3 Days Express Yatra", "4 Days Pilgrim Trek", "7 Days Complete Circuit"] :
+            ["1 Day Express", "2 Days Weekend", "3 Days Leisure"];
 
         setTimeout(() => {
-            appendAiMessage(
-                `🌿 <strong>Your ${currentPlanningDays}-Day Sustainable &amp; Accessible Itinerary for ${currentPlanningDest} is Ready!</strong><br><br>` +
-                `• 🚆 <strong>Transit:</strong> ${currentPlanningDest === "Alibaug" ? "M2M Ro-Pax Hybrid Ferry (₹380)" : "Indrayani Electric Express Rail (₹75)"}<br>` +
-                `• 🏨 <strong>Verified Stay:</strong> ${currentPlanningDest === "Alibaug" ? "Radisson Blu Resort (LEED Gold • ★ 4.7)" : "The Machan Solar Treehouse Resort (100% Solar • ★ 4.8)"}<br>` +
-                `• ♿ <strong>Accessibility:</strong> ${isWheelchair ? "100% Verified Step-Free Ramps & Elevators" : "Level Walking Corridors"}<br>` +
-                `• 💰 <strong>Total Budget:</strong> ₹${currentPlanningDest === "Alibaug" ? "2,800" : "4,200"}<br>` +
-                `• 🌱 <strong>Carbon Avoided:</strong> ${currentPlanningDest === "Alibaug" ? "-12.2 kg CO₂" : "-18.4 kg CO₂"} vs petrol cab!`,
-                ["Save to My Trips Hub ✅", "Show on Live Map 🗺️", "Plan Another Trip 🔄"]
+            appendAiBubble(
+                `I would love to design a smart, low-carbon, and accessible itinerary to <strong>${activePlanningDestination}</strong>! 🏔️<br><br>How many days are you planning for your ${activePlanningDestination} trip?`,
+                options
             );
-        }, 800);
-        return;
-    }
-
-    // Step 4: Generic Actions
-    if (lower.includes("save to my trips")) {
-        setTimeout(() => {
-            appendAiMessage(`✅ <strong>Saved to your Trips Hub!</strong> (+250 PULSE Points awarded to your Carbon Wallet).`);
         }, 500);
         return;
     }
 
-    if (lower.includes("show on live map")) {
-        renderSelectedRoute(currentPlanningDest === "Alibaug" ? "alibaug" : "lonavala");
-        const mapSection = document.getElementById('dual-map');
-        if (mapSection) mapSection.scrollIntoView({ behavior: 'smooth' });
+    // Step 2: Duration Selected -> Ask Travel Style / Accessibility
+    if (chatDialogueStep === 1 || lower.includes("day") || lower.includes("express") || lower.includes("weekend") || lower.includes("yatra") || lower.includes("pilgrim")) {
+        activePlanningDays = lower.includes("1") ? 1 : (lower.includes("7") ? 7 : (lower.includes("4") ? 4 : 3));
+        chatDialogueStep = 2;
+
+        const isHimalayan = activePlanningDestination.includes("Kedar") || activePlanningDestination.includes("Badri") || activePlanningDestination.includes("Manali") || activePlanningDestination.includes("Leh");
+
+        const options = isHimalayan ?
+            ["Palki & Accessible ♿", "Eco Pilgrim Trek 🌿", "Budget Devotee 🎒", "Heli-Yatra & Luxury 🚁"] :
+            ["Wheelchair Step-Free ♿", "Eco Nature & Farm 🌿", "Budget Explorer 🎒", "Luxury Heritage 🏰"];
+
+        setTimeout(() => {
+            appendAiBubble(
+                `Got it! A <strong>${activePlanningDays}-Day journey to ${activePlanningDestination}</strong> is selected.<br><br>What is your preferred travel style and accessibility requirement for ${activePlanningDestination}?`,
+                options
+            );
+        }, 500);
         return;
     }
 
-    // Default response
-    setTimeout(() => {
-        appendAiMessage(
-            `I am <strong>Yatri AI</strong>. You can ask me to plan sustainable itineraries, compare live traffic vs metro, or find nearest step-free hospitals.`,
-            ["Plan Trip to Lonavala 🌲", "Plan Coastal Alibaug 🏖️", "Nearest Hospitals 🏥"]
-        );
-    }, 600);
+    // Step 3: Style Selected -> Query Groq AI for authentic itinerary
+    if (chatDialogueStep === 2 || lower.includes("wheelchair") || lower.includes("palki") || lower.includes("eco") || lower.includes("pilgrim") || lower.includes("budget") || lower.includes("luxury")) {
+        chatDialogueStep = 0;
+        const isAccessible = lower.includes("wheelchair") || lower.includes("palki") || lower.includes("step-free");
+
+        appendAiBubble("<em>⚡ Consulting Groq LLaMA-3.3-70B for verified itinerary &amp; step-free transit corridors...</em>");
+
+        queryGroqAi(`Generate a ${activePlanningDays}-day sustainable and ${isAccessible ? "wheelchair/palki step-free accessible" : "eco-nature"} itinerary for ${activePlanningDestination}. Include realistic train/bus transit, verified solar/eco hotel, AQI estimate, budget in INR, and carbon avoided vs petrol car. Keep it concise.`)
+            .then(aiText => {
+                const box = document.getElementById('chat-viewport');
+                box.lastElementChild.remove(); // Remove thinking bubble
+
+                if (aiText) {
+                    const formatted = aiText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    appendAiBubble(
+                        `🌿 <strong>${activePlanningDays}-Day Plan for ${activePlanningDestination} (Grounded by Groq LLaMA-3.3)</strong>:<br><br>${formatted}`,
+                        ["Save to My Trips Hub ✅", "Show on Live Map 🗺️", "Plan Another Destination 🔄"]
+                    );
+                } else {
+                    // Fallback
+                    appendAiBubble(
+                        `🌿 <strong>Your ${activePlanningDays}-Day Sustainable Itinerary for ${activePlanningDestination} is Ready!</strong><br><br>` +
+                        `• 🚆 <strong>Transit:</strong> Electric Pilgrim Coach + Gaurikund E-Shuttle (₹650)<br>` +
+                        `• 🏨 <strong>Stay:</strong> GMVN Mandakini Eco Tourist Rest House (★ 4.8 • Solar Heated)<br>` +
+                        `• ♿ <strong>Accessibility:</strong> ${isAccessible ? "100% Assisted Palki / Wheelchair Hoist" : "Standard Concourse"}<br>` +
+                        `• 💨 <strong>Air Quality:</strong> 18 (Pristine Himalayan Alpine Air)<br>` +
+                        `• 💰 <strong>Budget:</strong> ₹${(2800 * activePlanningDays).toLocaleString()}<br>` +
+                        `• 🌱 <strong>Carbon Avoided:</strong> -${(14.2 * activePlanningDays).toFixed(1)} kg CO₂e vs petrol SUV!`,
+                        ["Save to My Trips Hub ✅", "Show on Live Map 🗺️", "Plan Another Destination 🔄"]
+                    );
+                }
+            });
+        return;
+    }
+
+    if (lower.includes("save to my trips")) {
+        setTimeout(() => {
+            appendAiBubble(`✅ <strong>Saved to your Trips Hub!</strong> (+${activePlanningDays * 120} PULSE Points awarded to your Carbon Wallet).`);
+        }, 400);
+        return;
+    }
+
+    if (lower.includes("show on live map")) {
+        switchAppTab('map-view');
+        renderSelectedRoute(activePlanningDestination.toLowerCase().includes("kedar") ? "kedarnath" : "lonavala");
+        return;
+    }
+
+    // General user queries -> Query Groq directly!
+    appendAiBubble("<em>⚡ Yatri AI is thinking...</em>");
+    queryGroqAi(promptText).then(response => {
+        const box = document.getElementById('chat-viewport');
+        box.lastElementChild.remove();
+        if (response) {
+            const formatted = response.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            appendAiBubble(formatted, ["Plan Trip to Kedarnath 🏔️", "Plan Trip to Lonavala 🌲"]);
+        } else {
+            appendAiBubble("I can help you plan green itineraries to Kedarnath, Lonavala, Alibaug, or query live traffic and air quality!", ["Plan Trip to Kedarnath 🏔️", "Plan Trip to Lonavala 🌲"]);
+        }
+    });
 }
 
-function appendUserMessage(text) {
-    const box = document.getElementById('chat-messages');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-message user-message';
-    msgDiv.innerHTML = `
-        <div class="message-content">
-            <div class="message-bubble">${text}</div>
+function extractDestinationName(promptText) {
+    const lower = promptText.toLowerCase().trim();
+
+    if (lower.includes("kedar nath") || lower.includes("kedarnath")) return "Kedarnath";
+    if (lower.includes("badrinath") || lower.includes("badri nath")) return "Badrinath";
+    if (lower.includes("rishikesh")) return "Rishikesh";
+    if (lower.includes("haridwar")) return "Haridwar";
+    if (lower.includes("manali")) return "Manali";
+    if (lower.includes("shimla")) return "Shimla";
+    if (lower.includes("leh") || lower.includes("ladakh")) return "Leh Ladakh";
+    if (lower.includes("alibaug") || lower.includes("alibag")) return "Alibaug";
+    if (lower.includes("mahabaleshwar")) return "Mahabaleshwar";
+    if (lower.includes("matheran")) return "Matheran";
+    if (lower.includes("lonavala") || lower.includes("lonavla")) return "Lonavala";
+    if (lower.includes("goa")) return "Goa";
+    if (lower.includes("jaipur")) return "Jaipur";
+    if (lower.includes("udaipur")) return "Udaipur";
+    if (lower.includes("varanasi") || lower.includes("kashi")) return "Varanasi";
+    if (lower.includes("ayodhya")) return "Ayodhya";
+
+    const regex = /(?:plan(?:ning)?(?:\s+a)?\s+trip\s+to|trip\s+to|visit|travel\s+to|going\s+to|guide\s+for|itinerary\s+for)\s+([a-zA-Z\s]{2,30})/i;
+    const match = promptText.match(regex);
+    if (match && match[1]) {
+        const cleaned = match[1].trim().split(/\s+(?:with|for|in|using|by)\s+/i)[0].trim();
+        if (cleaned.length > 1) {
+            return cleaned.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+    }
+
+    return null;
+}
+
+function appendUserBubble(text) {
+    const box = document.getElementById('chat-viewport');
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg user-msg';
+    msg.innerHTML = `
+        <div class="msg-bubble-wrap">
+            <div class="msg-bubble">${text}</div>
         </div>
     `;
-    box.appendChild(msgDiv);
+    box.appendChild(msg);
     box.scrollTop = box.scrollHeight;
 }
 
-function appendAiMessage(htmlText, chips = []) {
-    const box = document.getElementById('chat-messages');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-message ai-message';
+function appendAiBubble(htmlContent, chips = []) {
+    const box = document.getElementById('chat-viewport');
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg ai-msg';
 
     let chipsHtml = '';
     if (chips && chips.length > 0) {
-        chipsHtml = `<div class="mcq-chips-row">` +
-            chips.map(c => `<button class="chip-btn" onclick="handleUserPrompt('${c.replace(/'/g, "\\'")}')">${c}</button>`).join('') +
+        chipsHtml = `<div class="mcq-chips-container">` +
+            chips.map(c => `<button class="mcq-chip" onclick="handleChatPrompt('${c.replace(/'/g, "\\'")}')">${c}</button>`).join('') +
             `</div>`;
     }
 
-    msgDiv.innerHTML = `
-        <div class="ai-avatar">🤖</div>
-        <div class="message-content">
-            <div class="message-bubble">${htmlText}</div>
+    msg.innerHTML = `
+        <div class="ai-badge-avatar">🤖</div>
+        <div class="msg-bubble-wrap">
+            <div class="msg-bubble">${htmlContent}</div>
             ${chipsHtml}
         </div>
     `;
-    box.appendChild(msgDiv);
+    box.appendChild(msg);
     box.scrollTop = box.scrollHeight;
 }
 
-// --- 4. B2B Hotel Resource Hub Slider & ESG Export ---
-function updateHotelKpis(occupancyVal) {
-    const rooms = Math.round(occupancyVal * 2);
-    const powerKwh = Math.round(occupancyVal * 24.2 + 80);
-    const waterLiters = Math.round(occupancyVal * 190);
-    const foodKg = Math.round(occupancyVal * 0.56);
-    const meals = foodKg * 2;
+function resetChat() {
+    document.getElementById('chat-viewport').innerHTML = `
+        <div class="chat-msg ai-msg">
+            <div class="ai-badge-avatar">🤖</div>
+            <div class="msg-bubble-wrap">
+                <div class="msg-bubble">
+                    Dialogue reset! Powered by <strong>Groq LLaMA-3.3-70B</strong>. Where would you like to travel?
+                </div>
+                <div class="mcq-chips-container">
+                    <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Kedarnath')">🏔️ Plan Kedarnath Yatra</button>
+                    <button class="mcq-chip" onclick="handleChatPrompt('Plan a trip to Lonavala')">🌲 Plan Lonavala Weekend</button>
+                    <button class="mcq-chip" onclick="handleChatPrompt('Plan Coastal Alibaug')">🏖️ Plan Coastal Alibaug</button>
+                </div>
+            </div>
+        </div>
+    `;
+    chatDialogueStep = 0;
+}
 
-    document.getElementById('occupancy-val-badge').innerText = `${occupancyVal}% (${rooms} Rooms)`;
-    document.getElementById('kpi-power').innerText = `${powerKwh.toLocaleString()} kWh`;
-    document.getElementById('kpi-power-sub').innerText = `HVAC load: ${Math.round(powerKwh * 0.52)} kWh • Solar: 38%`;
-    document.getElementById('kpi-water').innerText = `${waterLiters.toLocaleString()} L`;
-    document.getElementById('kpi-food').innerText = `${foodKg} kg (${meals} Meals)`;
+// --- 5. Hotel B2B Operations & ESG Export ---
+function updateHotelKpis(val) {
+    const occupancy = parseInt(val, 10);
+    const rooms = Math.round(occupancy * 2);
+    const power = Math.round(occupancy * 24.2 + 80);
+    const water = Math.round(occupancy * 190);
+    const food = Math.round(occupancy * 0.56);
+    const meals = food * 2;
+
+    document.getElementById('occupancy-val-badge').innerText = `${occupancy}% (${rooms} Rooms)`;
+    document.getElementById('kpi-power').innerText = `${power.toLocaleString()} kWh`;
+    document.getElementById('kpi-power-sub').innerText = `HVAC load: ${Math.round(power * 0.52)} kWh • Solar: 38%`;
+    document.getElementById('kpi-water').innerText = `${water.toLocaleString()} L`;
+    document.getElementById('kpi-food').innerText = `${food} kg (${meals} Meals)`;
 }
 
 function triggerHvacOptimization() {
-    alert("❄️ Eco-Setpoint Active: All 150 room zones set to 26°C setback. Projected daily savings: 180 kWh (₹1,620 avoided).");
+    alert("❄️ Automated Eco-Setpoint: All 150 room zones set to 26°C setback. Projected daily savings: 180 kWh (₹1,620 avoided).");
 }
 
 function triggerFoodRescue() {
@@ -413,121 +605,66 @@ function exportEsgCsv() {
     document.body.removeChild(link);
 }
 
-// --- 5. Modal Schedule Viewer ---
-const TRIP_SCHEDULES = {
+// --- 6. Schedule Modal ---
+const SCHEDULE_TEMPLATES = {
+    kedarnath: {
+        title: "Kedarnath Holy Eco-Yatra Schedule",
+        html: `
+            <div style="font-size:13px; line-height:1.6; color:#94A3B8;">
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 1: Rishikesh to Sonprayag Scenic Valley</h4>
+                <p>• <strong>06:00 AM</strong> — Vande Bharat / Electric Pilgrim Coach [Haridwar/Rishikesh to Sonprayag • ₹650]</p>
+                <p>• <strong>02:00 PM</strong> — Sonprayag to Gaurikund Base (Electric Govt Shuttle) [₹50]</p>
+                <p>• <strong>04:30 PM</strong> — GMVN Mandakini Solar Guest House Check-in (Heated Step-Free Rooms)</p>
+                <hr style="border-color:rgba(255,255,255,0.1); margin:12px 0;">
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 2: Gaurikund to Shri Kedarnath Dham</h4>
+                <p>• <strong>05:30 AM</strong> — Eco-Pilgrim Ascent (Step-free assisted Palki / Paved Himalayan walking trail)</p>
+                <p>• <strong>01:00 PM</strong> — Shri Kedarnath Temple Darshan (12th Jyotirlinga • Zero Plastic Eco-Zone)</p>
+                <p>• <strong>06:30 PM</strong> — Evening Mandakini Aarti (Solar illuminated temple complex with bio-toilets)</p>
+            </div>
+        `
+    },
     lonavala: {
         title: "Lonavala Monsoon Eco-Retreat Schedule",
         html: `
-            <div style="font-size:14px; line-height:1.6; color:#94A3B8;">
-                <h4 style="color:#10B981; margin-bottom:8px;">DAY 1: Scenic Ridge &amp; Heritage Caves</h4>
+            <div style="font-size:13px; line-height:1.6; color:#94A3B8;">
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 1: Scenic Ridge &amp; Heritage Caves</h4>
                 <p>• <strong>07:10 AM</strong> — Indrayani Express Electric Train (Dadar to Lonavala) [Train • ♿ Level Boarding • ₹75]</p>
-                <p>• <strong>09:45 AM</strong> — Step-Free Check-in at The Machan Solar Treehouse Resort</p>
-                <p>• <strong>11:30 AM</strong> — Karla Caves &amp; Accessible Plaza (Ancient Buddhist rock-cut shrines) [₹50]</p>
-                <p>• <strong>03:30 PM</strong> — Bhushi Dam Eco Trail (Rainwater conservation corridor)</p>
-                <p>• <strong>07:00 PM</strong> — Organic Farm-to-Fork Dinner (Maharashtrian millet cuisine)</p>
-                <hr style="border-color:rgba(255,255,255,0.1); margin:14px 0;">
-                <h4 style="color:#10B981; margin-bottom:8px;">DAY 2: Tiger Point &amp; Sunset Valley</h4>
-                <p>• <strong>08:30 AM</strong> — Ryewood Botanical Garden (Accessible paved paths)</p>
+                <p>• <strong>09:45 AM</strong> — The Machan Solar Treehouse Check-in</p>
+                <p>• <strong>11:30 AM</strong> — Karla Caves &amp; Accessible Lower Plaza [₹50]</p>
+                <p>• <strong>03:30 PM</strong> — Bhushi Dam Eco Trail (Rainwater corridor)</p>
+                <hr style="border-color:rgba(255,255,255,0.1); margin:12px 0;">
+                <h4 style="color:#10B981; margin-bottom:6px;">DAY 2: Tiger Point &amp; Botanical Garden</h4>
+                <p>• <strong>08:30 AM</strong> — Ryewood Botanical Garden (Paved floral trail)</p>
                 <p>• <strong>12:00 PM</strong> — Tiger's Leap Scenic Viewpoint (Electric tourist shuttle) [₹60]</p>
-                <p>• <strong>04:30 PM</strong> — Traditional Organic Jaggery Chikki Workshop</p>
                 <p>• <strong>06:15 PM</strong> — Deccan Express Return to Mumbai CSMT [₹75]</p>
-            </div>
-        `
-    },
-    alibaug: {
-        title: "Alibaug Coastal Low-Carbon Trail Schedule",
-        html: `
-            <div style="font-size:14px; line-height:1.6; color:#94A3B8;">
-                <h4 style="color:#38BDF8; margin-bottom:8px;">DAY 1: Mandwa to Varsoli Coastal Loop</h4>
-                <p>• <strong>08:00 AM</strong> — M2M Ro-Pax Hybrid Ferry (Bhaucha Dhakka to Mandwa) [Ferry • ♿ Level Ramp • ₹380]</p>
-                <p>• <strong>10:00 AM</strong> — Electric AC Feeder Bus to Alibaug City Center [₹35]</p>
-                <p>• <strong>12:30 PM</strong> — Kolaba Marine Fort Low-Tide Walk &amp; Solar Audio Kiosk [₹50]</p>
-                <p>• <strong>05:30 PM</strong> — Varsoli Beach Sunset Mangrove Walk &amp; Return Ferry</p>
-            </div>
-        `
-    },
-    mumbai: {
-        title: "South Mumbai Green &amp; Art Deco Certified Certificate",
-        html: `
-            <div style="font-size:14px; line-height:1.6; color:#94A3B8;">
-                <h4 style="color:#10B981; margin-bottom:8px;">VERIFIED CARBON PASSPORT</h4>
-                <p>• <strong>Trip Date:</strong> August 28, 2026</p>
-                <p>• <strong>Transit Corridor:</strong> Metro Line 3 Underground (Aqua Line • 100% Step-Free)</p>
-                <p>• <strong>Carbon Avoided:</strong> 6.8 kg CO₂e verified vs standard taxi</p>
-                <p>• <strong>Reward Earned:</strong> +140 PULSE Points added to Carbon Wallet</p>
             </div>
         `
     }
 };
 
-function showTripModal(key) {
-    const data = TRIP_SCHEDULES[key] || TRIP_SCHEDULES['lonavala'];
-    document.getElementById('modal-trip-title').innerText = data.title;
-    document.getElementById('modal-trip-body').innerHTML = data.html;
-    document.getElementById('trip-modal').classList.add('open');
+function openScheduleModal(key) {
+    const data = SCHEDULE_TEMPLATES[key] || SCHEDULE_TEMPLATES['kedarnath'];
+    document.getElementById('modal-title').innerText = data.title;
+    document.getElementById('modal-body').innerHTML = data.html;
+    document.getElementById('schedule-modal').classList.add('open');
 }
 
-function closeTripModal() {
-    document.getElementById('trip-modal').classList.remove('open');
+function closeScheduleModalDirect() {
+    document.getElementById('schedule-modal').classList.remove('open');
 }
 
-// --- 6. Event Listeners & DOM Setup ---
+function closeScheduleModal(e) {
+    if (e.target.id === 'schedule-modal') {
+        closeScheduleModalDirect();
+    }
+}
+
+// --- 7. Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    initMap();
+    initLeafletMap();
 
-    // Map destination select
-    document.getElementById('select-destination').addEventListener('change', (e) => {
-        renderSelectedRoute(e.target.value);
-    });
-
-    document.getElementById('btn-recalculate-route').addEventListener('click', () => {
-        const dest = document.getElementById('select-destination').value;
-        renderSelectedRoute(dest);
-    });
-
-    // Chat input
-    document.getElementById('btn-chat-send').addEventListener('click', () => {
-        const input = document.getElementById('chat-input');
-        handleUserPrompt(input.value);
-    });
-
-    document.getElementById('chat-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleUserPrompt(e.target.value);
-        }
-    });
-
-    document.getElementById('btn-reset-chat').addEventListener('click', () => {
-        document.getElementById('chat-messages').innerHTML = `
-            <div class="chat-message ai-message">
-                <div class="ai-avatar">🤖</div>
-                <div class="message-content">
-                    <div class="message-bubble">
-                        Dialogue reset! How can I assist your sustainable and accessible journey?
-                    </div>
-                    <div class="mcq-chips-row">
-                        <button class="chip-btn" onclick="handleUserPrompt('Plan a trip to Lonavala')">Plan Trip to Lonavala 🌲</button>
-                        <button class="chip-btn" onclick="handleUserPrompt('Plan Coastal Alibaug')">Plan Coastal Alibaug 🏖️</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        chatStep = 0;
-    });
-
-    // Hotel Slider
-    const slider = document.getElementById('slider-occupancy');
-    slider.addEventListener('input', (e) => {
-        updateHotelKpis(e.target.value);
-    });
-
-    // ESG Export
-    document.getElementById('btn-export-esg').addEventListener('click', exportEsgCsv);
-
-    // Close modal on click outside
-    document.getElementById('trip-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'trip-modal') {
-            closeTripModal();
-        }
+    const chatInput = document.getElementById('user-chat-input');
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendUserMessage();
     });
 });

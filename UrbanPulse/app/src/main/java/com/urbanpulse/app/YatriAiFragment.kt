@@ -22,22 +22,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.FunctionDeclaration
-import com.google.ai.client.generativeai.type.FunctionType
-import com.google.ai.client.generativeai.type.Schema
-import com.google.ai.client.generativeai.type.Tool
-import com.google.ai.client.generativeai.type.content
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.urbanpulse.app.network.GroqApiClient
 import com.urbanpulse.app.network.LiveCityIntelligenceService
-import com.urbanpulse.app.network.TomTomMcpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.util.Locale
 
 class YatriAiFragment : Fragment() {
@@ -107,7 +100,7 @@ class YatriAiFragment : Fragment() {
         }
 
         if (messages.isEmpty()) {
-            addAiMessage("Hello! I am Yatri AI, your agentic green travel & inclusive hospitality companion.\n\nI can plan multi-day eco-itineraries, calculate low-carbon transit routes, find verified step-free stays, and query real-time TomTom & Open-Meteo environmental tools.\n\nTry asking: \"Plan a trip to Lonavala\" or \"Find accessible eco-resorts near me\"!")
+            addAiMessage("Hello! I am Yatri AI, your agentic green travel & inclusive hospitality companion.\n\nI can plan multi-day eco-itineraries for any destination (e.g. Kedarnath, Lonavala, Alibaug, Manali), calculate low-carbon transit routes, and find verified step-free stays.\n\nTry asking: \"Plan a trip to Kedarnath\" or \"Plan a trip to Lonavala\"!")
         }
     }
 
@@ -220,7 +213,7 @@ class YatriAiFragment : Fragment() {
 
     private fun setupSuggestionChips(view: View) {
         view.findViewById<Chip>(R.id.chipSuggestTripLonavala).setOnClickListener {
-            sendMessage("Plan a trip to Lonavala")
+            sendMessage("Plan a trip to Kedarnath")
         }
         view.findViewById<Chip>(R.id.chipSuggestHospital).setOnClickListener {
             sendMessage("Suggest some hospital near me")
@@ -262,6 +255,43 @@ class YatriAiFragment : Fragment() {
         }
     }
 
+    private fun extractDestination(prompt: String): String? {
+        val lower = prompt.lowercase().trim()
+
+        // Known famous pilgrimage and tourist spots
+        if (lower.contains("kedar nath") || lower.contains("kedarnath")) return "Kedarnath"
+        if (lower.contains("badrinath") || lower.contains("badri nath")) return "Badrinath"
+        if (lower.contains("rishikesh")) return "Rishikesh"
+        if (lower.contains("haridwar")) return "Haridwar"
+        if (lower.contains("manali")) return "Manali"
+        if (lower.contains("shimla")) return "Shimla"
+        if (lower.contains("leh") || lower.contains("ladakh")) return "Leh Ladakh"
+        if (lower.contains("alibaug") || lower.contains("alibag")) return "Alibaug"
+        if (lower.contains("mahabaleshwar")) return "Mahabaleshwar"
+        if (lower.contains("matheran")) return "Matheran"
+        if (lower.contains("lonavala") || lower.contains("lonavla")) return "Lonavala"
+        if (lower.contains("goa")) return "Goa"
+        if (lower.contains("jaipur")) return "Jaipur"
+        if (lower.contains("udaipur")) return "Udaipur"
+        if (lower.contains("varanasi") || lower.contains("kashi") || lower.contains("banaras")) return "Varanasi"
+        if (lower.contains("ayodhya")) return "Ayodhya"
+        if (lower.contains("pune")) return "Pune"
+        if (lower.contains("mumbai")) return "Mumbai"
+
+        // Regex pattern: "plan trip to X", "planning a trip to X", "trip to X", "visit X", "itinerary for X"
+        val regex = Regex("(?i)(?:plan(?:ning)?(?:\\s+a)?\\s+trip\\s+to|trip\\s+to|visit|travel\\s+to|going\\s+to|guide\\s+for|itinerary\\s+for)\\s+([a-zA-Z\\s]{2,30})")
+        val match = regex.find(prompt)
+        if (match != null) {
+            val raw = match.groupValues[1].trim()
+            val cleaned = raw.split(" with ", " for ", " in ", " using ", " by ")[0].trim()
+            if (cleaned.isNotEmpty()) {
+                return cleaned.split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+            }
+        }
+
+        return null
+    }
+
     private fun generateResponse(prompt: String) {
         fetchUserLocation()
 
@@ -272,50 +302,65 @@ class YatriAiFragment : Fragment() {
             val lowerPrompt = prompt.lowercase()
 
             // 1. Check if user is answering a pending Days MCQ question
-            if (pendingTripDestination != null && (lowerPrompt.contains("day") || lowerPrompt.contains("express") || lowerPrompt.contains("weekend") || lowerPrompt.contains("leisure") || lowerPrompt.matches(Regex(".*\\b[1-7]\\b.*")))) {
+            if (pendingTripDestination != null && (lowerPrompt.contains("day") || lowerPrompt.contains("express") || lowerPrompt.contains("weekend") || lowerPrompt.contains("leisure") || lowerPrompt.contains("yatra") || lowerPrompt.contains("pilgrimage") || lowerPrompt.matches(Regex(".*\\b[1-7]\\b.*")))) {
                 chatAdapter.removeTypingIndicator()
                 val days = when {
                     lowerPrompt.contains("1") || lowerPrompt.contains("express") -> 1
-                    lowerPrompt.contains("3") || lowerPrompt.contains("leisure") -> 3
+                    lowerPrompt.contains("3") -> 3
+                    lowerPrompt.contains("4") || lowerPrompt.contains("5") || lowerPrompt.contains("pilgrimage") -> 4
+                    lowerPrompt.contains("7") || lowerPrompt.contains("complete") -> 7
                     else -> 2
                 }
                 pendingTripDays = days
-                val dest = pendingTripDestination ?: "Lonavala"
+                val dest = pendingTripDestination ?: "Kedarnath"
+
+                val isHimalayan = dest.contains("Kedar", true) || dest.contains("Badri", true) || dest.contains("Manali", true) || dest.contains("Leh", true)
+
+                val options = if (isHimalayan) {
+                    listOf(
+                        "Palki & Accessible ♿",
+                        "Eco Pilgrim Trek 🌿",
+                        "Budget Devotee 🎒",
+                        "Heli-Yatra & Luxury 🚁"
+                    )
+                } else {
+                    listOf(
+                        "Wheelchair Step-Free ♿",
+                        "Eco Nature & Farm 🌿",
+                        "Budget Explorer 🎒",
+                        "Luxury Heritage 🏰"
+                    )
+                }
 
                 addAiMessage(
-                    text = "Got it! A **$days-Day trip to $dest** is selected.\n\nNow, what is your preferred travel style and accessibility requirement?",
+                    text = "Got it! A **$days-Day trip to $dest** is selected.\n\nNow, what is your preferred travel style and accessibility requirement for $dest?",
                     mcq = QuickMcqQuestion(
                         questionId = "style_mcq",
                         questionText = "Select travel style",
-                        options = listOf(
-                            "Wheelchair Step-Free ♿",
-                            "Eco Nature & Farm 🌿",
-                            "Budget Explorer 🎒",
-                            "Luxury Heritage 🏰"
-                        )
+                        options = options
                     )
                 )
                 return@launch
             }
 
             // 2. Check if user is answering the Style MCQ question
-            if (pendingTripDestination != null && (lowerPrompt.contains("wheelchair") || lowerPrompt.contains("step-free") || lowerPrompt.contains("eco") || lowerPrompt.contains("nature") || lowerPrompt.contains("budget") || lowerPrompt.contains("luxury") || lowerPrompt.contains("heritage"))) {
+            if (pendingTripDestination != null && (lowerPrompt.contains("wheelchair") || lowerPrompt.contains("palki") || lowerPrompt.contains("heli") || lowerPrompt.contains("step-free") || lowerPrompt.contains("eco") || lowerPrompt.contains("nature") || lowerPrompt.contains("pilgrim") || lowerPrompt.contains("devotee") || lowerPrompt.contains("budget") || lowerPrompt.contains("luxury") || lowerPrompt.contains("heritage"))) {
                 chatAdapter.removeTypingIndicator()
-                val dest = pendingTripDestination ?: "Lonavala"
+                val dest = pendingTripDestination ?: "Kedarnath"
                 val days = pendingTripDays
-                val isAccessible = lowerPrompt.contains("wheelchair") || lowerPrompt.contains("step-free")
-                val style = if (isAccessible) "Wheelchair Step-Free" else "Eco Nature"
+                val isAccessible = lowerPrompt.contains("wheelchair") || lowerPrompt.contains("palki") || lowerPrompt.contains("step-free")
+                val style = if (isAccessible) "Wheelchair / Palki Step-Free" else "Eco Pilgrim"
 
                 val generatedTrip = buildDynamicTrip(dest, days, isAccessible, style)
 
                 addAiMessage(
                     text = "🌿 **Your $days-Day Sustainable & Accessible Itinerary for $dest is Ready!**\n\n" +
                             "• 🚆 **Transit Option**: ${generatedTrip.travelMode} (Cost: ₹${generatedTrip.transitCostInr})\n" +
-                            "• 🏨 **Verified Eco Stay**: ${generatedTrip.hotelName} (Rating: ★ ${generatedTrip.hotelRating})\n" +
-                            "• ♿ **Accessibility**: ${if (generatedTrip.isStepFreeAccessible) "100% Level Boarding & Elevator Concourses" else "Standard Concourse"}\n" +
+                            "• 🏨 **Verified Stay**: ${generatedTrip.hotelName} (Rating: ★ ${generatedTrip.hotelRating})\n" +
+                            "• ♿ **Accessibility**: ${if (generatedTrip.isStepFreeAccessible) "100% Level Boarding & Assisted Palki / Concourse" else "Standard Concourse"}\n" +
                             "• 💨 **Air Quality**: ${generatedTrip.aqiStatus}\n" +
                             "• 💰 **Estimated Budget**: ₹${generatedTrip.totalBudgetInr}\n" +
-                            "• 🌱 **Carbon Avoided**: -${generatedTrip.co2SavedKg} kg CO2e vs petrol taxi!\n\n" +
+                            "• 🌱 **Carbon Avoided**: -${generatedTrip.co2SavedKg} kg CO2e vs private petrol SUV!\n\n" +
                             "You can save this trip to your **Trips tab** or open the full timeline below:",
                     trip = generatedTrip
                 )
@@ -323,53 +368,105 @@ class YatriAiFragment : Fragment() {
                 return@launch
             }
 
-            // 3. Check if user is asking to plan a trip to a destination
-            if (lowerPrompt.contains("plan") || lowerPrompt.contains("trip") || lowerPrompt.contains("itinerary") || lowerPrompt.contains("lonavala") || lowerPrompt.contains("alibaug") || lowerPrompt.contains("mahabaleshwar") || lowerPrompt.contains("matheran")) {
+            // 3. Dynamic Destination Extraction (Kedarnath, Manali, Lonavala, etc.)
+            val extractedDest = extractDestination(prompt)
+            if (extractedDest != null || lowerPrompt.contains("plan") || lowerPrompt.contains("trip") || lowerPrompt.contains("itinerary")) {
                 chatAdapter.removeTypingIndicator()
-                val dest = when {
-                    lowerPrompt.contains("alibaug") -> "Alibaug"
-                    lowerPrompt.contains("mahabaleshwar") -> "Mahabaleshwar"
-                    lowerPrompt.contains("matheran") -> "Matheran"
-                    lowerPrompt.contains("pune") -> "Pune"
-                    lowerPrompt.contains("goa") -> "Goa"
-                    else -> "Lonavala"
-                }
+                val dest = extractedDest ?: "Kedarnath"
                 pendingTripDestination = dest
 
+                val isHimalayan = dest.contains("Kedar", true) || dest.contains("Badri", true) || dest.contains("Manali", true) || dest.contains("Leh", true)
+
+                val options = if (isHimalayan) {
+                    listOf(
+                        "3 Days Express Yatra",
+                        "4 Days Pilgrim Trek",
+                        "7 Days Complete Circuit",
+                        "Custom Duration"
+                    )
+                } else {
+                    listOf(
+                        "1 Day Express (Same Day)",
+                        "2 Days Weekend",
+                        "3 Days Leisure",
+                        "Custom Duration"
+                    )
+                }
+
                 addAiMessage(
-                    text = "I would be happy to design a smart, low-carbon, and accessible itinerary to **$dest**! 🌲\n\nHow many days are you planning for this trip?",
+                    text = "I would be happy to design a smart, low-carbon, and accessible itinerary to **$dest**! 🏔️\n\nHow many days are you planning for your $dest trip?",
                     mcq = QuickMcqQuestion(
                         questionId = "days_mcq",
                         questionText = "Select trip duration",
-                        options = listOf(
-                            "1 Day Express (Same Day)",
-                            "2 Days Weekend",
-                            "3 Days Leisure",
-                            "Custom Duration"
-                        )
+                        options = options
                     )
                 )
                 return@launch
             }
 
-            // 4. Intelligent Local Grounded Engine
+            // 4. Groq Ultra-Fast AI with Local Grounding Fallback
             val isWheelchair = context?.let { AccessibilityManager.getInstance(it) }?.isWheelchairModeEnabled == true
-            val localResponse = withContext(Dispatchers.IO) {
-                LiveCityIntelligenceService.queryGroundedIntelligence(
-                    userPrompt = prompt,
-                    userLat = userLatitude,
-                    userLon = userLongitude,
-                    isWheelchair = isWheelchair
-                )
+            val groqSystemPrompt = "You are Yatri AI, an expert sustainable travel & smart mobility companion for UrbanPulse. You can answer ANY question naturally, including math, logic, science, and travel. User location: ($userLatitude, $userLongitude). Keep answers concise and direct."
+            
+            var aiResponse = GroqApiClient.queryGroq(prompt, groqSystemPrompt)
+
+            if (aiResponse.isNullOrBlank()) {
+                aiResponse = withContext(Dispatchers.IO) {
+                    LiveCityIntelligenceService.queryGroundedIntelligence(
+                        userPrompt = prompt,
+                        userLat = userLatitude,
+                        userLon = userLongitude,
+                        isWheelchair = isWheelchair
+                    )
+                }
             }
 
             chatAdapter.removeTypingIndicator()
-            addAiMessage(localResponse)
+            addAiMessage(aiResponse)
         }
     }
 
     private fun buildDynamicTrip(destination: String, days: Int, isAccessible: Boolean, style: String): TripPlan {
         return when {
+            destination.contains("Kedar", true) -> {
+                TripPlan(
+                    id = "trip_dyn_kedarnath_${System.currentTimeMillis()}",
+                    destination = "Kedarnath",
+                    title = "Kedarnath Dham Holy Eco-Yatra",
+                    durationDays = days,
+                    travelDates = "Upcoming Spiritual Journey ($days Days)",
+                    travelMode = "Electric Pilgrim AC Coach (Rishikesh) + Gaurikund Shuttle",
+                    co2SavedKg = (14.2 * days),
+                    pulsePointsEarned = (160 * days),
+                    isCompleted = false,
+                    hotelName = "GMVN Mandakini Eco Tourist Rest House (Solar Heated)",
+                    hotelRating = 4.8,
+                    isStepFreeAccessible = isAccessible,
+                    totalBudgetInr = (2800 * days),
+                    aqiStatus = "Pristine Himalayan Alpine Air (AQI 18)",
+                    transitCostInr = 650,
+                    dailyItinerary = listOf(
+                        TripDaySchedule(
+                            dayNumber = 1,
+                            dayTitle = "Rishikesh to Sonprayag Scenic Valley",
+                            activities = listOf(
+                                TripActivity("06:00 AM", "Vande Bharat / Electric Bus", "Haridwar/Rishikesh to Sonprayag (Zero Emission)", "E-Bus", true, 45, 650),
+                                TripActivity("02:00 PM", "Electric Local Shuttle", "Sonprayag to Gaurikund Base (Govt E-Shuttle)", "E-Bus", true, 10, 50),
+                                TripActivity("04:30 PM", "Eco Rest House Check-in", "GMVN Mandakini Solar Guest House (Heated Step-Free)", "Hotel", true, 0, 0)
+                            )
+                        ),
+                        TripDaySchedule(
+                            dayNumber = 2,
+                            dayTitle = "Gaurikund to Shri Kedarnath Dham",
+                            activities = listOf(
+                                TripActivity("05:30 AM", "Eco Pilgrim Ascent", if (isAccessible) "Step-free Palki / Assisted Wheelchair Hoist route" else "Paved Himalayan Walking Trail", "Walk", true, 0, 0),
+                                TripActivity("01:00 PM", "Shri Kedarnath Temple Darshan", "12th Jyotirlinga Darshan & Zero-Plastic Eco Zone", "Walk", true, 0, 0),
+                                TripActivity("06:30 PM", "Evening Mandakini Aarti", "Solar lit temple complex with bio-toilets", "Walk", true, 0, 0)
+                            )
+                        )
+                    )
+                )
+            }
             destination.contains("Alibaug", true) -> {
                 TripPlan(
                     id = "trip_dyn_alibaug_${System.currentTimeMillis()}",
@@ -401,38 +498,37 @@ class YatriAiFragment : Fragment() {
                     )
                 )
             }
-            destination.contains("Mahabaleshwar", true) -> {
+            destination.contains("Manali", true) -> {
                 TripPlan(
-                    id = "trip_dyn_mahabaleshwar_${System.currentTimeMillis()}",
-                    destination = "Mahabaleshwar",
-                    title = "Mahabaleshwar Strawberry & Agro-Retreat",
+                    id = "trip_dyn_manali_${System.currentTimeMillis()}",
+                    destination = "Manali",
+                    title = "Manali Alpine Pine & Solar Retreat",
                     durationDays = days,
-                    travelDates = "Upcoming Weekend ($days Days)",
-                    travelMode = "MSRTC Electric AC Shivshahi Bus",
-                    co2SavedKg = (24.0 * days),
-                    pulsePointsEarned = (120 * days),
+                    travelDates = "Upcoming Getaway ($days Days)",
+                    travelMode = "HRTC AC Electric Coach (Chandigarh to Manali)",
+                    co2SavedKg = (18.0 * days),
+                    pulsePointsEarned = (140 * days),
                     isCompleted = false,
-                    hotelName = "Courtyard by Marriott Eco Valley",
+                    hotelName = "The Himalayan Organic Eco-Lodge (Solar Powered)",
                     hotelRating = 4.8,
                     isStepFreeAccessible = true,
-                    totalBudgetInr = (3200 * days),
-                    aqiStatus = "Fresh Mountain Valley (AQI 22)",
-                    transitCostInr = 450,
+                    totalBudgetInr = (3100 * days),
+                    aqiStatus = "Clean Himalayan Pine Air (AQI 20)",
+                    transitCostInr = 550,
                     dailyItinerary = listOf(
                         TripDaySchedule(
                             dayNumber = 1,
-                            dayTitle = "Organic Berry Farms & Viewpoints",
+                            dayTitle = "Old Manali & Hadimba Forest Sanctuary",
                             activities = listOf(
-                                TripActivity("07:00 AM", "MSRTC Electric AC Coach", "Mumbai Dadar to Mahabaleshwar Bus Stand", "E-Bus", true, 60, 450),
-                                TripActivity("12:30 PM", "Mapro Organic Farm Tour", "Zero-waste agro-tourism with level pathways", "Walk", true, 0, 0),
-                                TripActivity("04:30 PM", "Venna Lake Solar Boat Ride", "Electric propelled boat with wheelchair hoist", "Walk", true, 5, 150)
+                                TripActivity("08:00 AM", "HRTC Electric Coach Arrival", "Manali Bus Stand to Old Manali", "E-Bus", true, 20, 550),
+                                TripActivity("11:30 AM", "Hadimba Temple Cedar Trail", "Step-free paved cedar forest walking corridor", "Walk", true, 0, 0),
+                                TripActivity("04:00 PM", "Vashisht Natural Thermal Baths", "Solar-heated natural hot springs with accessible ramp", "Walk", true, 0, 0)
                             )
                         )
                     )
                 )
             }
-            else -> {
-                // Lonavala & default
+            destination.contains("Lonavala", true) -> {
                 TripPlan(
                     id = "trip_dyn_lonavala_${System.currentTimeMillis()}",
                     destination = "Lonavala",
@@ -467,6 +563,37 @@ class YatriAiFragment : Fragment() {
                                 TripActivity("09:00 AM", "Ryewood Botanical Garden", "Step-free paved floral trail and sensory herb garden", "Walk", true, 0, 0),
                                 TripActivity("01:30 PM", "Tiger's Leap Panoramic View", "Electric tourist shuttle to cliffside platform", "E-Bus", true, 30, 60),
                                 TripActivity("06:15 PM", "Deccan Express Return Rail", "Lonavala Station to Mumbai CSMT", "Train", true, 28, 75)
+                            )
+                        )
+                    )
+                )
+            }
+            else -> {
+                // Any other destination dynamically planned
+                TripPlan(
+                    id = "trip_dyn_custom_${System.currentTimeMillis()}",
+                    destination = destination,
+                    title = "$destination $days-Day Low-Carbon Journey",
+                    durationDays = days,
+                    travelDates = "Upcoming Journey ($days Days)",
+                    travelMode = "Electric Vande Bharat / AC Electric Coach",
+                    co2SavedKg = (11.5 * days),
+                    pulsePointsEarned = (130 * days),
+                    isCompleted = false,
+                    hotelName = "Green Key Certified Eco-Stay $destination",
+                    hotelRating = 4.8,
+                    isStepFreeAccessible = isAccessible,
+                    totalBudgetInr = (2500 * days),
+                    aqiStatus = "Clean Regional Air (AQI 32)",
+                    transitCostInr = 400,
+                    dailyItinerary = listOf(
+                        TripDaySchedule(
+                            dayNumber = 1,
+                            dayTitle = "$destination City & Nature Discovery",
+                            activities = listOf(
+                                TripActivity("08:00 AM", "Electric Transit Arrival", "Arrive via high-speed electric rail or e-bus", "Train", true, 35, 400),
+                                TripActivity("11:00 AM", "Step-Free Eco Check-in", "Solar powered certified hotel accommodation", "Hotel", true, 0, 0),
+                                TripActivity("03:30 PM", "$destination Heritage & Walking Trail", "Pedestrianized zero-emission cultural corridor", "Walk", true, 0, 0)
                             )
                         )
                     )
