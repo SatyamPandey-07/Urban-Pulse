@@ -18,7 +18,13 @@ data class TripPlan(
     val totalBudgetInr: Int,
     val aqiStatus: String, // "Good (AQI 32)", "Moderate (AQI 65)"
     val transitCostInr: Int,
-    val dailyItinerary: List<TripDaySchedule>
+    val dailyItinerary: List<TripDaySchedule>,
+    val transitOpt1Name: String? = null,
+    val transitOpt1Metrics: String? = null,
+    val transitOpt2Name: String? = null,
+    val transitOpt2Metrics: String? = null,
+    val transitOpt3Name: String? = null,
+    val transitOpt3Metrics: String? = null
 ) : Serializable
 
 data class TripDaySchedule(

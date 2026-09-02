@@ -42,7 +42,21 @@ class TripDetailActivity : AppCompatActivity() {
         val tvOpt3Name = findViewById<TextView>(R.id.tvTransitOpt3Name)
         val tvOpt3Metrics = findViewById<TextView>(R.id.tvTransitOpt3Metrics)
 
-        if (dest.contains("kedar")) {
+        if (!trip.transitOpt1Name.isNullOrBlank()) {
+            tvOpt1Name?.text = trip.transitOpt1Name
+            tvOpt1Metrics?.text = trip.transitOpt1Metrics ?: "Low Emission Transit"
+            tvOpt2Name?.text = trip.transitOpt2Name ?: "⚡ Alternative Transit Option"
+            tvOpt2Metrics?.text = trip.transitOpt2Metrics ?: "Eco Route"
+            tvOpt3Name?.text = trip.transitOpt3Name ?: "🚗 Private Standard Petrol Cab"
+            tvOpt3Metrics?.text = trip.transitOpt3Metrics ?: "High Carbon Footprint"
+        } else if (dest.contains("matheran")) {
+            tvOpt1Name?.text = "🚆 Central Railway Local + Toy Train"
+            tvOpt1Metrics?.text = "₹110 • Level Boarding • 35g CO2"
+            tvOpt2Name?.text = "⚡ Neral E-Rickshaw + Shuttle"
+            tvOpt2Metrics?.text = "₹90 • Zero Emission • 18g CO2"
+            tvOpt3Name?.text = "🚗 Standard Petrol Taxi (to Dasturi)"
+            tvOpt3Metrics?.text = "₹2,100 • 2h 30m • 1,600g CO2"
+        } else if (dest.contains("kedar")) {
             tvOpt1Name?.text = "🚆 Mumbai-Haridwar Superfast + E-Shuttle"
             tvOpt1Metrics?.text = "₹1,450 • Level Boarding • 280g CO2"
             tvOpt2Name?.text = "⚡ AC Pilgrim Express Coach"

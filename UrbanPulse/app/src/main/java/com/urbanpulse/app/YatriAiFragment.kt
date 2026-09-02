@@ -26,6 +26,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.location.Geocoder
+import com.urbanpulse.app.network.GroqAgenticEngine
 import com.urbanpulse.app.network.GroqApiClient
 import com.urbanpulse.app.network.LiveCityIntelligenceService
 import kotlinx.coroutines.Dispatchers
@@ -120,6 +122,8 @@ class YatriAiFragment : Fragment() {
         }
     }
 
+    private var userCityName: String = "Mumbai"
+
     private fun fetchUserLocation() {
         val act = activity ?: return
         try {
@@ -129,6 +133,7 @@ class YatriAiFragment : Fragment() {
                     userLatitude = loc.latitude
                     userLongitude = loc.longitude
                     isLocationDetected = true
+                    resolveCityName(loc.latitude, loc.longitude)
                 } else {
                     val locMgr = act.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
                     val lastKnown = locMgr?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
@@ -137,11 +142,32 @@ class YatriAiFragment : Fragment() {
                         userLatitude = lastKnown.latitude
                         userLongitude = lastKnown.longitude
                         isLocationDetected = true
+                        resolveCityName(lastKnown.latitude, lastKnown.longitude)
                     }
                 }
             }
         } catch (e: SecurityException) {
             // Permission not granted
+        }
+    }
+
+    private fun resolveCityName(lat: Double, lon: Double) {
+        val ctx = context ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val geocoder = Geocoder(ctx, Locale.getDefault())
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocation(lat, lon, 1)
+                if (!addresses.isNullOrEmpty()) {
+                    val addr = addresses[0]
+                    val detected = addr.locality ?: addr.subAdminArea ?: addr.adminArea
+                    if (!detected.isNullOrBlank()) {
+                        userCityName = detected
+                    }
+                }
+            } catch (e: Exception) {
+                // Keep default
+            }
         }
     }
 
@@ -349,9 +375,15 @@ class YatriAiFragment : Fragment() {
                 val dest = pendingTripDestination ?: "Kedarnath"
                 val days = pendingTripDays
                 val isAccessible = lowerPrompt.contains("wheelchair") || lowerPrompt.contains("palki") || lowerPrompt.contains("step-free")
-                val style = if (isAccessible) "Wheelchair / Palki Step-Free" else "Eco Pilgrim"
-
-                val generatedTrip = buildDynamicTrip(dest, days, isAccessible, style)
+                val generatedTrip = withContext(Dispatchers.IO) {
+                    GroqAgenticEngine.generateAutonomousTripPlan(
+                        destination = dest,
+                        originCity = userCityName,
+                        days = days,
+                        isAccessible = isAccessible,
+                        travelStyle = style
+                    )
+                }
 
                 addAiMessage(
                     text = "🌿 **Your $days-Day Sustainable & Accessible Itinerary for $dest is Ready!**\n\n" +
