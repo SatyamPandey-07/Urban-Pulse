@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UrbanPulse Mobile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* Standalone Phone Mockup Screen */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #090D16;
+            color: #F8FAFC;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            max-height: 900px;
+            background: #0F172A;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 30px rgba(16, 185, 129, 0.15);
+            border-left: 1px solid rgba(255,255,255,0.08);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+
+        /* Phone Top Status Bar */
+        .phone-status-bar {
+            height: 38px;
+            background: #090D16;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #E2E8F0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .phone-notch {
+            width: 110px;
+            height: 18px;
+            background: #000000;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .notch-camera {
+            width: 9px;
+            height: 9px;
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 50%;
+        }
+
+        .phone-status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            padding: 10px 16px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-glass);
+            z-index: 900;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-brand h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, #10B981 0%, #38BDF8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mobile-location-tag {
+            font-size: 10px;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .mobile-aqi-pill {
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        /* Mobile Main Content Screens */
+        .mobile-viewport {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 74px; /* Space for dock */
+        }
+
+        .phone-bottom-bar {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 4px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 2px;
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        /* Override dock for mobile frame */
+        .app-bottom-dock {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            border-radius: 24px;
+            background: rgba(15, 23, 42, 0.98);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+        }
+
+        .dock-tab {
+            padding: 6px 10px;
+        }
+
+        .mobile-viewport .app-view {
+            display: none;
+            padding: 12px 14px;
+        }
+
+        .mobile-viewport .app-view.active {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #leaflet-map {
+            height: 280px;
+            border-radius: 14px;
+        }
+
+        /* Experience cards in mobile */
+        .mobile-exp-card {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .mobile-exp-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #F8FAFC;
+        }
+
+        .mobile-exp-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 8px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38BDF8;
+        }
+
+        .mobile-exp-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 4px 0;
+        }
+
+        .mobile-tag {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+            color: #94A3B8;
+        }
+
+        .mobile-tag.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+        }
+
+        .mobile-exp-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 8px;
+            margin-top: 4px;
+        }
+
+        .mobile-exp-price {
+            font-size: 13px;
+            font-weight: 800;
+            color: #10B981;
+        }
+
+        .mobile-book-btn {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: #FFFFFF;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <!-- Phone Status Bar -->
+        <div class="phone-status-bar">
+            <span>9:41</span>
+            <div class="phone-notch">
+                <div class="notch-camera"></div>
+            </div>
+            <div class="phone-status-right">
+                <span>5G</span>
+                <span>📶</span>
+                <span>100% 🔋</span>
+            </div>
+        </div>
+
+        <!-- Top App Bar -->
+        <header class="mobile-header">
+            <div class="mobile-brand">
+                <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="14" stroke="#10B981" stroke-width="2.5" stroke-dasharray="3 3"/>
+                    <path d="M7 16L12 11L17 19L21 14L25 18" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                    <h1>UrbanPulse</h1>
+                    <div class="mobile-location-tag">📍 Mumbai, Maharashtra</div>
+                </div>
+            </div>
+            <div class="mobile-aqi-pill">AQI 82 • Good</div>
+        </header>
+
+        <!-- Main Phone Body Views -->
+        <div class="mobile-viewport">
+            <!-- View 1: Map Transit -->
+            <div id="view-map" class="app-view active">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 700;">Dual Transit Route</span>
+                    <select id="select-destination" class="glass-select" style="font-size: 11px; padding: 4px 8px;" onchange="renderSelectedRoute(this.value)">
+                        <option value="lonavala" selected>Lonavala Scenic Ridge</option>
+                        <option value="kedarnath">Kedarnath Valley Corridor</option>
+                        <option value="fortis">Fortis Hospital (Step-Free)</option>
+                        <option value="csmt">CSMT Heritage Loop</option>
+                    </select>
+                </div>
+                <div id="leaflet-map"></div>
+                <div class="map-hud" style="position: static; margin-top: 6px;">
+                    <div class="hud-top-bar">
+                        <span class="hud-dest-name" id="hud-dest-title">Lonavala Scenic Ridge</span>
+                        <span class="hud-badge" id="hud-savings-badge">Save 18.4 kg CO₂ • Save ₹3,125</span>
+                    </div>
+                    <div class="hud-aqi-indicator" id="hud-aqi-text">Indrayani Electric Express (AQI: 28) vs Petrol Cab</div>
+                    <div class="hud-dual-columns">
+                        <div class="hud-card green-hud">
+                            <div class="hud-card-label">🌱 GREEN ROUTE</div>
+                            <div class="hud-val" id="green-time">1h 45m</div>
+                            <div class="hud-sub" id="green-details">Electric Express • 0.8 kg CO₂ • ₹150</div>
+                        </div>
+                        <div class="hud-card red-hud">
+                            <div class="hud-card-label">🚗 PETROL CAB</div>
+                            <div class="hud-val" id="cab-time">2h 15m</div>
+                            <div class="hud-sub" id="cab-details">Cab (MH Rate ₹28+₹18.5/km) • 19.2 kg CO₂ • ₹3,275</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 2: Yatri AI -->
+            <div id="view-yatri" class="app-view">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 700;">Yatri AI Copilot</span>
+                    <span style="font-size: 10px; color: #10B981; font-weight: 700;">⚡ Groq LPU (Sub-400ms)</span>
+                </div>
+
+                <div class="chat-thread-container" id="chat-thread" style="height: 380px;">
+                    <div class="chat-msg ai-msg">
+                        <div class="ai-avatar-badge">⚡</div>
+                        <div class="msg-bubble-wrap">
+                            <div class="msg-bubble">
+                                Namaste! I am <strong>Yatri AI</strong>, your local travel & experience engine powered by Groq LPU.<br><br>
+                                I can recommend hidden artisan workshops, verify step-free accessibility, or adapt plans when weather strikes!
+                                <div class="mcq-chips-container" id="initial-mcq-chips" style="margin-top: 10px;">
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Find local micro-experiences within 2 hours near my location')">⏱️ 2-Hr Micro Experiences</button>
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Adapt my plan: It started raining and I only have 90 minutes')">🌧️ Adapt Plan (Rain / Delay)</button>
+                                    <button class="mcq-chip" onclick="handleChatPrompt('Find child-friendly cultural workshops with wheelchair access')">👨‍👩‍👧 Family & Child-Friendly</button>
+                                    <button class="mcq-chip" onclick="openAddExperienceModal()">+ List Experience</button>
+                                    <button class="mcq-chip" onclick="openProviderDashboardModal()">📊 Provider Hub</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-row" style="margin-top: 4px;">
+                    <input type="text" id="user-chat-input" class="app-text-input" placeholder="Ask Yatri AI (e.g. '2hr workshop nearby')...">
+                    <button class="send-action-btn" id="btn-send-chat" onclick="sendUserMessage()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- View 3: Curated Experiences -->
+            <div id="view-experiences" class="app-view">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-size: 13px; font-weight: 700;">Local Experiences</span>
+                        <div style="font-size: 10px; color: #94A3B8;">Host & Community Experiences</div>
+                    </div>
+                    <button class="glass-pill-btn" style="font-size: 10px; padding: 3px 8px;" onclick="openAddExperienceModal()">+ Host One</button>
+                </div>
+
+                <!-- Filter Chips -->
+                <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
+                    <button class="mcq-chip" style="font-size: 10px; padding: 4px 10px; white-space: nowrap;">⚡ Under 2 Hrs</button>
+                    <button class="mcq-chip" style="font-size: 10px; padding: 4px 10px; white-space: nowrap;">🎨 Pottery & Crafts</button>
+                    <button class="mcq-chip" style="font-size: 10px; padding: 4px 10px; white-space: nowrap;">♿ Step-Free</button>
+                    <button class="mcq-chip" style="font-size: 10px; padding: 4px 10px; white-space: nowrap;">🐟 Culinary</button>
+                </div>
+
+                <!-- Experience Cards -->
+                <div class="mobile-exp-card">
+                    <div class="mobile-exp-header">
+                        <div>
+                            <div class="mobile-exp-title">Kumbharwada Terracotta Pottery</div>
+                            <div style="font-size: 10px; color: #94A3B8;">Dharavi Artisan Colony • 90 Mins</div>
+                        </div>
+                        <span class="mobile-exp-badge">⭐ 4.9 (142)</span>
+                    </div>
+                    <div class="mobile-exp-tags">
+                        <span class="mobile-tag green">♿ Step-Free</span>
+                        <span class="mobile-tag">👨‍👩‍👧 Family-Friendly</span>
+                        <span class="mobile-tag">🌧️ Covered / Indoor</span>
+                    </div>
+                    <div class="mobile-exp-footer">
+                        <span class="mobile-exp-price">₹350 / person</span>
+                        <button class="mobile-book-btn" onclick="alert('Booking confirmed for Kumbharwada Terracotta Workshop!')">Book Slot</button>
+                    </div>
+                </div>
+
+                <div class="mobile-exp-card">
+                    <div class="mobile-exp-header">
+                        <div>
+                            <div class="mobile-exp-title">Dadar Heritage Flower Market Walk</div>
+                            <div style="font-size: 10px; color: #94A3B8;">Dadar West • 60 Mins</div>
+                        </div>
+                        <span class="mobile-exp-badge">⭐ 4.8 (98)</span>
+                    </div>
+                    <div class="mobile-exp-tags">
+                        <span class="mobile-tag green">⚡ 1-Hour Express</span>
+                        <span class="mobile-tag">🌸 Cultural Heritage</span>
+                        <span class="mobile-tag">🌱 Zero Plastic</span>
+                    </div>
+                    <div class="mobile-exp-footer">
+                        <span class="mobile-exp-price">₹200 / person</span>
+                        <button class="mobile-book-btn" onclick="alert('Booking confirmed for Dadar Flower Market Walk!')">Book Slot</button>
+                    </div>
+                </div>
+
+                <div class="mobile-exp-card">
+                    <div class="mobile-exp-header">
+                        <div>
+                            <div class="mobile-exp-title">Worli Koliwada Fishing Village & Seafood</div>
+                            <div style="font-size: 10px; color: #94A3B8;">Worli Village • 120 Mins</div>
+                        </div>
+                        <span class="mobile-exp-badge">⭐ 4.9 (210)</span>
+                    </div>
+                    <div class="mobile-exp-tags">
+                        <span class="mobile-tag green">🐟 Community Hosted</span>
+                        <span class="mobile-tag">🌅 Sunset View</span>
+                    </div>
+                    <div class="mobile-exp-footer">
+                        <span class="mobile-exp-price">₹450 / person</span>
+                        <button class="mobile-book-btn" onclick="alert('Booking confirmed for Worli Koliwada Trail!')">Book Slot</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 4: Trips Hub -->
+            <div id="view-trips" class="app-view">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-size: 13px; font-weight: 700;">My Carbon Passport</span>
+                        <div style="font-size: 10px; color: #10B981;">320 Pulse Points Active</div>
+                    </div>
+                </div>
+                <div class="app-trip-card" style="margin-top: 6px;">
+                    <div class="trip-top-row">
+                        <div>
+                            <div class="trip-dest-name">Lonavala Eco-Trail</div>
+                            <div class="trip-date-str">Upcoming Weekend</div>
+                        </div>
+                        <span class="trip-carbon-tag">-18.4 kg CO₂</span>
+                    </div>
+                    <div class="trip-specs-list" style="font-size: 11px;">
+                        <div>⚡ <strong>Transit:</strong> Indrayani Electric Express</div>
+                        <div>🌱 <strong>Stay:</strong> The Machan Solar Treehouse</div>
+                        <div>♿ <strong>Access:</strong> 100% Step-Free Ramps</div>
+                    </div>
+                    <div class="trip-bottom-row">
+                        <span class="pulse-pts-pill">+250 PTS</span>
+                        <button class="view-itinerary-btn" onclick="openScheduleModal('lonavala')">Schedule</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 5: Hotel B2B ESG -->
+            <div id="view-hotel" class="app-view">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 700;">Hotel ESG Hub (B2B)</span>
+                    <button class="glass-pill-btn" style="font-size: 10px; padding: 3px 8px;" onclick="exportEsgPdf()">📄 Export PDF</button>
+                </div>
+                <div class="hotel-slider-box">
+                    <div class="slider-header-row" style="font-size: 11px;">
+                        <span>Occupancy Scale:</span>
+                        <span class="slider-badge" id="occupancy-val-badge">75% (150 Rooms)</span>
+                    </div>
+                    <input type="range" id="slider-occupancy" min="20" max="100" value="75" class="app-range-slider" oninput="updateHotelKpis(this.value)">
+                </div>
+                <div class="hotel-kpis-grid">
+                    <div class="kpi-glass-card">
+                        <div class="kpi-mini-label">POWER KWH</div>
+                        <div class="kpi-big-val text-purple" id="kpi-power" style="font-size: 15px;">1,820 kWh</div>
+                    </div>
+                    <div class="kpi-glass-card">
+                        <div class="kpi-mini-label">WATER RECYCLED</div>
+                        <div class="kpi-big-val text-cyan" id="kpi-water" style="font-size: 15px;">14,250 L</div>
+                    </div>
+                    <div class="kpi-glass-card esg-card-highlight">
+                        <div class="kpi-mini-label">ESG COMPLIANCE</div>
+                        <div class="kpi-big-val text-emerald" style="font-size: 15px;">LEED Platinum • ISO 14064</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phone Home Indicator Bar -->
+        <div class="phone-bottom-bar"></div>
+
+        <!-- Bottom Mobile Floating Dock -->
+        <div class="app-bottom-dock">
+            <button class="dock-tab active" id="dock-map" onclick="switchMobileTab('map-view')">
+                <span class="dock-icon">🗺️</span>
+                <span class="dock-label">Transit</span>
+            </button>
+            <button class="dock-tab" id="dock-experiences" onclick="switchMobileTab('experiences-view')">
+                <span class="dock-icon">🏺</span>
+                <span class="dock-label">Local Gems</span>
+            </button>
+            <button class="dock-tab" id="dock-chat" onclick="switchMobileTab('chat-view')">
+                <span class="dock-icon">⚡</span>
+                <span class="dock-label">Yatri AI</span>
+            </button>
+            <button class="dock-tab" id="dock-hotel" onclick="switchMobileTab('hotel-view')">
+                <span class="dock-icon">📊</span>
+                <span class="dock-label">Hotel ESG</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-add-experience" class="modal-overlay" onclick="closeAddExpModal(event)">
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <h3>+ List Your Local Experience</h3>
+                <button class="close-modal-btn" onclick="closeAddExpModalDirect()">✕</button>
+            </div>
+            <div class="modal-sheet-body">
+                <div style="margin-bottom: 8px;">
+                    <label style="font-size: 11px; color: #94A3B8;">Experience Title:</label>
+                    <input type="text" id="input-exp-name" class="app-text-input" placeholder="e.g. Bandra Street Art & Pottery">
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #94A3B8;">Category:</label>
+                        <select id="input-exp-category" class="glass-select" style="width: 100%;">
+                            <option value="Cultural Workshop">Cultural Workshop</option>
+                            <option value="Heritage & Art">Heritage & Art</option>
+                            <option value="Culinary & Food">Culinary & Food</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #94A3B8;">Price (₹):</label>
+                        <input type="number" id="input-exp-price" class="app-text-input" value="350">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #94A3B8;">Duration (Hrs):</label>
+                        <input type="number" id="input-exp-duration" class="app-text-input" value="1.5" step="0.5">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; color: #94A3B8;">Area:</label>
+                        <input type="text" id="input-exp-location" class="app-text-input" value="Bandra West">
+                    </div>
+                </div>
+                <div style="margin: 8px 0; font-size: 11px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="checkbox" id="input-exp-stepfree" checked> ♿ Step-Free Entrance
+                    </label>
+                </div>
+                <button class="glow-download-btn" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="publishProviderExperience()">
+                    <span>Publish Experience</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Provider Dashboard Modal -->
+    <div id="modal-provider-dashboard" class="modal-overlay" onclick="closeProviderDashboardModal(event)">
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <h3>📊 Provider Hub & Listings</h3>
+                <button class="close-modal-btn" onclick="closeProviderDashboardModalDirect()">✕</button>
+            </div>
+            <div class="modal-sheet-body">
+                <div id="web-provider-listings" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto;">
+                    <!-- Populated via JS -->
+                </div>
+                <button class="glass-pill-btn" style="width: 100%; margin-top: 10px; justify-content: center;" onclick="openAddExperienceModal()">
+                    + List Another Experience
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+    <script>
+        function switchMobileTab(tabKey) {
+            document.querySelectorAll('.mobile-viewport .app-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.dock-tab').forEach(el => el.classList.remove('active'));
+
+            if (tabKey === 'map-view') {
+                document.getElementById('view-map').classList.add('active');
+                document.getElementById('dock-map').classList.add('active');
+                if (window.leafletMap) {
+                    setTimeout(() => window.leafletMap.invalidateSize(), 150);
+                }
+            } else if (tabKey === 'experiences-view') {
+                document.getElementById('view-experiences').classList.add('active');
+                document.getElementById('dock-experiences').classList.add('active');
+            } else if (tabKey === 'chat-view') {
+                document.getElementById('view-yatri').classList.add('active');
+                document.getElementById('dock-chat').classList.add('active');
+            } else if (tabKey === 'hotel-view') {
+                document.getElementById('view-hotel').classList.add('active');
+                document.getElementById('dock-hotel').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
