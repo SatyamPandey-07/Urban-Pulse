@@ -9,6 +9,8 @@
 [![Groq LPU](https://img.shields.io/badge/Groq%20LPU-Sub--400ms%20Inference-F55036?style=for-the-badge&logo=lightning&logoColor=white)](https://groq.com)
 [![TomTom SDK](https://img.shields.io/badge/TomTom-Dual--Route%20Vector%20MCP-DF1B12?style=for-the-badge&logo=googlemaps&logoColor=white)](https://developer.tomtom.com)
 [![Compliance](https://img.shields.io/badge/Compliance-ISO%2014064%20A4%20Audit-007ACC?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://github.com/SatyamPandey-07/Urban-Pulse)
+[![Direct APK Download](https://img.shields.io/badge/Direct%20APK-Download%20v1.0.0-blue?style=for-the-badge&logo=android&logoColor=white)](https://github.com/SatyamPandey-07/Urban-Pulse/releases/download/v1.0.0-hackcelestial/UrbanPulse-v1.0.0.apk)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/SatyamPandey-07/Urban-Pulse/android-ci-cd.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/SatyamPandey-07/Urban-Pulse/actions)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 <p align="center">
@@ -227,7 +229,13 @@ CREATE TABLE hospitality_stays (
 
 ## 🚀 Setup, Build & Installation Guide
 
-### Prerequisites
+### 📲 Instant APK Download (No Build Required)
+You can directly download and install the compiled Android APK on any Android phone (Android 8.0+ / API 26+):
+- 📥 **Direct APK Download Link:** [Download `UrbanPulse-v1.0.0.apk`](https://github.com/SatyamPandey-07/Urban-Pulse/releases/download/v1.0.0-hackcelestial/UrbanPulse-v1.0.0.apk)
+- 📦 **GitHub Releases Hub:** [v1.0.0-hackcelestial Release Page](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial)
+- ⚙️ **Automated CI/CD Pipeline:** Built and packaged continuously with GitHub Actions via [`.github/workflows/android-ci-cd.yml`](.github/workflows/android-ci-cd.yml)
+
+### Prerequisites (For Local Development)
 - Android Studio Hedgehog (2023.1.1) or newer
 - Android SDK 34 (Android 14 UpsideDownCake)
 - Java Development Kit (JDK) 17

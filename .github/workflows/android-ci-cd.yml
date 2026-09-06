@@ -1,0 +1,78 @@
+name: Android CI/CD & Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Package Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission to gradlew
+        run: |
+          chmod +x UrbanPulse/gradlew
+
+      - name: Build Debug APK with Gradle
+        run: |
+          cd UrbanPulse
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Verify APK Generated
+        run: |
+          ls -lh UrbanPulse/app/build/outputs/apk/debug/
+          cp UrbanPulse/app/build/outputs/apk/debug/app-debug.apk ./UrbanPulse-v1.0.0.apk
+
+      - name: Upload APK as Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UrbanPulse-v1.0.0-apk
+          path: ./UrbanPulse-v1.0.0.apk
+          retention-days: 30
+
+      - name: Create / Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0-hackcelestial' }}
+          name: 🌿 UrbanPulse v1.0.0 — Production Release (HackCelestial 3.0)
+          body: |
+            ## 🌿 UrbanPulse — Intelligent Local Discovery, Sustainable Experience Platform & Autonomous Mobility 🚀
+            
+            **HackCelestial 3.0 — Pillai University Hackathon Production Release**
+            
+            ### 📱 Download Android APK
+            Tap the `UrbanPulse-v1.0.0.apk` asset below to install directly on your Android phone (Android 8.0+ / API 26+).
+            
+            ### ⚡ Core Platform Highlights
+            - 🚆 **TomTom Dual-Route Vector MCP Engine:** Live comparison of electrified trains & buses against private cabs with CO₂e savings.
+            - ⚡ **Sub-400ms Groq LPU Conversational Engine:** Grounded Yatri AI for personalized experience recommendations.
+            - ⏱️ **2-Hour Micro-Experience Finder:** Instant recommendations tailored to live GPS coordinates and tight schedules.
+            - ☔ **Real-Time Circumstance Adaptation:** 1-tap pivoting to indoor & covered workshops during sudden rain or transit delays.
+            - 👨‍👩‍👧‍👦 **Group Composition Filters:** Child-friendly, senior-friendly, and step-free accessibility concourse verification.
+            - 🏪 **Provider Business Hub:** Zero-commission portal for local artisans and guides to publish and toggle real-time availability.
+          files: ./UrbanPulse-v1.0.0.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
