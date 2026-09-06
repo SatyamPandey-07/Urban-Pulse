@@ -201,14 +201,15 @@ body.app-body {
 
 /* App Layout Grid */
 .app-layout {
- max-width: 1400px;
- margin: 24px auto;
- padding: 0 24px 60px 24px;
- display: grid;
- grid-template-columns: 1fr 1.35fr;
- gap: 32px;
- position: relative;
- z-index: 1;
+    max-width: 1440px;
+    margin: 16px auto;
+    padding: 0 28px 48px 28px;
+    display: grid;
+    grid-template-columns: 1.12fr 1fr;
+    gap: 48px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
 }
 
 /* Hero Panel (Left) */
@@ -381,40 +382,64 @@ body.app-body {
  color: #FFFFFF;
 }
 
-/* Device Frame (Right) */
-.app-device-frame {
- background: var(--bg-surface);
- border: 2px solid rgba(255, 255, 255, 0.12);
- border-radius: var(--radius-xl);
- box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 35px rgba(16, 185, 129, 0.2);
- height: 640px;
- display: flex;
- flex-direction: column;
- overflow: hidden;
- position: relative;
- backdrop-filter: blur(20px);
+/* Flagship Android Phone Device Mockup */
+.device-frame-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
-.device-notch { display: none !important; 
- width: 120px;
- height: 18px;
- background: rgba(0, 0, 0, 0.6);
- border-bottom-left-radius: 12px;
- border-bottom-right-radius: 12px;
- margin: 0 auto;
- position: absolute;
- top: 0;
- left: 50%;
- transform: translateX(-50%);
- z-index: 900;
+.app-device-frame {
+    width: 100%;
+    max-width: 440px;
+    height: 720px;
+    background: #0B111E;
+    border: 7px solid #1E293B;
+    border-radius: 44px;
+    box-shadow: 
+        0 25px 70px -15px rgba(0, 0, 0, 0.9), 
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 35px rgba(16, 185, 129, 0.18);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
 }
+
+/* Phone Top Status Bar */
+.phone-top-status {
+    height: 32px;
+    background: #0B111E;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94A3B8;
+    z-index: 999;
+    user-select: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.camera-punch-hole {
+    width: 11px;
+    height: 11px;
+    background: #030712;
+    border: 1.5px solid #1F2937;
+    border-radius: 50%;
+}
+
+.device-notch { display: none !important; }
 
 .app-view {
- flex: 1;
- display: none;
- flex-direction: column;
- padding: 24px 20px 75px 20px;
- overflow-y: auto;
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    padding: 14px 14px 8px 14px;
+    overflow-y: auto;
 }
 
 .app-view.active {
@@ -911,49 +936,73 @@ body.app-body {
  cursor: pointer;
 }
 
-/* Bottom Floating Dock */
+/* Material 3 Android Bottom Navigation Bar */
 .app-bottom-dock {
- position: absolute;
- bottom: 12px;
- left: 16px;
- right: 16px;
- background: rgba(15, 23, 42, 0.95);
- backdrop-filter: blur(20px);
- border: 1px solid var(--border-glass);
- border-radius: var(--radius-lg);
- display: flex;
- justify-content: space-around;
- padding: 6px;
- z-index: 950;
- box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    position: relative;
+    background: #0F172A;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-around;
+    padding: 6px 4px 4px 4px;
+    z-index: 950;
+    box-shadow: none;
+    border-radius: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .dock-tab {
- background: transparent;
- border: none;
- color: var(--text-secondary);
- display: flex;
- flex-direction: column;
- align-items: center;
- gap: 2px;
- padding: 6px 14px;
- border-radius: var(--radius-md);
- cursor: pointer;
- transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+    color: #94A3B8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.15s ease;
 }
 
-.dock-tab.active, .dock-tab:hover {
- color: var(--primary-emerald);
- background: rgba(16, 185, 129, 0.12);
+.dock-tab:hover {
+    color: #F8FAFC;
 }
 
-.dock-icon {
- font-size: 16px;
+.dock-tab.active {
+    color: #10B981;
+}
+
+.dock-tab.active .dock-icon-pill {
+    background: rgba(16, 185, 129, 0.18);
+    color: #10B981;
+    padding: 2px 14px;
+    border-radius: 12px;
+}
+
+.dock-icon-pill {
+    font-size: 15px;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    transition: all 0.15s ease;
 }
 
 .dock-label {
- font-size: 10px;
- font-weight: 600;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.android-gesture-bar {
+    width: 90px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    margin: 4px auto 6px auto;
 }
 
 /* Modal */

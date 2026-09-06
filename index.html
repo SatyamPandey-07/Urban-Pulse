@@ -113,11 +113,18 @@
  </div>
  </div>
 
- <!-- Right: Interactive Live App Screen / Canvas -->
- <div class="app-device-frame">
- 
- <!-- View 1: Live Dual Route Map View -->
- <div id="view-map" class="app-view active">
+        <!-- Right: Flagship Android Device Mockup -->
+        <div class="device-frame-wrapper">
+            <div class="app-device-frame">
+                <!-- Android Status Bar -->
+                <div class="phone-top-status">
+                    <span>9:41</span>
+                    <div class="camera-punch-hole"></div>
+                    <span style="display: flex; align-items: center; gap: 4px;">5G 📶 100% 🔋</span>
+                </div>
+                
+                <!-- View 1: Live Dual Route Map View -->
+                <div id="view-map" class="app-view active">
  <div class="app-view-header">
  <div>
  <div class="app-header-title">Live Dual-Route Canvas</div>
@@ -328,28 +335,30 @@
  </div>
  </div>
 
- <!-- Bottom Floating App Dock -->
- <div class="app-bottom-dock">
- <button class="dock-tab active" id="dock-map" onclick="switchAppTab('map-view')">
- <span class="dock-icon">️</span>
- <span class="dock-label">Live Map</span>
- </button>
- <button class="dock-tab" id="dock-chat" onclick="switchAppTab('chat-view')">
- <span class="dock-icon"></span>
- <span class="dock-label">Yatri AI</span>
- </button>
- <button class="dock-tab" id="dock-trips" onclick="switchAppTab('trips-view')">
- <span class="dock-icon"></span>
- <span class="dock-label">Trips</span>
- </button>
- <button class="dock-tab" id="dock-hotel" onclick="switchAppTab('hotel-view')">
- <span class="dock-icon"></span>
- <span class="dock-label">Hotel B2B</span>
- </button>
- </div>
+                <!-- Bottom Material 3 Android Navigation Bar -->
+                <div class="app-bottom-dock">
+                    <button class="dock-tab active" id="dock-map" onclick="switchAppTab('map-view')">
+                        <span class="dock-icon-pill">🗺️</span>
+                        <span class="dock-label">Live Map</span>
+                    </button>
+                    <button class="dock-tab" id="dock-chat" onclick="switchAppTab('chat-view')">
+                        <span class="dock-icon-pill">⚡</span>
+                        <span class="dock-label">Yatri AI</span>
+                    </button>
+                    <button class="dock-tab" id="dock-trips" onclick="switchAppTab('trips-view')">
+                        <span class="dock-icon-pill">🎒</span>
+                        <span class="dock-label">Trips</span>
+                    </button>
+                    <button class="dock-tab" id="dock-hotel" onclick="switchAppTab('hotel-view')">
+                        <span class="dock-icon-pill">🏢</span>
+                        <span class="dock-label">Hotel ESG</span>
+                    </button>
+                </div>
+                <!-- Android Home Gesture Bar -->
+                <div class="android-gesture-bar"></div>
+            </div>
         </div>
-    </div>
-</main>
+    </main>
 
     <!-- Schedule Modal -->
     <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)">
