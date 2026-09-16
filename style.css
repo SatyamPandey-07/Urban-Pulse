@@ -1166,6 +1166,151 @@ body.app-body {
     color: #FFFFFF !important;
 }
 
+/* =========================================================
+ Bento Grid — Full Feature Set showcase
+ ========================================================= */
+
+.bento-section {
+    max-width: 1440px;
+    margin: 64px auto 48px auto;
+    padding: 0 28px;
+    position: relative;
+    z-index: 1;
+}
+
+.bento-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 36px auto;
+}
+
+.bento-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-cyan);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+}
+
+.bento-title {
+    font-family: var(--font-heading);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+}
+
+.bento-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(150px, auto);
+    gap: 16px;
+}
+
+.bento-card {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    backdrop-filter: blur(16px);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.bento-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--card-accent, rgba(16, 185, 129, 0.12)) 0%, transparent 60%);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.bento-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--card-accent-solid, var(--border-glow));
+    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.5);
+}
+
+.bento-card--wide { grid-column: span 2; }
+.bento-card--tall { grid-row: span 2; }
+
+.bento-icon {
+    font-size: 26px;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-accent, rgba(16, 185, 129, 0.15));
+    border-radius: 14px;
+    z-index: 1;
+}
+
+.bento-card-title {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    z-index: 1;
+}
+
+.bento-card-desc {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    z-index: 1;
+    flex: 1;
+}
+
+.bento-tag {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-size: 10.5px;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: var(--card-accent, rgba(16, 185, 129, 0.15));
+    color: var(--card-accent-solid, var(--primary-emerald));
+    z-index: 1;
+    letter-spacing: 0.01em;
+}
+
+/* Per-category accent colors, applied inline via style="" on each card */
+.bento-card.accent-emerald { --card-accent: rgba(16, 185, 129, 0.16); --card-accent-solid: #10B981; }
+.bento-card.accent-cyan { --card-accent: rgba(56, 189, 248, 0.16); --card-accent-solid: #38BDF8; }
+.bento-card.accent-purple { --card-accent: rgba(168, 85, 247, 0.16); --card-accent-solid: #A855F7; }
+.bento-card.accent-amber { --card-accent: rgba(245, 158, 11, 0.16); --card-accent-solid: #F59E0B; }
+
+@media (max-width: 992px) {
+    .bento-grid { grid-template-columns: repeat(2, 1fr); }
+    .bento-card--wide { grid-column: span 2; }
+}
+
+@media (max-width: 600px) {
+    .bento-grid { grid-template-columns: 1fr; }
+    .bento-card--wide { grid-column: span 1; }
+    .bento-card--tall { grid-row: span 1; }
+    .bento-title { font-size: 26px; }
+}
+
 /* Ensure MCQ chips wrap properly and look modern */
 .mcq-chips-container {
     display: flex !important;

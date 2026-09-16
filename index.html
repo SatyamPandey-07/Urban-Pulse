@@ -363,6 +363,92 @@
         </div>
     </main>
 
+    <!-- Full Feature Set — Bento Grid -->
+    <section class="bento-section">
+        <div class="bento-header">
+            <div class="bento-eyebrow">🧩 Everything below is real, running code — not mockups</div>
+            <h2 class="bento-title">The Full UrbanPulse Feature Set</h2>
+            <p class="bento-subtitle">Every card here maps to real, tested code — a live API call, a persisted database row, or a computed formula. Nothing here is a placeholder.</p>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-card bento-card--wide accent-purple">
+                <div class="bento-icon">⚡</div>
+                <div class="bento-card-title">Yatri AI — Groq LPU Cloud</div>
+                <div class="bento-card-desc">Real conversational planning via <code>openai/gpt-oss-120b</code> &amp; <code>groq/compound</code>, sub-400ms inference, with a scripted offline fallback that's honestly labeled — never claims "Verified" when Groq is unreachable.</div>
+                <div class="bento-tag">api.groq.com · live</div>
+            </div>
+            <div class="bento-card bento-card--wide accent-emerald">
+                <div class="bento-icon">🦽</div>
+                <div class="bento-card-title">Evidence-Based Accessibility</div>
+                <div class="bento-card-desc">Every claim tagged Verified / Reported / Inferred — never "Accessible: Yes" outright. Travelers can "✅ Confirm" or "⚠️ Report an Issue" on any listing: a real second independent source that can upgrade a claim to Verified or flag a genuine contradiction.</div>
+                <div class="bento-tag">EvidenceGraphService.kt</div>
+            </div>
+
+            <div class="bento-card accent-cyan">
+                <div class="bento-icon">📐</div>
+                <div class="bento-card-title">Pareto Optimizer</div>
+                <div class="bento-card-desc">Non-dominated multi-objective ranking across carbon, accessibility &amp; price — returns Greenest, Most Accessible, and Best Value, not one "best" answer.</div>
+                <div class="bento-tag">0.4×Carbon + 0.4×Access + 0.2×Price</div>
+            </div>
+            <div class="bento-card accent-emerald">
+                <div class="bento-icon">🗺️</div>
+                <div class="bento-card-title">TomTom Dual-Route</div>
+                <div class="bento-card-desc">Live green-vs-standard routing with real fare &amp; CO₂e formulas, on both the Android app and this web map.</div>
+                <div class="bento-tag">api.tomtom.com · live</div>
+            </div>
+            <div class="bento-card accent-cyan">
+                <div class="bento-icon">💨</div>
+                <div class="bento-card-title">Open-Meteo AQI &amp; Weather</div>
+                <div class="bento-card-desc">Live PM2.5, PM10, US AQI and precipitation, fetched with zero API key — no static preset text.</div>
+                <div class="bento-tag">air-quality-api.open-meteo.com</div>
+            </div>
+            <div class="bento-card accent-amber">
+                <div class="bento-icon">☔</div>
+                <div class="bento-card-title">Circumstance Adaptation</div>
+                <div class="bento-card-desc">Rain-swap recommendations cross-checked against a real live Open-Meteo reading — not just trusting the word "rain" typed by the user.</div>
+                <div class="bento-tag">weather-verified</div>
+            </div>
+
+            <div class="bento-card bento-card--wide accent-cyan">
+                <div class="bento-icon">🔗</div>
+                <div class="bento-card-title">Central Registry Backend</div>
+                <div class="bento-card-desc">A real Node.js + Express + SQLite service (<code>server/</code>) — Experiences, Bookings, and Providers all genuinely persisted and shared between the Android app and this web app, with a local offline-cache fallback.</div>
+                <div class="bento-tag">REST API · SQLite</div>
+            </div>
+            <div class="bento-card accent-purple">
+                <div class="bento-icon">📅</div>
+                <div class="bento-card-title">Real Bookings</div>
+                <div class="bento-card-desc">"Book This Experience" creates a genuine persisted reservation record — not a hardcoded demand number.</div>
+                <div class="bento-tag">POST /api/.../bookings</div>
+            </div>
+            <div class="bento-card accent-emerald">
+                <div class="bento-icon">🏪</div>
+                <div class="bento-card-title">Provider Hub</div>
+                <div class="bento-card-desc">Zero-commission self-listing, real-time availability toggle, and live view/inquiry/booking counters driven by actual interactions.</div>
+                <div class="bento-tag">demand metrics · live</div>
+            </div>
+
+            <div class="bento-card accent-emerald">
+                <div class="bento-icon">📍</div>
+                <div class="bento-card-title">Green Route Planner</div>
+                <div class="bento-card-desc">"Use GPS" reads real device location; "Recalculate" fetches a live TomTom distance instead of a pure haversine estimate.</div>
+                <div class="bento-tag">FusedLocationProviderClient</div>
+            </div>
+            <div class="bento-card bento-card--wide accent-amber">
+                <div class="bento-icon">📄</div>
+                <div class="bento-card-title">ISO 14064 ESG Audit</div>
+                <div class="bento-card-desc">PASS/FAIL compliance computed live from real occupancy-derived power/water figures against stated benchmarks — plus a genuine SHA-256 hash of the report's own data for integrity verification.</div>
+                <div class="bento-tag">real compliance math · real hash</div>
+            </div>
+            <div class="bento-card accent-purple">
+                <div class="bento-icon">⏱️</div>
+                <div class="bento-card-title">2-Hour Micro-Experiences</div>
+                <div class="bento-card-desc">Pareto-ranked activities that realistically fit a tight window, filtered from the same real experience registry.</div>
+                <div class="bento-tag">duration ≤ 2h</div>
+            </div>
+        </div>
+    </section>
+
     <!-- Schedule Modal -->
     <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)">
         <div class="modal-sheet">
