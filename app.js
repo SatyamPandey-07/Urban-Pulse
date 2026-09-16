@@ -400,6 +400,34 @@ function recordExperienceViews(expList) {
     expList.forEach(exp => recordExperienceEvent(exp.id, 'viewsCount'));
 }
 
+// Same confidence-tagged-claim approach as the Android app's EvidenceGraphService — never state
+// "Accessible: Yes" outright; tag every claim Verified/Reported/Inferred and flag under-documentation.
+function buildExperienceEvidence(exp) {
+    const claims = [];
+    const tagCount = (exp.accessibilityTags || []).length;
+    const expectedTags = exp.accessibilityRating >= 90 ? 2 : 1;
+    const underDocumented = tagCount < expectedTags || (exp.accessibilityTags || []).includes("Standard Access");
+    claims.push({
+        icon: underDocumented ? "🔵" : "✅",
+        label: underDocumented ? "Inferred" : "Verified",
+        claim: `Accessibility: ${exp.accessibilityRating}% match, ${tagCount} documented feature(s)`,
+        contradiction: underDocumented
+            ? `Rating claims ${exp.accessibilityRating}% but accessibility features are generic or under-documented — treat as inferred until confirmed on-site.`
+            : null
+    });
+
+    const sustainability = exp.sustainability || "";
+    const isSpecific = sustainability.length > 20 && /(solar|organic|electric|zero|recycl|local)/i.test(sustainability);
+    claims.push({
+        icon: isSpecific ? "🟡" : "🔵",
+        label: isSpecific ? "Reported" : "Inferred",
+        claim: `Sustainability: ${sustainability}`,
+        contradiction: isSpecific ? null : "No specific, checkable sustainability practice was provided — this is a category-based estimate, not a verified claim."
+    });
+
+    return claims;
+}
+
 function openAddExperienceModal() {
     document.getElementById('modal-add-experience').classList.add('open');
 }
@@ -589,12 +617,15 @@ function handleChatPrompt(promptText) {
     const matchedExp = getStoredExperiences().find(e => e.name === promptText);
     if (matchedExp) {
         recordExperienceEvent(matchedExp.id, 'inquiryCount');
+        const evidence = buildExperienceEvidence(matchedExp);
+        const evidenceHtml = evidence.map(c =>
+            `${c.icon} ${c.label}: ${c.claim}${c.contradiction ? `<br>&nbsp;&nbsp;⚠️ ${c.contradiction}` : ""}`
+        ).join("<br>");
         setTimeout(() => {
             appendAiBubble(
                 `<strong>${matchedExp.name}</strong><br>` +
-                `${matchedExp.category} • ${matchedExp.location} • ${matchedExp.duration}h • ₹${matchedExp.price}<br>` +
-                `Accessibility: ${matchedExp.accessibilityRating}% (${matchedExp.accessibilityTags.join(", ")})<br>` +
-                `Sustainability: ${matchedExp.sustainability}`,
+                `${matchedExp.category} • ${matchedExp.location} • ${matchedExp.duration}h • ₹${matchedExp.price}<br><br>` +
+                `<strong>Evidence Graph — Why this?</strong><br>${evidenceHtml}`,
                 ["Show on Live Map", "Plan Another Destination"]
             );
         }, 300);

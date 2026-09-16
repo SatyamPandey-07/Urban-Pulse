@@ -509,11 +509,15 @@ class YatriAiFragment : Fragment() {
                 if (matchedExp != null) {
                     withContext(Dispatchers.IO) { ExperienceRepository(ctxForMatch).recordInquiry(matchedExp.id) }
                     chatAdapter.removeTypingIndicator()
+                    val evidence = com.urbanpulse.app.evidence.EvidenceGraphService.buildEvidenceForExperience(matchedExp)
+                    val evidenceText = evidence.joinToString("\n") { claim ->
+                        "${claim.confidence.icon} ${claim.confidence.label}: ${claim.claim}" +
+                            (claim.contradiction?.let { "\n   ⚠️ $it" } ?: "")
+                    }
                     addAiMessage(
                         "**${matchedExp.name}**\n\n" +
-                            "${matchedExp.category} • ${matchedExp.location} • ${matchedExp.durationHours}h • ${matchedExp.pricePerPerson}\n" +
-                            "Accessibility: ${matchedExp.accessibilityRating}% (${matchedExp.accessibilityTags.joinToString(", ")})\n" +
-                            "Sustainability: ${matchedExp.sustainabilityPractice}",
+                            "${matchedExp.category} • ${matchedExp.location} • ${matchedExp.durationHours}h • ${matchedExp.pricePerPerson}\n\n" +
+                            "**Evidence Graph — Why this?**\n$evidenceText",
                         mcq = QuickMcqQuestion(
                             questionId = "exp_detail_mcq",
                             questionText = "Next step",

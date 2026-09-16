@@ -1,5 +1,6 @@
 package com.urbanpulse.app.evidence
 
+import com.urbanpulse.app.ExperienceListing
 import com.urbanpulse.app.HospitalityStay
 
 /**
@@ -56,6 +57,47 @@ object EvidenceGraphService {
             claim = "Waste handling: ${stay.wastePolicy}",
             confidence = if (hasZeroWastePolicy) ConfidenceLevel.VERIFIED else ConfidenceLevel.REPORTED,
             sources = listOf("Operator waste policy statement")
+        )
+
+        return claims
+    }
+
+    /**
+     * Same confidence-tagged-claim approach as [buildEvidence], applied to general experience
+     * listings (not just hospitality stays) — the app-wide "never say Accessible: Yes outright"
+     * guarantee the pitch describes, not something limited to hotel/resort stays.
+     */
+    fun buildEvidenceForExperience(exp: ExperienceListing): List<EvidenceClaim> {
+        val claims = mutableListOf<EvidenceClaim>()
+
+        val tagCount = exp.accessibilityTags.size
+        val expectedTagsForRating = when {
+            exp.accessibilityRating >= 90 -> 2
+            exp.accessibilityRating >= 80 -> 1
+            else -> 1
+        }
+        val underDocumented = tagCount < expectedTagsForRating || exp.accessibilityTags.contains("Standard Access")
+        claims += EvidenceClaim(
+            claim = "Accessibility: ${exp.accessibilityRating}% match, $tagCount documented feature(s)",
+            confidence = if (underDocumented) ConfidenceLevel.INFERRED else ConfidenceLevel.VERIFIED,
+            sources = exp.accessibilityTags,
+            contradiction = if (underDocumented)
+                "Rating claims ${exp.accessibilityRating}% but accessibility features are generic or under-documented — treat as inferred until confirmed on-site."
+            else null
+        )
+
+        val sustainabilityText = exp.sustainabilityPractice
+        val isSpecificPractice = sustainabilityText.length > 20 &&
+            (sustainabilityText.contains("solar", true) || sustainabilityText.contains("organic", true) ||
+                sustainabilityText.contains("electric", true) || sustainabilityText.contains("zero", true) ||
+                sustainabilityText.contains("recycl", true) || sustainabilityText.contains("local", true))
+        claims += EvidenceClaim(
+            claim = "Sustainability: $sustainabilityText",
+            confidence = if (isSpecificPractice) ConfidenceLevel.REPORTED else ConfidenceLevel.INFERRED,
+            sources = if (isSpecificPractice) listOf("Provider-listed sustainability practice") else listOf("Category heuristic: ${exp.category}"),
+            contradiction = if (!isSpecificPractice)
+                "No specific, checkable sustainability practice was provided — this is a category-based estimate, not a verified claim."
+            else null
         )
 
         return claims
