@@ -2,7 +2,16 @@ package com.urbanpulse.app
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.urbanpulse.app.evidence.EvidenceClaim
+import com.urbanpulse.app.evidence.EvidenceGraphService
 
+/**
+ * Owns the traveler's own step-free / visual / hearing / service-animal accessibility
+ * preference flags, and is the entry point for evidence-tagged accessibility claims about
+ * a listing (delegating to [EvidenceGraphService], which holds the actual Verified/Reported/
+ * Inferred confidence-tagging logic) — this is the one place both halves of "accessibility"
+ * in this app meet: what the traveler needs, and what's actually been confirmed about a place.
+ */
 class AccessibilityManager(context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("AccessibilityPrefs", Context.MODE_PRIVATE)

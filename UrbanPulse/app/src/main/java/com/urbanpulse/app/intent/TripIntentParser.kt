@@ -4,14 +4,43 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 /**
  * Turns a traveler's free-text request into structured [TripIntent] constraints.
- * Uses Gemini when a real API key is configured; otherwise falls back to a
- * deterministic keyword parser so the feature still works without live config
- * (falls back on any Gemini error too, e.g. network/quota failures).
+ * Tries the real Groq LPU cloud first (sub-400ms structured JSON extraction, matching
+ * the pitch), falls back to Gemini if Groq is unavailable/fails, and finally falls back
+ * to a deterministic keyword parser so the feature still works with no live config at all.
  */
 object TripIntentParser {
+
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .build()
+
+    private val groqCandidateModels = listOf("openai/gpt-oss-120b", "groq/compound", "openai/gpt-oss-20b")
+
+    private const val INTENT_SCHEMA = """
+        Respond with ONLY a raw JSON object (no markdown fences, no commentary) matching exactly this shape:
+        {
+          "prioritizeCarbon": boolean,
+          "prioritizeAccessibility": boolean,
+          "prioritizeSpeed": boolean,
+          "prioritizeBudget": boolean,
+          "requireWheelchairAccess": boolean,
+          "requireSolarEnergy": boolean,
+          "requireZeroWaste": boolean,
+          "maxPriceRupees": number or null,
+          "searchKeywords": short string of the most relevant place/category keywords, or ""
+        }
+    """
 
     private data class RawIntentJson(
         val prioritizeCarbon: Boolean? = null,
@@ -25,17 +54,84 @@ object TripIntentParser {
         val searchKeywords: String? = null
     )
 
-    suspend fun parse(freeText: String, apiKey: String): TripIntent = withContext(Dispatchers.IO) {
+    suspend fun parse(freeText: String, groqApiKey: String, geminiApiKey: String): TripIntent = withContext(Dispatchers.IO) {
         if (freeText.isBlank()) return@withContext TripIntent()
 
-        if (apiKey.isNotEmpty() && apiKey != "DEMO_GEMINI_KEY" && apiKey != "null") {
+        if (groqApiKey.isNotEmpty() && groqApiKey != "DEMO_GROQ_KEY" && groqApiKey != "null") {
             try {
-                return@withContext parseWithGemini(freeText, apiKey)
+                return@withContext parseWithGroq(freeText, groqApiKey)
             } catch (_: Exception) {
-                // Fall through to rule-based parsing — never block the user on an LLM failure.
+                // Fall through to Gemini, then rules — never block the user on an LLM failure.
+            }
+        }
+
+        if (geminiApiKey.isNotEmpty() && geminiApiKey != "DEMO_GEMINI_KEY" && geminiApiKey != "null") {
+            try {
+                return@withContext parseWithGemini(freeText, geminiApiKey)
+            } catch (_: Exception) {
+                // Fall through to rule-based parsing.
             }
         }
         parseWithRules(freeText)
+    }
+
+    private fun parseWithGroq(freeText: String, apiKey: String): TripIntent {
+        val prompt = "Extract structured travel-planning constraints from this traveler request.\n$INTENT_SCHEMA\n\nTraveler request: \"${freeText.replace("\"", "'")}\""
+
+        for (modelName in groqCandidateModels) {
+            try {
+                val messagesArray = JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("role", "system")
+                        put("content", "You are a structured data extraction engine. Reply with raw JSON only, never prose.")
+                    })
+                    put(JSONObject().apply {
+                        put("role", "user")
+                        put("content", prompt)
+                    })
+                }
+                val requestJson = JSONObject().apply {
+                    put("model", modelName)
+                    put("messages", messagesArray)
+                    put("temperature", 0.1)
+                    put("max_tokens", 300)
+                }
+                val requestBody = requestJson.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("https://api.groq.com/openai/v1/chat/completions")
+                    .addHeader("Authorization", "Bearer $apiKey")
+                    .addHeader("Content-Type", "application/json")
+                    .post(requestBody)
+                    .build()
+
+                httpClient.newCall(request).execute().use { response ->
+                    val body = response.body?.string()
+                    if (response.isSuccessful && body != null) {
+                        val content = JSONObject(body).optJSONArray("choices")
+                            ?.optJSONObject(0)?.optJSONObject("message")?.optString("content")
+                        if (!content.isNullOrBlank()) {
+                            val jsonText = content.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
+                            val parsed = Gson().fromJson(jsonText, RawIntentJson::class.java)
+                            return TripIntent(
+                                prioritizeCarbon = parsed.prioritizeCarbon ?: false,
+                                prioritizeAccessibility = parsed.prioritizeAccessibility ?: false,
+                                prioritizeSpeed = parsed.prioritizeSpeed ?: false,
+                                prioritizeBudget = parsed.prioritizeBudget ?: false,
+                                requireWheelchairAccess = parsed.requireWheelchairAccess ?: false,
+                                requireSolarEnergy = parsed.requireSolarEnergy ?: false,
+                                requireZeroWaste = parsed.requireZeroWaste ?: false,
+                                maxPriceRupees = parsed.maxPriceRupees,
+                                searchKeywords = parsed.searchKeywords ?: "",
+                                parsedBy = "groq"
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Try next candidate model
+            }
+        }
+        throw IllegalStateException("All Groq candidate models failed")
     }
 
     private suspend fun parseWithGemini(freeText: String, apiKey: String): TripIntent {

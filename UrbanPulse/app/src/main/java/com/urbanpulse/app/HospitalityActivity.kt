@@ -93,7 +93,7 @@ class HospitalityActivity : BaseActivity() {
             val text = etIntent.text.toString()
             if (text.isBlank()) return@setOnClickListener
             lifecycleScope.launch {
-                val parsedIntent = TripIntentParser.parse(text, BuildConfig.GEMINI_API_KEY)
+                val parsedIntent = TripIntentParser.parse(text, BuildConfig.GROQ_API_KEY, BuildConfig.GEMINI_API_KEY)
                 applyTripIntent(parsedIntent, tvSummary)
             }
         }
@@ -123,7 +123,8 @@ class HospitalityActivity : BaseActivity() {
         if (intent.maxPriceRupees != null) appliedBits += "budget under ₹${intent.maxPriceRupees}"
 
         summaryView.visibility = View.VISIBLE
-        summaryView.text = "Parsed via ${if (intent.parsedBy == "gemini") "Gemini" else "keyword rules"}" +
+        val engineLabel = when (intent.parsedBy) { "groq" -> "Groq LPU"; "gemini" -> "Gemini"; else -> "keyword rules" }
+        summaryView.text = "Parsed via $engineLabel" +
             if (appliedBits.isNotEmpty()) " — ${appliedBits.joinToString(", ")}" else ""
     }
 
