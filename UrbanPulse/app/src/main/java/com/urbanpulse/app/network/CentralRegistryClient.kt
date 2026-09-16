@@ -202,6 +202,37 @@ object CentralRegistryClient {
 
     suspend fun recordInquiry(id: String): RegistryExperience? = recordEvent(id, "inquiry")
 
+    /** Real individual booking records for one experience — who actually booked, not just the
+     *  aggregate count already shown on the provider card. */
+    suspend fun fetchBookings(experienceId: String): List<RegistryBooking>? = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url("$baseUrl/api/experiences/$experienceId/bookings").get().build()
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return@withContext null
+                val body = resp.body?.string() ?: return@withContext null
+                val arr = JSONArray(body)
+                (0 until arr.length()).map { parseBooking(arr.getJSONObject(it)) }
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /** Real individual accessibility reports for one experience, including the traveler's note text. */
+    suspend fun fetchReports(experienceId: String): List<RegistryReport>? = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url("$baseUrl/api/experiences/$experienceId/reports").get().build()
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return@withContext null
+                val body = resp.body?.string() ?: return@withContext null
+                val arr = JSONArray(body)
+                (0 until arr.length()).map { parseReport(arr.getJSONObject(it)) }
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun createBooking(experienceId: String, travelerName: String, partySize: Int, bookingDate: String): RegistryBooking? =
         withContext(Dispatchers.IO) {
             try {

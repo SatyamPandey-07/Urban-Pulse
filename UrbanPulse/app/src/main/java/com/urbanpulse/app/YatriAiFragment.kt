@@ -445,10 +445,46 @@ class YatriAiFragment : Fragment() {
                     }
                 }
 
+                // Real per-booking / per-report detail view — these two backend endpoints
+                // existed with zero frontend caller until this: shows who actually booked
+                // (real traveler name, party size, date) and the real text of accessibility
+                // reports, not just the aggregate counts in `metrics` above.
+                val btnViewDetails = MaterialButton(ctx).apply {
+                    text = "View Booking & Report Details"
+                    textSize = 11f
+                    setOnClickListener {
+                        lifecycleScope.launch {
+                            val bookings = withContext(Dispatchers.IO) {
+                                com.urbanpulse.app.network.CentralRegistryClient.fetchBookings(exp.id)
+                            }
+                            val reports = withContext(Dispatchers.IO) {
+                                com.urbanpulse.app.network.CentralRegistryClient.fetchReports(exp.id)
+                            }
+                            val message = buildString {
+                                append("📅 ${bookings?.size ?: 0} Real Booking(s)\n")
+                                if (bookings.isNullOrEmpty()) append("No bookings yet\n") else {
+                                    bookings.forEach { append("• ${it.travelerName} — party of ${it.partySize} — ${it.bookingDate} (${it.status})\n") }
+                                }
+                                append("\n🦽 ${reports?.size ?: 0} Real Accessibility Report(s)\n")
+                                if (reports.isNullOrEmpty()) append("No reports yet") else {
+                                    reports.forEach { append("• ${if (it.confirmsAccessibility) "✅ Confirmed" else "⚠️ Disputed"}${if (it.note.isNotBlank()) ": ${it.note}" else ""}\n") }
+                                }
+                                if (bookings == null && reports == null) append("\n⚠️ Central Registry backend unreachable.")
+                            }
+                            AlertDialog.Builder(ctx)
+                                .setTitle(exp.name)
+                                .setMessage(message)
+                                .setPositiveButton("Close", null)
+                                .show()
+                        }
+                    }
+                }
+
                 row.addView(title)
                 row.addView(details)
                 row.addView(metrics)
                 row.addView(switchAvailability)
+                row.addView(btnViewDetails)
                 card.addView(row)
                 container.addView(card)
             }

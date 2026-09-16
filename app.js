@@ -713,9 +713,52 @@ function renderProviderDashboard() {
             <button class="view-itinerary-btn" style="width: 100%; padding: 6px; font-size: 11px;" onclick="toggleWebExperienceAvailability('${exp.id}')">
                 Toggle Status: ${isAvailable ? "Set to Booked Out" : "Set to Available Today"}
             </button>
+            <button class="view-itinerary-btn" style="width: 100%; padding: 6px; font-size: 11px; margin-top: 6px;" onclick="toggleBookingDetails('${exp.id}')">
+                View Booking &amp; Report Details
+            </button>
+            <div id="details-${exp.id}" style="display:none; margin-top: 8px; font-size: 11px; color: var(--text-secondary);"></div>
         `;
         container.appendChild(card);
     });
+}
+
+// Real per-booking / per-report detail view — the two GET endpoints below exist on the backend
+// but had no caller anywhere until this: providers can now see WHO actually booked (real
+// traveler name, party size, date) and read the actual text of accessibility reports, not just
+// the aggregate counts shown on the card above.
+async function toggleBookingDetails(expId) {
+    const panel = document.getElementById(`details-${expId}`);
+    if (!panel) return;
+    if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+        return;
+    }
+    panel.style.display = 'block';
+    panel.innerHTML = 'Loading real booking &amp; report data…';
+    if (!registryBackendAvailable) {
+        panel.innerHTML = '⚠️ Central Registry backend not running — per-booking detail requires the live backend (localStorage fallback only stores aggregate counts).';
+        return;
+    }
+    try {
+        const [bookingsRes, reportsRes] = await Promise.all([
+            fetch(`${REGISTRY_API_BASE}/api/experiences/${expId}/bookings`),
+            fetch(`${REGISTRY_API_BASE}/api/experiences/${expId}/reports`)
+        ]);
+        const bookings = bookingsRes.ok ? await bookingsRes.json() : [];
+        const reports = reportsRes.ok ? await reportsRes.json() : [];
+
+        let html = `<strong>📅 ${bookings.length} Real Booking(s)</strong><br>`;
+        html += bookings.length
+            ? bookings.map(b => `• ${b.travelerName} — party of ${b.partySize} — ${b.bookingDate} (${b.status})`).join('<br>')
+            : '<em>No bookings yet</em>';
+        html += `<br><br><strong>🦽 ${reports.length} Real Accessibility Report(s)</strong><br>`;
+        html += reports.length
+            ? reports.map(r => `• ${r.confirmsAccessibility ? '✅ Confirmed' : '⚠️ Disputed'}${r.note ? ': ' + r.note : ''}`).join('<br>')
+            : '<em>No reports yet</em>';
+        panel.innerHTML = html;
+    } catch (e) {
+        panel.innerHTML = '⚠️ Failed to load booking/report details.';
+    }
 }
 
 let lastViewedExperienceId = null;
