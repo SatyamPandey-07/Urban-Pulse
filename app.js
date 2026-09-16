@@ -312,7 +312,27 @@ const DEFAULT_LOCAL_EXPERIENCES = [
     }
 ];
 
-function getStoredExperiences() {
+// --- Central Registry client: a real shared backend (server/) instead of per-browser localStorage. ---
+// Falls back to a local-only localStorage store if the backend isn't running, so the static
+// site still works standalone — but in fallback mode, listings are NOT shared across browsers/devices.
+const REGISTRY_API_BASE = window.API_BASE_URL || "http://localhost:3001";
+let cachedExperiences = null;
+let registryBackendAvailable = false;
+
+async function initExperienceRegistry() {
+    try {
+        const res = await fetch(`${REGISTRY_API_BASE}/api/experiences`);
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        cachedExperiences = await res.json();
+        registryBackendAvailable = true;
+    } catch (e) {
+        console.warn("Central Registry backend unreachable — falling back to local-only browser storage. Run `npm install && npm start` inside /server for shared, cross-device data.", e);
+        cachedExperiences = getLocalOnlyExperiences();
+        registryBackendAvailable = false;
+    }
+}
+
+function getLocalOnlyExperiences() {
     try {
         const stored = localStorage.getItem('urbanpulse_experiences');
         if (stored) return JSON.parse(stored);
@@ -320,23 +340,59 @@ function getStoredExperiences() {
     return DEFAULT_LOCAL_EXPERIENCES;
 }
 
-function saveExperienceToRegistry(newExp) {
-    const list = getStoredExperiences();
-    list.unshift(newExp);
+function persistLocalOnly(list) {
     try {
         localStorage.setItem('urbanpulse_experiences', JSON.stringify(list));
     } catch (e) {}
-    return list;
 }
 
-function recordExperienceEvent(expId, field) {
-    const list = getStoredExperiences();
-    const target = list.find(e => e.id === expId);
+/** Synchronous read of the in-memory cache, populated by initExperienceRegistry() on load. */
+function getStoredExperiences() {
+    if (cachedExperiences === null) cachedExperiences = getLocalOnlyExperiences();
+    return cachedExperiences;
+}
+
+async function saveExperienceToRegistry(newExp) {
+    if (registryBackendAvailable) {
+        try {
+            const res = await fetch(`${REGISTRY_API_BASE}/api/experiences`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newExp)
+            });
+            if (res.ok) {
+                const saved = await res.json();
+                cachedExperiences.unshift(saved);
+                return cachedExperiences;
+            }
+        } catch (e) {
+            console.warn("Failed to publish to Central Registry backend, saving locally instead.", e);
+        }
+    }
+    cachedExperiences.unshift(newExp);
+    persistLocalOnly(cachedExperiences);
+    return cachedExperiences;
+}
+
+async function recordExperienceEvent(expId, field) {
+    const endpoint = field === 'inquiryCount' ? 'inquiry' : 'view';
+    if (registryBackendAvailable) {
+        try {
+            const res = await fetch(`${REGISTRY_API_BASE}/api/experiences/${expId}/${endpoint}`, { method: "POST" });
+            if (res.ok) {
+                const updated = await res.json();
+                const idx = cachedExperiences.findIndex(e => e.id === expId);
+                if (idx >= 0) cachedExperiences[idx] = updated;
+                return;
+            }
+        } catch (e) {
+            console.warn("Failed to record event on Central Registry backend, recording locally instead.", e);
+        }
+    }
+    const target = cachedExperiences.find(e => e.id === expId);
     if (target) {
         target[field] = (target[field] || 0) + 1;
-        try {
-            localStorage.setItem('urbanpulse_experiences', JSON.stringify(list));
-        } catch (e) {}
+        persistLocalOnly(cachedExperiences);
     }
 }
 
@@ -358,7 +414,7 @@ function closeAddExpModal(e) {
     }
 }
 
-function publishProviderExperience() {
+async function publishProviderExperience() {
     const name = document.getElementById('input-exp-name').value.trim();
     if (!name) {
         alert('Please enter an experience name');
@@ -378,7 +434,7 @@ function publishProviderExperience() {
     if (tags.length === 0) tags.push("Standard Access");
 
     const newExp = {
-        id: "exp_" + Date.now(),
+        id: "exp_" + Date.now(), // overwritten by the server's own id when the backend is available
         name,
         category,
         location,
@@ -391,19 +447,22 @@ function publishProviderExperience() {
         carbonKg: 0.3
     };
 
-    saveExperienceToRegistry(newExp);
+    await saveExperienceToRegistry(newExp);
     closeAddExpModalDirect();
 
     switchAppTab('chat-view');
+    const scopeNote = registryBackendAvailable
+        ? "Published to the shared Central Registry — visible to every device querying this backend."
+        : "Saved to this browser only (Central Registry backend not running — see console for setup instructions).";
     setTimeout(() => {
         appendAiBubble(
-            `🎉 <strong>Experience Published to UrbanPulse Registry!</strong><br><br>` +
+            `🎉 <strong>Experience Published!</strong><br><br>` +
             `• <strong>Title</strong>: ${name}<br>` +
             `• <strong>Category</strong>: ${category} • ${location}<br>` +
             `• <strong>Duration</strong>: ${duration}h • ₹${price} / person<br>` +
             `• <strong>Accessibility</strong>: ${tags.join(", ")}<br>` +
             `• <strong>Sustainability</strong>: ${sustainability}<br><br>` +
-            `Your experience is now live and will be recommended automatically to travelers asking for local experiences, workshops, or 2-hour micro-trips!`
+            `${scopeNote} It will be recommended automatically to travelers asking for local experiences, workshops, or 2-hour micro-trips!`
         );
     }, 300);
 }
@@ -468,14 +527,25 @@ function closeProviderDashboardModal(e) {
     }
 }
 
-function toggleWebExperienceAvailability(expId) {
-    const list = getStoredExperiences();
-    const target = list.find(e => e.id === expId);
+async function toggleWebExperienceAvailability(expId) {
+    if (registryBackendAvailable) {
+        try {
+            const res = await fetch(`${REGISTRY_API_BASE}/api/experiences/${expId}/availability`, { method: "PATCH" });
+            if (res.ok) {
+                const updated = await res.json();
+                const idx = cachedExperiences.findIndex(e => e.id === expId);
+                if (idx >= 0) cachedExperiences[idx] = updated;
+                renderProviderDashboard();
+                return;
+            }
+        } catch (e) {
+            console.warn("Failed to toggle availability on Central Registry backend, toggling locally instead.", e);
+        }
+    }
+    const target = cachedExperiences.find(e => e.id === expId);
     if (target) {
         target.isAvailableToday = (target.isAvailableToday !== false) ? false : true;
-        try {
-            localStorage.setItem('urbanpulse_experiences', JSON.stringify(list));
-        } catch (e) {}
+        persistLocalOnly(cachedExperiences);
         renderProviderDashboard();
     }
 }
@@ -1021,7 +1091,10 @@ function closeScheduleModal(e) {
  }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await initExperienceRegistry();
+    if (document.getElementById('web-provider-listings')) renderProviderDashboard();
+
     initLeafletMap();
     setTimeout(() => {
         if (leafletMap) leafletMap.invalidateSize();

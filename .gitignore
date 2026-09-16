@@ -14,3 +14,8 @@ local.properties
 **/*.apk
 **/*.aab
 config.local.js
+server/node_modules/
+server/data/*.db
+server/data/*.db-wal
+server/data/*.db-shm
+server/server.log
