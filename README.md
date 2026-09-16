@@ -40,22 +40,40 @@
 ---
 
 ## 📑 Table of Contents
-1. [Executive Summary & Track Alignment](#-executive-summary--track-alignment)
-2. [Problem Statement Breakdown](#-problem-statement-breakdown)
-3. [System Architecture Diagram](#-system-architecture-diagram)
-4. [Core Technological Innovations](#-core-technological-innovations)
+1. [What's New](#-whats-new)
+2. [Executive Summary & Track Alignment](#-executive-summary--track-alignment)
+3. [Problem Statement Breakdown](#-problem-statement-breakdown)
+4. [System Architecture Diagram](#-system-architecture-diagram)
+5. [Core Technological Innovations](#-core-technological-innovations)
    - [A. Pareto Multi-Objective Experience Ranking](#a-pareto-multi-objective-experience-ranking)
    - [B. 2-Hour Micro-Experience Time-Crunch Engine](#b-2-hour-micro-experience-time-crunch-engine)
    - [C. Real-Time Circumstance Adaptation (Rain / Delay)](#c-real-time-circumstance-adaptation-rain--delay)
    - [D. Group Size & Traveler Personalization](#d-group-size--traveler-personalization)
    - [E. Provider-Side Portal & Real-Time Availability Hub](#e-provider-side-portal--real-time-availability-hub)
    - [F. Live Multi-Modal Transit & Dual-Path Vector Routing](#f-live-multi-modal-transit--dual-path-vector-routing)
-5. [Mathematical & Algorithmic Models](#-mathematical--algorithmic-models)
-6. [On-Device Database Schema](#-on-device-database-schema)
-7. [Verified Seeded Local Experiences](#-verified-seeded-local-experiences)
-8. [Setup, Build & Installation Guide](#-setup-build--installation-guide)
-9. [Physical Device Testing & Verification](#-physical-device-testing--verification)
-10. [Presentation Deck & Video Demos](#-presentation-deck--video-demos)
+   - [G. Evidence-Based Accessibility Engine](#g-evidence-based-accessibility-engine)
+   - [H. Central Registry — Shared Backend](#h-central-registry--shared-backend)
+6. [Mathematical & Algorithmic Models](#-mathematical--algorithmic-models)
+7. [On-Device Database Schema](#-on-device-database-schema)
+8. [Verified Seeded Local Experiences](#-verified-seeded-local-experiences)
+9. [Setup, Build & Installation Guide](#-setup-build--installation-guide)
+10. [Physical Device Testing & Verification](#-physical-device-testing--verification)
+11. [Presentation Deck & Video Demos](#-presentation-deck--video-demos)
+
+---
+
+## ✨ What's New
+
+A security and "everything real, nothing mocked" pass across both the Android app and the web platform:
+
+- 🔗 **Central Registry backend** (`server/`) — a real Express + SQLite service so a provider listing published from the web app or the Android app is visible on both, instead of two separate per-device/per-browser silos.
+- 🦽 **Evidence-Based Accessibility, app-wide** — the Verified/Reported/Inferred confidence-tagging engine (previously hospitality-stays-only) now covers every experience listing, on Android and web, with contradiction warnings when a rating outpaces its documentation.
+- 🗺️ **Real TomTom + Open-Meteo on the web app** — the live dual-route map and AQI HUD now call the real APIs (matching what the Android app already did), replacing static preset data.
+- 📍 **Real GPS + real TomTom routing in the Green Route Planner** — "Use GPS" reads the actual device location; "Recalculate Route" fetches a live TomTom distance instead of a pure haversine estimate.
+- 📄 **ESG audit reports with real math** — PASS/FAIL compliance is now computed from the live occupancy-derived figures against stated benchmarks (not a hardcoded "PASSED"), with a genuine SHA-256 content hash for integrity verification, on both the PDF/CSV export and the Android report.
+- 📊 **Real interaction counters** — provider "views" and "inquiries" are now driven by actual chat/dashboard interactions instead of fixed placeholder numbers.
+- 🔐 **Security hardening** — live API keys are no longer committed to the repository; they're loaded from gitignored local config (`local.properties` for Android, `config.local.js` for web — see [`config.local.example.js`](config.local.example.js)).
+- 🧹 Removed unused/misleading dead code (an empty `Web3Manager.kt` blockchain simulation and several empty network-client stubs).
 
 ---
 
@@ -114,8 +132,16 @@ UrbanPulse bridges this gap by moving beyond traditional static search-and-list 
 | 📐 Pareto Multi-Objective Optimizer (Equilibrium across Carbon, Price, Accessibility & Time)    |
 | 🗺️ TomTom Routing Engine (Dual-route pathfinding: Green transit corridor vs. Petrol Cab)       |
 | 💨 Open-Meteo Environmental Stream (Live Air Quality Index: PM2.5, PM10, AQI status)           |
+| ✅ Evidence Graph Service (Verified / Reported / Inferred confidence-tagged claims)             |
 | 💾 On-Device Relational Store (SQLite TABLE_EXPERIENCES + TABLE_HOSPITALITY + Overrides)       |
 | 📄 Android Native PDF Engine (A4 ISO 14064 Compliance Audit Exporter)                          |
++-----------------------------------------------------------------+-----------------------------+
+                                                                   |
+                                                                   v
++-----------------------------------------------------------------------------------------------+
+|                     🔗 Central Registry — Shared Backend (server/, Express + SQLite)          |
+|   Real REST API (list / create / toggle-availability / record-view / record-inquiry)          |
+|   Android and Web both sync here — a listing published on one is visible on the other          |
 +-----------------------------------------------------------------------------------------------+
 ```
 
@@ -150,13 +176,24 @@ Travel plans face constant volatility. UrbanPulse features a 1-tap **`☔ Adapt 
 ### E. Provider-Side Portal & Real-Time Availability Hub
 Local small businesses and artisans are equal stakeholders on the platform:
 - **`+ List Experience` Form:** Enables pottery artisans, organic farmers, culinary instructors, and heritage guides to publish experiences with title, duration, pricing, and accessibility tags.
-- **Provider Dashboard:** Allows providers to flip status between `Available Today` and `Booked Out` in real time, and view direct traveler interest metrics (`184 Traveler Views • 42 Route Inquiries`).
-- **Hospitality Resource Hub:** B2B hotel tool forecasting HVAC loads, greywater recycling, and surplus food shelter dispatch, generating ISO 14064 A4 audit PDFs.
+- **Provider Dashboard:** Allows providers to flip status between `Available Today` and `Booked Out` in real time, and view **live** traveler interest metrics — view and inquiry counts driven by actual chat/dashboard interactions, not placeholder numbers.
+- **Hospitality Resource Hub:** B2B hotel tool forecasting HVAC loads, greywater recycling, and surplus food shelter dispatch, generating ISO 14064 A4 audit PDFs with computed PASS/FAIL compliance and a real SHA-256 content-integrity hash.
 
 ### F. Live Multi-Modal Transit & Dual-Path Vector Routing
 - **Green Corridor:** Electrified suburban rail, AC electric buses, Ro-Pax ferries, and step-free pedestrian walkways.
 - **Standard Corridor:** Petrol taxi baseline calculated via official municipal fare rules.
-- **Real-Time AQI HUD:** Live PM2.5, PM10, and air quality index fetched from Open-Meteo along the transit corridor.
+- **Real-Time AQI HUD:** Live PM2.5, PM10, and air quality index fetched from Open-Meteo along the transit corridor — on **both** the Android app and the web platform.
+
+### G. Evidence-Based Accessibility Engine
+UrbanPulse never states `Accessible: Yes` outright. [`EvidenceGraphService.kt`](UrbanPulse/app/src/main/java/com/urbanpulse/app/evidence/EvidenceGraphService.kt) tags every accessibility and sustainability claim — for hospitality stays *and* general experience listings — with a confidence level, mirrored in the web app's `buildExperienceEvidence()`:
+- ✅ **Verified:** Rating is backed by enough documented, specific features.
+- 🟡 **Reported:** A single, specific source (e.g. a provider-listed practice) backs the claim.
+- 🔵 **Inferred:** Under-documented — the claim is flagged with an explicit contradiction warning (e.g. *"Rating claims 94% but only 1 feature is documented — treat as inferred until confirmed on-site"*) rather than presented as fact.
+
+### H. Central Registry — Shared Backend
+A real Node.js + Express + SQLite service (`server/`) is the single source of truth for provider-listed experiences:
+- `GET/POST /api/experiences`, `PATCH /api/experiences/:id/availability`, `POST /api/experiences/:id/view`, `POST /api/experiences/:id/inquiry` — genuine persisted state, not per-device mocks.
+- The **Android app** (`CentralRegistryClient.kt`) and the **web app** (`app.js`) both sync to it, mirroring reads into a local SQLite/`localStorage` cache so the app still works offline — with a clear "not shared while offline" signal instead of silently pretending data is synced.
 
 ---
 
@@ -194,7 +231,10 @@ CREATE TABLE experiences (
     accessibility_tags TEXT NOT NULL,    -- Pipe-separated: Step-Free|Audio Guide
     carbon_kg_per_visit REAL NOT NULL,
     price_rupees INTEGER NOT NULL,
-    duration_hours REAL NOT NULL
+    duration_hours REAL NOT NULL,
+    is_available_today INTEGER NOT NULL DEFAULT 1,  -- real persisted toggle, not an in-memory placeholder
+    views_count INTEGER NOT NULL DEFAULT 0,          -- real counter, incremented on actual recommendation views
+    inquiry_count INTEGER NOT NULL DEFAULT 0         -- real counter, incremented on actual traveler inquiries
 );
 
 -- Sustainable Hospitality Stays
@@ -239,7 +279,9 @@ You can directly download and install the compiled Android APK on any Android ph
 - Android Studio Hedgehog (2023.1.1) or newer
 - Android SDK 34 (Android 14 UpsideDownCake)
 - Java Development Kit (JDK) 17
-- Node.js v18+ (for Web platform serving)
+- Node.js v18+ (for the Web platform and the Central Registry backend)
+
+> 🔐 **No API keys are committed to this repository.** Every key below is loaded from a gitignored local file — copy the example files and fill in your own keys before building.
 
 ### 📱 Android Native Build
 ```bash
@@ -247,9 +289,13 @@ You can directly download and install the compiled Android APK on any Android ph
 git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
 cd Urban-Pulse/UrbanPulse
 
-# 2. Add API keys in local.properties
+# 2. Add your own API keys to local.properties (gitignored, not committed)
 echo "GROQ_API_KEY=your_groq_api_key" >> local.properties
 echo "TOMTOM_API_KEY=your_tomtom_key" >> local.properties
+echo "GEMINI_API_KEY=your_gemini_key" >> local.properties
+# Optional — only needed on a physical device; the emulator default (10.0.2.2) reaches
+# the Central Registry server running on your dev machine automatically:
+echo "CENTRAL_REGISTRY_BASE_URL=http://<your-lan-ip>:3001" >> local.properties
 
 # 3. Compile and Assemble Debug APK
 ./gradlew assembleDebug
@@ -264,8 +310,20 @@ adb shell am start -n com.urbanpulse.app/.SplashActivity
 ### 🌐 Web Platform Run
 ```bash
 # From the repository root
+cp config.local.example.js config.local.js
+# then edit config.local.js and fill in your own GROQ_API_KEY / TOMTOM_API_KEY
+
 npx serve .
 # Open http://localhost:3000 in any modern browser
+```
+
+### 🔗 Central Registry Backend (Shared Provider Data)
+```bash
+cd server
+npm install
+npm start
+# Listens on http://localhost:3001 — the web app and an emulator Android build
+# both pick this up automatically; falls back to local-only storage if not running.
 ```
 
 ---

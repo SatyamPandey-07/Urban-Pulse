@@ -33,6 +33,19 @@ jobs:
         run: |
           chmod +x UrbanPulse/gradlew
 
+      - name: Write local.properties from repository secrets
+        run: |
+          cat > UrbanPulse/local.properties <<EOF
+          GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+          TOMTOM_API_KEY=${{ secrets.TOMTOM_API_KEY }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          CENTRAL_REGISTRY_BASE_URL=${{ secrets.CENTRAL_REGISTRY_BASE_URL }}
+          EOF
+        # Keys are never committed to the repo — they're injected here from GitHub repo
+        # secrets (Settings > Secrets and variables > Actions) so the built APK is fully
+        # functional without any live key ever touching source control. If a secret isn't
+        # set, build.gradle.kts falls back to its DEMO_* placeholder for that field.
+
       - name: Build Debug APK with Gradle
         run: |
           cd UrbanPulse
@@ -55,17 +68,26 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0-hackcelestial' }}
-          name: 🌿 UrbanPulse v1.0.0 — Production Release (HackCelestial 3.0)
+          name: 🌿 UrbanPulse v1.1.0 — Production Release (HackCelestial 3.0)
           body: |
             ## 🌿 UrbanPulse — Intelligent Local Discovery, Sustainable Experience Platform & Autonomous Mobility 🚀
-            
+
             **HackCelestial 3.0 — Pillai University Hackathon Production Release**
-            
+
             ### 📱 Download Android APK
             Tap the `UrbanPulse-v1.0.0.apk` asset below to install directly on your Android phone (Android 8.0+ / API 26+).
-            
+
+            ### ✨ What's New in v1.1.0
+            - 🔗 **Central Registry Backend:** a real Express + SQLite service (`server/`) so provider listings published on web or Android sync to both, instead of separate per-device stores.
+            - 🦽 **Evidence-Based Accessibility, App-Wide:** the Verified/Reported/Inferred confidence-tagging engine now covers every experience listing (previously hospitality-only), with contradiction warnings when a rating outpaces its documentation.
+            - 🗺️ **Real TomTom + Open-Meteo on the Web App:** the live dual-route map and AQI HUD now call the real APIs, matching the Android app.
+            - 📍 **Real GPS + Live TomTom Routing in Green Route Planner:** "Use GPS" reads actual device location; "Recalculate Route" fetches a live TomTom distance.
+            - 📄 **ESG Audits With Real Math:** PASS/FAIL compliance computed from live occupancy-derived figures against stated benchmarks, plus a genuine SHA-256 content-integrity hash.
+            - 📊 **Real Interaction Counters:** provider views/inquiries now reflect actual chat & dashboard activity.
+            - 🔐 **Security Hardening:** no live API keys committed to the repo — all loaded from gitignored local config.
+
             ### ⚡ Core Platform Highlights
-            - 🚆 **TomTom Dual-Route Vector MCP Engine:** Live comparison of electrified trains & buses against private cabs with CO₂e savings.
+            - 🚆 **TomTom Dual-Route Engine:** Live comparison of electrified trains & buses against private cabs with CO₂e savings.
             - ⚡ **Sub-400ms Groq LPU Conversational Engine:** Grounded Yatri AI for personalized experience recommendations.
             - ⏱️ **2-Hour Micro-Experience Finder:** Instant recommendations tailored to live GPS coordinates and tight schedules.
             - ☔ **Real-Time Circumstance Adaptation:** 1-tap pivoting to indoor & covered workshops during sudden rain or transit delays.
