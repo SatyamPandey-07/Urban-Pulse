@@ -29,8 +29,8 @@ android {
         applicationId = "com.urbanpulse.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -70,12 +70,8 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
-        compose = true
         viewBinding = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -98,12 +94,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation(platform("androidx.compose:compose-bom:2024.04.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    // Jetpack Compose was in the original project template but every screen here is a real
+    // classic View/XML layout (see the layout files driving each Activity/Fragment) — no
+    // Composable is ever rendered, so the Compose BOM + UI/Material3 artifacts were pure dead
+    // weight and have been removed.
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -125,16 +119,14 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // TomTom Maps SDK
-    implementation("com.tomtom.sdk.maps:map-display:1.13.0") {
-        exclude(group = "com.google.protobuf", module = "protobuf-java")
-        exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
-    }
+    // TomTom Search SDK (used by LiveMapFragment.kt / MedicalActivity.kt for real POI search).
+    // map-display and route-planner-online were declared but never referenced anywhere in the
+    // codebase — all real map rendering here goes through a WebView/Leaflet, and all real
+    // routing goes through direct TomTom REST calls (see CentralRegistryClient/LiveMapFragment),
+    // not this native SDK module. It was the single largest contributor to APK size (its native
+    // map-rendering .so libraries are bundled for every ABI) for zero functional benefit, so it's
+    // removed rather than kept "just in case".
     implementation("com.tomtom.sdk.search:search-online:1.13.0") {
-        exclude(group = "com.google.protobuf", module = "protobuf-java")
-        exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
-    }
-    implementation("com.tomtom.sdk.routing:route-planner-online:1.13.0") {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
         exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
     }
@@ -157,8 +149,4 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

@@ -68,7 +68,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0-hackcelestial' }}
-          name: 🌿 UrbanPulse v1.2.0 — Production Release (HackCelestial 3.0)
+          name: 🌿 UrbanPulse v1.3.0 — Production Release (HackCelestial 3.0)
           body: |
             ## 🌿 UrbanPulse — Intelligent Local Discovery, Sustainable Experience Platform & Autonomous Mobility 🚀
 
@@ -77,7 +77,13 @@ jobs:
             ### 📱 Download Android APK
             Tap the `UrbanPulse-v1.0.0.apk` asset below to install directly on your Android phone (Android 8.0+ / API 26+).
 
-            ### ✨ What's New in v1.2.0
+            ### ✨ What's New in v1.3.0
+            - ⚡ **Groq now does intent extraction, matching the pitch:** `TripIntentParser` previously only used Gemini; it now tries the real Groq LPU cloud first (sub-400ms structured JSON extraction), falling back to Gemini, then a deterministic keyword parser.
+            - ☔ **Circumstance Adaptation is now autonomous:** on both Android and web, a real live Open-Meteo check runs once per session — if it's actually raining at the user's location, adapted recommendations are pushed proactively, without the user needing to type "rain".
+            - 🦽 **`AccessibilityManager.kt` now really does what the architecture diagram says:** it's the entry point for evidence-tagged accessibility claims too (`evidenceFor(...)`, delegating to `EvidenceGraphService`), not just user preference toggles.
+            - 📦 **~300MB+ smaller debug APK:** removed the TomTom native map-display + route-planner SDK modules and the entire Jetpack Compose dependency stack — both were declared but had zero references anywhere in the codebase (all real map rendering here is WebView/Leaflet; all real routing is direct TomTom REST calls; every screen is a classic View/XML layout, not Compose).
+
+            ### ✨ What Shipped in v1.2.0
             - 📅 **Real Bookings:** the Central Registry now persists genuine reservation records (`POST /api/experiences/:id/bookings`) — "📅 Book This Experience" in the chat creates a real, queryable booking on Android and web alike.
             - ✅ **Real user reports feed the Evidence Graph:** travelers can "✅ Confirm Accessibility" or "⚠️ Report an Issue" on any listing — a genuinely independent second source that can upgrade a claim to Verified or surface a real flagged contradiction, not the provider's own data checked against itself.
             - 🌐 **Live website redesign:** a full Bento Grid feature showcase at [satyampande.me/Urban-Pulse](http://satyampande.me/Urban-Pulse/) covering every real feature, and a fixed custom-domain HTTPS certificate.
