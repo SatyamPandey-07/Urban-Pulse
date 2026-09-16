@@ -587,10 +587,17 @@ class YatriAiFragment : Fragment() {
                     )
                 }
 
+                val isAiGenerated = generatedTrip.source == "groq_ai"
+                val headerLine = if (isAiGenerated)
+                    "🌿 **Your $days-Day Sustainable & Accessible Itinerary for $dest is Ready!** (Generated live by Groq AI)\n\n"
+                else
+                    "🌿 **Your $days-Day Sustainable & Accessible Itinerary for $dest**\n⚠️ Groq AI was unreachable — this is an offline template estimate, not a live-verified plan.\n\n"
+                val stayLabel = if (isAiGenerated) "AI-Suggested Stay" else "Example Stay (unverified)"
+
                 addAiMessage(
-                    text = "🌿 **Your $days-Day Sustainable & Accessible Itinerary for $dest is Ready!**\n\n" +
+                    text = headerLine +
                             "• 🚆 **Transit Option**: ${generatedTrip.travelMode} (Cost: ₹${generatedTrip.transitCostInr})\n" +
-                            "• 🏨 **Verified Stay**: ${generatedTrip.hotelName} (Rating: ★ ${generatedTrip.hotelRating})\n" +
+                            "• 🏨 **$stayLabel**: ${generatedTrip.hotelName} (Rating: ★ ${generatedTrip.hotelRating})\n" +
                             "• ♿ **Accessibility**: ${if (generatedTrip.isStepFreeAccessible) "100% Level Boarding & Assisted Palki / Concourse" else "Standard Concourse"}\n" +
                             "• 💨 **Air Quality**: ${generatedTrip.aqiStatus}\n" +
                             "• 💰 **Estimated Budget**: ₹${generatedTrip.totalBudgetInr}\n" +
@@ -639,10 +646,17 @@ class YatriAiFragment : Fragment() {
             }
 
             // 2. Circumstance Adaptation Filter (Rain, Bad Weather, Sudden Delays)
-            if (lowerPrompt.contains("adapt") || lowerPrompt.contains("rain") || lowerPrompt.contains("weather") || lowerPrompt.contains("delay")) {
+            // Cross-checked against real live Open-Meteo conditions, not just the user's own wording —
+            // "isRain" fires if the user mentions it OR the live weather at their GPS coordinates shows it.
+            val keywordAdaptRequest = lowerPrompt.contains("adapt") || lowerPrompt.contains("rain") || lowerPrompt.contains("weather") || lowerPrompt.contains("delay")
+            if (keywordAdaptRequest) {
                 chatAdapter.removeTypingIndicator()
                 val ctx = context
                 if (ctx != null) {
+                    val liveWeather = withContext(Dispatchers.IO) {
+                        LiveCityIntelligenceService.getLiveWeatherAndAqi(userLatitude, userLongitude)
+                    }
+                    val liveRainDetected = liveWeather?.condition == "Showers"
                     val adaptive = withContext(Dispatchers.IO) {
                         ExperienceRepository(ctx).getAdaptiveExperiences(isRain = true, maxDuration = 2.0)
                     }
@@ -651,7 +665,15 @@ class YatriAiFragment : Fragment() {
                         ranked.take(3).forEach { ExperienceRepository(ctx).recordView(it.experience.id) }
                     }
                     val builder = StringBuilder("☔ **Real-Time Circumstance Adaptation Triggered**\n\n")
-                    builder.append("Detected weather change (rain/storm) or schedule delay! We have dynamically adapted your itinerary, swapping outdoor cycling and treks for covered, indoor cultural workshops & tactile galleries:\n\n")
+                    val weatherLine = if (liveWeather != null) {
+                        if (liveRainDetected)
+                            "Live weather check confirms rain (${liveWeather.condition}, ${liveWeather.temperatureC}°C) at your coordinates — "
+                        else
+                            "Live weather check shows ${liveWeather.condition} (no rain detected right now) — adapting based on your request anyway — "
+                    } else {
+                        "Weather change or schedule delay reported — "
+                    }
+                    builder.append("$weatherLine we've dynamically adapted your itinerary, swapping outdoor cycling and treks for covered, indoor cultural workshops & tactile galleries:\n\n")
 
                     ranked.take(3).forEachIndexed { index, r ->
                         val exp = r.experience
@@ -775,7 +797,8 @@ class YatriAiFragment : Fragment() {
                         userPrompt = prompt,
                         userLat = userLatitude,
                         userLon = userLongitude,
-                        isWheelchair = isWheelchair
+                        isWheelchair = isWheelchair,
+                        context = context
                     )
                 }
             }

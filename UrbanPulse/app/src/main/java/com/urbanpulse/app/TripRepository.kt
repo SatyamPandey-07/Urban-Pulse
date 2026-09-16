@@ -10,7 +10,13 @@ object TripRepository {
     private const val KEY_TRIPS = "saved_trips_json"
     private val gson = Gson()
 
-    private val defaultTrips = mutableListOf(
+    /**
+     * Illustrative quick-start templates shown only by the "Quick Lonavala"/"Quick Alibaug"
+     * shortcut buttons on the Trips tab — never a new user's real trip history. [getTrips]
+     * starts empty; a trip only appears there once genuinely created via Yatri AI or saved
+     * from one of these templates.
+     */
+    private val sampleQuickTrips = mutableListOf(
         TripPlan(
             id = "trip_lonavala_01",
             destination = "Lonavala",
@@ -110,21 +116,20 @@ object TripRepository {
         )
     )
 
+    /** The user's real saved trips — starts empty on first run, not pre-seeded with sample data. */
     fun getTrips(context: Context): List<TripPlan> {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val json = prefs.getString(KEY_TRIPS, null)
-        return if (json != null) {
-            try {
-                val type = object : TypeToken<List<TripPlan>>() {}.type
-                gson.fromJson(json, type)
-            } catch (e: Exception) {
-                defaultTrips
-            }
-        } else {
-            saveTrips(context, defaultTrips)
-            defaultTrips
+        val json = prefs.getString(KEY_TRIPS, null) ?: return emptyList()
+        return try {
+            val type = object : TypeToken<List<TripPlan>>() {}.type
+            gson.fromJson(json, type)
+        } catch (e: Exception) {
+            emptyList()
         }
     }
+
+    /** Illustrative quick-start templates — see [sampleQuickTrips]. Never persisted as the user's own trips. */
+    fun getSampleTrips(): List<TripPlan> = sampleQuickTrips
 
     fun addTrip(context: Context, trip: TripPlan) {
         val list = getTrips(context).toMutableList()

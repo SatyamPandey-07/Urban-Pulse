@@ -1,6 +1,9 @@
 package com.urbanpulse.app.network
 
+import android.content.Context
 import com.urbanpulse.app.BuildConfig
+import com.urbanpulse.app.data.HospitalityRepository
+import com.urbanpulse.app.evidence.EvidenceGraphService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -194,7 +197,8 @@ object LiveCityIntelligenceService {
         userPrompt: String,
         userLat: Double,
         userLon: Double,
-        isWheelchair: Boolean = false
+        isWheelchair: Boolean = false,
+        context: Context? = null
     ): String = withContext(Dispatchers.IO) {
         val lower = userPrompt.lowercase()
         when {
@@ -229,10 +233,20 @@ object LiveCityIntelligenceService {
                 }
             }
             lower.contains("hotel") || lower.contains("resort") || lower.contains("stay") || lower.contains("hospitality") -> {
-                "🏨 **Verified Sustainable & Accessible Stays Nearby**:\n\n" +
-                        "1. **The Machan Eco Resort (Lonavala)** — ★ 4.8\n   🌿 100% Solar Powered • 💧 85% Greywater Recycled • ♿ Step-Free Pathways\n\n" +
-                        "2. **The Taj Mahal Palace (Mumbai)** — ★ 4.9\n   🌿 Green Key Certified • Zero Single-Use Plastic • ♿ Full Elevator & Tactile Concourse\n\n" +
-                        "3. **Radisson Blu Resort (Alibaug)** — ★ 4.7\n   🌿 LEED Gold Certified • Rainwater Harvested • ♿ Level Access Rooms"
+                val stays = context?.let {
+                    try { HospitalityRepository(it).getAllStays() } catch (e: Exception) { null }
+                }
+                if (!stays.isNullOrEmpty()) {
+                    val top = stays.sortedByDescending { it.ecoScore }.take(3).joinToString("\n\n") { stay ->
+                        val evidence = EvidenceGraphService.buildEvidence(stay)
+                        val accessClaim = evidence.firstOrNull { it.claim.startsWith("Accessibility") }
+                        val evidenceLine = accessClaim?.let { "${it.confidence.icon} ${it.confidence.label}: ${it.claim}" } ?: "${stay.accessibilityRating}% accessibility match"
+                        "🏨 **${stay.name}** (${stay.location})\n   🌿 ${stay.energySource} • ${stay.carbonFootprintPerNight} • ${stay.pricePerNight}\n   ♿ $evidenceLine"
+                    }
+                    "🏨 **Sustainable & Accessible Stays Nearby** (from the on-device Evidence Graph, ranked by eco score):\n\n$top"
+                } else {
+                    "🏨 I can look up sustainable & accessible stays from the local registry, but couldn't read it right now — try the Hospitality tab directly."
+                }
             }
             else -> {
                 "I am **Yatri AI**, grounded in real-time TomTom routing, POI search, and Open-Meteo sensor data.\n\nI can help you:\n• Plan 1-Day to 3-Day low-carbon trips (e.g., \"Plan a trip to Lonavala\")\n• Find nearest accessible trauma hospitals\n• Compare live traffic vs. electric metro corridors\n• Query real-time air quality & weather"

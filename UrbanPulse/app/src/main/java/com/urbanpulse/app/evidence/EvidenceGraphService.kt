@@ -11,29 +11,24 @@ import com.urbanpulse.app.HospitalityStay
  */
 object EvidenceGraphService {
 
-    private val measuredCarbon = Regex("""\d+(\.\d+)?\s*kg""")
-
     fun buildEvidence(stay: HospitalityStay): List<EvidenceClaim> {
         val claims = mutableListOf<EvidenceClaim>()
 
-        val hasMeasuredCarbon = measuredCarbon.containsMatchIn(stay.carbonFootprintPerNight)
-        claims += when {
-            hasMeasuredCarbon && stay.ecoScore >= 4 -> EvidenceClaim(
-                claim = "Sustainability: ${stay.energySource}",
-                confidence = ConfidenceLevel.VERIFIED,
-                sources = listOf("Operator energy disclosure", "Measured carbon footprint: ${stay.carbonFootprintPerNight}")
-            )
-            hasMeasuredCarbon -> EvidenceClaim(
-                claim = "Sustainability: ${stay.energySource}",
-                confidence = ConfidenceLevel.REPORTED,
-                sources = listOf("Operator energy disclosure")
-            )
-            else -> EvidenceClaim(
-                claim = "Sustainability: ${stay.energySource}",
-                confidence = ConfidenceLevel.INFERRED,
-                sources = listOf("Category heuristic: ${stay.category}")
-            )
-        }
+        // No independent second source exists for sustainability claims in this dataset (no live
+        // operator API or third-party certification feed) — every stay's carbon figure is formatted
+        // with "kg" by the same repository code, so a "does the string contain a number + kg" check
+        // would always be true and isn't real corroboration. A single-source claim can therefore
+        // never legitimately reach VERIFIED here; only REPORTED (specific operator disclosure) or
+        // INFERRED (generic/vague) apply.
+        val isSpecificEnergySource = stay.energySource.length > 15 && !stay.energySource.equals("Grid", ignoreCase = true)
+        claims += EvidenceClaim(
+            claim = "Sustainability: ${stay.energySource}",
+            confidence = if (isSpecificEnergySource) ConfidenceLevel.REPORTED else ConfidenceLevel.INFERRED,
+            sources = if (isSpecificEnergySource) listOf("Operator energy disclosure: ${stay.carbonFootprintPerNight}") else listOf("Category heuristic: ${stay.category}"),
+            contradiction = if (!isSpecificEnergySource)
+                "Energy source is generic with no specific operator disclosure to back it — treat as a category estimate, not a confirmed practice."
+            else null
+        )
 
         val tagCount = stay.accessibilityTags.size
         val expectedTagsForRating = when {

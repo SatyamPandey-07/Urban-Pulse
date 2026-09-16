@@ -13,6 +13,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+data class EsgAuditResult(
+    val file: File,
+    val complianceStatus: String,
+    val contentHash: String
+)
+
 object EsgPdfGenerator {
 
     private fun sha256Hex(text: String): String {
@@ -32,7 +38,7 @@ object EsgPdfGenerator {
         mealsCount: Int,
         energyRSquared: Double,
         wasteRSquared: Double
-    ): File {
+    ): EsgAuditResult {
         val pdfDocument = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 Size (595 x 842)
         val page = pdfDocument.startPage(pageInfo)
@@ -191,6 +197,6 @@ object EsgPdfGenerator {
         outputStream.close()
         pdfDocument.close()
 
-        return outputFile
+        return EsgAuditResult(file = outputFile, complianceStatus = complianceStatus, contentHash = contentHash)
     }
 }

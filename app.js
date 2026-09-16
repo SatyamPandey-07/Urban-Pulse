@@ -99,6 +99,24 @@ async function fetchOpenMeteoAqi(lat, lon) {
     }
 }
 
+// Real live weather check (not just AQI) — used to cross-check circumstance adaptation against
+// actual conditions instead of trusting the user's wording alone. Defaults to Mumbai coordinates
+// since the web demo has no device geolocation wired in.
+async function fetchOpenMeteoWeather(lat = 19.0760, lon = 72.8777) {
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weather_code`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const json = await res.json();
+        if (!json.current) return null;
+        const code = json.current.weather_code;
+        const isRaining = json.current.precipitation > 0 || [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code);
+        return { temperatureC: json.current.temperature_2m, precipitation: json.current.precipitation, isRaining };
+    } catch (e) {
+        return null;
+    }
+}
+
 function formatMinutes(min) {
     if (min < 60) return `${min}m`;
     const h = Math.floor(min / 60);
@@ -608,7 +626,7 @@ function renderProviderDashboard() {
     });
 }
 
-function handleChatPrompt(promptText) {
+async function handleChatPrompt(promptText) {
     appendUserBubble(promptText);
 
     const lower = promptText.toLowerCase().trim();
@@ -633,10 +651,19 @@ function handleChatPrompt(promptText) {
     }
 
     // 1. Circumstance Adaptation (Rain, Weather, Sudden Delays)
+    // Cross-checked against a real live Open-Meteo reading, not just the user's own wording.
     if (lower.includes("adapt") || lower.includes("rain") || lower.includes("weather") || lower.includes("delay")) {
+        const liveWeather = await fetchOpenMeteoWeather();
         const covered = getStoredExperiences().filter(e => e.category.includes("Workshop") || e.category.includes("Craft") || e.category.includes("Culinary") || e.category.includes("Art"));
         let html = `☔ <strong>Real-Time Circumstance Adaptation Triggered</strong><br><br>`;
-        html += `Detected weather change (rain/storm) or schedule delay! We have dynamically adapted your itinerary, swapping outdoor cycling and treks for covered, indoor cultural workshops & tactile galleries:<br><br>`;
+        if (liveWeather) {
+            html += liveWeather.isRaining
+                ? `Live weather check confirms rain (${liveWeather.precipitation}mm, ${liveWeather.temperatureC}°C) at Mumbai HQ coordinates — `
+                : `Live weather check shows no rain right now (${liveWeather.temperatureC}°C) — adapting based on your request anyway — `;
+        } else {
+            html += `Weather change or schedule delay reported — `;
+        }
+        html += `we've dynamically adapted your itinerary, swapping outdoor cycling and treks for covered, indoor cultural workshops & tactile galleries:<br><br>`;
 
         covered.slice(0, 3).forEach((exp, idx) => {
             html += `<strong>${idx + 1}. ${exp.name}</strong> [🏛️ Indoor / Covered]<br>`;

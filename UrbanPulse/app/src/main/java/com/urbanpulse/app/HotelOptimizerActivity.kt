@@ -141,7 +141,7 @@ class HotelOptimizerActivity : AppCompatActivity() {
         val mealsCount = (covers * 0.076 * 2.5).toInt()
 
         try {
-            val pdfFile = EsgPdfGenerator.generateEsgAuditPdf(
+            val esgResult = EsgPdfGenerator.generateEsgAuditPdf(
                 context = this,
                 facilityName = "The Orchid Eco-Heritage Resort & Conference Center",
                 occupancyPct = currentOccupancyPercent.toInt(),
@@ -154,12 +154,13 @@ class HotelOptimizerActivity : AppCompatActivity() {
                 energyRSquared = energyModel?.rSquared ?: 0.0,
                 wasteRSquared = wasteModel?.rSquared ?: 0.0
             )
+            val pdfFile = esgResult.file
 
             val uri: Uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", pdfFile)
 
             AlertDialog.Builder(this)
                 .setTitle("📄 Official ESG Audit PDF Generated")
-                .setMessage("Your certified ISO 14064 & LEED Platinum audit PDF report is ready.\n\n• File: ${pdfFile.name}\n• Size: ${pdfFile.length() / 1024} KB\n• Compliance: PASSED (BEE 4.8★)")
+                .setMessage("Your ISO 14064 & LEED Platinum-benchmarked audit PDF report is ready.\n\n• File: ${pdfFile.name}\n• Size: ${pdfFile.length() / 1024} KB\n• Compliance: ${esgResult.complianceStatus} (computed from live occupancy vs. benchmarks)\n• Integrity Hash: ${esgResult.contentHash.take(12)}…")
                 .setPositiveButton("Open PDF") { _, _ ->
                     val viewIntent = Intent(Intent.ACTION_VIEW).apply {
                         setDataAndType(uri, "application/pdf")

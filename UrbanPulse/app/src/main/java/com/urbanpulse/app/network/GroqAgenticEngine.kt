@@ -222,7 +222,8 @@ object GroqAgenticEngine {
                 transitOpt2Name = root.optString("transitOpt2Name", null),
                 transitOpt2Metrics = root.optString("transitOpt2Metrics", null),
                 transitOpt3Name = root.optString("transitOpt3Name", null),
-                transitOpt3Metrics = root.optString("transitOpt3Metrics", null)
+                transitOpt3Metrics = root.optString("transitOpt3Metrics", null),
+                source = "groq_ai"
             )
         } catch (e: Exception) {
             null

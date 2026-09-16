@@ -40,7 +40,7 @@ class TripsFragment : Fragment() {
         }
 
         view.findViewById<MaterialButton>(R.id.btnQuickLonavala).setOnClickListener {
-            val trip = TripRepository.getTrips(requireContext()).firstOrNull { it.destination.contains("Lonavala", true) }
+            val trip = TripRepository.getSampleTrips().firstOrNull { it.destination.contains("Lonavala", true) }
             if (trip != null) {
                 openTripDetail(trip)
             } else {
@@ -49,7 +49,7 @@ class TripsFragment : Fragment() {
         }
 
         view.findViewById<MaterialButton>(R.id.btnQuickAlibaug).setOnClickListener {
-            val trip = TripRepository.getTrips(requireContext()).firstOrNull { it.destination.contains("Alibaug", true) }
+            val trip = TripRepository.getSampleTrips().firstOrNull { it.destination.contains("Alibaug", true) }
             if (trip != null) {
                 openTripDetail(trip)
             } else {
