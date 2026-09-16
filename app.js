@@ -238,7 +238,7 @@ function switchAppTab(tabKey) {
 
  document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
  document.querySelectorAll('.dock-tab').forEach(d => d.classList.remove('active'));
- document.querySelectorAll('.nav-pill-btn').forEach(b => b.classList.remove('active'));
+ document.querySelectorAll('.nav-pill-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
 
  const targetView = document.getElementById(views[tabKey]);
  const targetDock = document.getElementById(docks[tabKey]);
@@ -246,10 +246,13 @@ function switchAppTab(tabKey) {
  if (targetView) targetView.classList.add('active');
  if (targetDock) targetDock.classList.add('active');
 
- // Also update pill menu
- const pillIndex = Object.keys(views).indexOf(tabKey);
- const pillButtons = document.querySelectorAll('.nav-pill-btn');
- if (pillButtons[pillIndex]) pillButtons[pillIndex].classList.add('active');
+ // Also update pill menu — real aria-selected state, not just a visual class, so screen
+ // reader / keyboard users get the same "which tab is active" signal as sighted mouse users.
+ const activePill = document.querySelector(`.nav-pill-btn[data-tab-btn="${tabKey}"]`);
+ if (activePill) {
+     activePill.classList.add('active');
+     activePill.setAttribute('aria-selected', 'true');
+ }
 
  if (tabKey === 'map-view' && leafletMap) {
  setTimeout(() => leafletMap.invalidateSize(), 200);
@@ -605,6 +608,7 @@ async function publishProviderExperience() {
 let chatDialogueStep = 0;
 let activePlanningDestination = "Kedarnath";
 let activePlanningDays = 3;
+let activePlanningAccessible = false;
 
 async function queryGroqAi(prompt, systemInstruction = null) {
     const localExpSummary = getStoredExperiences().slice(0, 5).map(e => `${e.name} (${e.category} in ${e.location}, ${e.duration}h, ₹${e.price}, ${e.accessibilityRating}% access)`).join("; ");
@@ -890,6 +894,7 @@ async function handleChatPrompt(promptText) {
  if (chatDialogueStep === 2 || lower.includes("wheelchair") || lower.includes("palki") || lower.includes("eco") || lower.includes("pilgrim") || lower.includes("budget") || lower.includes("luxury")) {
  chatDialogueStep = 0;
  const isAccessible = lower.includes("wheelchair") || lower.includes("palki") || lower.includes("step-free");
+ activePlanningAccessible = isAccessible;
 
  appendAiBubble("<em> Consulting Groq LLaMA-3.3-70B for verified itinerary &amp; step-free transit corridors...</em>");
 
@@ -902,7 +907,7 @@ async function handleChatPrompt(promptText) {
  const formatted = aiText.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
  appendAiBubble(
  ` <strong>${activePlanningDays}-Day Plan for ${activePlanningDestination} (Grounded by Groq LLaMA-3.3)</strong>:<br><br>${formatted}`,
- ["Save to My Trips Hub ", "Show on Live Map ️", "Plan Another Destination "]
+ ["Save to My Trips Hub ", "🎖️ Get Trip Certificate", "Show on Live Map ️", "Plan Another Destination "]
  );
  } else {
  // Fallback
@@ -914,7 +919,7 @@ async function handleChatPrompt(promptText) {
  `• <strong>Air Quality:</strong> 18 (Pristine Himalayan Alpine Air)<br>` +
  `• <strong>Budget:</strong> ₹${(2800 * activePlanningDays).toLocaleString()}<br>` +
  `• <strong>Carbon Avoided:</strong> -${(14.2 * activePlanningDays).toFixed(1)} kg CO₂e vs petrol SUV!`,
- ["Save to My Trips Hub ", "Show on Live Map ️", "Plan Another Destination "]
+ ["Save to My Trips Hub ", "🎖️ Get Trip Certificate", "Show on Live Map ️", "Plan Another Destination "]
  );
  }
  });
@@ -925,6 +930,11 @@ async function handleChatPrompt(promptText) {
  setTimeout(() => {
  appendAiBubble(` <strong>Saved to your Trips Hub!</strong> (+${activePlanningDays * 120} PULSE Points awarded to your Carbon Wallet).`);
  }, 400);
+ return;
+ }
+
+ if (lower.includes("trip certificate")) {
+ generateTripCertificate();
  return;
  }
 
@@ -1287,10 +1297,35 @@ async function autoCheckRainAdaptation() {
     setTimeout(() => appendAiBubble(html, covered.slice(0, 3).map(e => e.name)), 500);
 }
 
+// Real live aggregate stats from the Central Registry — computed by SQL over actual rows
+// (bookings, party sizes, accessibility reports), not a fabricated headline number.
+async function loadImpactStats() {
+    const statusLine = document.getElementById('impact-status-line');
+    if (!statusLine) return;
+    statusLine.textContent = "Connecting to the Central Registry backend…";
+    try {
+        const res = await fetch(`${REGISTRY_API_BASE}/api/impact-stats`);
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const stats = await res.json();
+        document.getElementById('impact-experiences').textContent = stats.experienceCount;
+        document.getElementById('impact-bookings').textContent = stats.bookingCount;
+        document.getElementById('impact-travelers').textContent = stats.travelerCount;
+        document.getElementById('impact-reports').textContent = stats.accessibilityConfirmCount + stats.accessibilityDisputeCount;
+        const generated = new Date(stats.generatedAt).toLocaleTimeString();
+        statusLine.textContent = `Live from the Central Registry backend — last updated ${generated}. Avg. eco score of listed experiences: ${stats.averageEcoScore}/5.`;
+    } catch (e) {
+        statusLine.textContent = "⚠️ Central Registry backend isn't reachable right now — start it with `cd server && npm start` to see live cross-device stats.";
+        ['impact-experiences', 'impact-bookings', 'impact-travelers', 'impact-reports'].forEach(id => {
+            document.getElementById(id).textContent = "—";
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     await initExperienceRegistry();
     if (document.getElementById('web-provider-listings')) renderProviderDashboard();
     autoCheckRainAdaptation();
+    loadImpactStats();
 
     initLeafletMap();
     setTimeout(() => {

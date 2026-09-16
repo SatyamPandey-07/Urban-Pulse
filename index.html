@@ -13,11 +13,13 @@
 </head>
 <body class="app-body">
 
+ <a href="#main-content" class="skip-to-content-link">Skip to main content</a>
+
  <!-- Top App Bar -->
  <header class="top-nav">
  <div class="nav-content">
             <div class="brand-group">
-                <svg class="brand-logo-svg" width="38" height="38" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="brand-logo-svg" width="38" height="38" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" focusable="false">
                     <circle cx="60" cy="60" r="50" fill="#10B981" fill-opacity="0.18"/>
                     <path d="M60 22C80 22 96 38 96 60C96 86 60 102 60 102C60 102 24 86 24 60C24 38 40 22 60 22Z" fill="#1E293B" stroke="#334155" stroke-width="2"/>
                     <path d="M34 60L46 60L52 42L62 78L70 52L76 64L86 60" stroke="#10B981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -30,12 +32,12 @@
                 </div>
             </div>
 
- <div class="nav-pill-menu">
- <button class="nav-pill-btn active" onclick="switchAppTab('map-view')">Live Map</button>
- <button class="nav-pill-btn" onclick="switchAppTab('chat-view')">Yatri Groq AI</button>
- <button class="nav-pill-btn" onclick="switchAppTab('trips-view')">Trips Hub</button>
- <button class="nav-pill-btn" onclick="switchAppTab('hotel-view')">Hotel B2B</button>
- </div>
+ <nav class="nav-pill-menu" aria-label="Primary app sections" role="tablist">
+ <button class="nav-pill-btn active" onclick="switchAppTab('map-view')" role="tab" aria-selected="true" aria-controls="view-map" data-tab-btn="map-view">Live Map</button>
+ <button class="nav-pill-btn" onclick="switchAppTab('chat-view')" role="tab" aria-selected="false" aria-controls="view-chat" data-tab-btn="chat-view">Yatri Groq AI</button>
+ <button class="nav-pill-btn" onclick="switchAppTab('trips-view')" role="tab" aria-selected="false" aria-controls="view-trips" data-tab-btn="trips-view">Trips Hub</button>
+ <button class="nav-pill-btn" onclick="switchAppTab('hotel-view')" role="tab" aria-selected="false" aria-controls="view-hotel" data-tab-btn="hotel-view">Hotel B2B</button>
+ </nav>
 
             <div class="nav-cta-group">
                 <a href="https://github.com/SatyamPandey-07/Urban-Pulse" target="_blank" class="glass-btn">
@@ -50,7 +52,7 @@
     </header>
 
     <!-- Main App Container -->
-    <main class="app-layout">
+    <main class="app-layout" id="main-content">
 
         <!-- Left: App Live Hero & Interactive Device Mockup -->
         <div class="app-hero-panel">
@@ -127,7 +129,7 @@
                 </div>
                 
                 <!-- View 1: Live Dual Route Map View -->
-                <div id="view-map" class="app-view active">
+                <div id="view-map" class="app-view active" role="tabpanel" aria-label="Live Map">
  <div class="app-view-header">
  <div>
  <div class="app-header-title">Live Dual-Route Canvas</div>
@@ -144,7 +146,7 @@
  </div>
 
  <div class="map-container">
- <div id="leaflet-map"></div>
+ <div id="leaflet-map" role="img" aria-label="Interactive map showing the green (low-carbon) route and standard route between origin and destination"></div>
 
  <!-- Floating Difference HUD -->
  <div class="map-hud">
@@ -171,19 +173,19 @@
  </div>
 
  <!-- View 2: Yatri Groq AI Interactive Chat View -->
- <div id="view-chat" class="app-view">
+ <div id="view-chat" class="app-view" role="tabpanel" aria-label="Yatri Groq AI Chat">
  <div class="app-view-header">
  <div class="ai-header-info">
- <div class="ai-status-pulse"></div>
+ <div class="ai-status-pulse" aria-hidden="true"></div>
  <div>
  <div class="app-header-title">Yatri AI Assistant</div>
  <div class="app-header-sub">Powered by Groq LLaMA-3.3-70B • 100% Real-Time</div>
  </div>
  </div>
- <button class="glass-icon-btn" onclick="resetChat()" title="Reset Dialogue"></button>
+ <button class="glass-icon-btn" onclick="resetChat()" aria-label="Reset conversation">↺</button>
  </div>
 
- <div class="chat-viewport" id="chat-viewport">
+ <div class="chat-viewport" id="chat-viewport" role="log" aria-live="polite" aria-label="Conversation with Yatri AI">
  <div class="chat-msg ai-msg">
  <div class="ai-badge-avatar"></div>
  <div class="msg-bubble-wrap">
@@ -206,15 +208,16 @@
  </div>
 
  <div class="chat-input-row">
+ <label for="user-chat-input" class="visually-hidden">Message Yatri AI</label>
  <input type="text" id="user-chat-input" class="app-text-input" placeholder="Type destination or prompt (e.g. 'Planning a trip to Kedarnath')...">
- <button class="send-action-btn" id="btn-send-chat" onclick="sendUserMessage()">
- <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+ <button class="send-action-btn" id="btn-send-chat" onclick="sendUserMessage()" aria-label="Send message">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
  </button>
  </div>
  </div>
 
  <!-- View 3: Trips Hub View -->
- <div id="view-trips" class="app-view">
+ <div id="view-trips" class="app-view" role="tabpanel" aria-label="Trips Hub">
  <div class="app-view-header">
  <div>
  <div class="app-header-title">My Trips &amp; Carbon Passport</div>
@@ -269,7 +272,7 @@
  </div>
 
  <!-- View 4: Hotel B2B Sustainability Optimizer View -->
- <div id="view-hotel" class="app-view">
+ <div id="view-hotel" class="app-view" role="tabpanel" aria-label="Hotel B2B">
  <div class="app-view-header">
  <div>
  <div class="app-header-title">Hotel ESG Resource Hub</div>
@@ -449,12 +452,30 @@
         </div>
     </section>
 
+    <!-- Live Impact Dashboard — real aggregate data from the Central Registry, not fabricated headline numbers -->
+    <section class="bento-section" id="impact-section">
+        <div class="bento-header">
+            <div class="bento-eyebrow">📊 Live from the Central Registry database — refresh anytime</div>
+            <h2 class="bento-title">Real Platform Impact</h2>
+            <p class="bento-subtitle" id="impact-status-line">Connecting to the Central Registry backend…</p>
+        </div>
+        <div class="bento-grid" id="impact-stats-grid" style="grid-auto-rows: minmax(110px, auto);">
+            <div class="bento-card accent-emerald"><div class="bento-icon">🏪</div><div class="bento-card-title" id="impact-experiences">—</div><div class="bento-card-desc">Real listed experiences</div></div>
+            <div class="bento-card accent-cyan"><div class="bento-icon">📅</div><div class="bento-card-title" id="impact-bookings">—</div><div class="bento-card-desc">Real confirmed bookings</div></div>
+            <div class="bento-card accent-purple"><div class="bento-icon">🧑‍🤝‍🧑</div><div class="bento-card-title" id="impact-travelers">—</div><div class="bento-card-desc">Real travelers served (party size)</div></div>
+            <div class="bento-card accent-amber"><div class="bento-icon">🦽</div><div class="bento-card-title" id="impact-reports">—</div><div class="bento-card-desc">Real accessibility reports collected</div></div>
+        </div>
+        <div style="text-align:center; margin-top: 14px;">
+            <button class="glass-pill-btn" onclick="loadImpactStats()">🔄 Refresh Live Stats</button>
+        </div>
+    </section>
+
     <!-- Schedule Modal -->
-    <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)">
+    <div id="schedule-modal" class="modal-overlay" onclick="closeScheduleModal(event)" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-sheet">
             <div class="modal-sheet-header">
                 <h3 id="modal-title">Trip Schedule</h3>
-                <button class="close-modal-btn" onclick="closeScheduleModalDirect()">✕</button>
+                <button class="close-modal-btn" onclick="closeScheduleModalDirect()" aria-label="Close schedule dialog">✕</button>
             </div>
             <div class="modal-sheet-body" id="modal-body">
                 <!-- Content injected via JS -->
@@ -463,11 +484,11 @@
     </div>
 
     <!-- Provider Experience Listing Modal -->
-    <div id="modal-add-experience" class="modal-overlay" onclick="closeAddExpModal(event)">
+    <div id="modal-add-experience" class="modal-overlay" onclick="closeAddExpModal(event)" role="dialog" aria-modal="true" aria-labelledby="modal-add-exp-title">
         <div class="modal-sheet">
             <div class="modal-sheet-header">
-                <h3>List Your Local Experience (Provider Hub)</h3>
-                <button class="close-modal-btn" onclick="closeAddExpModalDirect()">✕</button>
+                <h3 id="modal-add-exp-title">List Your Local Experience (Provider Hub)</h3>
+                <button class="close-modal-btn" onclick="closeAddExpModalDirect()" aria-label="Close experience listing dialog">✕</button>
             </div>
             <div class="modal-sheet-body">
                 <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
@@ -523,11 +544,11 @@
     </div>
 
     <!-- Provider Dashboard Modal -->
-    <div id="modal-provider-dashboard" class="modal-overlay" onclick="closeProviderDashboardModal(event)">
+    <div id="modal-provider-dashboard" class="modal-overlay" onclick="closeProviderDashboardModal(event)" role="dialog" aria-modal="true" aria-labelledby="modal-provider-dashboard-title">
         <div class="modal-sheet">
             <div class="modal-sheet-header">
-                <h3>Provider Hub &amp; Listings</h3>
-                <button class="close-modal-btn" onclick="closeProviderDashboardModalDirect()">✕</button>
+                <h3 id="modal-provider-dashboard-title">Provider Hub &amp; Listings</h3>
+                <button class="close-modal-btn" onclick="closeProviderDashboardModalDirect()" aria-label="Close provider hub dialog">✕</button>
             </div>
             <div class="modal-sheet-body">
                 <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">

@@ -277,6 +277,48 @@ app.get("/api/experiences/:id/reports", (req, res) => {
     res.json(rows.map(reportRowToJson));
 });
 
+// --- Impact Dashboard: real cross-platform aggregates, computed live via SQL — not a
+// fabricated "X kg CO2 saved" headline number. Only reports what's genuinely measurable
+// from persisted rows (bookings, travelers, accessibility reports, listings).
+
+app.get("/api/impact-stats", (req, res) => {
+    const experienceCount = db.prepare("SELECT COUNT(*) AS n FROM experiences").get().n;
+    const bookingStats = db.prepare(
+        "SELECT COUNT(*) AS bookingCount, COALESCE(SUM(party_size), 0) AS travelerCount FROM bookings WHERE status = 'confirmed'"
+    ).get();
+    const reportStats = db.prepare(
+        "SELECT confirms_accessibility, COUNT(*) AS n FROM experience_reports GROUP BY confirms_accessibility"
+    ).all();
+    const confirmCount = reportStats.find(r => r.confirms_accessibility === 1)?.n || 0;
+    const disputeCount = reportStats.find(r => r.confirms_accessibility === 0)?.n || 0;
+    const carbonFootprint = db.prepare(`
+        SELECT COALESCE(SUM(e.carbon_kg * b.cnt), 0) AS totalKg
+        FROM experiences e
+        JOIN (SELECT experience_id, COUNT(*) AS cnt FROM bookings WHERE status = 'confirmed' GROUP BY experience_id) b
+        ON b.experience_id = e.id
+    `).get().totalKg;
+    const avgEcoScore = db.prepare("SELECT AVG(eco_score) AS avg FROM experiences").get().avg || 0;
+    const topExperiences = db.prepare(`
+        SELECT e.id, e.name, e.location,
+               (SELECT COUNT(*) FROM bookings WHERE experience_id = e.id AND status = 'confirmed') AS bookingCount
+        FROM experiences e
+        ORDER BY bookingCount DESC, e.eco_score DESC
+        LIMIT 5
+    `).all();
+
+    res.json({
+        experienceCount,
+        bookingCount: bookingStats.bookingCount,
+        travelerCount: bookingStats.travelerCount,
+        accessibilityConfirmCount: confirmCount,
+        accessibilityDisputeCount: disputeCount,
+        bookedExperiencesCarbonFootprintKg: Math.round(carbonFootprint * 10) / 10,
+        averageEcoScore: Math.round(avgEcoScore * 10) / 10,
+        topExperiences: topExperiences.map(e => ({ id: e.id, name: e.name, location: e.location, bookingCount: e.bookingCount })),
+        generatedAt: new Date().toISOString()
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`UrbanPulse Central Registry listening on http://localhost:${PORT}`);
     console.log(`SQLite database: ${DB_PATH}`);
