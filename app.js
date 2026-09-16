@@ -418,20 +418,108 @@ function recordExperienceViews(expList) {
     expList.forEach(exp => recordExperienceEvent(exp.id, 'viewsCount'));
 }
 
+function getOrCreateTravelerName() {
+    try {
+        let name = localStorage.getItem('urbanpulse_traveler_name');
+        if (name) return name;
+        name = "Traveler-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+        localStorage.setItem('urbanpulse_traveler_name', name);
+        return name;
+    } catch (e) {
+        return "Traveler-WEB";
+    }
+}
+
+async function createBooking(expId, travelerName, partySize, bookingDate) {
+    if (registryBackendAvailable) {
+        try {
+            const res = await fetch(`${REGISTRY_API_BASE}/api/experiences/${expId}/bookings`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ travelerName, partySize, bookingDate })
+            });
+            if (res.ok) {
+                const idx = cachedExperiences.findIndex(e => e.id === expId);
+                if (idx >= 0) cachedExperiences[idx].bookingCount = (cachedExperiences[idx].bookingCount || 0) + 1;
+                return true;
+            }
+        } catch (e) {
+            console.warn("Failed to create booking on Central Registry backend.", e);
+        }
+    }
+    const target = cachedExperiences.find(e => e.id === expId);
+    if (target) {
+        target.bookingCount = (target.bookingCount || 0) + 1;
+        persistLocalOnly(cachedExperiences);
+        return true;
+    }
+    return false;
+}
+
+async function submitAccessibilityReport(expId, confirmsAccessibility, note) {
+    if (registryBackendAvailable) {
+        try {
+            const res = await fetch(`${REGISTRY_API_BASE}/api/experiences/${expId}/reports`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ confirmsAccessibility, note })
+            });
+            if (res.ok) {
+                const idx = cachedExperiences.findIndex(e => e.id === expId);
+                if (idx >= 0) {
+                    const field = confirmsAccessibility ? 'accessibilityConfirmCount' : 'accessibilityDisputeCount';
+                    cachedExperiences[idx][field] = (cachedExperiences[idx][field] || 0) + 1;
+                }
+                return true;
+            }
+        } catch (e) {
+            console.warn("Failed to submit report on Central Registry backend.", e);
+        }
+    }
+    const target = cachedExperiences.find(e => e.id === expId);
+    if (target) {
+        const field = confirmsAccessibility ? 'accessibilityConfirmCount' : 'accessibilityDisputeCount';
+        target[field] = (target[field] || 0) + 1;
+        persistLocalOnly(cachedExperiences);
+        return true;
+    }
+    return false;
+}
+
 // Same confidence-tagged-claim approach as the Android app's EvidenceGraphService — never state
 // "Accessible: Yes" outright; tag every claim Verified/Reported/Inferred and flag under-documentation.
+// Real traveler reports (confirmsAccessibility submissions) take priority over the tag heuristic.
 function buildExperienceEvidence(exp) {
     const claims = [];
     const tagCount = (exp.accessibilityTags || []).length;
     const expectedTags = exp.accessibilityRating >= 90 ? 2 : 1;
     const underDocumented = tagCount < expectedTags || (exp.accessibilityTags || []).includes("Standard Access");
-    claims.push({
-        icon: underDocumented ? "🔵" : "✅",
-        label: underDocumented ? "Inferred" : "Verified",
+    const disputeCount = exp.accessibilityDisputeCount || 0;
+    const confirmCount = exp.accessibilityConfirmCount || 0;
+
+    if (disputeCount > 0) {
+        claims.push({
+            icon: "🔵",
+            label: "Inferred",
+            claim: `Accessibility: ${exp.accessibilityRating}% claimed, but disputed by travelers`,
+            contradiction: `${disputeCount} traveler report(s) dispute this accessibility claim` +
+                (confirmCount > 0 ? ` (vs. ${confirmCount} confirming)` : "") +
+                ` — treat the ${exp.accessibilityRating}% rating as unconfirmed until resolved.`
+        });
+    } else if (confirmCount > 0) {
+        claims.push({
+            icon: "✅",
+            label: "Verified",
+            claim: `Accessibility: ${exp.accessibilityRating}% match, ${tagCount} documented feature(s)`,
+            contradiction: null
+        });
+    } else claims.push({
+        icon: underDocumented ? "🔵" : "🟡",
+        label: underDocumented ? "Inferred" : "Reported",
         claim: `Accessibility: ${exp.accessibilityRating}% match, ${tagCount} documented feature(s)`,
         contradiction: underDocumented
-            ? `Rating claims ${exp.accessibilityRating}% but accessibility features are generic or under-documented — treat as inferred until confirmed on-site.`
-            : null
+            ? `Rating claims ${exp.accessibilityRating}% but accessibility features are generic or under-documented, and no traveler has confirmed it yet — treat as inferred until confirmed on-site.`
+            : "Provider-declared only — no independent traveler confirmation yet."
     });
 
     const sustainability = exp.sustainability || "";
@@ -616,7 +704,7 @@ function renderProviderDashboard() {
                 <span class="trip-carbon-tag" style="font-size: 10px;">${isAvailable ? "Available" : "Booked Out"}</span>
             </div>
             <div style="font-size: 11px; color: var(--primary-emerald); margin: 6px 0;">
-                👁️ ${exp.viewsCount || 0} Traveler Views • ${exp.inquiryCount || 0} Direct Inquiries
+                👁️ ${exp.viewsCount || 0} Views • ${exp.inquiryCount || 0} Inquiries • 📅 ${exp.bookingCount || 0} Bookings
             </div>
             <button class="view-itinerary-btn" style="width: 100%; padding: 6px; font-size: 11px;" onclick="toggleWebExperienceAvailability('${exp.id}')">
                 Toggle Status: ${isAvailable ? "Set to Booked Out" : "Set to Available Today"}
@@ -626,15 +714,45 @@ function renderProviderDashboard() {
     });
 }
 
+let lastViewedExperienceId = null;
+
 async function handleChatPrompt(promptText) {
     appendUserBubble(promptText);
 
     const lower = promptText.toLowerCase().trim();
 
-    // 0. Experience chip clicked directly -> record a real inquiry and show its detail card
+    // 0a. Real booking / accessibility-report actions on the last-viewed experience
+    if (lastViewedExperienceId && ["📅 Book This Experience", "✅ Confirm Accessibility", "⚠️ Report an Issue"].includes(promptText)) {
+        const expId = lastViewedExperienceId;
+        if (promptText === "📅 Book This Experience") {
+            const travelerName = getOrCreateTravelerName();
+            const bookingDate = new Date().toISOString().slice(0, 10);
+            const ok = await createBooking(expId, travelerName, 1, bookingDate);
+            setTimeout(() => appendAiBubble(
+                ok ? `✅ <strong>Booked!</strong> Confirmed for ${travelerName} on ${bookingDate}. This is a real reservation recorded in the Central Registry.`
+                   : `⚠️ Couldn't reach the booking service right now — please try again.`
+            ), 200);
+        } else if (promptText === "✅ Confirm Accessibility") {
+            const ok = await submitAccessibilityReport(expId, true, "Confirmed via Yatri AI chat");
+            setTimeout(() => appendAiBubble(
+                ok ? `✅ Thanks — your confirmation was recorded and will strengthen this listing's Evidence Graph confidence for future travelers.`
+                   : `⚠️ Couldn't submit your report right now — please try again.`
+            ), 200);
+        } else if (promptText === "⚠️ Report an Issue") {
+            const ok = await submitAccessibilityReport(expId, false, "Disputed via Yatri AI chat");
+            setTimeout(() => appendAiBubble(
+                ok ? `⚠️ Thanks for flagging this — future travelers will see this as a real disputed claim in the Evidence Graph.`
+                   : `⚠️ Couldn't submit your report right now — please try again.`
+            ), 200);
+        }
+        return;
+    }
+
+    // 0b. Experience chip clicked directly -> record a real inquiry and show its detail card
     const matchedExp = getStoredExperiences().find(e => e.name === promptText);
     if (matchedExp) {
         recordExperienceEvent(matchedExp.id, 'inquiryCount');
+        lastViewedExperienceId = matchedExp.id;
         const evidence = buildExperienceEvidence(matchedExp);
         const evidenceHtml = evidence.map(c =>
             `${c.icon} ${c.label}: ${c.claim}${c.contradiction ? `<br>&nbsp;&nbsp;⚠️ ${c.contradiction}` : ""}`
@@ -642,9 +760,10 @@ async function handleChatPrompt(promptText) {
         setTimeout(() => {
             appendAiBubble(
                 `<strong>${matchedExp.name}</strong><br>` +
-                `${matchedExp.category} • ${matchedExp.location} • ${matchedExp.duration}h • ₹${matchedExp.price}<br><br>` +
+                `${matchedExp.category} • ${matchedExp.location} • ${matchedExp.duration}h • ₹${matchedExp.price}<br>` +
+                `📅 ${matchedExp.bookingCount || 0} real booking(s) • 👁️ ${matchedExp.viewsCount || 0} views<br><br>` +
                 `<strong>Evidence Graph — Why this?</strong><br>${evidenceHtml}`,
-                ["Show on Live Map", "Plan Another Destination"]
+                ["📅 Book This Experience", "✅ Confirm Accessibility", "⚠️ Report an Issue", "Show on Live Map"]
             );
         }, 300);
         return;

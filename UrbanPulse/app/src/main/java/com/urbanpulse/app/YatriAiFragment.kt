@@ -129,6 +129,21 @@ class YatriAiFragment : Fragment() {
 
     private var userCityName: String = "Mumbai"
 
+    /** Id of the experience last shown in a detail card — lets the "Book" / "Confirm" / "Report"
+     *  chip taps below act on the right listing without re-parsing the chat text. */
+    private var lastViewedExperienceId: String? = null
+
+    /** A stable per-device traveler name for real bookings — no login system exists, so this is
+     *  a persisted pseudonymous identifier (not a fabricated one-off), reused across sessions. */
+    private fun getOrCreateTravelerName(ctx: Context): String {
+        val prefs = ctx.getSharedPreferences("urbanpulse_traveler", Context.MODE_PRIVATE)
+        prefs.getString("traveler_name", null)?.let { return it }
+        val shortId = java.util.UUID.randomUUID().toString().take(6).uppercase()
+        val name = "Traveler-$shortId"
+        prefs.edit().putString("traveler_name", name).apply()
+        return name
+    }
+
     private fun fetchUserLocation() {
         val act = activity ?: return
         try {
@@ -331,7 +346,7 @@ class YatriAiFragment : Fragment() {
                 }
 
                 val metrics = android.widget.TextView(ctx).apply {
-                    text = "👁️ ${exp.viewsCount} Traveler Views • ${exp.inquiryCount} Direct Route Requests"
+                    text = "👁️ ${exp.viewsCount} Views • ${exp.inquiryCount} Inquiries • 📅 ${exp.bookingCount} Bookings"
                     textSize = 12f
                     setPadding(0, 8, 0, 8)
                 }
@@ -500,7 +515,48 @@ class YatriAiFragment : Fragment() {
 
             val lowerPrompt = prompt.lowercase()
 
-            // 0. An experience chip/name was tapped directly -> record a real inquiry and show its detail card
+            // 0a. Real booking / accessibility-report actions on the last-viewed experience
+            val ctxForAction = context
+            if (ctxForAction != null && lastViewedExperienceId != null &&
+                (prompt == "📅 Book This Experience" || prompt == "✅ Confirm Accessibility" || prompt == "⚠️ Report an Issue")
+            ) {
+                chatAdapter.removeTypingIndicator()
+                val expId = lastViewedExperienceId!!
+                when (prompt) {
+                    "📅 Book This Experience" -> {
+                        val travelerName = getOrCreateTravelerName(ctxForAction)
+                        val bookingDate = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US).format(java.util.Date())
+                        val success = withContext(Dispatchers.IO) {
+                            ExperienceRepository(ctxForAction).createBooking(expId, travelerName, 1, bookingDate)
+                        }
+                        addAiMessage(
+                            if (success) "✅ **Booked!** Confirmed for $travelerName on $bookingDate. This is a real reservation recorded in the Central Registry."
+                            else "⚠️ Couldn't reach the booking service right now — please try again."
+                        )
+                    }
+                    "✅ Confirm Accessibility" -> {
+                        val success = withContext(Dispatchers.IO) {
+                            ExperienceRepository(ctxForAction).submitAccessibilityReport(expId, true, "Confirmed via Yatri AI chat")
+                        }
+                        addAiMessage(
+                            if (success) "✅ Thanks — your confirmation was recorded and will strengthen this listing's Evidence Graph confidence for future travelers."
+                            else "⚠️ Couldn't submit your report right now — please try again."
+                        )
+                    }
+                    "⚠️ Report an Issue" -> {
+                        val success = withContext(Dispatchers.IO) {
+                            ExperienceRepository(ctxForAction).submitAccessibilityReport(expId, false, "Disputed via Yatri AI chat")
+                        }
+                        addAiMessage(
+                            if (success) "⚠️ Thanks for flagging this — future travelers will see this as a real disputed claim in the Evidence Graph."
+                            else "⚠️ Couldn't submit your report right now — please try again."
+                        )
+                    }
+                }
+                return@launch
+            }
+
+            // 0b. An experience chip/name was tapped directly -> record a real inquiry and show its detail card
             val ctxForMatch = context
             if (ctxForMatch != null) {
                 val matchedExp = withContext(Dispatchers.IO) {
@@ -508,6 +564,7 @@ class YatriAiFragment : Fragment() {
                 }
                 if (matchedExp != null) {
                     withContext(Dispatchers.IO) { ExperienceRepository(ctxForMatch).recordInquiry(matchedExp.id) }
+                    lastViewedExperienceId = matchedExp.id
                     chatAdapter.removeTypingIndicator()
                     val evidence = com.urbanpulse.app.evidence.EvidenceGraphService.buildEvidenceForExperience(matchedExp)
                     val evidenceText = evidence.joinToString("\n") { claim ->
@@ -516,12 +573,13 @@ class YatriAiFragment : Fragment() {
                     }
                     addAiMessage(
                         "**${matchedExp.name}**\n\n" +
-                            "${matchedExp.category} • ${matchedExp.location} • ${matchedExp.durationHours}h • ${matchedExp.pricePerPerson}\n\n" +
+                            "${matchedExp.category} • ${matchedExp.location} • ${matchedExp.durationHours}h • ${matchedExp.pricePerPerson}\n" +
+                            "📅 ${matchedExp.bookingCount} real booking(s) • 👁️ ${matchedExp.viewsCount} views\n\n" +
                             "**Evidence Graph — Why this?**\n$evidenceText",
                         mcq = QuickMcqQuestion(
                             questionId = "exp_detail_mcq",
                             questionText = "Next step",
-                            options = listOf("Show on Live Map", "Plan Another Destination")
+                            options = listOf("📅 Book This Experience", "✅ Confirm Accessibility", "⚠️ Report an Issue", "Show on Live Map")
                         )
                     )
                     return@launch

@@ -41,7 +41,26 @@ object CentralRegistryClient {
         val carbonKg: Double,
         val isAvailableToday: Boolean,
         val viewsCount: Int,
-        val inquiryCount: Int
+        val inquiryCount: Int,
+        val bookingCount: Int,
+        val accessibilityConfirmCount: Int,
+        val accessibilityDisputeCount: Int
+    )
+
+    data class RegistryBooking(
+        val id: String,
+        val experienceId: String,
+        val travelerName: String,
+        val partySize: Int,
+        val bookingDate: String,
+        val status: String
+    )
+
+    data class RegistryReport(
+        val id: String,
+        val experienceId: String,
+        val confirmsAccessibility: Boolean,
+        val note: String
     )
 
     private fun parseExperience(o: JSONObject): RegistryExperience {
@@ -61,9 +80,28 @@ object CentralRegistryClient {
             carbonKg = o.optDouble("carbonKg", 0.3),
             isAvailableToday = o.optBoolean("isAvailableToday", true),
             viewsCount = o.optInt("viewsCount", 0),
-            inquiryCount = o.optInt("inquiryCount", 0)
+            inquiryCount = o.optInt("inquiryCount", 0),
+            bookingCount = o.optInt("bookingCount", 0),
+            accessibilityConfirmCount = o.optInt("accessibilityConfirmCount", 0),
+            accessibilityDisputeCount = o.optInt("accessibilityDisputeCount", 0)
         )
     }
+
+    private fun parseBooking(o: JSONObject) = RegistryBooking(
+        id = o.getString("id"),
+        experienceId = o.getString("experienceId"),
+        travelerName = o.optString("travelerName", "Traveler"),
+        partySize = o.optInt("partySize", 1),
+        bookingDate = o.optString("bookingDate", ""),
+        status = o.optString("status", "confirmed")
+    )
+
+    private fun parseReport(o: JSONObject) = RegistryReport(
+        id = o.getString("id"),
+        experienceId = o.getString("experienceId"),
+        confirmsAccessibility = o.optBoolean("confirmsAccessibility", true),
+        note = o.optString("note", "")
+    )
 
     suspend fun fetchExperiences(): List<RegistryExperience>? = withContext(Dispatchers.IO) {
         try {
@@ -153,4 +191,47 @@ object CentralRegistryClient {
     suspend fun recordView(id: String): RegistryExperience? = recordEvent(id, "view")
 
     suspend fun recordInquiry(id: String): RegistryExperience? = recordEvent(id, "inquiry")
+
+    suspend fun createBooking(experienceId: String, travelerName: String, partySize: Int, bookingDate: String): RegistryBooking? =
+        withContext(Dispatchers.IO) {
+            try {
+                val payload = JSONObject().apply {
+                    put("travelerName", travelerName)
+                    put("partySize", partySize)
+                    put("bookingDate", bookingDate)
+                }
+                val req = Request.Builder()
+                    .url("$baseUrl/api/experiences/$experienceId/bookings")
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@withContext null
+                    val body = resp.body?.string() ?: return@withContext null
+                    parseBooking(JSONObject(body))
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+    suspend fun submitReport(experienceId: String, confirmsAccessibility: Boolean, note: String): RegistryReport? =
+        withContext(Dispatchers.IO) {
+            try {
+                val payload = JSONObject().apply {
+                    put("confirmsAccessibility", confirmsAccessibility)
+                    put("note", note)
+                }
+                val req = Request.Builder()
+                    .url("$baseUrl/api/experiences/$experienceId/reports")
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@withContext null
+                    val body = resp.body?.string() ?: return@withContext null
+                    parseReport(JSONObject(body))
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
 }

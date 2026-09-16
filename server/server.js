@@ -36,6 +36,24 @@ db.exec(`
     inquiry_count INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS bookings (
+    id TEXT PRIMARY KEY,
+    experience_id TEXT NOT NULL REFERENCES experiences(id),
+    traveler_name TEXT NOT NULL,
+    party_size INTEGER NOT NULL DEFAULT 1,
+    booking_date TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'confirmed',
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS experience_reports (
+    id TEXT PRIMARY KEY,
+    experience_id TEXT NOT NULL REFERENCES experiences(id),
+    confirms_accessibility INTEGER NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+  );
 `);
 
 const SEED_EXPERIENCES = [
@@ -89,7 +107,13 @@ if (seedIfEmpty.n === 0) {
     seedTx(SEED_EXPERIENCES);
 }
 
+const countBookings = db.prepare("SELECT COUNT(*) AS n FROM bookings WHERE experience_id = ? AND status = 'confirmed'");
+const countReports = db.prepare("SELECT confirms_accessibility, COUNT(*) AS n FROM experience_reports WHERE experience_id = ? GROUP BY confirms_accessibility");
+
 function rowToJson(row) {
+    const reportRows = countReports.all(row.id);
+    const confirmCount = reportRows.find(r => r.confirms_accessibility === 1)?.n || 0;
+    const disputeCount = reportRows.find(r => r.confirms_accessibility === 0)?.n || 0;
     return {
         id: row.id,
         name: row.name,
@@ -105,6 +129,31 @@ function rowToJson(row) {
         isAvailableToday: !!row.is_available_today,
         viewsCount: row.views_count,
         inquiryCount: row.inquiry_count,
+        bookingCount: countBookings.get(row.id).n,
+        accessibilityConfirmCount: confirmCount,
+        accessibilityDisputeCount: disputeCount,
+        createdAt: row.created_at
+    };
+}
+
+function bookingRowToJson(row) {
+    return {
+        id: row.id,
+        experienceId: row.experience_id,
+        travelerName: row.traveler_name,
+        partySize: row.party_size,
+        bookingDate: row.booking_date,
+        status: row.status,
+        createdAt: row.created_at
+    };
+}
+
+function reportRowToJson(row) {
+    return {
+        id: row.id,
+        experienceId: row.experience_id,
+        confirmsAccessibility: !!row.confirms_accessibility,
+        note: row.note,
         createdAt: row.created_at
     };
 }
@@ -170,6 +219,62 @@ app.post("/api/experiences/:id/inquiry", (req, res) => {
     if (!existing) return res.status(404).json({ error: "not found" });
     db.prepare("UPDATE experiences SET inquiry_count = inquiry_count + 1 WHERE id = ?").run(req.params.id);
     res.json(rowToJson(db.prepare("SELECT * FROM experiences WHERE id = ?").get(req.params.id)));
+});
+
+// --- Bookings: real persisted records, not a hardcoded "184 bookings" style metric ---
+
+app.post("/api/experiences/:id/bookings", (req, res) => {
+    const existing = db.prepare("SELECT * FROM experiences WHERE id = ?").get(req.params.id);
+    if (!existing) return res.status(404).json({ error: "not found" });
+    const body = req.body || {};
+    if (!body.travelerName || typeof body.travelerName !== "string") {
+        return res.status(400).json({ error: "travelerName is required" });
+    }
+    const id = "booking_" + crypto.randomUUID();
+    const row = {
+        id,
+        experienceId: req.params.id,
+        travelerName: body.travelerName,
+        partySize: Number(body.partySize) || 1,
+        bookingDate: body.bookingDate || new Date().toISOString().slice(0, 10),
+        createdAt: new Date().toISOString()
+    };
+    db.prepare(`
+        INSERT INTO bookings (id, experience_id, traveler_name, party_size, booking_date, status, created_at)
+        VALUES (@id, @experienceId, @travelerName, @partySize, @bookingDate, 'confirmed', @createdAt)
+    `).run(row);
+    const saved = db.prepare("SELECT * FROM bookings WHERE id = ?").get(id);
+    res.status(201).json(bookingRowToJson(saved));
+});
+
+app.get("/api/experiences/:id/bookings", (req, res) => {
+    const rows = db.prepare("SELECT * FROM bookings WHERE experience_id = ? ORDER BY created_at DESC").all(req.params.id);
+    res.json(rows.map(bookingRowToJson));
+});
+
+// --- Traveler accessibility reports: a real second, independent signal for the Evidence Graph ---
+// (confirms or disputes the provider's own accessibility claim — genuine corroboration/contradiction,
+// not the same source checked against itself)
+
+app.post("/api/experiences/:id/reports", (req, res) => {
+    const existing = db.prepare("SELECT * FROM experiences WHERE id = ?").get(req.params.id);
+    if (!existing) return res.status(404).json({ error: "not found" });
+    const body = req.body || {};
+    if (typeof body.confirmsAccessibility !== "boolean") {
+        return res.status(400).json({ error: "confirmsAccessibility (boolean) is required" });
+    }
+    const id = "report_" + crypto.randomUUID();
+    db.prepare(`
+        INSERT INTO experience_reports (id, experience_id, confirms_accessibility, note, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    `).run(id, req.params.id, body.confirmsAccessibility ? 1 : 0, body.note || "", new Date().toISOString());
+    const saved = db.prepare("SELECT * FROM experience_reports WHERE id = ?").get(id);
+    res.status(201).json(reportRowToJson(saved));
+});
+
+app.get("/api/experiences/:id/reports", (req, res) => {
+    const rows = db.prepare("SELECT * FROM experience_reports WHERE experience_id = ? ORDER BY created_at DESC").all(req.params.id);
+    res.json(rows.map(reportRowToJson));
 });
 
 app.listen(PORT, () => {

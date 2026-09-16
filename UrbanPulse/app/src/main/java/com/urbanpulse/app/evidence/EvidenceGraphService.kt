@@ -72,14 +72,37 @@ object EvidenceGraphService {
             else -> 1
         }
         val underDocumented = tagCount < expectedTagsForRating || exp.accessibilityTags.contains("Standard Access")
-        claims += EvidenceClaim(
-            claim = "Accessibility: ${exp.accessibilityRating}% match, $tagCount documented feature(s)",
-            confidence = if (underDocumented) ConfidenceLevel.INFERRED else ConfidenceLevel.VERIFIED,
-            sources = exp.accessibilityTags,
-            contradiction = if (underDocumented)
-                "Rating claims ${exp.accessibilityRating}% but accessibility features are generic or under-documented — treat as inferred until confirmed on-site."
-            else null
-        )
+
+        // Real traveler reports (a genuinely independent second source, submitted via the
+        // "Confirm" / "Report an issue" prompt) take priority over the provider-declared tag
+        // heuristic below — this is what makes "official sources + user reports" actually true.
+        claims += when {
+            exp.accessibilityDisputeCount > 0 -> EvidenceClaim(
+                claim = "Accessibility: ${exp.accessibilityRating}% claimed, but disputed by travelers",
+                confidence = ConfidenceLevel.INFERRED,
+                sources = listOf("${exp.accessibilityDisputeCount} traveler report(s) disputing this claim") + exp.accessibilityTags,
+                contradiction = "${exp.accessibilityDisputeCount} traveler report(s) dispute this accessibility claim" +
+                    (if (exp.accessibilityConfirmCount > 0) " (vs. ${exp.accessibilityConfirmCount} confirming)" else "") +
+                    " — treat the ${exp.accessibilityRating}% rating as unconfirmed until resolved."
+            )
+            exp.accessibilityConfirmCount > 0 -> EvidenceClaim(
+                claim = "Accessibility: ${exp.accessibilityRating}% match, $tagCount documented feature(s)",
+                confidence = ConfidenceLevel.VERIFIED,
+                sources = listOf("${exp.accessibilityConfirmCount} independent traveler report(s) confirming on-site") + exp.accessibilityTags
+            )
+            underDocumented -> EvidenceClaim(
+                claim = "Accessibility: ${exp.accessibilityRating}% match, $tagCount documented feature(s)",
+                confidence = ConfidenceLevel.INFERRED,
+                sources = exp.accessibilityTags,
+                contradiction = "Rating claims ${exp.accessibilityRating}% but accessibility features are generic or under-documented, and no traveler has confirmed it yet — treat as inferred until confirmed on-site."
+            )
+            else -> EvidenceClaim(
+                claim = "Accessibility: ${exp.accessibilityRating}% match, $tagCount documented feature(s)",
+                confidence = ConfidenceLevel.REPORTED,
+                sources = exp.accessibilityTags,
+                contradiction = "Provider-declared only — no independent traveler confirmation yet."
+            )
+        }
 
         val sustainabilityText = exp.sustainabilityPractice
         val isSpecificPractice = sustainabilityText.length > 20 &&

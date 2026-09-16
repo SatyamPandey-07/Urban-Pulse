@@ -18,11 +18,13 @@ class AppDatabaseHelper private constructor(context: Context) : SQLiteOpenHelper
 
     companion object {
         private const val DB_NAME = "urbanpulse_app.db"
-        private const val DB_VERSION = 3
+        private const val DB_VERSION = 4
 
         const val TABLE_STAYS = "hospitality_stays"
         const val TABLE_HISTORY = "hotel_metrics_history"
         const val TABLE_EXPERIENCES = "experiences"
+        const val TABLE_BOOKINGS = "bookings"
+        const val TABLE_REPORTS = "experience_reports"
 
         @Volatile
         private var instance: AppDatabaseHelper? = null
@@ -86,6 +88,32 @@ class AppDatabaseHelper private constructor(context: Context) : SQLiteOpenHelper
             """.trimIndent()
         )
 
+        db.execSQL(
+            """
+            CREATE TABLE $TABLE_BOOKINGS (
+                id TEXT PRIMARY KEY,
+                experience_id TEXT NOT NULL,
+                traveler_name TEXT NOT NULL,
+                party_size INTEGER NOT NULL DEFAULT 1,
+                booking_date TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'confirmed',
+                created_at TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+
+        db.execSQL(
+            """
+            CREATE TABLE $TABLE_REPORTS (
+                id TEXT PRIMARY KEY,
+                experience_id TEXT NOT NULL,
+                confirms_accessibility INTEGER NOT NULL,
+                note TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+
         seedHospitalityStays(db)
         seedHotelHistory(db)
         seedExperiences(db)
@@ -95,6 +123,8 @@ class AppDatabaseHelper private constructor(context: Context) : SQLiteOpenHelper
         db.execSQL("DROP TABLE IF EXISTS $TABLE_STAYS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_HISTORY")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_EXPERIENCES")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_BOOKINGS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_REPORTS")
         onCreate(db)
     }
 

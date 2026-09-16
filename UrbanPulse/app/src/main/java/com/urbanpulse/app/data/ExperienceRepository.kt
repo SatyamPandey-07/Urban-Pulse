@@ -50,7 +50,10 @@ class ExperienceRepository(context: Context) {
             isAvailableToday = isAvailableToday,
             travelerTags = tags,
             viewsCount = viewsCount,
-            inquiryCount = inquiryCount
+            inquiryCount = inquiryCount,
+            bookingCount = bookingCount,
+            accessibilityConfirmCount = accessibilityConfirmCount,
+            accessibilityDisputeCount = accessibilityDisputeCount
         )
     }
 
@@ -115,12 +118,73 @@ class ExperienceRepository(context: Context) {
                     isAvailableToday = it.getInt(it.getColumnIndexOrThrow("is_available_today")) != 0,
                     travelerTags = tags,
                     viewsCount = it.getInt(it.getColumnIndexOrThrow("views_count")),
-                    inquiryCount = it.getInt(it.getColumnIndexOrThrow("inquiry_count"))
+                    inquiryCount = it.getInt(it.getColumnIndexOrThrow("inquiry_count")),
+                    bookingCount = countLocalRows(AppDatabaseHelper.TABLE_BOOKINGS, id),
+                    accessibilityConfirmCount = countLocalReports(id, confirms = true),
+                    accessibilityDisputeCount = countLocalReports(id, confirms = false)
                 )
             }
         }
         return experiences
     }
+
+    private fun countLocalRows(table: String, experienceId: String): Int {
+        val db = dbHelper.readableDatabase
+        db.rawQuery("SELECT COUNT(*) FROM $table WHERE experience_id = ?", arrayOf(experienceId)).use {
+            return if (it.moveToFirst()) it.getInt(0) else 0
+        }
+    }
+
+    private fun countLocalReports(experienceId: String, confirms: Boolean): Int {
+        val db = dbHelper.readableDatabase
+        db.rawQuery(
+            "SELECT COUNT(*) FROM ${AppDatabaseHelper.TABLE_REPORTS} WHERE experience_id = ? AND confirms_accessibility = ?",
+            arrayOf(experienceId, if (confirms) "1" else "0")
+        ).use {
+            return if (it.moveToFirst()) it.getInt(0) else 0
+        }
+    }
+
+    /** Creates a real booking on the shared backend when reachable, and always writes through to the local cache. */
+    suspend fun createBooking(experienceId: String, travelerName: String, partySize: Int, bookingDate: String): Boolean =
+        withContext(Dispatchers.IO) {
+            val onBackend = CentralRegistryClient.createBooking(experienceId, travelerName, partySize, bookingDate)
+            try {
+                val db = dbHelper.writableDatabase
+                val values = ContentValues().apply {
+                    put("id", onBackend?.id ?: "booking_${System.currentTimeMillis()}")
+                    put("experience_id", experienceId)
+                    put("traveler_name", travelerName)
+                    put("party_size", partySize)
+                    put("booking_date", bookingDate)
+                    put("status", "confirmed")
+                    put("created_at", java.time.Instant.now().toString())
+                }
+                db.insert(AppDatabaseHelper.TABLE_BOOKINGS, null, values) != -1L
+            } catch (e: Exception) {
+                onBackend != null
+            }
+        }
+
+    /** Submits a real traveler accessibility report — a genuine second, independent signal for the
+     *  Evidence Graph (confirming or disputing the provider's own claim), not the same source echoed back. */
+    suspend fun submitAccessibilityReport(experienceId: String, confirmsAccessibility: Boolean, note: String): Boolean =
+        withContext(Dispatchers.IO) {
+            val onBackend = CentralRegistryClient.submitReport(experienceId, confirmsAccessibility, note)
+            try {
+                val db = dbHelper.writableDatabase
+                val values = ContentValues().apply {
+                    put("id", onBackend?.id ?: "report_${System.currentTimeMillis()}")
+                    put("experience_id", experienceId)
+                    put("confirms_accessibility", if (confirmsAccessibility) 1 else 0)
+                    put("note", note)
+                    put("created_at", java.time.Instant.now().toString())
+                }
+                db.insert(AppDatabaseHelper.TABLE_REPORTS, null, values) != -1L
+            } catch (e: Exception) {
+                onBackend != null
+            }
+        }
 
     /** Toggles availability on the shared backend when reachable, and always writes through to the local cache. */
     suspend fun toggleAvailability(id: String, available: Boolean) = withContext(Dispatchers.IO) {

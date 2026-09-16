@@ -74,6 +74,9 @@ A security and "everything real, nothing mocked" pass across both the Android ap
 - 📊 **Real interaction counters** — provider "views" and "inquiries" are now driven by actual chat/dashboard interactions instead of fixed placeholder numbers.
 - 🔐 **Security hardening** — live API keys are no longer committed to the repository; they're loaded from gitignored local config (`local.properties` for Android, `config.local.js` for web — see [`config.local.example.js`](config.local.example.js)).
 - 🧹 Removed unused/misleading dead code (an empty `Web3Manager.kt` blockchain simulation and several empty network-client stubs).
+- 📅 **Real bookings** — the Central Registry now persists genuine booking records (`POST /api/experiences/:id/bookings`), not a hardcoded demand number. "📅 Book This Experience" in the chat creates a real, queryable reservation on Android and web alike.
+- ✅ **Real user reports feed the Evidence Graph** — travelers can now "✅ Confirm Accessibility" or "⚠️ Report an Issue" on any experience. These are genuinely independent second-source signals (not the same provider data checked against itself): a confirmed report can legitimately upgrade a claim to Verified, and a disputed one is surfaced as a real contradiction — this is what makes "confidence score built from official sources + user reports" literally true rather than aspirational.
+- 🐛 **Fixed several more fabricated details found in a follow-up audit**: a new user's Trips tab no longer seeds 3 fake completed trips; the offline AI-itinerary fallback is labeled honestly instead of calling itself "Verified"; the chatbot's hotel recommendations now read the real on-device hospitality registry instead of 3 hardcoded hotels; circumstance adaptation cross-checks live Open-Meteo weather instead of trusting keywords alone; and the ESG audit dialog shows its own actually-computed compliance status instead of a hardcoded "PASSED (BEE 4.8★)".
 
 ---
 
@@ -186,14 +189,18 @@ Local small businesses and artisans are equal stakeholders on the platform:
 
 ### G. Evidence-Based Accessibility Engine
 UrbanPulse never states `Accessible: Yes` outright. [`EvidenceGraphService.kt`](UrbanPulse/app/src/main/java/com/urbanpulse/app/evidence/EvidenceGraphService.kt) tags every accessibility and sustainability claim — for hospitality stays *and* general experience listings — with a confidence level, mirrored in the web app's `buildExperienceEvidence()`:
-- ✅ **Verified:** Rating is backed by enough documented, specific features.
-- 🟡 **Reported:** A single, specific source (e.g. a provider-listed practice) backs the claim.
-- 🔵 **Inferred:** Under-documented — the claim is flagged with an explicit contradiction warning (e.g. *"Rating claims 94% but only 1 feature is documented — treat as inferred until confirmed on-site"*) rather than presented as fact.
+- ✅ **Verified:** Backed either by enough documented, specific provider features, *or* by a real independent traveler report confirming it on-site (`accessibilityConfirmCount > 0`) — genuine two-source corroboration, not a single source checked against itself.
+- 🟡 **Reported:** A single, specific source (e.g. a provider-listed practice) backs the claim, with no independent confirmation yet.
+- 🔵 **Inferred / disputed:** Under-documented, or a traveler has filed a real "⚠️ Report an Issue" against it — the claim is flagged with an explicit contradiction warning (e.g. *"2 traveler report(s) dispute this accessibility claim — treat the 94% rating as unconfirmed until resolved"*) rather than presented as fact.
+
+This is what makes "confidence score built from official sources **+ user reports**" literally true: the provider's own listing is one source, and the "✅ Confirm Accessibility" / "⚠️ Report an Issue" prompts on every experience detail card collect the second, independent one.
 
 ### H. Central Registry — Shared Backend
-A real Node.js + Express + SQLite service (`server/`) is the single source of truth for provider-listed experiences:
-- `GET/POST /api/experiences`, `PATCH /api/experiences/:id/availability`, `POST /api/experiences/:id/view`, `POST /api/experiences/:id/inquiry` — genuine persisted state, not per-device mocks.
-- The **Android app** (`CentralRegistryClient.kt`) and the **web app** (`app.js`) both sync to it, mirroring reads into a local SQLite/`localStorage` cache so the app still works offline — with a clear "not shared while offline" signal instead of silently pretending data is synced.
+A real Node.js + Express + SQLite service (`server/`) is the single source of truth for provider-listed experiences, bookings, and traveler reports:
+- **Experiences**: `GET/POST /api/experiences`, `PATCH /api/experiences/:id/availability`, `POST /api/experiences/:id/view`, `POST /api/experiences/:id/inquiry`.
+- **Bookings**: `POST/GET /api/experiences/:id/bookings` — a real, persisted reservation record (traveler name, party size, date), not a hardcoded demand number.
+- **Accessibility reports**: `POST/GET /api/experiences/:id/reports` — a real second independent signal for the Evidence Graph. A traveler "confirms" or "disputes" the provider's own accessibility claim; the aggregate counts (`accessibilityConfirmCount` / `accessibilityDisputeCount`) feed directly into whether a claim is shown as Verified, Reported, or a flagged contradiction.
+- The **Android app** (`CentralRegistryClient.kt`) and the **web app** (`app.js`) both sync to all of the above, mirroring reads into a local SQLite/`localStorage` cache so the app still works offline — with a clear "not shared while offline" signal instead of silently pretending data is synced.
 
 ---
 
