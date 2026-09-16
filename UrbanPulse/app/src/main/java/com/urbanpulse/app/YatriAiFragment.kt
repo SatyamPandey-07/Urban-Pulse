@@ -154,6 +154,7 @@ class YatriAiFragment : Fragment() {
                     userLongitude = loc.longitude
                     isLocationDetected = true
                     resolveCityName(loc.latitude, loc.longitude)
+                    maybeAutoTriggerRainAdaptation()
                 } else {
                     val locMgr = act.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
                     val lastKnown = locMgr?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
@@ -163,11 +164,55 @@ class YatriAiFragment : Fragment() {
                         userLongitude = lastKnown.longitude
                         isLocationDetected = true
                         resolveCityName(lastKnown.latitude, lastKnown.longitude)
+                        maybeAutoTriggerRainAdaptation()
                     }
                 }
             }
         } catch (e: SecurityException) {
             // Permission not granted
+        }
+    }
+
+    private var hasAutoCheckedRainAdaptation = false
+
+    /** Proactively checks real live weather at the user's location once per session and, if it's
+     *  actually raining, pushes an adapted recommendation without the user needing to say "rain" —
+     *  this is what makes Circumstance Adaptation autonomous rather than purely keyword-reactive. */
+    private fun maybeAutoTriggerRainAdaptation() {
+        if (hasAutoCheckedRainAdaptation) return
+        hasAutoCheckedRainAdaptation = true
+        val ctx = context ?: return
+        lifecycleScope.launch {
+            val weather = withContext(Dispatchers.IO) {
+                LiveCityIntelligenceService.getLiveWeatherAndAqi(userLatitude, userLongitude)
+            }
+            if (weather?.condition != "Showers") return@launch
+
+            val adaptive = withContext(Dispatchers.IO) {
+                ExperienceRepository(ctx).getAdaptiveExperiences(isRain = true, maxDuration = 2.0)
+            }
+            val ranked = ExperienceOptimizer.rank(adaptive)
+            if (ranked.isEmpty()) return@launch
+
+            withContext(Dispatchers.IO) {
+                ranked.take(3).forEach { ExperienceRepository(ctx).recordView(it.experience.id) }
+            }
+            val builder = StringBuilder(
+                "☔ **Live weather at your location shows rain (${weather.condition}, ${weather.temperatureC}°C)** — " +
+                    "I've proactively adapted your recommendations to covered, indoor options without you needing to ask:\n\n"
+            )
+            ranked.take(3).forEachIndexed { index, r ->
+                val exp = r.experience
+                builder.append("${index + 1}. **${exp.name}** 🏛️ Indoor/Covered • ${exp.location} • ${exp.durationHours}h • ${exp.pricePerPerson}\n")
+            }
+            addAiMessage(
+                builder.toString(),
+                mcq = QuickMcqQuestion(
+                    questionId = "auto_rain_mcq",
+                    questionText = "Select rain-adapted experience",
+                    options = ranked.take(3).map { it.experience.name }
+                )
+            )
         }
     }
 

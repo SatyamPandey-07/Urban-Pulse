@@ -32,6 +32,15 @@ class AccessibilityManager(context: Context) {
         get() = prefs.getBoolean("key_service_animal", false)
         set(value) = prefs.edit().putBoolean("key_service_animal", value).apply()
 
+    /** Evidence-tagged accessibility/sustainability claims for an experience listing — real
+     *  confidence tiers (Verified/Reported/Inferred), not a plain "Accessible: Yes/No". */
+    fun evidenceFor(experience: ExperienceListing): List<EvidenceClaim> =
+        EvidenceGraphService.buildEvidenceForExperience(experience)
+
+    /** Same, for a hospitality stay. */
+    fun evidenceFor(stay: HospitalityStay): List<EvidenceClaim> =
+        EvidenceGraphService.buildEvidence(stay)
+
     companion object {
         @Volatile
         private var instance: AccessibilityManager? = null
