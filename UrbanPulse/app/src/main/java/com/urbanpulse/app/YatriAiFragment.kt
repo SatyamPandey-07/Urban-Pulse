@@ -648,7 +648,7 @@ class YatriAiFragment : Fragment() {
                     withContext(Dispatchers.IO) { ExperienceRepository(ctxForMatch).recordInquiry(matchedExp.id) }
                     lastViewedExperienceId = matchedExp.id
                     chatAdapter.removeTypingIndicator()
-                    val evidence = com.urbanpulse.app.evidence.EvidenceGraphService.buildEvidenceForExperience(matchedExp)
+                    val evidence = AccessibilityManager.getInstance(ctxForMatch).evidenceFor(matchedExp)
                     val evidenceText = evidence.joinToString("\n") { claim ->
                         "${claim.confidence.icon} ${claim.confidence.label}: ${claim.claim}" +
                             (claim.contradiction?.let { "\n   ⚠️ $it" } ?: "")

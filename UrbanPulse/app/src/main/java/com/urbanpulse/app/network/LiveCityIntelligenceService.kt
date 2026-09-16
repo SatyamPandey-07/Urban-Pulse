@@ -3,7 +3,6 @@ package com.urbanpulse.app.network
 import android.content.Context
 import com.urbanpulse.app.BuildConfig
 import com.urbanpulse.app.data.HospitalityRepository
-import com.urbanpulse.app.evidence.EvidenceGraphService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -236,9 +235,10 @@ object LiveCityIntelligenceService {
                 val stays = context?.let {
                     try { HospitalityRepository(it).getAllStays() } catch (e: Exception) { null }
                 }
-                if (!stays.isNullOrEmpty()) {
+                if (!stays.isNullOrEmpty() && context != null) {
+                    val accessMgr = com.urbanpulse.app.AccessibilityManager.getInstance(context)
                     val top = stays.sortedByDescending { it.ecoScore }.take(3).joinToString("\n\n") { stay ->
-                        val evidence = EvidenceGraphService.buildEvidence(stay)
+                        val evidence = accessMgr.evidenceFor(stay)
                         val accessClaim = evidence.firstOrNull { it.claim.startsWith("Accessibility") }
                         val evidenceLine = accessClaim?.let { "${it.confidence.icon} ${it.confidence.label}: ${it.claim}" } ?: "${stay.accessibilityRating}% accessibility match"
                         "🏨 **${stay.name}** (${stay.location})\n   🌿 ${stay.energySource} • ${stay.carbonFootprintPerNight} • ${stay.pricePerNight}\n   ♿ $evidenceLine"
