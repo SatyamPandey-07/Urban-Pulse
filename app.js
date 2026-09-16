@@ -1268,9 +1268,29 @@ function closeScheduleModal(e) {
  }
 }
 
+// Proactively checks real live weather once on load and, if it's actually raining, surfaces
+// an adapted recommendation without the user needing to type "rain" — makes Circumstance
+// Adaptation autonomous rather than purely keyword-reactive (mirrors the Android app).
+async function autoCheckRainAdaptation() {
+    const liveWeather = await fetchOpenMeteoWeather();
+    if (!liveWeather || !liveWeather.isRaining) return;
+    const covered = getStoredExperiences().filter(e =>
+        e.category.includes("Workshop") || e.category.includes("Craft") || e.category.includes("Culinary") || e.category.includes("Art")
+    );
+    if (covered.length === 0) return;
+    recordExperienceViews(covered.slice(0, 3));
+    let html = `☔ <strong>Live weather at Mumbai HQ coordinates shows rain (${liveWeather.precipitation}mm, ${liveWeather.temperatureC}°C)</strong> — I've proactively adapted your recommendations to covered, indoor options without you needing to ask:<br><br>`;
+    covered.slice(0, 3).forEach((exp, idx) => {
+        html += `<strong>${idx + 1}. ${exp.name}</strong> [🏛️ Indoor / Covered]<br>`;
+        html += `• Location: ${exp.location} • Duration: <strong>${exp.duration}h</strong> • Price: <strong>₹${exp.price}</strong><br><br>`;
+    });
+    setTimeout(() => appendAiBubble(html, covered.slice(0, 3).map(e => e.name)), 500);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     await initExperienceRegistry();
     if (document.getElementById('web-provider-listings')) renderProviderDashboard();
+    autoCheckRainAdaptation();
 
     initLeafletMap();
     setTimeout(() => {
