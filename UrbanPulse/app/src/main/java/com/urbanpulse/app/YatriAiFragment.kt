@@ -471,7 +471,7 @@ class YatriAiFragment : Fragment() {
                                 }
                                 if (bookings == null && reports == null) append("\n⚠️ Central Registry backend unreachable.")
                             }
-                            AlertDialog.Builder(ctx)
+                            MaterialAlertDialogBuilder(ctx)
                                 .setTitle(exp.name)
                                 .setMessage(message)
                                 .setPositiveButton("Close", null)
