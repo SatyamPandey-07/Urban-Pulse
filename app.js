@@ -2,204 +2,111 @@
 // UrbanPulse — Real-Time App Logic with Groq LLaMA-3.3 Engine
 // =========================================================
 
-const _k = ["gsk_", "OhtufweMq0L", "xxoddzGHqW", "Gdyb3FYqUS", "bbqvsrrfoY", "UVIsfQ4ZaCa"].join("");
-const GROQ_API_KEY = window.GROQ_API_KEY || _k;
+const GROQ_API_KEY = window.GROQ_API_KEY || "";
+const TOMTOM_API_KEY = window.TOMTOM_API_KEY || "";
+if (!GROQ_API_KEY || !TOMTOM_API_KEY) {
+    console.warn("GROQ_API_KEY / TOMTOM_API_KEY not set. Copy config.local.example.js to config.local.js, fill in real keys, and include it before app.js.");
+}
 
-// --- 1. Dual Route Presets ---
-const ROUTE_PRESETS = {
- kedarnath: {
- title: "Kedarnath Himalayan Transit Corridor (224 km)",
- distKm: 224.0,
- aqi: "18 (Pristine Himalayan Alpine Air)",
- green: {
- time: "5h 15m",
- fare: 650,
- mode: " Vande Bharat + Electric Pilgrim Shuttle",
- co2Grams: 42,
- details: "Zero Tailpipe Emissions • Assisted Palki & Step-Free Concourse",
- coords: [
- [30.0869, 78.2676], // Rishikesh
- [30.1500, 78.4500], // Devprayag
- [30.2800, 78.9800], // Rudraprayag
- [30.5200, 79.0700], // Guptkashi
- [30.6300, 79.0300], // Sonprayag
- [30.7352, 79.0669] // Shri Kedarnath Dham
- ]
- },
- normal: {
- time: "7h 45m",
- fare: 4800,
- mode: " Diesel SUV Private Taxi",
- co2Grams: 3600,
- details: "Narrow Mountain Road Delays • High Carbon Footprint • Landslide Risk",
- coords: [
- [30.0869, 78.2676],
- [30.1800, 78.4000],
- [30.2500, 78.9000],
- [30.4800, 79.1200],
- [30.6000, 79.0900],
- [30.7352, 79.0669]
- ]
- }
- },
- lonavala: {
- title: "Lonavala Scenic Ridge (83.0 km)",
- distKm: 83.0,
- aqi: "28 (Clean Mountain Air)",
- green: {
- time: "2h 05m",
- fare: 75,
- mode: " Indrayani Electric Express",
- co2Grams: 28,
- details: "Level Boarding • 100% Elevator Access Concourse",
- coords: [
- [19.0178, 72.8478],
- [19.0544, 72.9000],
- [19.1136, 73.0000],
- [18.9900, 73.1200],
- [18.8900, 73.2500],
- [18.7546, 73.4062]
- ]
- },
- normal: {
- time: "2h 45m",
- fare: 3200,
- mode: " Petrol Cab (MH Taxi Formula)",
- co2Grams: 2400,
- details: "Base ₹28 + ₹18.5/km • Heavy Ghats Traffic Delay",
- coords: [
- [19.0178, 72.8478],
- [19.0600, 72.8800],
- [19.1400, 72.9800],
- [19.0400, 73.0800],
- [18.8200, 73.2800],
- [18.7546, 73.4062]
- ]
- }
- },
- fortis: {
- title: "Fortis Hospital Mulund (Trauma Center) (6.4 km)",
- distKm: 6.4,
- aqi: "42 (Moderate Air Quality)",
- green: {
- time: "14m",
- fare: 20,
- mode: " Metro Line 4 / Electric Feeder",
- co2Grams: 14,
- details: "Dedicated Green Corridor • 100% Step-Free Emergency Concourse",
- coords: [
- [19.1775, 72.9544],
- [19.1750, 72.9550],
- [19.1728, 72.9564]
- ]
- },
- normal: {
- time: "26m",
- fare: 145,
- mode: " Standard Auto / Cab",
- co2Grams: 180,
- details: "LBS Marg Bottleneck Congestion • Delay: +12 mins",
- coords: [
- [19.1775, 72.9544],
- [19.1820, 72.9600],
- [19.1728, 72.9564]
- ]
- }
- },
- powai: {
- title: "Powai EV Fast Charging Hub (11.8 km)",
- distKm: 11.8,
- aqi: "38 (Clean Lake Zone)",
- green: {
- time: "20m",
- fare: 25,
- mode: " BEST AC Electric Bus Corridor",
- co2Grams: 22,
- details: "Zero Tailpipe Emissions • Low-Floor Ramp Access",
- coords: [
- [19.1775, 72.9544],
- [19.1500, 72.9300],
- [19.1200, 72.9050]
- ]
- },
- normal: {
- time: "38m",
- fare: 245,
- mode: " Petrol Cab",
- co2Grams: 340,
- details: "JVLR Arterial Congestion • Delay: +18 mins",
- coords: [
- [19.1775, 72.9544],
- [19.1600, 72.9100],
- [19.1200, 72.9050]
- ]
- }
- },
- csmt: {
- title: "CSMT South Mumbai Heritage Loop (24.5 km)",
- distKm: 24.5,
- aqi: "54 (Urban Coastal)",
- green: {
- time: "32m",
- fare: 35,
- mode: " Metro Line 3 Underground (Aqua Line)",
- co2Grams: 20,
- details: "100% Renewable Powered • Tactile Paving & Elevators",
- coords: [
- [19.1775, 72.9544],
- [19.1136, 72.8697],
- [19.0544, 72.8402],
- [18.9400, 72.8353]
- ]
- },
- normal: {
- time: "58m",
- fare: 480,
- mode: " Standard Taxi",
- co2Grams: 720,
- details: "Eastern Freeway Bottlenecks • Delay: +26 mins",
- coords: [
- [19.1775, 72.9544],
- [19.1000, 72.8900],
- [19.0100, 72.8600],
- [18.9400, 72.8353]
- ]
- }
- },
- alibaug: {
- title: "Alibaug Coastal Trail (Hybrid Ferry) (48.0 km)",
- distKm: 48.0,
- aqi: "34 (Pristine Coastal)",
- green: {
- time: "1h 15m",
- fare: 380,
- mode: " M2M Electric Hybrid Ro-Pax Ferry",
- co2Grams: 45,
- details: "Level Boarding Ramp • Accessible Restrooms & Decks",
- coords: [
- [18.9400, 72.8353],
- [18.8500, 72.8800],
- [18.7500, 72.8900],
- [18.6500, 72.8800]
- ]
- },
- normal: {
- time: "3h 30m",
- fare: 2800,
- mode: " Petrol Cab (via Pen Highway)",
- co2Grams: 1900,
- details: "Narrow Highway Curves • High Carbon Footprint",
- coords: [
- [18.9400, 72.8353],
- [19.0200, 73.0200],
- [18.7500, 73.1000],
- [18.6500, 72.8800]
- ]
- }
- }
+// --- 1. Destination Registry (origin/destination coords only — routes, fares, CO2 & AQI are fetched live below) ---
+const DESTINATIONS = {
+    kedarnath: {
+        title: "Kedarnath Himalayan Transit Corridor",
+        origin: [30.0869, 78.2676], // Rishikesh
+        dest: [30.7352, 79.0669], // Shri Kedarnath Dham
+        greenMode: "Vande Bharat + Electric Pilgrim Shuttle",
+        greenDetails: "Zero Tailpipe Emissions • Assisted Palki & Step-Free Concourse",
+        normalMode: "Diesel SUV Private Taxi",
+        normalDetails: "Narrow Mountain Road Delays • High Carbon Footprint • Landslide Risk"
+    },
+    lonavala: {
+        title: "Lonavala Scenic Ridge",
+        origin: [19.0178, 72.8478], // Mumbai
+        dest: [18.7546, 73.4062],
+        greenMode: "Indrayani Electric Express",
+        greenDetails: "Level Boarding • 100% Elevator Access Concourse",
+        normalMode: "Petrol Cab (MH Taxi Formula)",
+        normalDetails: "Base ₹28 + ₹18.5/km • Heavy Ghats Traffic Delay"
+    },
+    fortis: {
+        title: "Fortis Hospital Mulund (Trauma Center)",
+        origin: [19.1775, 72.9544],
+        dest: [19.1728, 72.9564],
+        greenMode: "Metro Line 4 / Electric Feeder",
+        greenDetails: "Dedicated Green Corridor • 100% Step-Free Emergency Concourse",
+        normalMode: "Standard Auto / Cab",
+        normalDetails: "LBS Marg Bottleneck Congestion"
+    },
+    powai: {
+        title: "Powai EV Fast Charging Hub",
+        origin: [19.1775, 72.9544],
+        dest: [19.1200, 72.9050],
+        greenMode: "BEST AC Electric Bus Corridor",
+        greenDetails: "Zero Tailpipe Emissions • Low-Floor Ramp Access",
+        normalMode: "Petrol Cab",
+        normalDetails: "JVLR Arterial Congestion"
+    },
+    csmt: {
+        title: "CSMT South Mumbai Heritage Loop",
+        origin: [19.1775, 72.9544],
+        dest: [18.9400, 72.8353],
+        greenMode: "Metro Line 3 Underground (Aqua Line)",
+        greenDetails: "100% Renewable Powered • Tactile Paving & Elevators",
+        normalMode: "Standard Taxi",
+        normalDetails: "Eastern Freeway Bottlenecks"
+    },
+    alibaug: {
+        title: "Alibaug Coastal Trail",
+        origin: [18.9400, 72.8353],
+        dest: [18.6500, 72.8800],
+        greenMode: "M2M Electric Hybrid Ro-Pax Ferry",
+        greenDetails: "Level Boarding Ramp • Accessible Restrooms & Decks",
+        normalMode: "Petrol Cab (via Pen Highway)",
+        normalDetails: "Narrow Highway Curves • High Carbon Footprint"
+    }
 };
 
-// --- 2. Leaflet Dual-Route Map ---
+// --- 2. Live TomTom Routing + Open-Meteo AQI (mirrors Android LiveMapFragment.kt) ---
+async function fetchTomTomRoute(origin, dest, routeType, traffic) {
+    if (!TOMTOM_API_KEY) return null;
+    const url = `https://api.tomtom.com/routing/1/calculateRoute/${origin[0]},${origin[1]}:${dest[0]},${dest[1]}/json?key=${TOMTOM_API_KEY}&routeType=${routeType}&traffic=${traffic}&travelMode=car`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const json = await res.json();
+        const route = json.routes && json.routes[0];
+        if (!route) return null;
+        const summary = route.summary || {};
+        const distKm = (summary.lengthInMeters || 0) / 1000.0;
+        const timeMin = Math.max(1, Math.round((summary.travelTimeInSeconds || 0) / 60));
+        const points = (route.legs && route.legs[0] && route.legs[0].points) || [];
+        const coords = points.map(p => [p.latitude, p.longitude]);
+        return { distKm, timeMin, coords };
+    } catch (e) {
+        return null;
+    }
+}
+
+async function fetchOpenMeteoAqi(lat, lon) {
+    try {
+        const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const json = await res.json();
+        return json.current ? json.current.us_aqi : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function formatMinutes(min) {
+    if (min < 60) return `${min}m`;
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return `${h}h ${m}m`;
+}
+
+// --- 3. Leaflet Dual-Route Map (real TomTom geometry + real Open-Meteo AQI) ---
 let leafletMap = null;
 let routeLayerGroup = null;
 
@@ -219,61 +126,80 @@ function initLeafletMap() {
  renderSelectedRoute('lonavala');
 }
 
-function renderSelectedRoute(key) {
+async function renderSelectedRoute(key) {
  if (!leafletMap || !routeLayerGroup) return;
 
- const data = ROUTE_PRESETS[key] || ROUTE_PRESETS['lonavala'];
+ const meta = DESTINATIONS[key] || DESTINATIONS['lonavala'];
+ const destTitleEl = document.getElementById('hud-dest-title');
+ if (destTitleEl) destTitleEl.innerText = `${meta.title} — fetching live route...`;
+
+ // Real TomTom dual-route calls (eco vs fastest+traffic), real Open-Meteo AQI at destination
+ const [normalRoute, greenRoute, aqi] = await Promise.all([
+     fetchTomTomRoute(meta.origin, meta.dest, 'fastest', 'true'),
+     fetchTomTomRoute(meta.origin, meta.dest, 'eco', 'false'),
+     fetchOpenMeteoAqi(meta.dest[0], meta.dest[1])
+ ]);
+
+ // Fallback geodesic geometry only if the live TomTom call failed
+ const fallbackCoords = [meta.origin, meta.dest];
+ const normal = normalRoute || { distKm: 0, timeMin: 0, coords: fallbackCoords };
+ const green = greenRoute || { distKm: 0, timeMin: 0, coords: fallbackCoords };
+ const dist = normal.distKm > 0 ? normal.distKm : (green.distKm > 0 ? green.distKm : 1);
+
+ // Real-world fare/CO2 formulas (identical to Android LiveMapFragment.kt)
+ const normalFare = Math.round(28.0 + (dist * 18.5));
+ const normalCo2 = Math.round(dist * 160.0);
+ const greenFare = dist <= 5.0 ? 10 : dist <= 12.0 ? 20 : dist <= 25.0 ? 30 : Math.round(dist * 1.7);
+ const greenCo2 = Math.round(dist * 14.0);
+ const savedCo2 = Math.max(100, normalCo2 - greenCo2);
+ const savedFare = Math.max(0, normalFare - greenFare);
+
  routeLayerGroup.clearLayers();
 
- // Normal Path
- const normalLine = L.polyline(data.normal.coords, {
+ const normalLine = L.polyline(normal.coords, {
  color: '#EF4444',
  weight: 5,
  opacity: 0.85,
  dashArray: '8, 8',
  lineCap: 'round'
- }).bindPopup(`<b> Standard Cab</b><br>${data.normal.time} • ₹${data.normal.fare} • ${data.normal.co2Grams}g CO₂`);
+ }).bindPopup(`<b>Standard Cab</b><br>${formatMinutes(normal.timeMin)} • ₹${normalFare} • ${normalCo2}g CO₂`);
 
- // Green Path
- const greenGlow = L.polyline(data.green.coords, {
+ const greenGlow = L.polyline(green.coords, {
  color: '#059669',
  weight: 10,
  opacity: 0.4,
  lineCap: 'round'
  });
 
- const greenLine = L.polyline(data.green.coords, {
+ const greenLine = L.polyline(green.coords, {
  color: '#10B981',
  weight: 5,
  opacity: 1.0,
  lineCap: 'round'
- }).bindPopup(`<b> Green Path (${data.green.mode})</b><br>${data.green.time} • ₹${data.green.fare} • ${data.green.co2Grams}g CO₂`);
+ }).bindPopup(`<b>Green Path (${meta.greenMode})</b><br>${formatMinutes(green.timeMin)} • ₹${greenFare} • ${greenCo2}g CO₂`);
 
  routeLayerGroup.addLayer(normalLine);
  routeLayerGroup.addLayer(greenGlow);
  routeLayerGroup.addLayer(greenLine);
 
- const destCoord = data.green.coords[data.green.coords.length - 1];
- const destMarker = L.marker(destCoord).bindPopup(`<b> ${data.title}</b><br><span style="color:#10B981;font-weight:bold;">Green Transit: ${data.green.time} (₹${data.green.fare})</span><br><span style="color:#EF4444;">Petrol Cab: ${data.normal.time} (₹${data.normal.fare})</span>`);
+ const destMarker = L.marker(meta.dest).bindPopup(`<b>${meta.title}</b><br><span style="color:#10B981;font-weight:bold;">Green Transit: ${formatMinutes(green.timeMin)} (₹${greenFare})</span><br><span style="color:#EF4444;">Petrol Cab: ${formatMinutes(normal.timeMin)} (₹${normalFare})</span>`);
  routeLayerGroup.addLayer(destMarker);
  destMarker.openPopup();
 
  const featureGroup = L.featureGroup([normalLine, greenLine]);
  leafletMap.fitBounds(featureGroup.getBounds(), { padding: [40, 40], maxZoom: 13 });
 
- // Update HUD Metrics
- const savedCo2 = (data.normal.co2Grams - data.green.co2Grams);
- const savedFare = (data.normal.fare - data.green.fare);
+ const aqiText = aqi !== null && aqi !== undefined ? `${aqi} (Live Open-Meteo US AQI)` : "Unavailable";
 
- document.getElementById('hud-dest-title').innerText = data.title;
- document.getElementById('hud-aqi-text').innerHTML = ` ${data.green.mode} (Open-Meteo AQI: ${data.aqi}) vs Petrol Cab`;
+ document.getElementById('hud-dest-title').innerText = `${meta.title} (${dist.toFixed(1)} km)`;
+ document.getElementById('hud-aqi-text').innerHTML = `${meta.greenMode} (Open-Meteo AQI: ${aqiText}) vs Petrol Cab`;
  document.getElementById('hud-savings-badge').innerText = `Save ${savedCo2}g CO₂ • Save ₹${savedFare.toLocaleString()}`;
 
- document.getElementById('green-time-fare').innerText = `${data.green.time} • ₹${data.green.fare}`;
- document.getElementById('green-details').innerText = `${data.green.mode} • ${data.green.details}`;
+ document.getElementById('green-time-fare').innerText = `${formatMinutes(green.timeMin)} • ₹${greenFare}`;
+ document.getElementById('green-details').innerText = `${meta.greenMode} • ${meta.greenDetails}`;
 
- document.getElementById('normal-time-fare').innerText = `${data.normal.time} • ₹${data.normal.fare.toLocaleString()}`;
- document.getElementById('normal-details').innerText = `${data.normal.details}`;
+ document.getElementById('normal-time-fare').innerText = `${formatMinutes(normal.timeMin)} • ₹${normalFare.toLocaleString()}`;
+ document.getElementById('normal-details').innerText = `${meta.normalDetails}`;
 }
 
 // --- 3. App Navigation & Tab Switching ---
@@ -401,6 +327,21 @@ function saveExperienceToRegistry(newExp) {
         localStorage.setItem('urbanpulse_experiences', JSON.stringify(list));
     } catch (e) {}
     return list;
+}
+
+function recordExperienceEvent(expId, field) {
+    const list = getStoredExperiences();
+    const target = list.find(e => e.id === expId);
+    if (target) {
+        target[field] = (target[field] || 0) + 1;
+        try {
+            localStorage.setItem('urbanpulse_experiences', JSON.stringify(list));
+        } catch (e) {}
+    }
+}
+
+function recordExperienceViews(expList) {
+    expList.forEach(exp => recordExperienceEvent(exp.id, 'viewsCount'));
 }
 
 function openAddExperienceModal() {
@@ -559,7 +500,7 @@ function renderProviderDashboard() {
                 <span class="trip-carbon-tag" style="font-size: 10px;">${isAvailable ? "Available" : "Booked Out"}</span>
             </div>
             <div style="font-size: 11px; color: var(--primary-emerald); margin: 6px 0;">
-                👁️ ${exp.viewsCount || 142} Traveler Views • 38 Direct Inquiries
+                👁️ ${exp.viewsCount || 0} Traveler Views • ${exp.inquiryCount || 0} Direct Inquiries
             </div>
             <button class="view-itinerary-btn" style="width: 100%; padding: 6px; font-size: 11px;" onclick="toggleWebExperienceAvailability('${exp.id}')">
                 Toggle Status: ${isAvailable ? "Set to Booked Out" : "Set to Available Today"}
@@ -573,6 +514,22 @@ function handleChatPrompt(promptText) {
     appendUserBubble(promptText);
 
     const lower = promptText.toLowerCase().trim();
+
+    // 0. Experience chip clicked directly -> record a real inquiry and show its detail card
+    const matchedExp = getStoredExperiences().find(e => e.name === promptText);
+    if (matchedExp) {
+        recordExperienceEvent(matchedExp.id, 'inquiryCount');
+        setTimeout(() => {
+            appendAiBubble(
+                `<strong>${matchedExp.name}</strong><br>` +
+                `${matchedExp.category} • ${matchedExp.location} • ${matchedExp.duration}h • ₹${matchedExp.price}<br>` +
+                `Accessibility: ${matchedExp.accessibilityRating}% (${matchedExp.accessibilityTags.join(", ")})<br>` +
+                `Sustainability: ${matchedExp.sustainability}`,
+                ["Show on Live Map", "Plan Another Destination"]
+            );
+        }, 300);
+        return;
+    }
 
     // 1. Circumstance Adaptation (Rain, Weather, Sudden Delays)
     if (lower.includes("adapt") || lower.includes("rain") || lower.includes("weather") || lower.includes("delay")) {
@@ -588,6 +545,7 @@ function handleChatPrompt(promptText) {
         });
 
         html += `Would you like to route transit to the nearest covered workshop?`;
+        recordExperienceViews(covered.slice(0, 3));
         setTimeout(() => {
             appendAiBubble(html, covered.slice(0, 3).map(e => e.name).concat(["Live Route Map"]));
         }, 400);
@@ -607,6 +565,7 @@ function handleChatPrompt(promptText) {
         });
 
         html += `Select an activity to view family group pricing and step-free transit directions:`;
+        recordExperienceViews(familyList.slice(0, 3));
         setTimeout(() => {
             appendAiBubble(html, familyList.slice(0, 3).map(e => e.name).concat(["Explore Eco Stays"]));
         }, 400);
@@ -627,6 +586,7 @@ function handleChatPrompt(promptText) {
         });
 
         html += `Which of these would you like to explore or route?`;
+        recordExperienceViews(exps.slice(0, 4));
         setTimeout(() => {
             appendAiBubble(html, exps.slice(0, 3).map(e => e.name).concat(["+ List New Experience"]));
         }, 400);
@@ -852,12 +812,37 @@ function triggerFoodRescue() {
  alert(" Food Rescue Dispatched: Driver from Roti Bank / Feeding India assigned. Pickup ETA: 18 minutes.");
 }
 
-function exportEsgPdf() {
+async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function exportEsgPdf() {
  const occupancy = document.getElementById('slider-occupancy').value;
+ const rooms = Math.round(occupancy * 2);
  const power = Math.round(occupancy * 24.2 + 80);
  const water = Math.round(occupancy * 190);
  const food = Math.round(occupancy * 0.56);
  const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+ // Real pass/fail computed from the live occupancy-derived metrics against the stated benchmarks
+ // (BEE 5-Star energy benchmark: <=20 kWh/room/day; water target: <=220 L/room/day)
+ const powerPerRoom = power / rooms;
+ const waterPerRoom = water / rooms;
+ const passPower = powerPerRoom <= 20;
+ const passWater = waterPerRoom <= 220;
+ const complianceStatus = (passPower && passWater) ? "PASSED" : "NEEDS IMPROVEMENT";
+ const complianceColor = (passPower && passWater) ? "#059669" : "#DC2626";
+
+ // Facility-declared install assumptions (solar capacity mix, HVAC setback, greywater recycling rate)
+ // are NOT live telemetry — there is no connected utility meter — so they are disclosed as such
+ // rather than presented as measured values.
+ const solarMixPct = 38.5;
+ const hvacSetbackKwh = Math.round(power * 0.10);
+ const greywaterPct = 85;
+
+ const reportBody = `Facility=The Orchid Eco-Heritage Resort;Occupancy=${occupancy}%;Rooms=${rooms};Date=${dateStr};Power=${power}kWh;Water=${water}L;Food=${food}kg;PowerPerRoom=${powerPerRoom.toFixed(2)};WaterPerRoom=${waterPerRoom.toFixed(2)};Compliance=${complianceStatus}`;
+ const contentHash = await sha256Hex(reportBody);
 
  const printWin = window.open('', '_blank');
  printWin.document.write(`
@@ -877,50 +862,52 @@ function exportEsgPdf() {
  th, td { padding: 10px 14px; text-align: left; font-size: 12px; border-bottom: 1px solid #E2E8F0; }
  th { background: #F8FAFC; color: #64748B; font-weight: 600; }
  .highlight-green { color: #059669; font-weight: bold; }
- .footer-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; margin-top: 30px; font-size: 11px; color: #64748B; }
+ .note-row td { color: #94A3B8; font-style: italic; }
+ .footer-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; margin-top: 30px; font-size: 11px; color: #64748B; word-break: break-all; }
  @media print { @page { margin: 1.5cm; } button { display: none; } }
  </style>
  </head>
  <body>
  <div class="header-band">
  <div class="brand-sub">URBANPULSE • B2B SUSTAINABILITY INTELLIGENCE PLATFORM</div>
- <div class="title">Verified ESG Compliance &amp; Resource Audit</div>
+ <div class="title">ESG Compliance &amp; Resource Audit</div>
  <div class="standard">Standard: ISO 14064 Greenhouse Protocol • LEED Platinum &amp; BEE 5-Star Benchmarking</div>
  </div>
 
  <div class="meta-grid">
  <div><strong>Facility:</strong> The Orchid Eco-Heritage Resort &amp; Conference Center</div>
- <div><strong>Occupancy Scale:</strong> ${occupancy}% (${Math.round(occupancy * 2)} Rooms)</div>
+ <div><strong>Occupancy Scale:</strong> ${occupancy}% (${rooms} Rooms)</div>
  <div><strong>Audit Date:</strong> ${dateStr}</div>
- <div><strong>Compliance Status:</strong> <span class="highlight-green">PASSED (BEE 4.8 / LEED Platinum)</span></div>
+ <div><strong>Compliance Status:</strong> <span style="color:${complianceColor}; font-weight:bold;">${complianceStatus}</span> (computed live from occupancy inputs vs. benchmarks below)</div>
  </div>
 
  <div class="sec-title"> Energy Intelligence &amp; HVAC Avoidance</div>
  <table>
- <tr><th>Metric</th><th>Recorded Value</th><th>Compliance Benchmark</th></tr>
- <tr><td>Daily Power Consumption</td><td><strong>${power.toLocaleString()} kWh</strong></td><td>BEE 5-Star Benchmark</td></tr>
- <tr><td>Automated HVAC Setback Avoided</td><td class="highlight-green">180 kWh (Daily)</td><td>Automated 26°C Setpoint</td></tr>
- <tr><td>Onsite Solar Generation Mix</td><td class="highlight-green">38.5% Renewable</td><td>Target: &gt;= 30.0%</td></tr>
+ <tr><th>Metric</th><th>Value</th><th>Compliance Benchmark</th></tr>
+ <tr><td>Daily Power Consumption (live, from occupancy)</td><td><strong>${power.toLocaleString()} kWh</strong> (${powerPerRoom.toFixed(1)} kWh/room)</td><td>${passPower ? '<span class="highlight-green">PASS</span>' : 'FAIL'} — Target &lt;= 20 kWh/room</td></tr>
+ <tr><td>Automated HVAC Setback Avoided (est. 10% of load)</td><td>${hvacSetbackKwh.toLocaleString()} kWh (Daily)</td><td>Automated 26°C Setpoint</td></tr>
+ <tr class="note-row"><td colspan="3">Solar Generation Mix &amp; HVAC setback are facility-declared installed-capacity assumptions, not live meter telemetry (no utility meter is connected)</td></tr>
+ <tr><td>Onsite Solar Generation Mix (declared)</td><td>${solarMixPct}% Renewable</td><td>Target: &gt;= 30.0%</td></tr>
  </table>
 
  <div class="sec-title"> Water Stewardship &amp; Recycling</div>
  <table>
- <tr><th>Metric</th><th>Recorded Value</th><th>Compliance Benchmark</th></tr>
- <tr><td>Daily Potable Water Consumption</td><td><strong>${water.toLocaleString()} Liters</strong></td><td>Target &lt;= 220 L/room</td></tr>
- <tr><td>Greywater Recycled &amp; Reused</td><td class="highlight-green">${Math.round(water * 0.85).toLocaleString()} Liters (85%)</td><td>Zero Liquid Discharge (ZLD)</td></tr>
+ <tr><th>Metric</th><th>Value</th><th>Compliance Benchmark</th></tr>
+ <tr><td>Daily Potable Water Consumption (live, from occupancy)</td><td><strong>${water.toLocaleString()} Liters</strong> (${waterPerRoom.toFixed(0)} L/room)</td><td>${passWater ? '<span class="highlight-green">PASS</span>' : 'FAIL'} — Target &lt;= 220 L/room</td></tr>
+ <tr><td>Greywater Recycled &amp; Reused (declared rate: ${greywaterPct}%)</td><td>${Math.round(water * greywaterPct / 100).toLocaleString()} Liters</td><td>Zero Liquid Discharge (ZLD)</td></tr>
  </table>
 
  <div class="sec-title"> Food Waste Diversion &amp; Rescue</div>
  <table>
- <tr><th>Metric</th><th>Recorded Value</th><th>Compliance Benchmark</th></tr>
- <tr><td>Surplus Food Diverted</td><td><strong>${food} kg</strong></td><td>R² = 0.94 Predictor Model</td></tr>
- <tr><td>Shelter Meals Provided</td><td class="highlight-green">${food * 2} Hot Meals</td><td>Feeding India / Roti Bank Verified</td></tr>
+ <tr><th>Metric</th><th>Value</th><th>Compliance Benchmark</th></tr>
+ <tr><td>Surplus Food Diverted (live, from occupancy)</td><td><strong>${food} kg</strong></td><td>Food Waste Reduction Target</td></tr>
+ <tr><td>Shelter Meals Provided (est. 2 meals/kg)</td><td>${food * 2} Meals</td><td>Local Food Rescue Partner</td></tr>
  </table>
 
  <div class="footer-box">
- <strong>OFFICIALLY VERIFIED &amp; DIGITALLY SIGNED</strong><br>
- Generated cryptographically by UrbanPulse AI Agentic Engine on behalf of The Orchid Eco-Heritage Resort.<br>
- Valid for ESG Corporate Reporting under SEBI BRSR Guidelines.
+ <strong>Report generation method:</strong> Power/Water/Food figures are computed live from the occupancy input via this app's KPI formulas. Solar mix, HVAC setback and greywater rate are disclosed facility-declared assumptions, not live sensor data — no IoT/utility integration exists yet. Compliance status is computed by comparing the live figures to the stated benchmarks above, not a fixed verdict.<br><br>
+ <strong>Content Integrity Hash (SHA-256):</strong> ${contentHash}<br>
+ This hash is a real digest of this report's data fields, computed client-side at generation time — recompute it from the fields above to verify this document was not altered after export. It is not a legal or regulatory digital signature.
  </div>
 
  <script>
@@ -936,24 +923,30 @@ function exportEsgPdf() {
 
 function exportEsgCsv() {
  const occupancy = document.getElementById('slider-occupancy').value;
+ const rooms = Math.round(occupancy * 2);
  const power = Math.round(occupancy * 24.2 + 80);
  const water = Math.round(occupancy * 190);
  const food = Math.round(occupancy * 0.56);
+ const dateStr = new Date().toISOString().slice(0, 10);
+ const powerPerRoom = power / rooms;
+ const waterPerRoom = water / rooms;
+ const passPower = powerPerRoom <= 20;
+ const passWater = waterPerRoom <= 220;
+ const complianceStatus = (passPower && passWater) ? "PASSED" : "NEEDS IMPROVEMENT";
 
  const csvContent = "data:text/csv;charset=utf-8," +
  "URBANPULSE B2B ESG SUSTAINABILITY & COMPLIANCE AUDIT SHEET\n" +
- "Facility Name,The Grand Eco-Hotel & Resort Mumbai\n" +
- "Audit Date,September 2026\n" +
- "Standard,ISO 14064 Carbon Accounting & LEED Platinum Verified\n\n" +
- "Metric,Recorded Value,Unit,Compliance Benchmark\n" +
- `Current Occupancy,${occupancy},%,Target <= 85%\n` +
- `Facility Power Consumption,${power},kWh,BEE 5-Star Benchmark\n` +
- `Solar Renewable Mix,38,%,Target >= 30%\n` +
- `Greywater Recycled,${water},Liters,Zero Liquid Discharge (ZLD)\n` +
- `Kitchen Surplus Rescued,${food},kg,Feeding India Verified\n` +
- "Single-Use Plastic Ban,100,%,Zero Waste Certified\n" +
- "Wheelchair Accessibility Audit,100,%,Pass (ADA/Harmonized Guidelines)\n\n" +
- "Verification Status,PASSED - LEED PLATINUM 4.8/5.0 STARS\n";
+ "Facility Name,The Orchid Eco-Heritage Resort & Conference Center\n" +
+ `Audit Date,${dateStr}\n` +
+ "Standard,ISO 14064 Carbon Accounting & LEED Platinum Benchmarking\n\n" +
+ "Metric,Value,Unit,Compliance Benchmark,Data Source\n" +
+ `Current Occupancy,${occupancy},%,Target <= 85%,Live user input\n` +
+ `Facility Power Consumption,${power},kWh,${passPower ? 'PASS' : 'FAIL'} - Target <= 20 kWh/room,Live (formula on occupancy)\n` +
+ `Solar Renewable Mix,38.5,%,Target >= 30%,Facility-declared assumption (no meter)\n` +
+ `Water Consumption,${water},Liters,${passWater ? 'PASS' : 'FAIL'} - Target <= 220 L/room,Live (formula on occupancy)\n` +
+ `Greywater Recycled (declared 85% rate),${Math.round(water * 0.85)},Liters,Zero Liquid Discharge (ZLD),Facility-declared assumption\n` +
+ `Kitchen Surplus Diverted,${food},kg,Food Waste Reduction Target,Live (formula on occupancy)\n\n` +
+ `Verification Status,${complianceStatus} (computed from live figures above vs. stated benchmarks)\n`;
 
  const encodedUri = encodeURI(csvContent);
  const link = document.createElement("a");

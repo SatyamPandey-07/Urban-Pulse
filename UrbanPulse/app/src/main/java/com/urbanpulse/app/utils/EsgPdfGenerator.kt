@@ -8,11 +8,17 @@ import android.graphics.RectF
 import android.graphics.pdf.PdfDocument
 import java.io.File
 import java.io.FileOutputStream
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 object EsgPdfGenerator {
+
+    private fun sha256Hex(text: String): String {
+        val digest = MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.UTF_8))
+        return digest.joinToString("") { "%02x".format(it) }
+    }
 
     fun generateEsgAuditPdf(
         context: Context,
@@ -23,7 +29,9 @@ object EsgPdfGenerator {
         energySavedKwh: String,
         waterTotalLiters: String,
         foodSurplusKg: String,
-        mealsCount: Int
+        mealsCount: Int,
+        energyRSquared: Double,
+        wasteRSquared: Double
     ): File {
         val pdfDocument = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 Size (595 x 842)
@@ -32,6 +40,22 @@ object EsgPdfGenerator {
 
         val paint = Paint().apply { isAntiAlias = true }
         val dateStr = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault()).format(Date())
+
+        // Real pass/fail computed from the live occupancy-derived metrics vs. the stated benchmarks
+        // (BEE 5-Star energy benchmark: <=20 kWh/room/day; water target: <=220 L/room/day)
+        val energyTotalNum = energyTotalKwh.replace(",", "").toDoubleOrNull() ?: 0.0
+        val waterTotalNum = waterTotalLiters.replace(",", "").toDoubleOrNull() ?: 0.0
+        val powerPerRoom = if (totalRooms > 0) energyTotalNum / totalRooms else 0.0
+        val waterPerRoom = if (totalRooms > 0) waterTotalNum / totalRooms else 0.0
+        val passPower = powerPerRoom <= 20.0
+        val passWater = waterPerRoom <= 220.0
+        val complianceStatus = if (passPower && passWater) "PASSED" else "NEEDS IMPROVEMENT"
+        val greywaterRecycled = (waterTotalNum * 0.85).toInt()
+
+        val reportBody = "Facility=$facilityName;Occupancy=$occupancyPct%;Rooms=$totalRooms;Date=$dateStr;" +
+            "Energy=$energyTotalKwh;Water=$waterTotalLiters;Food=$foodSurplusKg;" +
+            "PowerPerRoom=${"%.2f".format(powerPerRoom)};WaterPerRoom=${"%.2f".format(waterPerRoom)};Compliance=$complianceStatus"
+        val contentHash = sha256Hex(reportBody)
 
         // 1. Header Banner
         paint.color = Color.parseColor("#064E3B") // Deep Emerald Green
@@ -64,8 +88,8 @@ object EsgPdfGenerator {
         canvas.drawText("Audit Timestamp: $dateStr", 48f, 148f, paint)
 
         canvas.drawText("Occupancy Scale: $occupancyPct% ($totalRooms Active Rooms)", 330f, 128f, paint)
-        paint.color = Color.parseColor("#059669")
-        canvas.drawText("Compliance Status: AUDIT PASSED (4.8★)", 330f, 148f, paint)
+        paint.color = if (passPower && passWater) Color.parseColor("#059669") else Color.parseColor("#DC2626")
+        canvas.drawText("Compliance Status: $complianceStatus (live figures vs. benchmarks)", 330f, 148f, paint)
 
         var currentY = 190f
 
@@ -106,33 +130,39 @@ object EsgPdfGenerator {
             currentY += 38f
         }
 
-        // 3. Section: Energy
+        // 3. Section: Energy (live, predicted from real occupancy-history regression model)
         drawSectionTitle("Energy Efficiency & HVAC Load", "⚡")
-        drawMetricRow("Daily Power Consumption", "$energyTotalKwh kWh", "Benchmark: BEE 5-Star")
-        drawMetricRow("Automated HVAC Power Avoided", energySavedKwh, "Automated 26°C Setback", true)
-        drawMetricRow("Onsite Solar Generation Mix", "38.5% Renewable", "Target: >= 30.0%", true)
+        drawMetricRow(
+            "Daily Power Consumption (${"%.1f".format(powerPerRoom)} kWh/room)",
+            "$energyTotalKwh kWh",
+            if (passPower) "PASS — Target <= 20 kWh/room" else "FAIL — Target <= 20 kWh/room",
+            passPower
+        )
+        drawMetricRow("Automated HVAC Power Avoided (R²=${"%.2f".format(energyRSquared)})", energySavedKwh, "Automated 26°C Setback", true)
+        drawMetricRow("Onsite Solar Generation Mix (facility-declared, not metered)", "38.5% Renewable", "Target: >= 30.0%")
 
         currentY += 10f
 
         // 4. Section: Water
         drawSectionTitle("Water Stewardship & Recycling", "💧")
-        drawMetricRow("Daily Potable Water Consumption", "$waterTotalLiters Liters", "Target <= 220 L/room")
-        drawMetricRow("Greywater Recycled & Reused", "14,250 Liters (85%)", "Zero Liquid Discharge (ZLD)", true)
+        drawMetricRow(
+            "Daily Potable Water Consumption (${"%.0f".format(waterPerRoom)} L/room)",
+            "$waterTotalLiters Liters",
+            if (passWater) "PASS — Target <= 220 L/room" else "FAIL — Target <= 220 L/room",
+            passWater
+        )
+        drawMetricRow(
+            "Greywater Recycled & Reused (declared 85% rate)",
+            "${String.format(Locale.US, "%,d", greywaterRecycled)} Liters",
+            "Zero Liquid Discharge (ZLD)"
+        )
 
         currentY += 10f
 
-        // 5. Section: Food Waste
+        // 5. Section: Food Waste (live, predicted from real occupancy-history regression model)
         drawSectionTitle("Kitchen Surplus & Food Diversion", "🍲")
-        drawMetricRow("Surplus Food Diverted", "$foodSurplusKg kg", "R² = 0.94 Predictor Model")
-        drawMetricRow("Shelter Meals Provided", "$mealsCount Hot Meals", "Feeding India / Roti Bank Verified", true)
-
-        currentY += 10f
-
-        // 6. Section: Compliance Rating
-        drawSectionTitle("Accreditation & ESG Rating", "🏅")
-        drawMetricRow("BEE Star Rating", "4.8 / 5.0 Stars", "Certified Tier-1 Green Hotel", true)
-        drawMetricRow("LEED Green Building Status", "Platinum Certified", "Zero Waste to Landfill", true)
-        drawMetricRow("Single-Use Plastic Elimination", "100% Zero Single-Use", "Glass & Bamboo Refills", true)
+        drawMetricRow("Surplus Food Diverted (R²=${"%.2f".format(wasteRSquared)})", "$foodSurplusKg kg", "60-Day Occupancy Trend Model")
+        drawMetricRow("Shelter Meals Provided (est. 2 meals/kg)", "$mealsCount Meals", "Local Food Rescue Partner", true)
 
         // 7. Footer Stamp & Digital Seal
         val footerBox = RectF(32f, 730f, 563f, 800f)

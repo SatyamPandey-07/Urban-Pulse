@@ -13,3 +13,4 @@ local.properties
 **/local.properties
 **/*.apk
 **/*.aab
+config.local.js

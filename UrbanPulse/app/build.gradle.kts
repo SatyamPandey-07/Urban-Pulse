@@ -13,7 +13,7 @@ val localProperties = Properties().apply {
     }
 }
 
-val tomtomApiKey = localProperties.getProperty("TOMTOM_API_KEY") ?: "v2eR2zca1XkbbMm51PYvM2b81y6soEi5"
+val tomtomApiKey = localProperties.getProperty("TOMTOM_API_KEY") ?: "DEMO_TOMTOM_KEY"
 val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY") ?: "DEMO_GEMINI_KEY"
 val groqApiKey = localProperties.getProperty("GROQ_API_KEY") ?: "DEMO_GROQ_KEY"
 
