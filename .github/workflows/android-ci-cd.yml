@@ -68,7 +68,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0-hackcelestial' }}
-          name: 🌿 UrbanPulse v1.1.0 — Production Release (HackCelestial 3.0)
+          name: 🌿 UrbanPulse v1.2.0 — Production Release (HackCelestial 3.0)
           body: |
             ## 🌿 UrbanPulse — Intelligent Local Discovery, Sustainable Experience Platform & Autonomous Mobility 🚀
 
@@ -77,7 +77,13 @@ jobs:
             ### 📱 Download Android APK
             Tap the `UrbanPulse-v1.0.0.apk` asset below to install directly on your Android phone (Android 8.0+ / API 26+).
 
-            ### ✨ What's New in v1.1.0
+            ### ✨ What's New in v1.2.0
+            - 📅 **Real Bookings:** the Central Registry now persists genuine reservation records (`POST /api/experiences/:id/bookings`) — "📅 Book This Experience" in the chat creates a real, queryable booking on Android and web alike.
+            - ✅ **Real user reports feed the Evidence Graph:** travelers can "✅ Confirm Accessibility" or "⚠️ Report an Issue" on any listing — a genuinely independent second source that can upgrade a claim to Verified or surface a real flagged contradiction, not the provider's own data checked against itself.
+            - 🌐 **Live website redesign:** a full Bento Grid feature showcase at [satyampande.me/Urban-Pulse](http://satyampande.me/Urban-Pulse/) covering every real feature, and a fixed custom-domain HTTPS certificate.
+            - 🐛 **Follow-up audit fixes:** removed 3 fake pre-completed trips shown to new users, honestly labeled the offline AI-itinerary fallback instead of calling it "Verified", the chatbot's hotel picks now read the real hospitality registry instead of 3 hardcoded hotels, circumstance adaptation cross-checks live Open-Meteo weather, and the ESG dialog shows its own computed compliance status instead of a hardcoded "PASSED".
+
+            ### ✨ What Shipped in v1.1.0
             - 🔗 **Central Registry Backend:** a real Express + SQLite service (`server/`) so provider listings published on web or Android sync to both, instead of separate per-device stores.
             - 🦽 **Evidence-Based Accessibility, App-Wide:** the Verified/Reported/Inferred confidence-tagging engine now covers every experience listing (previously hospitality-only), with contradiction warnings when a rating outpaces its documentation.
             - 🗺️ **Real TomTom + Open-Meteo on the Web App:** the live dual-route map and AQI HUD now call the real APIs, matching the Android app.
