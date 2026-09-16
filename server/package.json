@@ -1,0 +1,15 @@
+{
+  "name": "urbanpulse-registry-server",
+  "version": "1.0.0",
+  "description": "UrbanPulse Central Registry — a real shared backend for experiences/providers, used by both the web app and (optionally) the Android app instead of per-device localStorage/SQLite silos.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

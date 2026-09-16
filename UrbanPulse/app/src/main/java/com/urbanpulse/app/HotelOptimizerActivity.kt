@@ -150,7 +150,9 @@ class HotelOptimizerActivity : AppCompatActivity() {
                 energySavedKwh = tvEnergySaved.text.toString(),
                 waterTotalLiters = tvWaterTotal.text.toString(),
                 foodSurplusKg = tvFoodSurplus.text.toString(),
-                mealsCount = mealsCount
+                mealsCount = mealsCount,
+                energyRSquared = energyModel?.rSquared ?: 0.0,
+                wasteRSquared = wasteModel?.rSquared ?: 0.0
             )
 
             val uri: Uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", pdfFile)

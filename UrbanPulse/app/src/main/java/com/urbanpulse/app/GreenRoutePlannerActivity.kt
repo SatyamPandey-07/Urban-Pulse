@@ -1,7 +1,12 @@
 package com.urbanpulse.app
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,8 +15,11 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.ChipGroup
@@ -34,12 +42,29 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
     private var lastRanked: List<MobilityOption> = emptyList()
     private var lastPriority: TradeoffPriority = TradeoffPriority.ECO
 
+    /** Real TomTom-routed distance for the current origin/dest, set by "Recalculate Route".
+     *  Cleared whenever the origin/dest text changes so stale network results are never reused. */
+    private var realDistanceOverrideKm: Double? = null
+
     private lateinit var etOrigin: EditText
     private lateinit var etDest: EditText
     private lateinit var tvRankedHeader: TextView
     private lateinit var btnConfirm: MaterialButton
 
     private lateinit var cardByMode: Map<TravelMode, MaterialCardView>
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        if (grants.values.any { it }) {
+            fetchRealGpsLocation()
+        } else {
+            Toast.makeText(this, "Location permission denied — using default city-center origin.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun currentDistanceKm(): Double =
+        realDistanceOverrideKm ?: CarbonEstimator.estimateDistanceKm(etOrigin.text.toString(), etDest.text.toString())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,21 +91,41 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
         btnConfirm = findViewById(R.id.btnConfirmGreenRoute)
 
         btnUseGps.setOnClickListener {
-            etOrigin.setText("My Real-time GPS Location (19.1775° N, 72.9544° E)")
-            recalcAndRender()
-            Toast.makeText(this, "Origin set to real-time GPS coordinates.", Toast.LENGTH_SHORT).show()
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            ) {
+                fetchRealGpsLocation()
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                )
+            }
         }
 
         btnRecalc.setOnClickListener {
-            recalcAndRender()
-            val distanceKm = CarbonEstimator.estimateDistanceKm(etOrigin.text.toString(), etDest.text.toString())
-            Toast.makeText(this, String.format(Locale.US, "Routes recalculated for a %.1f km trip.", distanceKm), Toast.LENGTH_SHORT).show()
+            val originText = etOrigin.text.toString()
+            val destText = etDest.text.toString()
+            lifecycleScope.launch {
+                val realKm = CarbonEstimator.fetchRealRouteDistanceKm(originText, destText, BuildConfig.TOMTOM_API_KEY)
+                if (realKm != null) {
+                    realDistanceOverrideKm = realKm
+                    recalcAndRender()
+                    Toast.makeText(this@GreenRoutePlannerActivity, String.format(Locale.US, "TomTom-routed distance: %.1f km.", realKm), Toast.LENGTH_SHORT).show()
+                } else {
+                    recalcAndRender()
+                    val distanceKm = currentDistanceKm()
+                    Toast.makeText(this@GreenRoutePlannerActivity, String.format(Locale.US, "Live route unavailable — using %.1f km estimate.", distanceKm), Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         val debounce = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) { recalcAndRender() }
+            override fun afterTextChanged(s: Editable?) {
+                realDistanceOverrideKm = null // text changed — any previous live route no longer applies
+                recalcAndRender()
+            }
         }
         etOrigin.addTextChangedListener(debounce)
         etDest.addTextChangedListener(debounce)
@@ -137,12 +182,38 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
             if (appliedBits.isNotEmpty()) " — ${appliedBits.joinToString(", ")}" else ""
     }
 
+    /** Uses the real device GPS fix (FusedLocationProviderClient, with a LocationManager fallback) as the trip origin. */
+    private fun fetchRealGpsLocation() {
+        try {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
+                val resolved = loc ?: run {
+                    val locMgr = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+                    locMgr?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                        ?: locMgr?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                }
+                if (resolved != null) {
+                    etOrigin.setText(
+                        String.format(Locale.US, "My GPS Location (%.4f° N, %.4f° E)", resolved.latitude, resolved.longitude)
+                    )
+                    Toast.makeText(this, "Origin set to real-time GPS coordinates.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "GPS location unavailable — enable location services and try again.", Toast.LENGTH_SHORT).show()
+                }
+            }.addOnFailureListener {
+                Toast.makeText(this, "GPS location unavailable — enable location services and try again.", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: SecurityException) {
+            Toast.makeText(this, "Location permission denied.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     /** Recomputes real distance/cost/carbon for every mode (including walk/cycle feasibility) and re-renders every card. */
     private fun recalcAndRender() {
         val accessMgr = AccessibilityManager.getInstance(this)
         val requireStepFree = accessMgr.isWheelchairModeEnabled || lastPriority == TradeoffPriority.STEP_FREE
 
-        val distanceKm = CarbonEstimator.estimateDistanceKm(etOrigin.text.toString(), etDest.text.toString())
+        val distanceKm = currentDistanceKm()
         val allOptions = CarbonEstimator.estimateAllModes(distanceKm)
         val ranked = MobilityOptimizer.rank(allOptions, lastPriority, requireStepFree)
         lastRanked = ranked
@@ -260,9 +331,7 @@ class GreenRoutePlannerActivity : AppCompatActivity() {
     }
 
     private fun confirmJourney() {
-        val allOptions = CarbonEstimator.estimateAllModes(
-            CarbonEstimator.estimateDistanceKm(etOrigin.text.toString(), etDest.text.toString())
-        )
+        val allOptions = CarbonEstimator.estimateAllModes(currentDistanceKm())
         val option = allOptions.firstOrNull { it.mode == selectedMode } ?: return
         val baseline = allOptions.first { it.mode == TravelMode.TAXI }.carbonGrams
         val avoidedGrams = option.carbonAvoidedVsBaseline(baseline)

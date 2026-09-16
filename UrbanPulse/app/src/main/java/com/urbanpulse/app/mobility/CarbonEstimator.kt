@@ -1,5 +1,11 @@
 package com.urbanpulse.app.mobility
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.min
@@ -91,6 +97,40 @@ object CarbonEstimator {
         // Road/rail routes are never a straight line; apply a realistic detour factor.
         val routed = straightLine * 1.35
         return min(routed, 60.0).coerceAtLeast(1.5)
+    }
+
+    private val routeHttpClient = OkHttpClient.Builder()
+        .connectTimeout(6, TimeUnit.SECONDS)
+        .readTimeout(6, TimeUnit.SECONDS)
+        .build()
+
+    /**
+     * Fetches a real road-network distance from the TomTom Routing API for the resolved
+     * origin/destination coordinates. Returns null (caller falls back to [estimateDistanceKm]'s
+     * haversine+detour-factor estimate) if the key is missing or the call fails.
+     */
+    suspend fun fetchRealRouteDistanceKm(originText: String, destinationText: String, apiKey: String): Double? {
+        if (apiKey.isBlank() || apiKey == "DEMO_TOMTOM_KEY") return null
+        val (lat1, lng1) = resolveCoordinates(originText)
+        val (lat2, lng2) = resolveCoordinates(destinationText)
+        return withContext(Dispatchers.IO) {
+            try {
+                val url = "https://api.tomtom.com/routing/1/calculateRoute/$lat1,$lng1:$lat2,$lng2/json?key=$apiKey&routeType=eco&traffic=true"
+                val req = Request.Builder().url(url).get().build()
+                routeHttpClient.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@withContext null
+                    val body = resp.body?.string() ?: return@withContext null
+                    val json = JSONObject(body)
+                    val routes = json.optJSONArray("routes") ?: return@withContext null
+                    if (routes.length() == 0) return@withContext null
+                    val summary = routes.getJSONObject(0).optJSONObject("summary") ?: return@withContext null
+                    val lengthMeters = summary.optDouble("lengthInMeters", 0.0)
+                    if (lengthMeters > 0.0) lengthMeters / 1000.0 else null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 
     fun estimateOption(mode: TravelMode, distanceKm: Double): MobilityOption {

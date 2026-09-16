@@ -69,7 +69,7 @@ object EsgPdfGenerator {
         paint.color = Color.WHITE
         paint.textSize = 20f
         paint.isFakeBoldText = true
-        canvas.drawText("Verified ESG Compliance & Resource Audit", 32f, 60f, paint)
+        canvas.drawText("ESG Compliance & Resource Audit", 32f, 60f, paint)
 
         paint.color = Color.parseColor("#A7F3D0")
         paint.textSize = 9f
@@ -164,21 +164,24 @@ object EsgPdfGenerator {
         drawMetricRow("Surplus Food Diverted (R²=${"%.2f".format(wasteRSquared)})", "$foodSurplusKg kg", "60-Day Occupancy Trend Model")
         drawMetricRow("Shelter Meals Provided (est. 2 meals/kg)", "$mealsCount Meals", "Local Food Rescue Partner", true)
 
-        // 7. Footer Stamp & Digital Seal
-        val footerBox = RectF(32f, 730f, 563f, 800f)
+        // 7. Footer: real SHA-256 content hash (computed from the report's own data fields above)
+        val footerBox = RectF(32f, 720f, 563f, 800f)
         paint.color = Color.parseColor("#F1F5F9")
         canvas.drawRoundRect(footerBox, 8f, 8f, paint)
 
         paint.color = Color.parseColor("#064E3B")
-        paint.textSize = 10f
+        paint.textSize = 9f
         paint.isFakeBoldText = true
-        canvas.drawText("OFFICIALLY VERIFIED & DIGITALLY SIGNED", 48f, 752f, paint)
+        canvas.drawText("Report Generation Method", 48f, 740f, paint)
 
         paint.color = Color.parseColor("#64748B")
-        paint.textSize = 8f
+        paint.textSize = 7.5f
         paint.isFakeBoldText = false
-        canvas.drawText("Generated cryptographically by UrbanPulse AI Agentic Engine on behalf of $facilityName.", 48f, 768f, paint)
-        canvas.drawText("Document Hash: SHA-256 Verified • Valid for ESG Corporate Reporting under SEBI BRSR Guidelines.", 48f, 782f, paint)
+        canvas.drawText("Energy/Water/Food figures are live predictions from a linear regression fit on 60 days of occupancy history.", 48f, 754f, paint)
+        canvas.drawText("Solar mix & greywater rate are facility-declared assumptions, not metered telemetry. Compliance is computed, not fixed.", 48f, 766f, paint)
+        paint.textSize = 7f
+        canvas.drawText("Content Integrity Hash (SHA-256): $contentHash", 48f, 780f, paint)
+        canvas.drawText("Real digest of this report's data fields, computed on-device at generation time — not a legal/regulatory signature.", 48f, 792f, paint)
 
         pdfDocument.finishPage(page)
 
