@@ -14,5 +14,6 @@ data class ExperienceListing(
     val durationHours: Double,
     var isAvailableToday: Boolean = true,
     val travelerTags: List<String> = listOf("Child-Friendly", "Family", "Indoor"),
-    var viewsCount: Int = 142
+    var viewsCount: Int = 0,
+    var inquiryCount: Int = 0
 )

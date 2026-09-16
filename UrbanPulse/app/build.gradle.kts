@@ -16,6 +16,10 @@ val localProperties = Properties().apply {
 val tomtomApiKey = localProperties.getProperty("TOMTOM_API_KEY") ?: "DEMO_TOMTOM_KEY"
 val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY") ?: "DEMO_GEMINI_KEY"
 val groqApiKey = localProperties.getProperty("GROQ_API_KEY") ?: "DEMO_GROQ_KEY"
+// 10.0.2.2 is the Android emulator's alias for the host machine's localhost — reaches `server/`
+// running on the dev machine out of the box. A physical device needs the host's LAN IP instead
+// (set CENTRAL_REGISTRY_BASE_URL in local.properties, e.g. http://192.168.1.23:3001).
+val centralRegistryBaseUrl = localProperties.getProperty("CENTRAL_REGISTRY_BASE_URL") ?: "http://10.0.2.2:3001"
 
 android {
     namespace = "com.urbanpulse.app"
@@ -36,6 +40,7 @@ android {
         buildConfigField("String", "TOMTOM_API_KEY", "\"$tomtomApiKey\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
         buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
+        buildConfigField("String", "CENTRAL_REGISTRY_BASE_URL", "\"$centralRegistryBaseUrl\"")
     }
 
     buildTypes {
@@ -48,11 +53,13 @@ android {
             buildConfigField("String", "TOMTOM_API_KEY", "\"$tomtomApiKey\"")
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
             buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
+            buildConfigField("String", "CENTRAL_REGISTRY_BASE_URL", "\"$centralRegistryBaseUrl\"")
         }
         debug {
             buildConfigField("String", "TOMTOM_API_KEY", "\"$tomtomApiKey\"")
             buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
             buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
+            buildConfigField("String", "CENTRAL_REGISTRY_BASE_URL", "\"$centralRegistryBaseUrl\"")
         }
     }
     compileOptions {

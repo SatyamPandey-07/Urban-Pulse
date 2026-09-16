@@ -18,7 +18,7 @@ class AppDatabaseHelper private constructor(context: Context) : SQLiteOpenHelper
 
     companion object {
         private const val DB_NAME = "urbanpulse_app.db"
-        private const val DB_VERSION = 2
+        private const val DB_VERSION = 3
 
         const val TABLE_STAYS = "hospitality_stays"
         const val TABLE_HISTORY = "hotel_metrics_history"
@@ -78,7 +78,10 @@ class AppDatabaseHelper private constructor(context: Context) : SQLiteOpenHelper
                 accessibility_tags TEXT NOT NULL,
                 carbon_kg_per_visit REAL NOT NULL,
                 price_rupees INTEGER NOT NULL,
-                duration_hours REAL NOT NULL
+                duration_hours REAL NOT NULL,
+                is_available_today INTEGER NOT NULL DEFAULT 1,
+                views_count INTEGER NOT NULL DEFAULT 0,
+                inquiry_count INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )

@@ -331,7 +331,7 @@ class YatriAiFragment : Fragment() {
                 }
 
                 val metrics = android.widget.TextView(ctx).apply {
-                    text = "👁️ ${exp.viewsCount} Traveler Views • 42 Direct Route Requests"
+                    text = "👁️ ${exp.viewsCount} Traveler Views • ${exp.inquiryCount} Direct Route Requests"
                     textSize = 12f
                     setPadding(0, 8, 0, 8)
                 }
@@ -340,7 +340,9 @@ class YatriAiFragment : Fragment() {
                     text = if (exp.isAvailableToday) "Available Today (Accepting Travelers)" else "Booked Out / Paused"
                     isChecked = exp.isAvailableToday
                     setOnCheckedChangeListener { _, isChecked ->
-                        ExperienceRepository(ctx).toggleAvailability(exp.id, isChecked)
+                        lifecycleScope.launch {
+                            ExperienceRepository(ctx).toggleAvailability(exp.id, isChecked)
+                        }
                         text = if (isChecked) "Available Today (Accepting Travelers)" else "Booked Out / Paused"
                         Toast.makeText(ctx, "${exp.name} availability updated!", Toast.LENGTH_SHORT).show()
                     }
@@ -498,6 +500,30 @@ class YatriAiFragment : Fragment() {
 
             val lowerPrompt = prompt.lowercase()
 
+            // 0. An experience chip/name was tapped directly -> record a real inquiry and show its detail card
+            val ctxForMatch = context
+            if (ctxForMatch != null) {
+                val matchedExp = withContext(Dispatchers.IO) {
+                    try { ExperienceRepository(ctxForMatch).getAllExperiences().find { it.name == prompt } } catch (e: Exception) { null }
+                }
+                if (matchedExp != null) {
+                    withContext(Dispatchers.IO) { ExperienceRepository(ctxForMatch).recordInquiry(matchedExp.id) }
+                    chatAdapter.removeTypingIndicator()
+                    addAiMessage(
+                        "**${matchedExp.name}**\n\n" +
+                            "${matchedExp.category} • ${matchedExp.location} • ${matchedExp.durationHours}h • ${matchedExp.pricePerPerson}\n" +
+                            "Accessibility: ${matchedExp.accessibilityRating}% (${matchedExp.accessibilityTags.joinToString(", ")})\n" +
+                            "Sustainability: ${matchedExp.sustainabilityPractice}",
+                        mcq = QuickMcqQuestion(
+                            questionId = "exp_detail_mcq",
+                            questionText = "Next step",
+                            options = listOf("Show on Live Map", "Plan Another Destination")
+                        )
+                    )
+                    return@launch
+                }
+            }
+
             // 1. Check if user is answering a pending Days MCQ question
             if (pendingTripDestination != null && (lowerPrompt.contains("day") || lowerPrompt.contains("express") || lowerPrompt.contains("weekend") || lowerPrompt.contains("leisure") || lowerPrompt.contains("yatra") || lowerPrompt.contains("pilgrimage") || lowerPrompt.matches(Regex(".*\\b[1-7]\\b.*")))) {
                 chatAdapter.removeTypingIndicator()
@@ -617,6 +643,9 @@ class YatriAiFragment : Fragment() {
                         ExperienceRepository(ctx).getAdaptiveExperiences(isRain = true, maxDuration = 2.0)
                     }
                     val ranked = ExperienceOptimizer.rank(adaptive)
+                    withContext(Dispatchers.IO) {
+                        ranked.take(3).forEach { ExperienceRepository(ctx).recordView(it.experience.id) }
+                    }
                     val builder = StringBuilder("☔ **Real-Time Circumstance Adaptation Triggered**\n\n")
                     builder.append("Detected weather change (rain/storm) or schedule delay! We have dynamically adapted your itinerary, swapping outdoor cycling and treks for covered, indoor cultural workshops & tactile galleries:\n\n")
 
@@ -651,6 +680,9 @@ class YatriAiFragment : Fragment() {
                         ExperienceRepository(ctx).getAdaptiveExperiences(isRain = false, maxDuration = 3.0, familyOnly = true)
                     }
                     val ranked = ExperienceOptimizer.rank(familyExp)
+                    withContext(Dispatchers.IO) {
+                        ranked.take(4).forEach { ExperienceRepository(ctx).recordView(it.experience.id) }
+                    }
                     val builder = StringBuilder("👨‍👩‍👧‍👦 **Family & Child-Friendly Recommendations**\n\n")
                     builder.append("Filtered for safe, interactive, and family-appropriate activities with step-free stroller/ramp concourses:\n\n")
 
@@ -689,6 +721,9 @@ class YatriAiFragment : Fragment() {
                     val isWheelchair = AccessibilityManager.getInstance(ctx).isWheelchairModeEnabled
                     val filtered = allExp.filter { it.durationHours <= 2.5 && (!isWheelchair || it.accessibilityRating >= 80) }
                     val ranked = ExperienceOptimizer.rank(filtered)
+                    withContext(Dispatchers.IO) {
+                        ranked.take(4).forEach { ExperienceRepository(ctx).recordView(it.experience.id) }
+                    }
 
                     val builder = StringBuilder("⏱️ **Found ${ranked.size} Pareto-Optimized Micro-Experiences (Under 2 Hours)**\n\n")
                     builder.append("Curated for your available time window near your coordinates with verified accessibility:\n\n")
