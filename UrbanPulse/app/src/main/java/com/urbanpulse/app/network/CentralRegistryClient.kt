@@ -63,6 +63,16 @@ object CentralRegistryClient {
         val note: String
     )
 
+    data class ImpactStats(
+        val experienceCount: Int,
+        val bookingCount: Int,
+        val travelerCount: Int,
+        val accessibilityConfirmCount: Int,
+        val accessibilityDisputeCount: Int,
+        val bookedExperiencesCarbonFootprintKg: Double,
+        val averageEcoScore: Double
+    )
+
     private fun parseExperience(o: JSONObject): RegistryExperience {
         val tagsArray = o.optJSONArray("accessibilityTags") ?: JSONArray()
         val tags = (0 until tagsArray.length()).map { tagsArray.getString(it) }
@@ -213,6 +223,30 @@ object CentralRegistryClient {
                 null
             }
         }
+
+    /** Real cross-user aggregate stats computed by the backend via SQL over actual rows —
+     *  not a fabricated headline number. Mirrors the same /api/impact-stats endpoint the web app uses. */
+    suspend fun fetchImpactStats(): ImpactStats? = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url("$baseUrl/api/impact-stats").get().build()
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return@withContext null
+                val body = resp.body?.string() ?: return@withContext null
+                val o = JSONObject(body)
+                ImpactStats(
+                    experienceCount = o.optInt("experienceCount", 0),
+                    bookingCount = o.optInt("bookingCount", 0),
+                    travelerCount = o.optInt("travelerCount", 0),
+                    accessibilityConfirmCount = o.optInt("accessibilityConfirmCount", 0),
+                    accessibilityDisputeCount = o.optInt("accessibilityDisputeCount", 0),
+                    bookedExperiencesCarbonFootprintKg = o.optDouble("bookedExperiencesCarbonFootprintKg", 0.0),
+                    averageEcoScore = o.optDouble("averageEcoScore", 0.0)
+                )
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     suspend fun submitReport(experienceId: String, confirmsAccessibility: Boolean, note: String): RegistryReport? =
         withContext(Dispatchers.IO) {

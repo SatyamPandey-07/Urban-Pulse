@@ -362,8 +362,45 @@ class YatriAiFragment : Fragment() {
             val allExp = withContext(Dispatchers.IO) {
                 try { ExperienceRepository(ctx).getAllExperiences() } catch (e: Exception) { emptyList() }
             }
+            val impact = withContext(Dispatchers.IO) {
+                com.urbanpulse.app.network.CentralRegistryClient.fetchImpactStats()
+            }
 
             container.removeAllViews()
+
+            // Real Impact Dashboard summary — SQL-aggregated from actual bookings/reports on the
+            // Central Registry backend, not a fabricated headline number. Omitted entirely (rather
+            // than showing zeros) when the backend isn't reachable, so it never implies live data
+            // it doesn't have.
+            if (impact != null) {
+                val impactCard = com.google.android.material.card.MaterialCardView(ctx).apply {
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { setMargins(0, 0, 0, 20) }
+                    radius = 24f
+                    strokeWidth = 2
+                    setContentPadding(24, 20, 24, 20)
+                }
+                val impactRow = android.widget.LinearLayout(ctx).apply { orientation = android.widget.LinearLayout.VERTICAL }
+                impactRow.addView(android.widget.TextView(ctx).apply {
+                    text = "📊 Real Platform Impact (Live)"
+                    textSize = 15f
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                })
+                impactRow.addView(android.widget.TextView(ctx).apply {
+                    text = "🏪 ${impact.experienceCount} experiences • 📅 ${impact.bookingCount} real bookings • 🧑‍🤝‍🧑 ${impact.travelerCount} travelers served"
+                    textSize = 12f
+                    setPadding(0, 8, 0, 4)
+                })
+                impactRow.addView(android.widget.TextView(ctx).apply {
+                    text = "🦽 ${impact.accessibilityConfirmCount + impact.accessibilityDisputeCount} accessibility reports collected • Avg. eco score: ${impact.averageEcoScore}/5"
+                    textSize = 12f
+                })
+                impactCard.addView(impactRow)
+                container.addView(impactCard)
+            }
+
             allExp.forEach { exp ->
                 val card = com.google.android.material.card.MaterialCardView(ctx).apply {
                     layoutParams = android.widget.LinearLayout.LayoutParams(
