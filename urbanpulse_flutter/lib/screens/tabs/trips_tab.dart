@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../domain/carbon_estimator.dart';
