@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/safe_launch.dart';
 import '../../agents/runtime/agent_kind.dart';
 import '../../agents/safar/transport_planner.dart';
 import '../../core/app_colors.dart';
@@ -102,10 +102,7 @@ class TripOverview extends StatelessWidget {
           _Heading(icon: Icons.link_rounded, color: AgentKind.khoji.color, text: 'Sources'),
           for (final s in itinerary.sources.take(30))
             InkWell(
-              onTap: () async {
-                final uri = Uri.tryParse(s.url);
-                if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
-              },
+              onTap: () => openWebLink(s.url),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
@@ -151,7 +148,7 @@ class _Heading extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(width: 8),
-        Text(text, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: color)),
+        Expanded(child: Text(text, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: color))),
       ],
     ),
   );

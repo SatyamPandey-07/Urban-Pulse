@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/safe_launch.dart';
 import '../../agents/runtime/agent_kind.dart';
 import '../../models/itinerary/itinerary.dart';
 import '../../models/itinerary/itinerary_parts.dart';
@@ -188,10 +188,7 @@ class _Provenance extends StatelessWidget {
     );
     if (p.url == null) return Text(text, style: style);
     return InkWell(
-      onTap: () async {
-        final uri = Uri.tryParse(p.url!);
-        if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
-      },
+      onTap: () => openWebLink(p.url),
       child: Text(text, style: style),
     );
   }

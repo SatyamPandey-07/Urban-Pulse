@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/safe_launch.dart';
 import '../../agents/runtime/agent_kind.dart';
 import '../../agents/yatri/planner_orchestrator.dart';
 import '../../core/app_colors.dart';
@@ -422,10 +422,7 @@ class _Details extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 32)),
-              onPressed: () async {
-                final uri = Uri.tryParse(url);
-                if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
-              },
+              onPressed: () => openWebLink(url),
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
               label: const Text('Open listing'),
             ),

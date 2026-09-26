@@ -209,8 +209,8 @@ class _DaysTabState extends State<_DaysTab> with AutomaticKeepAliveClientMixin {
                       onTap: () => setState(() => _day = i),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 160),
-                        width: 78,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        width: 96,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                         decoration: BoxDecoration(
                           color: selected ? scheme.primary : scheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(16),
@@ -219,8 +219,14 @@ class _DaysTabState extends State<_DaysTab> with AutomaticKeepAliveClientMixin {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Day ${d.number}', style: theme.textTheme.labelLarge?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurface, fontWeight: FontWeight.w800)),
-                            Text(shortDate(d.date), style: theme.textTheme.labelSmall?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurfaceVariant)),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Day ${d.number}', style: theme.textTheme.labelLarge?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurface, fontWeight: FontWeight.w800)),
+                            ),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(shortDate(d.date), style: theme.textTheme.labelSmall?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurfaceVariant)),
+                            ),
                           ],
                         ),
                       ),
