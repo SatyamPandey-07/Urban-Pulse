@@ -1,3 +1,4 @@
+import '../khoji/khoji_agent.dart';
 import '../runtime/report.dart';
 import '../runtime/task_board.dart';
 import '../yatri/hotspot_gates.dart';
@@ -6,16 +7,19 @@ import 'hotspot_finder.dart';
 /// Bhatkanti, the hotspot finder. A worker: it searches, narrates into the
 /// feed and reports what it found plus the questions it can see. Yatri decides.
 class BhatkantiAgent {
-  BhatkantiAgent(this.finder);
+  BhatkantiAgent(this.finder, {this.khoji});
 
   final HotspotFinder finder;
+
+  /// Khoji checks new places and unconfirmed access before they are planned.
+  final KhojiAgent? khoji;
 
   Future<AgentReport> run(TaskContext ctx, HotspotQuery query) async {
     ctx.say(
       'is looking for places to visit in ${query.destination}',
       why: 'Bhatkanti picks about ${query.perDay} places a day: ${query.target} for this trip, from maps, Wikipedia and web searches.',
     );
-    final HotspotSearchResult result;
+    HotspotSearchResult result;
     try {
       result = await finder.find(
         query,
@@ -24,6 +28,18 @@ class BhatkantiAgent {
       );
     } catch (e) {
       return AgentReport.failed(ctx.agent, 'Bhatkanti could not search for places');
+    }
+
+    final k = khoji;
+    if (k != null && result.selected.isNotEmpty && !ctx.degraded && !ctx.cancelled) {
+      try {
+        final v = await k.verifyHotspots(ctx, result);
+        if (v.replacements.isNotEmpty || v.closedIds.isNotEmpty) {
+          result = HotspotFinder.amended(result, replacements: v.replacements, dropIds: v.closedIds);
+        }
+      } catch (_) {
+        // verification is a bonus; the search result stands
+      }
     }
 
     final issues = HotspotGates.check(result);

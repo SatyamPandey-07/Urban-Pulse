@@ -217,6 +217,23 @@ class HotspotFinder {
     );
   }
 
+  /// [r] with the places in [replacements] swapped in (verified copies), and
+  /// those in [dropIds] removed and replaced from the rest of the pool.
+  static HotspotSearchResult amended(HotspotSearchResult r, {Map<String, Hotspot> replacements = const {}, Set<String> dropIds = const {}}) {
+    Hotspot swap(Hotspot h) => replacements[h.id] ?? h;
+    final pool = [for (final h in r.pool) if (!dropIds.contains(h.id)) swap(h)];
+    final base = HotspotSearchResult(
+      query: r.query,
+      selected: [for (final h in r.selected) if (!dropIds.contains(h.id)) swap(h)],
+      pool: pool,
+      considered: r.considered,
+      sources: r.sources,
+      warnings: r.warnings,
+    );
+    // Something was dropped: refill the selection from the pool.
+    return dropIds.isEmpty ? base : reselect(base, r.query.mix);
+  }
+
   /// Re-picks the trip's places from an existing [pool] under another [mix]:
   /// no new search, so it is instant.
   static HotspotSearchResult reselect(HotspotSearchResult r, HotspotMix mix) {

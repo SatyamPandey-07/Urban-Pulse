@@ -14,6 +14,8 @@ import '../atithi/hotel_finder.dart';
 import '../bhatkanti/bhatkanti_agent.dart';
 import '../bhatkanti/hotspot_finder.dart';
 import '../hisab/budget_engine.dart';
+import '../khoji/khoji.dart';
+import '../khoji/khoji_agent.dart';
 import '../hisab/hotel_budget.dart';
 import '../raah/day_planner.dart';
 import '../runtime/agent_kind.dart';
@@ -217,7 +219,16 @@ class PlannerOrchestrator {
       estimator: toolkit.estimator,
       fetchPage: toolset.fetch,
     );
-    final atithi = AtithiAgent(finder);
+    final khoji = KhojiAgent(
+      Khoji(
+        llm: toolkit.llm,
+        budget: toolset.budget,
+        search: toolset.search,
+        fetchPage: toolset.fetch,
+        wikipedia: toolkit.wikipedia,
+      ),
+    );
+    final atithi = AtithiAgent(finder, khoji: hotelsOnly ? null : khoji);
 
     final hotelQuery = HotelQuery(
       destination: destination,
@@ -248,6 +259,7 @@ class PlannerOrchestrator {
         llm: toolkit.llm,
         estimator: toolkit.estimator,
       ),
+      khoji: khoji,
     );
     final safar = SafarAgent(estimator: toolkit.estimator);
     final spotQuery = HotspotQuery(
@@ -321,7 +333,7 @@ class PlannerOrchestrator {
           why: round == 0
               ? 'Yatri needs somewhere to base the plan. Atithi searches hotels, prices and access details.'
               : 'You changed what the search should look for, so Atithi is trying again.',
-          timeout: const Duration(seconds: 40),
+          timeout: const Duration(seconds: 55),
         ),
         (c) => atithi.run(c, query),
         say: round == 0 ? 'allocated the hotel search to Atithi' : 're-tasked Atithi with the new limits',
@@ -457,7 +469,7 @@ class PlannerOrchestrator {
           agent: AgentKind.bhatkanti,
           title: round == 0 ? 'Find places to visit' : 'Look further out',
           why: 'A trip needs things to do. Bhatkanti finds about ${query.perDay} places a day, mixing well-known sights with new ones.',
-          timeout: const Duration(seconds: 40),
+          timeout: const Duration(seconds: 55),
         ),
         (c) => agent.run(c, query),
         say: round == 0 ? 'allocated the search for places to visit to Bhatkanti' : 'asked Bhatkanti to look further out',

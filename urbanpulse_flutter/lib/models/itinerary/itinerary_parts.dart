@@ -58,6 +58,9 @@ class Claim {
     this.confidence = 0.5,
   });
 
+  /// The claim that holds a hotel's or place's guest reviews.
+  static const reviewsLabel = 'What guests say';
+
   final String text;
   final Verdict verdict;
   final List<SourceRef> sources;
@@ -65,6 +68,9 @@ class Claim {
   /// Short quotes from reviews (Khoji prefers the lower-rated ones).
   final List<String> reviewQuotes;
   final double confidence;
+
+  /// Whether this is the reviews entry rather than a factual claim.
+  bool get isReviews => text == reviewsLabel;
 
   Claim copyWith({Verdict? verdict, List<SourceRef>? sources, List<String>? reviewQuotes, double? confidence}) =>
       Claim(
