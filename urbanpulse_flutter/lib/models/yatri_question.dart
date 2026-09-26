@@ -11,6 +11,7 @@ enum AnswerWidget {
   multiSelect,
   dateTimeRange,
   groupStepper,
+  childAges,
   budgetRange,
   text,
 }
@@ -59,6 +60,7 @@ class YatriQuestion {
     this.reason = IssueKind.missing,
     this.attempt = 0,
     this.skippable = false,
+    this.variant,
   });
 
   final String id;
@@ -83,6 +85,11 @@ class YatriQuestion {
   final int attempt;
   final bool skippable;
 
+  /// Which flavour of the answer widget to show (e.g. `calendar` vs `presets`
+  /// for dates). The agent may pick one from [QuestionCatalog.variantsFor];
+  /// null means the default.
+  final String? variant;
+
   String get displayText => text ?? defaultText;
 
   YatriQuestion copyWith({
@@ -91,6 +98,7 @@ class YatriQuestion {
     int? attempt,
     Map<String, Object?>? prefill,
     Set<String>? preselected,
+    String? variant,
   }) =>
       YatriQuestion(
         id: id,
@@ -105,6 +113,7 @@ class YatriQuestion {
         reason: reason,
         attempt: attempt ?? this.attempt,
         skippable: skippable,
+        variant: variant ?? this.variant,
       );
 }
 
@@ -196,6 +205,17 @@ final class GroupAnswer extends YatriAnswer {
     final women_ = women > 0 ? ' · $women women' : '';
     return '${parts.join(', ')}$women_';
   }
+}
+
+final class AgesAnswer extends YatriAnswer {
+  const AgesAnswer(this.ages);
+
+  final List<int> ages;
+
+  @override
+  String get displayLabel => ages.isEmpty
+      ? 'No children'
+      : 'Ages: ${ages.map((a) => a == 0 ? 'under 1' : '$a').join(', ')}';
 }
 
 final class BudgetAnswer extends YatriAnswer {

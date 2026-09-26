@@ -246,33 +246,40 @@ abstract final class BriefValidator {
     return const [];
   }
 
-  /// Issues with the traveller breakdown alone. Also used by the answer
-  /// applier to reject a bad stepper submission.
+  /// Issues with the traveller breakdown. Each part is its own question so the
+  /// agent only asks for what it could not work out: the adult / senior /
+  /// child split (`group`), the children's ages (`childAges`) and how many
+  /// travellers are women (`women`). Also used by the answer applier to reject
+  /// a bad stepper submission.
   static List<BriefIssue> groupIssues(TripBrief b) {
-    BriefIssue issue(IssueKind k, String message) => BriefIssue(
+    BriefIssue issue(String qid, IssueKind k, String message) => BriefIssue(
       field: BriefField.group,
-      questionId: 'group',
+      questionId: qid,
       kind: k,
       message: message,
     );
 
-    if (!b.hasGroupBreakdown) {
+    if (!b.hasPartsBreakdown) {
       return [
-        issue(IssueKind.missing, 'Who’s travelling — adults, seniors, children?'),
+        issue(
+          'group',
+          IssueKind.missing,
+          'Who’s travelling — adults, seniors, children?',
+        ),
       ];
     }
     final adults = b.adults!;
     final seniors = b.seniors!;
     final children = b.children!;
-    final women = b.women!;
     final total = b.travellerCount;
 
-    if (adults < 0 || seniors < 0 || children < 0 || women < 0) {
-      return [issue(IssueKind.invalid, 'Counts can’t be negative.')];
+    if (adults < 0 || seniors < 0 || children < 0 || (b.women ?? 0) < 0) {
+      return [issue('group', IssueKind.invalid, 'Counts can’t be negative.')];
     }
     if (adults + seniors < 1) {
       return [
         issue(
+          'group',
           IssueKind.invalid,
           'At least one adult or senior has to travel with the group.',
         ),
@@ -282,28 +289,42 @@ abstract final class BriefValidator {
     if (total != null && sum != total) {
       return [
         issue(
+          'group',
           IssueKind.conflict,
           'You now have $total travellers but the group adds up to $sum.',
         ),
       ];
     }
-    if (women > sum) {
+    if (b.childAges.any((a) => a < 0 || a > 17)) {
       return [
-        issue(IssueKind.invalid, 'Women can’t be more than the whole group.'),
+        issue('childAges', IssueKind.invalid, 'Child ages must be between 0 and 17.'),
       ];
     }
     if (b.childAges.length != children) {
       return [
         issue(
+          'childAges',
           IssueKind.missing,
-          children == 0
-              ? 'No child ages are needed.'
-              : 'Please pick an age for each child.',
+          children == 1
+              ? 'How old is the child?'
+              : 'How old are the children?',
         ),
       ];
     }
-    if (b.childAges.any((a) => a < 0 || a > 17)) {
-      return [issue(IssueKind.invalid, 'Child ages must be between 0 and 17.')];
+    final women = b.women;
+    if (women == null) {
+      return [
+        issue('women', IssueKind.missing, 'Are any of the travellers women?'),
+      ];
+    }
+    if (women > sum) {
+      return [
+        issue(
+          'women',
+          IssueKind.invalid,
+          'Women can’t be more than the whole group.',
+        ),
+      ];
     }
     return const [];
   }

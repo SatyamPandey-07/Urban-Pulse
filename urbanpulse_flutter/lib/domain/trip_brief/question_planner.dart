@@ -11,15 +11,16 @@ class PlannerState {
   /// Failed attempts per question id, so a stubborn question escalates.
   final Map<String, int> attempts = {};
 
-  /// Whether the "add optional preferences?" offer has been made, and what is
-  /// still queued if the traveler said yes.
-  bool optionalOffered = false;
-  final List<String> optionalQueue = [];
+  /// Whether the next-best-question step has already run (it is consulted at
+  /// most once per conversation to keep token use low), and the optional
+  /// questions it chose that are still waiting to be asked.
+  bool nbaConsulted = false;
+  final List<String> nbaQueue = [];
 
   void reset() {
     attempts.clear();
-    optionalOffered = false;
-    optionalQueue.clear();
+    nbaConsulted = false;
+    nbaQueue.clear();
   }
 }
 
@@ -34,6 +35,8 @@ abstract final class QuestionPlanner {
     'dates',
     'travellers',
     'group',
+    'childAges',
+    'women',
     'womenSafety',
     'accessibility',
     'transport',
@@ -95,12 +98,10 @@ abstract final class QuestionPlanner {
       );
     }
 
-    if (!state.optionalOffered) {
-      state.optionalOffered = true;
-      return QuestionCatalog.build('optionalOffer', brief, now: now);
-    }
-    if (state.optionalQueue.isNotEmpty) {
-      return QuestionCatalog.build(state.optionalQueue.first, brief, now: now);
+    // Mandatory fields are all valid: only questions the next-best-question
+    // step chose remain.
+    if (state.nbaQueue.isNotEmpty) {
+      return QuestionCatalog.build(state.nbaQueue.first, brief, now: now);
     }
     return null;
   }

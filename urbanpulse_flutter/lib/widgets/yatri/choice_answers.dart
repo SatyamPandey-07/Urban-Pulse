@@ -11,9 +11,6 @@ import 'option_card.dart';
 typedef AnswerSubmit = void Function(YatriAnswer answer);
 typedef AnswerChanged = void Function(YatriAnswer? answer);
 
-/// Questions whose options are short one-word choices, shown as pills.
-const _pillQuestions = {'destination', 'origin', 'travellers', 'style', 'pace'};
-
 /// Single choice. A tap answers immediately in chat mode.
 class McqAnswerView extends StatefulWidget {
   const McqAnswerView({
@@ -56,31 +53,18 @@ class _McqAnswerViewState extends State<McqAnswerView> {
   @override
   Widget build(BuildContext context) {
     final q = widget.question;
-    final pills = _pillQuestions.contains(q.id);
 
-    final Widget options = pills
-        ? Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final o in q.options)
-                OptionPill(
-                  option: o,
-                  selected: _selected == o.id,
-                  onTap: () => _pick(o),
-                ),
-            ],
-          )
-        : OptionGrid(
-            children: [
-              for (final o in q.options)
-                OptionCard(
-                  option: o,
-                  selected: _selected == o.id,
-                  onTap: () => _pick(o),
-                ),
-            ],
-          );
+    // Every single-choice question is a vertical list of options.
+    final Widget options = OptionGrid(
+      children: [
+        for (final o in q.options)
+          OptionCard(
+            option: o,
+            selected: _selected == o.id,
+            onTap: () => _pick(o),
+          ),
+      ],
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

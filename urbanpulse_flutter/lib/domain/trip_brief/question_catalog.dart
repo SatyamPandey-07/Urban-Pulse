@@ -14,8 +14,24 @@ abstract final class QuestionCatalog {
   ];
   static const skipId = 'skip';
 
-  /// Optional questions offered after the mandatory ones, in order.
+  /// Optional questions the agent may pick from once the mandatory ones are
+  /// answered (see the next-best-question step).
   static const optionalIds = ['style', 'pace', 'stay', 'dietary'];
+
+  /// The widget flavours the agent is allowed to choose per question; the
+  /// first is the default. Anything else the model suggests is ignored.
+  static const _variants = <String, List<String>>{
+    'dates': ['calendar', 'presets'],
+    'budget': ['tiers', 'slider'],
+    'travellers': ['list', 'stepper'],
+  };
+
+  static List<String> variantsFor(String questionId) =>
+      _variants[questionId] ?? const [];
+
+  /// [wanted] if it is an allowed flavour for [questionId], else null.
+  static String? validVariant(String questionId, String? wanted) =>
+      wanted != null && variantsFor(questionId).contains(wanted) ? wanted : null;
 
   static YatriQuestion build(
     String id,
@@ -79,6 +95,7 @@ abstract final class QuestionCatalog {
           hint: shownHint,
           reason: reason,
           attempt: attempt,
+          variant: 'calendar',
           prefill: {'now': now, 'start': b.start, 'end': b.end},
         );
       case 'travellers':
@@ -90,9 +107,10 @@ abstract final class QuestionCatalog {
           hint: shownHint,
           reason: reason,
           attempt: attempt,
+          variant: 'list',
           options: [
             const QuestionOption(id: '1', label: 'Just me', emoji: '🧍'),
-            for (final n in [2, 3, 4, 5, 6, 8, 10])
+            for (final n in [2, 3, 4, 5, 6])
               QuestionOption(id: '$n', label: '$n people', emoji: '👥'),
           ],
         );
@@ -194,6 +212,7 @@ abstract final class QuestionCatalog {
           hint: shownHint,
           reason: reason,
           attempt: attempt,
+          variant: 'tiers',
           prefill: {
             'people': b.travellerCount ?? 1,
             'days': b.days == 0 ? 1 : b.days,
@@ -201,15 +220,43 @@ abstract final class QuestionCatalog {
             'max': b.budgetMaxInr,
           },
         );
-      case 'optionalOffer':
+      case 'childAges':
+        final kids = b.children ?? 0;
         return YatriQuestion(
           id: id,
-          fields: const [],
-          widget: AnswerWidget.yesNo,
-          defaultText:
-              'That’s everything I need! Want to add a few optional '
-              'preferences (pace, stay, food)?',
-          reason: IssueKind.optional,
+          fields: const [BriefField.group],
+          widget: AnswerWidget.childAges,
+          defaultText: kids == 1
+              ? 'How old is the child?'
+              : 'How old are the $kids children?',
+          hint: shownHint,
+          reason: reason,
+          attempt: attempt,
+          prefill: {'children': kids, 'childAges': b.childAges},
+        );
+      case 'women':
+        final total = b.travellerCount ?? 1;
+        final shown = total < 5 ? total : 4;
+        return YatriQuestion(
+          id: id,
+          fields: const [BriefField.group],
+          widget: AnswerWidget.mcq,
+          defaultText: 'Are any of the travellers women?',
+          hint: shownHint,
+          reason: reason,
+          attempt: attempt,
+          options: [
+            const QuestionOption(id: '0', label: 'No women in the group'),
+            for (var n = 1; n <= shown; n++)
+              QuestionOption(
+                id: '$n',
+                label: n == total
+                    ? (total == 1 ? 'Yes, I am a woman' : 'All $total are women')
+                    : '$n ${n == 1 ? 'woman' : 'women'}',
+              ),
+            if (total > shown)
+              QuestionOption(id: '$total', label: 'All $total are women'),
+          ],
         );
       case 'style':
         return _optionalMcq(

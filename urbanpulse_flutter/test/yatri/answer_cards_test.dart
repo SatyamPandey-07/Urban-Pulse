@@ -116,7 +116,7 @@ void main() {
     const ids = [
       'destination', 'origin', 'dates', 'travellers', 'group', 'womenSafety',
       'accessibility', 'a11y.wheelchair.type', 'a11y.visual.support',
-      'transport', 'budget', 'optionalOffer', 'style', 'stay', 'confirm.dates', //
+      'transport', 'budget', 'childAges', 'women', 'style', 'stay', 'confirm.dates', //
     ];
 
     for (final (name, size) in [('phone', _phone), ('tablet', _tablet), ('wide', _wide)]) {

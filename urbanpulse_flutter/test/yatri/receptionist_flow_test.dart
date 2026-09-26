@@ -22,6 +22,13 @@ class FakeLlm implements LlmGateway {
   bool failNextExtraction = false;
   bool phrasingWorks = true;
   int extractionCalls = 0;
+  int nextBestCalls = 0;
+
+  /// What the next-best-question call returns.
+  String nextBestReply = '{"ask": []}';
+
+  /// What the phrasing call returns.
+  String phrasingReply = '{"message": "Warm rewrite of the question?"}';
 
   @override
   bool get isConfigured => configured;
@@ -42,8 +49,12 @@ class FakeLlm implements LlmGateway {
       }
       return GroqSuccess(extractions.removeAt(0), 'fake');
     }
+    if (system.contains('whether to ask the traveller anything more')) {
+      nextBestCalls++;
+      return GroqSuccess(nextBestReply, 'fake');
+    }
     if (!phrasingWorks) return const GroqFailure(GroqErrorKind.timeout);
-    return const GroqSuccess('{"message": "Warm rewrite of the question?"}', 'fake');
+    return GroqSuccess(phrasingReply, 'fake');
   }
 }
 
@@ -159,9 +170,8 @@ void main() {
     expect(c.activeQuestion!.question.id, 'budget');
     await answerActive(c, const BudgetAnswer(20000, 40000));
 
-    expect(c.activeQuestion!.question.id, 'optionalOffer');
-    await answerActive(c, const BoolAnswer(false));
-
+    // The model was asked once whether more detail would help and said no.
+    expect(llm.nextBestCalls, 1);
     expect(c.phase, YatriPhase.review);
     expect(c.entries.last, isA<ReviewReadyEntry>());
     expect(c.report.isComplete, isTrue);

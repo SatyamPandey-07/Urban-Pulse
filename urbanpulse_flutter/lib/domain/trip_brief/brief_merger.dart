@@ -169,6 +169,33 @@ abstract final class BriefMerger {
     }
     if (u['notes'] case final e?) b = b.copyWith(notes: e.value as String);
 
-    return MergeResult(b.copyWith(uncertain: uncertain), changes);
+    return MergeResult(_completeGroup(b).copyWith(uncertain: uncertain), changes);
+  }
+
+  /// Works out what the traveller's words already imply about the group, so
+  /// the agent does not ask a question it can answer itself:
+  /// - if the adults (plus any seniors / children given) already make up the
+  ///   whole party, the unstated groups are 0 ("4 men" -> 4 adults, 0 seniors,
+  ///   0 children);
+  /// - with no children there are no child ages to collect.
+  /// Anything genuinely ambiguous ("family of 4") is left for the validator to
+  /// ask about.
+  static TripBrief _completeGroup(TripBrief b) {
+    final total = b.travellerCount;
+    var seniors = b.seniors;
+    var children = b.children;
+    final adults = b.adults;
+
+    if (total != null && adults != null) {
+      final known = adults + (seniors ?? 0) + (children ?? 0);
+      if (known == total) {
+        seniors ??= 0;
+        children ??= 0;
+      }
+    }
+
+    final ages = children == 0 && b.childAges.isNotEmpty ? const <int>[] : null;
+    if (seniors == b.seniors && children == b.children && ages == null) return b;
+    return b.copyWith(seniors: seniors, children: children, childAges: ages);
   }
 }

@@ -8,6 +8,7 @@ import '../../core/config.dart';
 import '../../core/routes.dart';
 import '../../models/trip_brief.dart';
 import '../../models/trip_models.dart';
+import '../../services/place_geocoder.dart';
 import '../../state/activity_tracker.dart';
 import '../../state/app_scope.dart';
 import '../../state/yatri_controller.dart';
@@ -39,6 +40,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
   final _speech = SpeechToText();
+  final _geocoder = PlaceGeocoder();
   final Map<int, GlobalKey> _entryKeys = {};
   bool _isListening = false;
 
@@ -58,6 +60,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
             settingsNeeds: () => _settingsNeeds(services),
             onTripPlanned: () => services.activity.increment(TrackedAction.tripsPlanned),
             onTripSaved: () => services.activity.increment(TrackedAction.tripsSaved),
+            geocode: _geocoder.lookup,
           )
           ..addListener(_onChanged)
           ..start();

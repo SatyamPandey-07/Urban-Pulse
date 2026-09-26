@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../agents/core/yatri_agent.dart';
 import '../agents/planner/trip_plan_handoff_agent.dart';
@@ -8,6 +9,7 @@ import '../domain/trip_brief/brief_merger.dart';
 import '../domain/trip_brief/brief_validator.dart';
 import '../domain/trip_brief/extraction.dart';
 import '../domain/trip_brief/question_catalog.dart';
+import '../domain/route_path.dart';
 import '../domain/trip_brief/question_planner.dart';
 import '../models/trip_brief.dart';
 import '../models/trip_models.dart';
@@ -83,6 +85,25 @@ class ReviewReadyEntry extends ChatEntry {
 
 class PlanningEntry extends ChatEntry {}
 
+/// The route preview: origin and destination on a map, joined by an animated
+/// line styled by the selected transport mode. It appears once both places are
+/// fixed and updates in place as the places or transport change.
+class RouteMapEntry extends ChatEntry {
+  RouteMapEntry({required this.origin, required this.destination});
+
+  String origin;
+  String destination;
+  LatLng? originPoint;
+  LatLng? destinationPoint;
+  bool loading = true;
+  List<TripTransportMode> modes = const [];
+
+  /// The mode currently previewed.
+  TripTransportMode? shown;
+
+  bool get ready => !loading && originPoint != null && destinationPoint != null;
+}
+
 class PlanEntry extends ChatEntry {
   PlanEntry(this.plan);
 
@@ -115,6 +136,7 @@ class YatriController extends ChangeNotifier {
     this.settingsNeeds = _noNeeds,
     this.onTripPlanned,
     this.onTripSaved,
+    this.geocode,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     brief = TripBrief.empty(_clock());
@@ -132,6 +154,9 @@ class YatriController extends ChangeNotifier {
   final Set<AccessibilityNeed> Function() settingsNeeds;
   final Future<void> Function()? onTripPlanned;
   final Future<void> Function()? onTripSaved;
+
+  /// Looks up a place's coordinates for the route map. Null disables the map.
+  final Future<LatLng?> Function(String place)? geocode;
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
@@ -197,12 +222,12 @@ class YatriController extends ChangeNotifier {
       ProgressItem('Travellers', 'travellers', done(BriefField.travellers),
           brief.travellerCount?.toString()),
       ProgressItem('Group', 'group', done(BriefField.group),
-          brief.hasGroupBreakdown
+          brief.hasPartsBreakdown
               ? GroupAnswer(
                   adults: brief.adults!,
                   seniors: brief.seniors!,
                   children: brief.children!,
-                  women: brief.women!,
+                  women: brief.women ?? 0,
                   childAges: brief.childAges,
                 ).displayLabel
               : null),
@@ -356,18 +381,6 @@ class YatriController extends ChangeNotifier {
     final entry = _entryFor(q);
     if (entry == null || !entry.isActive) return;
 
-    if (q.id == 'optionalOffer') {
-      entry.answer = a;
-      entries.add(UserText(a.displayLabel));
-      if (a is BoolAnswer && a.value) {
-        _state.optionalQueue.addAll(QuestionCatalog.optionalIds);
-      }
-      busy = true;
-      _notify();
-      await _advance();
-      return;
-    }
-
     final res = AnswerApplier.apply(brief, q, a, now);
     if (!res.isOk) {
       final attempt = (_state.attempts[q.id] ?? 0) + 1;
@@ -382,7 +395,7 @@ class YatriController extends ChangeNotifier {
     _remember('user', a.displayLabel);
     brief = res.brief!;
     _state.attempts.remove(q.id);
-    _state.optionalQueue.remove(q.id);
+    _state.nbaQueue.remove(q.id);
     if (phase == YatriPhase.review) phase = YatriPhase.intake;
     busy = true;
     _notify();
@@ -422,7 +435,9 @@ class YatriController extends ChangeNotifier {
     List<BriefChange> changes = const [],
     bool phrase = false,
   }) async {
-    var q = QuestionPlanner.next(
+    _syncMap();
+
+    YatriQuestion? planNext() => QuestionPlanner.next(
       brief,
       report,
       _state,
@@ -430,6 +445,17 @@ class YatriController extends ChangeNotifier {
       detectedCity: detectedCity(),
       settingsNeeds: settingsNeeds(),
     );
+
+    var q = planNext();
+
+    // Every mandatory field is valid: let the model decide, once, whether an
+    // extra question or two would improve the plan. It costs at most one small
+    // call and none when the brief is already rich.
+    if (q == null && !_state.nbaConsulted && hasKey()) {
+      _state.nbaConsulted = true;
+      _state.nbaQueue.addAll(await receptionist.nextBest(brief));
+      q = planNext();
+    }
 
     if (q == null) {
       _enterReview();
@@ -440,12 +466,18 @@ class YatriController extends ChangeNotifier {
         phrase ||
         q.reason == IssueKind.conflict ||
         q.reason == IssueKind.invalid;
-    String? line;
+    PhrasedQuestion? phrased;
     if (needsPhrasing && hasKey()) {
-      line = await receptionist.phrase(q, brief, ack: ack, changes: changes);
-      if (line != null) q = q.copyWith(text: line);
+      phrased = await receptionist.phrase(q, brief, ack: ack, changes: changes);
+      if (phrased != null) {
+        // The model may choose the widget, but only from the allow-list.
+        q = q.copyWith(
+          text: phrased.message,
+          variant: QuestionCatalog.validVariant(q.id, phrased.widget),
+        );
+      }
     }
-    if (line == null && ack != null) entries.add(AgentText(ack));
+    if (phrased == null && ack != null) entries.add(AgentText(ack));
 
     for (final e in entries) {
       if (e is QuestionEntry && e.isActive) e.superseded = true;
@@ -453,6 +485,74 @@ class YatriController extends ChangeNotifier {
     entries.add(QuestionEntry(q));
     _remember('assistant', q.displayText);
     busy = false;
+    _notify();
+  }
+
+  // --- route map ------------------------------------------------------------
+
+  /// Adds the route map once the origin and destination are both fixed (valid
+  /// and confirmed), and keeps it in step with later changes to the places or
+  /// the selected transport modes.
+  void _syncMap() {
+    final lookup = geocode;
+    if (lookup == null) return;
+
+    final origin = brief.originCity?.trim();
+    final destination = brief.destination?.trim();
+    final r = report;
+    final fixed =
+        origin != null &&
+        origin.isNotEmpty &&
+        destination != null &&
+        destination.isNotEmpty &&
+        !r.hasIssueFor(BriefField.origin) &&
+        !r.hasIssueFor(BriefField.destination);
+    if (!fixed) return;
+
+    var entry = entries.whereType<RouteMapEntry>().firstOrNull;
+    if (entry == null) {
+      entry = RouteMapEntry(origin: origin, destination: destination);
+      entries.add(entry);
+      _resolveMap(entry, lookup);
+    } else if (entry.origin != origin || entry.destination != destination) {
+      entry
+        ..origin = origin
+        ..destination = destination
+        ..loading = true;
+      _resolveMap(entry, lookup);
+    }
+
+    entry.modes = [
+      for (final m in TripTransportMode.values)
+        if (brief.transportModes.contains(m)) m,
+    ];
+    if (entry.shown == null || !entry.modes.contains(entry.shown)) {
+      entry.shown = RouteStyles.preferred(entry.modes);
+    }
+  }
+
+  Future<void> _resolveMap(
+    RouteMapEntry entry,
+    Future<LatLng?> Function(String) lookup,
+  ) async {
+    final o = entry.origin;
+    final d = entry.destination;
+    final points = await Future.wait([lookup(o), lookup(d)]);
+    // The places changed while we were looking these up.
+    if (entry.origin != o || entry.destination != d) return;
+    entry
+      ..originPoint = points[0]
+      ..destinationPoint = points[1]
+      ..loading = false;
+    // The map is a nicety: if either place can't be found, drop it silently.
+    if (!entry.ready) entries.remove(entry);
+    _notify();
+  }
+
+  /// Previews another selected transport mode on the map.
+  void showMode(RouteMapEntry entry, TripTransportMode mode) {
+    if (!entry.modes.contains(mode)) return;
+    entry.shown = mode;
     _notify();
   }
 
