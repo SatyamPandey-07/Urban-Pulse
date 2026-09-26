@@ -16,6 +16,7 @@ import pipeline
 MAX_ATTEMPTS = 3
 PROBE_EVERY = 600
 GIVE_UP_AFTER = 9 * 3600
+BLIND_AFTER = 2 * 3600
 
 
 def log(*a):
@@ -44,21 +45,31 @@ def main():
     state = pipeline.load()
     started = time.time()
     attempts = sum(1 for f in state.get("failed_alignments", []) if "502" in f.get("error", ""))
+    down_since = time.time()
+    blind_tried = False
     while True:
         if time.time() - started > GIVE_UP_AFTER:
             log("giving up: backend not ready in time")
             return
         if not state.get("alignment_id"):
             ok, why = backend_up(state["base_model_id"])
-            if not ok:
+            # Inference and training are separate services: after two hours of
+            # failed probes, try one alignment anyway.
+            blind = not ok and not blind_tried and time.time() - down_since > BLIND_AFTER
+            if not ok and not blind:
                 log("backend not ready:", why)
                 time.sleep(PROBE_EVERY)
                 continue
+            if blind:
+                blind_tried = True
+                log("inference still down; trying the alignment anyway")
+            else:
+                down_since = time.time()
             if attempts >= MAX_ATTEMPTS:
                 log("attempt limit reached")
                 return
             attempts += 1
-            log(f"backend up; starting alignment attempt {attempts}")
+            log(f"starting alignment attempt {attempts}")
             pipeline.align(state)
         s = pipeline.alignment_status(state)
         st = str(s.get("status", "")).upper()

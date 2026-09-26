@@ -271,7 +271,7 @@ class RuleTravelRisk implements TravelRiskModel {
     String type = 'none';
     if (RegExp(r'landslide|land slide|mudslide').hasMatch(l)) {
       type = 'landslide';
-    } else if (RegExp(r'(closed|shut|band hai|band kar|suspended for tourists)').hasMatch(l) && RegExp(r'(fort|beach|falls|temple|park|museum|ferry|caves|boat|zoo|palace|ropeway|memorial|attraction|tourists)').hasMatch(l)) {
+    } else if (RegExp(r'(closed|shut|band hai|band kar|suspended for tourists)').hasMatch(l) && RegExp(r'(fort|beach|falls|temple|park|museum|ferry|caves|boat|zoo|palace|ropeway|memorial|attraction|tourists|visitors|mahal|garh|qila|mandir|masjid|dargah|church|gate|minar|tomb|ghat|lake|garden|bagh|market|bazaar|monument|sanctuary|dam|point|mantar|baori|kund|stepwell|trek|cruise)').hasMatch(l)) {
       type = 'attraction_closed';
     } else if (RegExp(r'(road (closed|caved|blocked)|closed .*(road|bridge|underpass|subway)|diversion|caved in)').hasMatch(l)) {
       type = 'road_closed';

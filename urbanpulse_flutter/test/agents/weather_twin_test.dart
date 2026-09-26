@@ -211,7 +211,8 @@ void main() {
 </channel></rss>''';
     final news = SocialSignalFeed.parseGoogleNewsRss(rss);
     expect(news, hasLength(2));
-    expect(news.first.text, contains('MI Road & Tonk Road'));
+    expect(news.first.text, 'Heavy rain lashes Jaipur, waterlogging on MI Road & Tonk Road');
+    expect(news.first.source, 'Google News · Times of India');
     expect(news[1].text, 'Amber Fort closed for tourists after red alert');
     expect(news.first.at, DateTime.utc(2026, 9, 26, 14, 5));
 
