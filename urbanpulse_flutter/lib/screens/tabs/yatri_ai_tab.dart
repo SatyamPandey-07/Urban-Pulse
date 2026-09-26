@@ -323,6 +323,8 @@ class _YatriAiTabState extends State<YatriAiTab> {
                   _openForm();
                 case 'reset':
                   c.start();
+                case 'demo':
+                  c.startDemoPlan();
                 case 'list':
                   _openAddExperienceDialog();
                 case 'provider':
@@ -332,6 +334,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
             itemBuilder: (_) => const [
               PopupMenuItem(value: 'form', child: Text('Open trip form')),
               PopupMenuItem(value: 'reset', child: Text('Start over')),
+              PopupMenuItem(value: 'demo', child: Text('Preview agent graph (demo)')),
               PopupMenuDivider(),
               PopupMenuItem(value: 'list', child: Text('List an experience')),
               PopupMenuItem(value: 'provider', child: Text('Provider dashboard')),

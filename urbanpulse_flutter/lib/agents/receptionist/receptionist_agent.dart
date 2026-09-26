@@ -230,7 +230,7 @@ JSON shape (omit keys you have nothing for; never invent values):
   "adults": 2, "seniors": 0, "children": 2, "women": 1, "childAges": [6, 9],
   "budgetMinInr": 20000, "budgetMaxInr": 40000,
   "transportModes": ["train","metroLocal","eBus","bus","sharedEv","selfDriveEv","carTaxi","flight"],
-  "accessibilityNeeds": ["wheelchair","limitedMobility","visual","hearing","elderlyCare","serviceAnimal","none"],
+  "accessibilityNeeds": ["wheelchair","limitedMobility","visual","hearing","elderlyCare","serviceAnimal","cognitiveSensory","otherSpecial","none"],
   "womenSafety": ["womenOnlyTransport","verifiedStays","avoidLateNightTransit","sharedLiveLocation","none"],
   "style": "leisure|family|pilgrimage|adventure|heritage|nature|workation",
   "pace": "relaxed|balanced|packed",

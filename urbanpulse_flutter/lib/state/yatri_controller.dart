@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../agents/core/yatri_agent.dart';
+import '../agents/runtime/demo_plan.dart';
+import '../agents/runtime/plan_clock.dart';
+import '../agents/runtime/task_board.dart';
+import '../agents/runtime/task_graph.dart';
 import '../agents/planner/trip_plan_handoff_agent.dart';
 import '../agents/receptionist/receptionist_agent.dart';
 import '../domain/trip_brief/answer_applier.dart';
@@ -85,6 +91,14 @@ class ReviewReadyEntry extends ChatEntry {
 
 class PlanningEntry extends ChatEntry {}
 
+/// The live multi-agent task graph, drawn inline in the chat.
+class TaskGraphEntry extends ChatEntry {
+  TaskGraphEntry(this.graph, this.clock);
+
+  final TaskGraph graph;
+  final PlanClock clock;
+}
+
 /// The route preview: origin and destination on a map, joined by an animated
 /// line styled by the selected transport mode. It appears once both places are
 /// fixed and updates in place as the places or transport change.
@@ -160,6 +174,7 @@ class YatriController extends ChangeNotifier {
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
+  final Map<String, Completer<YatriAnswer>> _planWaiters = {};
   final PlannerState _state = PlannerState();
   final List<GroqMessage> _history = [];
 
@@ -377,6 +392,20 @@ class YatriController extends ChangeNotifier {
 
   /// A structured answer from a card. No model call is needed to apply it.
   Future<void> answer(YatriQuestion q, YatriAnswer a) async {
+    // A question an agent asked mid-plan: hand the answer straight back to the
+    // waiting agent. (It is allowed while the plan is busy, that is the point.)
+    final waiter = _planWaiters[q.id];
+    if (waiter != null) {
+      final planEntry = _entryFor(q);
+      if (planEntry == null || !planEntry.isActive) return;
+      planEntry.answer = a;
+      entries.add(UserText(a.displayLabel));
+      _planWaiters.remove(q.id);
+      waiter.complete(a);
+      _notify();
+      return;
+    }
+
     if (busy) return;
     final entry = _entryFor(q);
     if (entry == null || !entry.isActive) return;
@@ -484,6 +513,67 @@ class YatriController extends ChangeNotifier {
     }
     entries.add(QuestionEntry(q));
     _remember('assistant', q.displayText);
+    busy = false;
+    _notify();
+  }
+
+  // --- multi-agent planning -------------------------------------------------
+
+  /// Puts a question from a planner agent in front of the user and waits for
+  /// the answer. Used by agents through `TaskContext.waitForUser`, which pauses
+  /// the plan clock meanwhile. The question card carries a “?” with [why].
+  Future<YatriAnswer> askPlanQuestion(YatriQuestion q) {
+    final existing = _planWaiters[q.id];
+    if (existing != null) return existing.future;
+    final completer = Completer<YatriAnswer>();
+    _planWaiters[q.id] = completer;
+    entries.add(QuestionEntry(q));
+    _remember('assistant', q.displayText);
+    _notify();
+    return completer.future;
+  }
+
+  /// A scripted, offline run of the whole planner so the task graph can be
+  /// seen working (menu: "Preview agent graph"). No model or network is used.
+  Future<void> startDemoPlan({double speed = 1.0}) async {
+    if (busy || phase == YatriPhase.planning) return;
+    phase = YatriPhase.planning;
+    busy = true;
+    final graph = TaskGraph();
+    final clock = PlanClock();
+    final board = TaskBoard(graph: graph, clock: clock);
+    entries.add(TaskGraphEntry(graph, clock));
+    _notify();
+
+    var n = 0;
+    final report = await runDemoPlan(
+      board,
+      speed: speed,
+      ask: (question, options) async {
+        final id = 'plan.demo.${n++}';
+        final a = await askPlanQuestion(
+          YatriQuestion(
+            id: id,
+            fields: const [],
+            widget: AnswerWidget.mcq,
+            defaultText: question,
+            reason: IssueKind.optional,
+            agent: 'yatri',
+            why:
+                'Yatri is the only agent that decides. When two goals collide '
+                '(access and budget here), it asks you rather than choosing for you.',
+            options: [
+              for (var i = 0; i < options.length; i++)
+                QuestionOption(id: 'o$i', label: options[i], recommended: i == 0),
+            ],
+          ),
+        );
+        return a is ChoiceAnswer ? a.label : options.first;
+      },
+    );
+
+    entries.add(AgentText('${report.summary}. This was a preview run: no real data was used.'));
+    phase = YatriPhase.done;
     busy = false;
     _notify();
   }

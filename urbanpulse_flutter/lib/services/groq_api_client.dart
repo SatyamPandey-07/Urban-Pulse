@@ -16,11 +16,12 @@ abstract final class GroqApiClient {
 
   /// Active high-performance models available on the project's Groq account,
   /// tried in order.
+  ///
+  /// (`groq/compound-mini` was decommissioned on 2026-09-21.)
   static const candidateModels = [
     'openai/gpt-oss-120b',
     'groq/compound',
     'openai/gpt-oss-20b',
-    'groq/compound-mini',
   ];
 
   static const _defaultSystemPrompt =
@@ -85,6 +86,10 @@ abstract final class GroqApiClient {
     Duration? requestTimeout,
     String? apiKeyOverride,
     http.Client? client,
+
+    /// Extra top-level request fields, e.g. `search_settings` for
+    /// `groq/compound`'s built-in web search.
+    Map<String, Object?>? extraBody,
   }) async {
     final apiKey = apiKeyOverride ?? AppConfig.groqApiKey;
     if (apiKey.isEmpty) return const GroqFailure(GroqErrorKind.noKey);
@@ -107,13 +112,19 @@ abstract final class GroqApiClient {
               'max_tokens': maxTokens,
               if (jsonMode) 'response_format': {'type': 'json_object'},
               if (reasoningEffort != null) 'reasoning_effort': reasoningEffort,
+              ...?extraBody,
             }),
           )
           .timeout(requestTimeout ?? timeout);
 
       final status = response.statusCode;
       if (status < 200 || status >= 300) {
-        return GroqFailure(_kindFor(status), status: status, detail: response.body);
+        return GroqFailure(
+          _kindFor(status),
+          status: status,
+          detail: response.body,
+          retryAfter: _retryAfter(response.headers['retry-after']),
+        );
       }
 
       final json = jsonDecode(response.body) as Map<String, dynamic>;
@@ -126,7 +137,7 @@ abstract final class GroqApiClient {
       if (content == null || content.trim().isEmpty) {
         return const GroqFailure(GroqErrorKind.empty);
       }
-      return GroqSuccess(content, model);
+      return GroqSuccess(content, model, raw: json);
     } on TimeoutException {
       return const GroqFailure(GroqErrorKind.timeout);
     } catch (_) {
@@ -134,6 +145,13 @@ abstract final class GroqApiClient {
     } finally {
       if (client == null) http_.close();
     }
+  }
+
+  /// The `Retry-After` header (seconds), if the provider sent one.
+  static Duration? _retryAfter(String? header) {
+    final seconds = double.tryParse((header ?? '').trim());
+    if (seconds == null || seconds < 0) return null;
+    return Duration(milliseconds: (seconds * 1000).round());
   }
 
   static GroqErrorKind _kindFor(int status) => switch (status) {
@@ -167,16 +185,23 @@ sealed class GroqResult {
 }
 
 final class GroqSuccess extends GroqResult {
-  const GroqSuccess(this.content, this.model);
+  const GroqSuccess(this.content, this.model, {this.raw});
 
   final String content;
   final String model;
+
+  /// The decoded response body, for callers that need more than the text (e.g.
+  /// `groq/compound`'s `executed_tools` with its search results).
+  final Map<String, dynamic>? raw;
 }
 
 final class GroqFailure extends GroqResult {
-  const GroqFailure(this.kind, {this.status, this.detail});
+  const GroqFailure(this.kind, {this.status, this.detail, this.retryAfter});
 
   final GroqErrorKind kind;
   final int? status;
   final String? detail;
+
+  /// How long the provider asked us to wait (rate limits).
+  final Duration? retryAfter;
 }

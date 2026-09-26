@@ -28,6 +28,8 @@ enum AccessibilityNeed {
   hearing('Hearing impairment', '🦻'),
   elderlyCare('Elderly care', '🧓'),
   serviceAnimal('Travelling with a service animal', '🐕‍🦺'),
+  cognitiveSensory('Sensory or cognitive needs', '🧠'),
+  otherSpecial('Other special needs', '🤝'),
   none('No accessibility needs', '✅');
 
   const AccessibilityNeed(this.label, this.emoji);

@@ -131,6 +131,20 @@ void main() {
       ]));
     });
 
+    test('sensory/cognitive and other special needs get their own follow-ups', () {
+      final b = completeBrief().copyWith(
+        accessibilityNeeds: {AccessibilityNeed.cognitiveSensory, AccessibilityNeed.otherSpecial},
+      );
+      final ids = validate(b).issues.map((i) => i.questionId).toSet();
+      expect(ids, containsAll(['a11y.cognitive.support', 'a11y.otherSpecial.support']));
+
+      final done = b.copyWith(accessibilityDetails: {
+        'a11y.cognitive.support': {'quiet_low_crowd'},
+        'a11y.otherSpecial.support': {'rest_breaks'},
+      });
+      expect(validate(done).isComplete, isTrue);
+    });
+
     test('answering a follow-up removes its issue', () {
       var b = completeBrief().copyWith(
         accessibilityNeeds: {AccessibilityNeed.serviceAnimal},

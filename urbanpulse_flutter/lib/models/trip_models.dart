@@ -61,7 +61,10 @@ class TripPlan {
   /// actually produced by the AI or fetched live.
   final String source;
 
-  bool get isAiGenerated => source == 'groq_ai';
+  /// True for plans an AI wrote (`groq_ai`) or the multi-agent planner
+  /// assembled (`multi_agent`, whose estimated parts are labelled on the
+  /// itinerary itself).
+  bool get isAiGenerated => source == 'groq_ai' || source == 'multi_agent';
 
   /// The planner doesn't know the real dates, so the Yatri hand-off replaces
   /// its placeholder label and title with the traveler's.

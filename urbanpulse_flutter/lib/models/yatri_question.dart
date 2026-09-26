@@ -61,6 +61,8 @@ class YatriQuestion {
     this.attempt = 0,
     this.skippable = false,
     this.variant,
+    this.why,
+    this.agent,
   });
 
   final String id;
@@ -90,6 +92,14 @@ class YatriQuestion {
   /// null means the default.
   final String? variant;
 
+  /// Why the app is asking, shown behind a “?” next to the question. Used by
+  /// the planner's questions to the user.
+  final String? why;
+
+  /// The planner agent asking (its name is coloured), for planner questions.
+  /// Stored by name to keep this model free of UI types.
+  final String? agent;
+
   String get displayText => text ?? defaultText;
 
   YatriQuestion copyWith({
@@ -114,6 +124,8 @@ class YatriQuestion {
         attempt: attempt ?? this.attempt,
         skippable: skippable,
         variant: variant ?? this.variant,
+        why: why,
+        agent: agent,
       );
 }
 

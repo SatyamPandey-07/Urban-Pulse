@@ -9,6 +9,8 @@ import '../common.dart';
 import 'answer_view.dart';
 import 'brief_summary.dart';
 import 'chat_bubbles.dart';
+import '../../agents/runtime/agent_kind.dart';
+import '../taskgraph/task_graph_card.dart';
 import 'option_card.dart';
 import 'route_map_card.dart';
 
@@ -45,12 +47,17 @@ class ChatEntryView extends StatelessWidget {
         return AgentBubble(text: e.text);
       case QuestionEntry():
         final q = e.question;
+        final planner = _plannerFor(q);
         return AgentBubble(
           text: q.displayText,
+          agent: planner,
+          why: q.why,
           child: e.isActive
               ? AnswerCard(
                   question: q,
-                  disabled: controller.busy,
+                  // Planner questions arrive while the plan is busy; that is
+                  // exactly when they must be answerable.
+                  disabled: controller.busy && !q.id.startsWith('plan.'),
                   onSubmit: (a) => controller.answer(q, a),
                   entryId: e.id,
                 )
@@ -75,6 +82,8 @@ class ChatEntryView extends StatelessWidget {
         );
       case PlanningEntry():
         return const _PlanningCard();
+      case TaskGraphEntry():
+        return TaskGraphCard(graph: e.graph, clock: e.clock);
       case RouteMapEntry():
         if (!e.ready) return const _MapLoadingCard();
         return Padding(
@@ -105,6 +114,16 @@ class ChatEntryView extends StatelessWidget {
         );
     }
   }
+}
+
+/// The planner agent behind a question (by name), if it is one.
+AgentKind? _plannerFor(YatriQuestion q) {
+  final name = q.agent;
+  if (name == null) return null;
+  for (final a in AgentKind.values) {
+    if (a.name == name) return a;
+  }
+  return null;
 }
 
 /// The card that holds an active question's answer widget.
