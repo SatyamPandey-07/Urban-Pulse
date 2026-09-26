@@ -135,7 +135,7 @@ class AgentToolkit {
 
   /// A fresh set of tools with its own credit budget for one plan.
   PlanToolset newPlan({ToolBudget? budget}) {
-    final b = budget ?? ToolBudget(maxSearches: 14, maxFetches: 12, maxLlmSearches: 6);
+    final b = budget ?? ToolBudget(maxSearches: 20, maxFetches: 12, maxLlmSearches: 6, maxReviewSearches: 8);
     final t = tavily;
     final search = WebSearchTool(
       budget: b,

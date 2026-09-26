@@ -97,10 +97,13 @@ class PlanningEntry extends ChatEntry {}
 
 /// The live multi-agent task graph, drawn inline in the chat.
 class TaskGraphEntry extends ChatEntry {
-  TaskGraphEntry(this.graph, this.clock);
+  TaskGraphEntry(this.graph, this.clock, {this.onStop});
 
   final TaskGraph graph;
   final PlanClock clock;
+
+  /// Stops the plan early and shows what is ready (null for the demo).
+  final VoidCallback? onStop;
 }
 
 /// The route preview: origin and destination on a map, joined by an animated
@@ -228,6 +231,21 @@ class YatriController extends ChangeNotifier {
     _disposed = true;
     _cancelPlan();
     super.dispose();
+  }
+
+  /// The traveller pressed Stop: the agents finish what they are doing, start
+  /// nothing new, and the plan so far is shown. Open questions take their
+  /// recommended answer.
+  void stopPlanning() {
+    final o = _orchestrator;
+    if (o == null) return;
+    o.stop();
+    final waiting = _planWaiters.values.toList();
+    _planWaiters.clear();
+    for (final w in waiting) {
+      if (!w.isCompleted) w.complete(const ChoiceAnswer('', ''));
+    }
+    _notify();
   }
 
   /// Stops a running plan: no new work starts, questions waiting on the
@@ -769,7 +787,7 @@ class YatriController extends ChangeNotifier {
       now: () => now,
     );
     _orchestrator = orchestrator;
-    entries.add(TaskGraphEntry(orchestrator.graph, orchestrator.clock));
+    entries.add(TaskGraphEntry(orchestrator.graph, orchestrator.clock, onStop: stopPlanning));
     _notify();
 
     PlanOutcome outcome;
@@ -803,12 +821,14 @@ class YatriController extends ChangeNotifier {
     if (itinerary != null) {
       phase = YatriPhase.done;
       final hotel = outcome.hotel;
+      final stay = hotel == null ? '' : ', staying at ${hotel.name}';
       entries
         ..add(
           AgentText(
-            hotel == null
-                ? 'Here’s your ${itinerary.dayCount}-day plan for ${confirmed.destination}.'
-                : 'Here’s your ${itinerary.dayCount}-day plan for ${confirmed.destination}, staying at ${hotel.name}.',
+            outcome.status == PlanStatus.partial
+                ? 'You stopped the planning early, so some days may be light. '
+                      'Here’s what was ready for ${confirmed.destination}$stay. Plan again any time for the full trip.'
+                : 'Here’s your ${itinerary.dayCount}-day plan for ${confirmed.destination}$stay.',
           ),
         )
         ..add(ItineraryEntry(itinerary));

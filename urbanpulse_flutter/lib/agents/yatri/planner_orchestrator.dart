@@ -9,9 +9,11 @@ import '../../models/trip_brief.dart';
 import '../../models/yatri_question.dart';
 import '../../services/data/forecast_client.dart';
 import '../../services/data/location_key_resolver.dart';
+import '../../services/place_geocoder.dart';
 import '../atithi/atithi_agent.dart';
 import '../atithi/hotel_finder.dart';
 import '../bhatkanti/bhatkanti_agent.dart';
+import '../bhatkanti/hotspot_candidate.dart';
 import '../bhatkanti/hotspot_finder.dart';
 import '../hariyali/carbon_engine.dart';
 import '../hariyali/hariyali_agent.dart';
@@ -30,8 +32,10 @@ import '../safar/safar_agent.dart';
 import '../safar/transport_planner.dart';
 import '../saksham/audit_engine.dart';
 import '../saksham/saksham_agent.dart';
+import '../tools/web_search_tool.dart';
 import 'access_gates.dart';
 import 'budget_gates.dart';
+import 'completeness_gate.dart';
 import 'hotel_gates.dart';
 import 'hotspot_gates.dart';
 import 'itinerary_assembler.dart';
@@ -41,8 +45,12 @@ import 'transport_gates.dart';
 typedef AskUser = Future<YatriAnswer> Function(YatriQuestion question);
 
 enum PlanStatus {
-  /// The trip was planned as far as this stage goes.
+  /// The whole trip is planned: every day has enough to do, or the traveller
+  /// accepted a lighter day.
   planned,
+
+  /// The traveller stopped the plan before it was finished; what exists so far.
+  partial,
 
   /// The destination could not be found on a map; the traveller must give another.
   unlocatable,
@@ -82,8 +90,8 @@ class PlanOutcome {
   final Itinerary? itinerary;
 }
 
-/// What the agents have produced so far. Written by the phases, read by the
-/// stages that come after them.
+/// What the agents have produced so far, and what Yatri has already tried.
+/// Written by the phases and the goal loop, read by the stages after them.
 class _State {
   _State(this.brief, this.center);
 
@@ -109,13 +117,43 @@ class _State {
   final Set<String> droppedIds = {};
   final Set<String> bannedOutdoor = {};
   final List<String> notes = [];
+
+  // --- how the plan can be repaired -------------------------------------------
+  late AtithiAgent atithi;
+  late HotelQuery hotelQuery;
+  late BhatkantiAgent bhatkanti;
+  late HotspotQuery spotQuery;
+  late SafarAgent safar;
+  WebSearchTool? search;
+
+  /// Run counters, so every re-run is its own node in the graph.
+  int hotelRuns = 0;
+  int spotRuns = 0;
+  int journeyRuns = 0;
+
+  /// Repairs Yatri has made on its own ("more", "wider"): each at most once.
+  final Set<String> repairs = {};
+
+  /// Gaps the traveller accepted ("keep day 3 light").
+  final Set<String> accepted = {};
+
+  /// Per gap, the options already chosen, so they are not offered again.
+  final Map<String, Set<String>> usedOptions = {};
+  final Map<String, int> gapAsks = {};
+
+  /// Places the traveller picked from the near misses, kept whatever the filters say.
+  final Set<String> forcedIds = {};
 }
 
 /// Yatri: the only agent that decides. It reads the brief, allocates work to
 /// the workers as nodes of the live task graph, checks what comes back against
 /// the gates, and when two goals collide (access and budget, say) it asks the
-/// traveller with concrete options instead of choosing for them. The loop runs
-/// until the plan is settled or there is nothing more to try.
+/// traveller with concrete options instead of choosing for them.
+///
+/// The loop runs until the goal is met: every day the traveller is at the
+/// destination has enough to do, there is a stay and a journey, or the
+/// traveller knowingly accepted a gap. Nothing ends it because time passed, and
+/// no worker is ever told to hurry; the traveller can stop it at any time.
 ///
 /// Everything here is deterministic policy over the workers' reports, so a
 /// model outage can never stop a plan.
@@ -142,7 +180,7 @@ class PlannerOrchestrator {
   late final TaskBoard board;
   final DateTime Function() _now;
 
-  /// How many times a search may be repeated with new constraints.
+  /// How many times a hotel search may be repeated with new constraints.
   final int maxSearches;
 
   /// Hotels offered to the traveller to choose from.
@@ -151,8 +189,17 @@ class PlannerOrchestrator {
   /// Only the hotel stage (used by focused tests).
   final bool hotelsOnly;
 
+  /// A defensive cap on goal-loop rounds against a logic bug. Every gap ends in
+  /// a finite number of questions, so a real plan never gets near it; it is not
+  /// a time limit.
+  static const maxRounds = 80;
+
   final Set<String> _asked = {};
   Future<void> _askTail = Future.value();
+
+  /// Stops the plan (the traveller pressed Stop): what exists is returned as
+  /// [PlanStatus.partial].
+  void stop() => board.cancel();
 
   Future<PlanOutcome> run(TripBrief brief) async {
     var outcome = PlanOutcome.failed('Planning did not finish');
@@ -162,7 +209,6 @@ class PlannerOrchestrator {
         agent: AgentKind.yatri,
         title: 'Plan your trip',
         why: 'Yatri is the only agent that decides. It hands work to the specialists, checks what they bring back and asks you when a choice is yours.',
-        timeout: const Duration(minutes: 6),
       ),
       (ctx) async {
         outcome = await _plan(ctx, brief);
@@ -191,8 +237,11 @@ class PlannerOrchestrator {
     );
 
     final origin = brief.originCity?.trim() ?? '';
-    final located = await Future.wait([_geocode(destination), if (!hotelsOnly && origin.isNotEmpty) _locateOrigin(origin)]);
-    final center = located.first;
+    final areaF = _geocodeArea(destination);
+    final originF = !hotelsOnly && origin.isNotEmpty ? _locateOrigin(origin) : Future<LatLng?>.value(null);
+    final area = await areaF;
+    final originPoint = await originF;
+    final center = area?.center;
     if (center == null && !await _isOnline()) {
       ctx.say(
         'cannot reach the internet, so nothing can be looked up',
@@ -213,9 +262,21 @@ class PlannerOrchestrator {
       );
     }
     final st = _State(brief, center);
-    if (located.length > 1) st.origin = located[1];
+    st.origin = originPoint;
+
+    // A state or region (Goa, Kodagu) spreads well beyond a town's radius:
+    // search the whole of it.
+    final span = area?.isRegion == true ? area?.spanKm : null;
+    if (span != null) {
+      ctx.say(
+        'is treating $destination as a region about ${(span * 2).round()} km across',
+        why: 'It is a state or district rather than one town, so hotels and places are searched across all of it.',
+        kind: FeedKind.decide,
+      );
+    }
 
     final toolset = toolkit.newPlan();
+    st.search = toolset.search;
     final finder = HotelFinder(
       resolver: LocationKeyResolver(
         xotelo: toolkit.xotelo,
@@ -241,9 +302,9 @@ class PlannerOrchestrator {
         wikipedia: toolkit.wikipedia,
       ),
     );
-    final atithi = AtithiAgent(finder, khoji: hotelsOnly ? null : khoji);
+    st.atithi = AtithiAgent(finder, khoji: hotelsOnly ? null : khoji);
 
-    final hotelQuery = HotelQuery(
+    st.hotelQuery = HotelQuery(
       destination: destination,
       center: center,
       checkIn: brief.start!,
@@ -252,18 +313,19 @@ class PlannerOrchestrator {
       adults: HotelBudget.adultsFor(brief),
       needs: brief.accessibilityNeeds,
       nightlyCapInr: HotelBudget.nightlyCapInr(brief),
+      radiusKm: span == null ? 10 : (span * 0.8).clamp(10.0, HotelGates.maxRadiusKm),
       preferEco: brief.sustainability == SustainabilityPriority.greenest || brief.stayTypes.contains(StayType.ecoStay),
       notes: _notes(brief),
     );
 
     if (hotelsOnly) {
-      await _hotelPhase(ctx, st, atithi, hotelQuery);
+      await _hotelPhase(ctx, st, st.hotelQuery);
       return _hotelsOnlyOutcome(st);
     }
 
     // The specialists work at the same time; the traveller is asked one
     // question at a time as their answers come in.
-    final bhatkanti = BhatkantiAgent(
+    st.bhatkanti = BhatkantiAgent(
       HotspotFinder(
         overpass: toolkit.overpass,
         wikipedia: toolkit.wikipedia,
@@ -274,8 +336,8 @@ class PlannerOrchestrator {
       ),
       khoji: khoji,
     );
-    final safar = SafarAgent(estimator: toolkit.estimator);
-    final spotQuery = HotspotQuery(
+    st.safar = SafarAgent(estimator: toolkit.estimator);
+    final baseQuery = HotspotQuery(
       destination: destination,
       center: center,
       days: brief.days,
@@ -284,20 +346,27 @@ class PlannerOrchestrator {
       needs: brief.accessibilityNeeds,
       notes: _notes(brief),
       year: brief.start!.year,
+      details: brief.accessibilityDetails,
     );
+    st.spotQuery = span == null ? baseQuery : baseQuery.copyWith(radiusFactor: (span / baseQuery.radiusKm).clamp(1.0, 4.0));
 
     await Future.wait([
-      _guardPhase(ctx, 'hotels', () => _hotelPhase(ctx, st, atithi, hotelQuery)),
-      _guardPhase(ctx, 'places', () => _hotspotPhase(ctx, st, bhatkanti, spotQuery)),
-      _guardPhase(ctx, 'journey', () => _transportPhase(ctx, st, safar)),
+      _guardPhase(ctx, 'hotels', () => _hotelPhase(ctx, st, st.hotelQuery)),
+      _guardPhase(ctx, 'places', () => _hotspotPhase(ctx, st, st.spotQuery)),
+      _guardPhase(ctx, 'journey', () => _transportPhase(ctx, st)),
       _guardPhase(ctx, 'weather', () => _weatherPhase(ctx, st)),
     ]);
 
-    // Lay out the days, price them, and settle any budget problem.
+    // Lay out the days, audit and price them, and keep going until the whole
+    // trip is planned.
     final itinerary = await _settle(ctx, st);
+    final stopped = ctx.cancelled;
+    final visits = itinerary == null ? 0 : itinerary.days.fold<int>(0, (s, d) => s + PlanCompleteness.visitsOn(d));
     return PlanOutcome(
-      status: PlanStatus.planned,
-      summary: itinerary == null ? 'Planned without a full itinerary' : 'Planned ${itinerary.dayCount} days in $destination',
+      status: stopped ? PlanStatus.partial : (itinerary == null ? PlanStatus.failed : PlanStatus.planned),
+      summary: itinerary == null
+          ? (stopped ? 'Stopped before any days were planned' : 'Could not build the days')
+          : '${stopped ? 'Stopped early: ' : 'Planned '}${itinerary.dayCount} days in $destination with $visits place${visits == 1 ? '' : 's'}',
       hotel: st.hotel,
       hotels: st.hotels,
       center: center,
@@ -321,8 +390,8 @@ class PlannerOrchestrator {
       await run();
     } catch (_) {
       ctx.say(
-        'ran into a problem with the $name, and is carrying on without it',
-        why: 'A failed specialist never stops the plan: Yatri routes around it and says so.',
+        'ran into a problem with the $name, and will come back to it',
+        why: 'A failed specialist never stops the plan: Yatri routes around it now and repairs it before the plan is finished.',
         kind: FeedKind.warn,
       );
     }
@@ -330,34 +399,35 @@ class PlannerOrchestrator {
 
   // --- hotels ---------------------------------------------------------------
 
-  Future<void> _hotelPhase(TaskContext ctx, _State st, AtithiAgent atithi, HotelQuery first) async {
+  Future<void> _hotelPhase(TaskContext ctx, _State st, HotelQuery first) async {
     var query = first;
     HotelSearchResult? found;
+    HotelOption? picked;
     var skipped = false;
 
     for (var round = 0; round <= maxSearches; round++) {
-      final atithiId = 'atithi.hotels.$round';
+      final n = st.hotelRuns++;
+      final atithiId = 'atithi.hotels.$n';
       final report = await ctx.delegate(
         TaskSpec(
           id: atithiId,
           agent: AgentKind.atithi,
-          title: round == 0 ? 'Find hotels' : 'Search again',
+          title: n == 0 ? 'Find hotels' : 'Search again',
           goal: 'Find stays for ${query.nights} nights',
-          why: round == 0
+          why: n == 0
               ? 'Yatri needs somewhere to base the plan. Atithi searches hotels, prices and access details.'
-              : 'You changed what the search should look for, so Atithi is trying again.',
-          timeout: const Duration(seconds: 55),
+              : 'The search is looking for something different now, so Atithi is trying again.',
         ),
-        (c) => atithi.run(c, query),
-        say: round == 0 ? 'allocated the hotel search to Atithi' : 're-tasked Atithi with the new limits',
+        (c) => st.atithi.run(c, query),
+        say: n == 0 ? 'allocated the hotel search to Atithi' : 're-tasked Atithi with the new limits',
       );
       st.hotelTask = atithiId;
 
       final result = report.payload is HotelSearchResult ? report.payload as HotelSearchResult : null;
       if (result == null) {
         ctx.say(
-          'Atithi could not search for hotels; carrying on without a stay',
-          why: 'A failed specialist never stops the plan: Yatri routes around it and says so.',
+          'Atithi could not finish the hotel search; Yatri will come back to the stay',
+          why: 'A failed specialist never stops the plan: the stay is repaired before the plan is finished.',
           kind: FeedKind.warn,
         );
         break;
@@ -366,12 +436,11 @@ class PlannerOrchestrator {
 
       final hisab = await ctx.delegate(
         TaskSpec(
-          id: 'hisab.hotels.$round',
+          id: 'hisab.hotels.$n',
           agent: AgentKind.hisab,
           title: 'Check the hotel budget',
           why: 'Hisab checks that a suitable hotel fits your budget before anything is planned around it.',
           parents: [atithiId],
-          timeout: const Duration(seconds: 8),
         ),
         (c) async {
           final issues = HotelGates.checkHisab(result);
@@ -389,49 +458,50 @@ class PlannerOrchestrator {
       final issues = [...report.issues, ...hisab.issues].where((i) => !_asked.contains(i.id)).toList();
       if (issues.isEmpty) break;
 
-      // Running out of time or searches: settle for what there is.
-      if (round == maxSearches || clock.expired) {
-        ctx.say(
-          'is going with the best hotels found, as time is short',
-          why: 'Yatri stops asking once the plan is running long, so you always get a result.',
-          kind: FeedKind.decide,
-        );
-        break;
-      }
-
-      final issue = issues.first;
+      final issue = round == maxSearches ? HotelGates.withoutSearching(issues.first) : issues.first;
       _asked.add(issue.id);
       ctx.say('needs your decision on the hotels', why: issue.why, kind: FeedKind.ask);
       final option = await _askIssue(ctx, issue);
       ctx.say('you chose: ${option.label}', why: 'Yatri acts on your choice and re-plans if needed.', kind: FeedKind.decide);
-      if (option.effect['action'] == 'skip') {
+      final action = option.effect['action'];
+      if (action == 'skip') {
         skipped = true;
         break;
       }
+      if (action == 'swapHotel') {
+        picked = result.options.where((o) => o.id == option.effect['hotelId']).firstOrNull;
+        if (picked != null) {
+          st.notes.add('You chose ${picked.name} knowing it does not meet every need or the budget; confirm with the hotel.');
+          break;
+        }
+      }
       final next = HotelGates.apply(query, option);
       if (next == null) break;
+      if (next.nightlyCapInr != query.nightlyCapInr && next.nightlyCapInr != null) {
+        st.notes.add('You raised the hotel budget to ${rupees(next.nightlyCapInr!)} a night.');
+      }
       query = next;
     }
 
     st.hotels = found;
     if (found != null) st.notes.addAll(found.warnings);
-    if (skipped || found == null || found.options.isEmpty) {
-      st.stayOwn = skipped;
+    if (skipped) {
+      st.stayOwn = true;
       return;
     }
-    st.hotel = await _chooseHotel(ctx, found);
+    if (found == null || found.options.isEmpty) return;
+    st.hotel = picked ?? await _chooseHotel(ctx, found, st.brief.accessibilityNeeds, st.brief.accessibilityDetails);
   }
 
-  /// The traveller picks the stay; “let Yatri choose” (or running out of time,
-  /// or a single candidate) takes the best-ranked one.
-  Future<HotelOption> _chooseHotel(TaskContext ctx, HotelSearchResult found) async {
-    final options = found.options.take(maxChoices).toList();
-    if (options.length == 1 || clock.expired) {
-      ctx.say(
-        'picked ${options.first.name}',
-        why: options.length == 1 ? 'It was the only stay that fit.' : 'Time was short, so Yatri took the best-ranked stay.',
-        kind: FeedKind.decide,
-      );
+  /// The traveller picks the stay; “let Yatri choose” (or a single candidate)
+  /// takes the best fit. Stays confirmed to suit the group's access needs come
+  /// first, then those with the facilities the traveller asked for (a lift, a
+  /// roll-in shower); the best fit is the recommended answer.
+  Future<HotelOption> _chooseHotel(TaskContext ctx, HotelSearchResult found, Set<AccessibilityNeed> groupNeeds, Map<String, Set<String>> details) async {
+    final ranked = rankStays(found.options, groupNeeds, details, nightlyCapInr: found.query.nightlyCapInr);
+    final options = ranked.take(maxChoices).toList();
+    if (options.length == 1) {
+      ctx.say('picked ${options.first.name}', why: 'It was the only stay that fit.', kind: FeedKind.decide);
       return options.first;
     }
 
@@ -442,17 +512,19 @@ class PlannerOrchestrator {
     );
     final needs = {for (final n in found.query.needs) if (n != AccessibilityNeed.none) n};
     final question = YatriQuestion(
-      id: 'plan.hotels.choice',
+      // A later choice (after a new search) is a new question, never the old answer.
+      id: _hotelChoices++ == 0 ? 'plan.hotels.choice' : 'plan.hotels.choice.$_hotelChoices',
       fields: const [],
       widget: AnswerWidget.hotelChoice,
       defaultText: 'Here are the stays that fit best. Which would you like?',
       reason: IssueKind.optional,
       agent: AgentKind.yatri.name,
-      why: 'Ranked by how well each fits your group, budget and location. Access details show where they came from, and anything unconfirmed says so.',
+      why: 'Stays confirmed to suit your group come first, then by the facilities you asked for, budget and location. '
+          'Access details show where they came from, and anything unconfirmed says so.',
       hotels: options,
       hotelNeeds: needs,
       options: [
-        for (final h in options) QuestionOption(id: h.id, label: h.name),
+        for (var i = 0; i < options.length; i++) QuestionOption(id: options[i].id, label: options[i].name, recommended: i == 0),
         const QuestionOption(id: autoPick, label: 'Let Yatri choose'),
       ],
     );
@@ -467,75 +539,138 @@ class PlannerOrchestrator {
     return chosen;
   }
 
+  /// A stable re-rank of Atithi's stays for the group: fewest needs known to
+  /// fail, then fewest unconfirmed (see [HotelGates.fitKey]); then within the
+  /// nightly budget before above it; then fewest needs only partly met; then
+  /// the facilities the traveller asked for; otherwise Atithi's order. Access
+  /// comes before price, but among stays that suit the group equally, the one
+  /// that fits the budget is recommended. Public for tests.
+  static List<HotelOption> rankStays(List<HotelOption> options, Set<AccessibilityNeed> groupNeeds, Map<String, Set<String>> details, {int? nightlyCapInr}) {
+    final needs = {for (final n in groupNeeds) if (n != AccessibilityNeed.none) n};
+    final wanted = <RegExp>[
+      if ((details['a11y.wheelchair.facilities'] ?? const {}).contains('lift') || (details['a11y.elderly.support'] ?? const {}).contains('ground_floor'))
+        RegExp(r'lift|elevator|ground floor', caseSensitive: false),
+      if ((details['a11y.wheelchair.facilities'] ?? const {}).contains('roll_in')) RegExp(r'roll.?in|accessible (bath|shower)', caseSensitive: false),
+      if ((details['a11y.wheelchair.facilities'] ?? const {}).contains('toilet')) RegExp(r'accessible (toilet|bathroom|washroom)', caseSensitive: false),
+      if ((details['a11y.elderly.support'] ?? const {}).contains('medical')) RegExp(r'doctor|medical|hospital|first aid', caseSensitive: false),
+    ];
+    List<int> key(int i, HotelOption h) {
+      final fit = HotelGates.fitKey(h, needs);
+      final over = nightlyCapInr != null && h.nightlyInr != null && h.nightlyInr! > nightlyCapInr ? 1 : 0;
+      return [fit[0], fit[1], over, fit[2], -wanted.where((r) => r.hasMatch([...h.amenities, ...h.labels].join(' '))).length, i];
+    }
+
+    final keyed = [for (var i = 0; i < options.length; i++) (key(i, options[i]), options[i])];
+    keyed.sort((a, b) {
+      for (var k = 0; k < a.$1.length; k++) {
+        final c = a.$1[k].compareTo(b.$1[k]);
+        if (c != 0) return c;
+      }
+      return 0;
+    });
+    return [for (final e in keyed) e.$2];
+  }
+
   /// The option id meaning “you pick”.
   static const autoPick = 'auto';
 
+  int _hotelChoices = 0;
+
   // --- places to visit --------------------------------------------------------
 
-  Future<void> _hotspotPhase(TaskContext ctx, _State st, BhatkantiAgent agent, HotspotQuery first) async {
-    var query = first;
-    for (var round = 0; round <= 1; round++) {
-      final id = 'bhatkanti.spots.$round';
-      final report = await ctx.delegate(
-        TaskSpec(
-          id: id,
-          agent: AgentKind.bhatkanti,
-          title: round == 0 ? 'Find places to visit' : 'Look further out',
-          why: 'A trip needs things to do. Bhatkanti finds about ${query.perDay} places a day, mixing well-known sights with new ones.',
-          timeout: const Duration(seconds: 55),
-        ),
-        (c) => agent.run(c, query),
-        say: round == 0 ? 'allocated the search for places to visit to Bhatkanti' : 'asked Bhatkanti to look further out',
+  /// Runs Bhatkanti once with [query]. Null when it could not search.
+  Future<(HotspotSearchResult, List<Issue>)?> _runBhatkanti(TaskContext ctx, _State st, HotspotQuery query, {required String title, required String say}) async {
+    final n = st.spotRuns++;
+    final id = 'bhatkanti.spots.$n';
+    final report = await ctx.delegate(
+      TaskSpec(
+        id: id,
+        agent: AgentKind.bhatkanti,
+        title: title,
+        why: 'A trip needs things to do. Bhatkanti finds about ${query.perDay} places a day, mixing well-known sights with new ones.',
+      ),
+      (c) => st.bhatkanti.run(c, query),
+      say: say,
+    );
+    st.spotsTask = id;
+    final result = report.payload is HotspotSearchResult ? report.payload as HotspotSearchResult : null;
+    return result == null ? null : (result, report.issues);
+  }
+
+  Future<void> _hotspotPhase(TaskContext ctx, _State st, HotspotQuery first) async {
+    final found = await _runBhatkanti(ctx, st, first, title: 'Find places to visit', say: 'allocated the search for places to visit to Bhatkanti');
+    if (found == null) {
+      ctx.say(
+        'Bhatkanti could not finish the search; Yatri will try again before the plan is done',
+        why: 'A failed specialist never stops the plan, and the days are never left empty without asking you.',
+        kind: FeedKind.warn,
       );
-      st.spotsTask = id;
-      final result = report.payload is HotspotSearchResult ? report.payload as HotspotSearchResult : null;
-      if (result == null) {
-        ctx.say(
-          'Bhatkanti could not search for places; the days will be left open',
-          why: 'A failed specialist never stops the plan: Yatri routes around it and says so.',
-          kind: FeedKind.warn,
-        );
-        return;
-      }
-      st.spots = result;
-      st.notes.addAll(result.warnings);
-
-      final issues = report.issues.where((i) => !_asked.contains(i.id)).toList();
-      if (issues.isEmpty || clock.expired) return;
-      final issue = issues.first;
-      _asked.add(issue.id);
-      ctx.say('needs your taste on the places', why: issue.why, kind: FeedKind.ask);
-      final option = await _askIssue(ctx, issue);
-      ctx.say('you chose: ${option.label}', why: 'Yatri re-picks the places to match.', kind: FeedKind.decide);
-
-      final mix = HotspotGates.mixOf(option);
-      if (mix != null) {
-        st.spots = HotspotFinder.reselect(result, mix);
-        ctx.say(
-          're-picked the places: ${mix.label.toLowerCase()}',
-          why: 'No new search was needed: Yatri re-ranked what Bhatkanti had already found.',
-          kind: FeedKind.decide,
-        );
-        return;
-      }
-      final wider = HotspotGates.widen(query, option);
-      if (wider == null) return; // "leave the days open"
-      query = wider;
+      return;
     }
+    final (result, reported) = found;
+    st.spots = result;
+    st.notes.addAll(result.warnings);
+
+    // "Nothing found" is the goal loop's to repair; only the question of taste is asked here.
+    final issues = reported.where((i) => !_asked.contains(i.id) && i.id == 'hotspots.mix').toList();
+    if (issues.isEmpty) return;
+    final issue = issues.first;
+    _asked.add(issue.id);
+    ctx.say('needs your taste on the places', why: issue.why, kind: FeedKind.ask);
+    final option = await _askIssue(ctx, issue);
+    ctx.say('you chose: ${option.label}', why: 'Yatri re-picks the places to match.', kind: FeedKind.decide);
+    final mix = HotspotGates.mixOf(option);
+    if (mix != null) {
+      // The newest search result may have arrived meanwhile: re-pick from it.
+      final current = st.spots ?? result;
+      st.spots = HotspotFinder.reselect(current, mix);
+      st.spotQuery = st.spotQuery.withMix(mix);
+      ctx.say(
+        're-picked the places: ${mix.label.toLowerCase()}',
+        why: 'No new search was needed: Yatri re-ranked what Bhatkanti had already found.',
+        kind: FeedKind.decide,
+      );
+    }
+  }
+
+  /// Everything two searches found, one entry per place, re-picked under [q].
+  static HotspotSearchResult _mergeSpots(HotspotSearchResult? old, HotspotSearchResult fresh, HotspotQuery q) {
+    if (old == null) return HotspotFinder.reselect(HotspotSearchResult(query: q, selected: fresh.selected, pool: fresh.pool, considered: fresh.considered, sources: fresh.sources, warnings: fresh.warnings), q.mix);
+    final pool = <Hotspot>[];
+    for (final h in [...old.pool, ...fresh.pool]) {
+      final dup = pool.any(
+        (p) =>
+            p.id == h.id ||
+            p.name.trim().toLowerCase() == h.name.trim().toLowerCase() ||
+            (HotspotCandidates.sameName(p.name, h.name) && _km(p.location, h.location) <= 1.5),
+      );
+      if (!dup) pool.add(h);
+    }
+    pool.sort((a, b) => b.score.compareTo(a.score));
+    final merged = HotspotSearchResult(
+      query: q,
+      selected: const [],
+      pool: pool,
+      considered: old.considered + fresh.considered,
+      sources: {...old.sources, ...fresh.sources}.toList(),
+      warnings: {...old.warnings, ...fresh.warnings}.toList(),
+    );
+    return HotspotFinder.reselect(merged, q.mix);
   }
 
   // --- the journey ----------------------------------------------------------
 
-  Future<void> _transportPhase(TaskContext ctx, _State st, SafarAgent safar) async {
+  Future<void> _transportPhase(TaskContext ctx, _State st) async {
     final brief = st.brief;
     final origin = st.origin;
     if (origin == null) {
-      st.notes.add('Your starting point could not be placed on the map, so the journey there is not planned or priced.');
-      ctx.say(
-        'could not place ${brief.originCity ?? 'your starting point'} on the map, so the journey is skipped',
-        why: 'Travel time, cost and CO₂ need both ends of the journey.',
-        kind: FeedKind.warn,
-      );
+      if ((brief.originCity ?? '').trim().isNotEmpty) {
+        ctx.say(
+          'could not place ${brief.originCity} on the map yet; Yatri will come back to the journey',
+          why: 'Travel time, cost and CO₂ need both ends of the journey.',
+          kind: FeedKind.warn,
+        );
+      }
       return;
     }
     final query = TransportQuery(
@@ -551,33 +686,33 @@ class PlannerOrchestrator {
       priority: brief.sustainability,
       departure: brief.start,
     );
+    final n = st.journeyRuns++;
+    final id = n == 0 ? 'safar.transport' : 'safar.transport.$n';
     final report = await ctx.delegate(
       TaskSpec(
-        id: 'safar.transport',
+        id: id,
         agent: AgentKind.safar,
-        title: 'Plan the journey',
+        title: n == 0 ? 'Plan the journey' : 'Plan the journey again',
         why: 'Yatri needs to know how you get there, how long it takes, what it costs and how much CO₂ it emits.',
-        timeout: const Duration(seconds: 25),
       ),
-      (c) => safar.run(c, query),
-      say: 'allocated the journey to Safar',
+      (c) => st.safar.run(c, query),
+      say: n == 0 ? 'allocated the journey to Safar' : 'asked Safar to try the journey again',
     );
-    st.transportTask = 'safar.transport';
+    st.transportTask = id;
     final plan = report.payload is TransportPlan ? report.payload as TransportPlan : null;
     if (plan == null) {
       ctx.say(
-        'Safar could not plan the journey; it will not be priced',
-        why: 'A failed specialist never stops the plan: Yatri routes around it and says so.',
+        'Safar could not plan the journey; Yatri will come back to it',
+        why: 'A failed specialist never stops the plan: the journey is repaired or put to you before the plan is finished.',
         kind: FeedKind.warn,
       );
-      st.notes.add('The journey to ${brief.destination} could not be planned, so it is not in the budget.');
       return;
     }
     st.transport = plan;
     st.chosen = plan.recommended;
 
     final issues = report.issues.where((i) => !_asked.contains(i.id)).toList();
-    if (issues.isEmpty || clock.expired) return;
+    if (issues.isEmpty) return;
     final issue = issues.first;
     _asked.add(issue.id);
     ctx.say('needs your choice of transport', why: issue.why, kind: FeedKind.ask);
@@ -598,8 +733,6 @@ class PlannerOrchestrator {
         agent: AgentKind.raah,
         title: 'Check the weather',
         why: 'Rain changes which places suit which day, so Raah looks at the forecast before ordering the days.',
-        optional: true,
-        timeout: const Duration(seconds: 12),
       ),
       (c) async {
         final days = await toolkit.forecast.outlook(st.center.latitude, st.center.longitude, brief.start!, brief.end!, today: _now());
@@ -631,25 +764,17 @@ class PlannerOrchestrator {
     if (!report.isUsable && st.weather.isEmpty) st.notes.add('The weather forecast was not available.');
   }
 
-  // --- days, audit, budget, assembly ------------------------------------------
+  // --- the goal loop: days, audit, budget, completeness ------------------------
 
-  /// Lays out the days, then audits and prices them, and keeps going until
-  /// nothing needs the traveller's decision (or time and rounds run out). Each
-  /// pass is Raah, then Saksham and Hisab side by side; the first open problem
-  /// (access, then weather, then budget) is put to the traveller, or fixed
-  /// quietly when it is a minor place, and the days are laid out again.
+  /// Lays out the days, then audits and prices them, and keeps going until the
+  /// trip is whole. Each pass is Raah, then Saksham, Hisab and Hariyali side by
+  /// side. Then, in order: unsuitable minor places are swapped quietly; a gap
+  /// in the plan (a thin day, no stay, no journey) is repaired by Yatri itself
+  /// if it still has something to try, or put to the traveller as a choice of
+  /// real options; then access, weather, budget and footprint questions. The
+  /// loop ends only when nothing is missing and nothing is left to decide.
   Future<Itinerary?> _settle(TaskContext ctx, _State st) async {
     final brief = st.brief;
-    if (st.spots == null && st.hotel == null) {
-      ctx.say(
-        'has too little to build days from',
-        why: 'Neither places nor a stay could be found, so there is nothing to lay out.',
-        kind: FeedKind.warn,
-      );
-      return null;
-    }
-
-    const maxPasses = 5;
     DayPlanResult? days;
     Budget? budget;
     AuditResult? audit;
@@ -661,7 +786,8 @@ class PlannerOrchestrator {
     var dirty = true;
     final needs = {for (final n in brief.accessibilityNeeds) if (n != AccessibilityNeed.none) n};
 
-    for (var guard = 0; guard < 24; guard++) {
+    for (var round = 0; round < maxRounds; round++) {
+      if (ctx.cancelled) break;
       if (dirty) {
         pass++;
         dirty = false;
@@ -682,7 +808,6 @@ class PlannerOrchestrator {
         if (reports[2].payload is GreenResult) green = (reports[2].payload as GreenResult).report;
         greenIssues = reports[2].issues;
       }
-      if (pass >= maxPasses || clock.expired) break;
 
       final fixes = audit == null
           ? const AccessFixes()
@@ -704,7 +829,30 @@ class PlannerOrchestrator {
         continue;
       }
 
-      final issues = [...fixes.issues, ...rainIssues, ...budgetIssues, ...greenIssues].where((i) => !_asked.contains(i.id)).toList();
+      // The goal: is this a whole trip yet?
+      final gaps = PlanCompleteness.check(
+        days: days,
+        brief: brief,
+        hasPlaces: _hasPlaces(st),
+        hasStay: st.hotel != null || st.stayOwn,
+        journeyNeeded: (brief.originCity ?? '').trim().isNotEmpty,
+        hasJourney: st.chosen != null,
+        accepted: st.accepted,
+        slowPace: _slowPace(brief),
+      );
+      if (gaps.isNotEmpty) {
+        final gap = gaps.first;
+        _narrateGaps(ctx, gaps);
+        if (await _autoRepair(ctx, st, gap)) {
+          dirty = true;
+          continue;
+        }
+        dirty = await _askGap(ctx, st, gap);
+        continue;
+      }
+
+      final unconfirmed = days == null ? null : _unconfirmedAccess(st, days);
+      final issues = [...fixes.issues, ?unconfirmed, ...rainIssues, ...budgetIssues, ...greenIssues].where((i) => !_asked.contains(i.id)).toList();
       if (issues.isEmpty) break;
 
       final issue = issues.first;
@@ -723,7 +871,7 @@ class PlannerOrchestrator {
       final option = await _askIssue(ctx, issue);
       ctx.say('you chose: ${option.label}', why: 'Yatri applies it and re-plans the days if needed.', kind: FeedKind.decide);
       // An answer that changes nothing just moves on to the next open issue.
-      dirty = _applyChoice(ctx, st, option);
+      dirty = option.effect['action'] == 'pickUnconfirmed' ? await _pickUnconfirmed(ctx, st, days!) : _applyChoice(ctx, st, option);
     }
 
     if (days == null || budget == null) return null;
@@ -742,15 +890,340 @@ class PlannerOrchestrator {
       weather: st.weather,
       audit: audit?.audit,
       green: green,
-      extraAssumptions: [...st.notes, if (st.stayOwn) 'You chose to arrange your own stay, so no hotel is included.'],
+      extraAssumptions: [
+        ...st.notes,
+        if (st.stayOwn) 'You chose to arrange your own stay, so no hotel is included.',
+        if ((st.search?.unansweredReviewSearches ?? 0) > 0 && !_anyReviews(st)) 'Guest reviews were unavailable: no search provider answered the review searches.',
+      ],
     );
     final timed = itinerary.copyWith(timings: _timings());
+    final visits = d.days.fold<int>(0, (s, day) => s + PlanCompleteness.visitsOn(day));
     ctx.say(
-      'put the plan together: ${itinerary.dayCount} days, ${rupees(b.totalInr)}',
-      why: 'Yatri combined the stay, places, journey, days, access audit and budget into one itinerary.',
+      'put the plan together: ${itinerary.dayCount} days, $visits place${visits == 1 ? '' : 's'}, ${rupees(b.totalInr)}',
+      why: ctx.cancelled
+          ? 'You stopped the plan, so this is what was ready.'
+          : 'Every day you are there has enough to do (or you chose a lighter day), and the stay, journey, access and budget are settled.',
       kind: FeedKind.decide,
     );
     return timed;
+  }
+
+  static const _mobilityNeeds = {AccessibilityNeed.wheelchair, AccessibilityNeed.limitedMobility, AccessibilityNeed.elderlyCare};
+
+  /// Places in the plan that no source confirms for the group's mobility needs.
+  List<Hotspot> _unconfirmedVisits(_State st, DayPlanResult days) {
+    final needs = [for (final n in st.brief.accessibilityNeeds) if (_mobilityNeeds.contains(n)) n];
+    if (needs.isEmpty) return const [];
+    final byId = {for (final h in [...?st.spots?.pool, ...?st.spots?.selected]) h.id: h};
+    final out = <Hotspot>[];
+    for (final d in days.days) {
+      for (final slot in d.slots) {
+        if (slot.kind != SlotKind.visit) continue;
+        final h = byId[slot.refId];
+        if (h == null || st.forcedIds.contains(h.id) || out.any((o) => o.id == h.id)) continue;
+        if (!HotspotFinder.accessConfirmed(h, needs.toSet())) out.add(h);
+      }
+    }
+    return out;
+  }
+
+  /// When places in the plan have no confirmed access for a wheelchair user or
+  /// someone with limited mobility, the traveller decides, once: swap them for
+  /// confirmed places, pick which to keep, or keep them and check ahead.
+  Issue? _unconfirmedAccess(_State st, DayPlanResult days) {
+    final unknown = _unconfirmedVisits(st, days);
+    if (unknown.isEmpty) return null;
+    final needs = {for (final n in st.brief.accessibilityNeeds) if (_mobilityNeeds.contains(n)) n};
+    final planned = {for (final d in days.days) for (final s in d.slots) if (s.kind == SlotKind.visit) s.refId};
+    final confirmed = [
+      for (final h in st.spots?.pool ?? const <Hotspot>[])
+        if (!planned.contains(h.id) && !st.droppedIds.contains(h.id) && h.kind != HotspotKind.food && !HotspotFinder.isExcluded(h, st.spotQuery) && HotspotFinder.accessConfirmed(h, needs)) h,
+    ];
+    final what = needs.map((n) => n.label.toLowerCase()).join(', ');
+    final names = unknown.take(4).map((h) => h.name).join(', ');
+    final swap = unknown.take(confirmed.length).map((h) => h.id).toList();
+    return Issue(
+      id: 'access.unconfirmed',
+      agent: AgentKind.saksham,
+      severity: IssueSeverity.warning,
+      message: '${unknown.length} of the places in the plan have no confirmed access for $what: $names${unknown.length > 4 ? '…' : ''}. What should I do?',
+      why: 'Saksham found nothing (in maps, reviews or the places\' own pages) saying these work for your group. '
+          'Nothing says they do not either, so it is your call.',
+      options: [
+        if (swap.isNotEmpty)
+          IssueOption(
+            id: 'swap',
+            label: 'Swap ${swap.length == unknown.length ? 'them' : '${swap.length} of them'} for places with confirmed access',
+            subtitle: '${confirmed.length} confirmed place${confirmed.length == 1 ? '' : 's'} available, e.g. ${confirmed.take(2).map((h) => h.name).join(', ')}',
+            effect: {'action': 'replacePlaces', 'ids': swap},
+            recommended: true,
+          ),
+        const IssueOption(id: 'pick', label: 'Let me choose which of them to keep', effect: {'action': 'pickUnconfirmed'}),
+        IssueOption(
+          id: 'keep',
+          label: 'Keep them; I will check access before going',
+          effect: const {'action': 'keepUnconfirmed'},
+          recommended: swap.isEmpty,
+        ),
+      ],
+    );
+  }
+
+  /// The traveller ticks the unconfirmed places to keep; the rest are replaced.
+  Future<bool> _pickUnconfirmed(TaskContext ctx, _State st, DayPlanResult days) async {
+    final unknown = _unconfirmedVisits(st, days);
+    if (unknown.isEmpty) return false;
+    final question = YatriQuestion(
+      id: 'plan.access.unconfirmed.pick',
+      fields: const [],
+      widget: AnswerWidget.multiSelect,
+      defaultText: 'Tick the places to keep. The others will be replaced with better-suited ones where possible.',
+      reason: IssueKind.conflict,
+      agent: AgentKind.yatri.name,
+      why: 'None of these has confirmed access for your group; you know best which are worth the risk.',
+      options: [for (final h in unknown) QuestionOption(id: h.id, label: h.name, subtitle: '${h.kind.name} · access not confirmed')],
+    );
+    final answer = await _askQuestion(ctx, question);
+    final keep = switch (answer) {
+      MultiChoiceAnswer(:final optionIds) => optionIds,
+      ChoiceAnswer(:final optionId) => {optionId},
+      _ => {for (final h in unknown) h.id},
+    };
+    st.forcedIds.addAll(keep.where((id) => unknown.any((h) => h.id == id)));
+    final drop = [for (final h in unknown) if (!keep.contains(h.id)) h.id];
+    if (keep.isNotEmpty) {
+      st.notes.add('You kept ${unknown.where((h) => keep.contains(h.id)).map((h) => h.name).join(', ')} without confirmed access; check before going.');
+    }
+    if (drop.isEmpty) return false;
+    _replacePlaces(ctx, st, drop);
+    return true;
+  }
+
+  static double _km(LatLng a, LatLng b) => const Distance().as(LengthUnit.Kilometer, a, b);
+
+  static bool _anyReviews(_State st) => [?st.hotel, ...?st.hotels?.options].any((h) => h.claims.any((c) => c.isReviews));
+
+  bool _hasPlaces(_State st) {
+    final s = st.spots;
+    if (s == null) return false;
+    return s.selected.isNotEmpty || s.pool.isNotEmpty;
+  }
+
+  static bool _slowPace(TripBrief b) =>
+      b.accessibilityNeeds.contains(AccessibilityNeed.elderlyCare) || (b.accessibilityDetails['a11y.elderly.support']?.contains('slow_pace') ?? false);
+
+  final Set<String> _narrated = {};
+
+  void _narrateGaps(TaskContext ctx, List<PlanGap> gaps) {
+    final key = gaps.map((g) => g.id).join(',');
+    if (!_narrated.add(key)) return;
+    final thin = [for (final g in gaps) if (g.kind == GapKind.day) 'day ${g.day}'];
+    final parts = [
+      if (gaps.any((g) => g.kind == GapKind.places)) 'no places to visit yet',
+      if (thin.isNotEmpty) '${thin.join(', ')} ${thin.length == 1 ? 'is' : 'are'} too thin',
+      if (gaps.any((g) => g.kind == GapKind.time)) 'the journey leaves no time there',
+      if (gaps.any((g) => g.kind == GapKind.stay)) 'no stay yet',
+      if (gaps.any((g) => g.kind == GapKind.journey)) 'the journey is not planned',
+    ];
+    ctx.say(
+      'is not finished: ${parts.join('; ')}',
+      why: 'Yatri keeps working until the whole trip is planned, and asks you only when it has nothing left to try.',
+      kind: FeedKind.decide,
+    );
+  }
+
+  /// One thing Yatri can do on its own about [gap], if it has not done it yet.
+  /// True when something changed and the days should be laid out again.
+  Future<bool> _autoRepair(TaskContext ctx, _State st, PlanGap gap) async {
+    switch (gap.kind) {
+      case GapKind.places:
+        if (st.repairs.add('places.retry')) {
+          return _searchPlaces(ctx, st, st.spotQuery, why: 'the first search came back empty or failed');
+        }
+        return false;
+      case GapKind.day:
+        // 1. More of what Bhatkanti already found: no new search.
+        final spots = st.spots;
+        if (spots != null && spots.pool.length > spots.selected.length && st.repairs.add('places.more')) {
+          st.spotQuery = st.spotQuery.copyWith(extra: st.spotQuery.extra + st.spotQuery.perDay * 2);
+          final before = spots.selected.length;
+          st.spots = HotspotFinder.reselect(HotspotSearchResult(query: st.spotQuery, selected: spots.selected, pool: spots.pool, considered: spots.considered, sources: spots.sources, warnings: spots.warnings), st.spotQuery.mix);
+          ctx.say(
+            'is adding more of the places Bhatkanti found to fill day ${gap.day}',
+            why: 'Day ${gap.day} has ${gap.visits} of the ${gap.needed} places it needs; Bhatkanti found more than the first pick used.',
+            kind: FeedKind.decide,
+          );
+          return st.spots!.selected.length > before;
+        }
+        // 2. A wider search, at full depth.
+        if (st.repairs.add('places.wider')) {
+          return _searchPlaces(ctx, st, st.spotQuery.copyWith(radiusFactor: st.spotQuery.radiusFactor * 1.6), why: 'day ${gap.day} is still short of places');
+        }
+        return false;
+      case GapKind.stay:
+        if (st.repairs.add('stay.retry')) {
+          ctx.say('is searching for a stay again', why: 'There is no stay yet and you have not said you will arrange one.', kind: FeedKind.decide);
+          final before = st.hotel;
+          await _hotelPhase(ctx, st, st.hotelQuery.copyWith(radiusKm: (st.hotelQuery.radiusKm * 2).clamp(10.0, HotelGates.maxRadiusKm)));
+          return st.hotel != before || st.stayOwn;
+        }
+        return false;
+      case GapKind.journey:
+        if (st.repairs.add('journey.retry')) {
+          if (st.origin == null && (st.brief.originCity ?? '').trim().isNotEmpty) st.origin = await _locateOrigin(st.brief.originCity!.trim());
+          await _transportPhase(ctx, st);
+          return st.chosen != null;
+        }
+        return false;
+      case GapKind.time:
+        return false; // how to travel is the traveller's call
+    }
+  }
+
+  /// Runs Bhatkanti again with [query] and merges what it finds with what was
+  /// already there. True when there is anything new to plan with.
+  Future<bool> _searchPlaces(TaskContext ctx, _State st, HotspotQuery query, {required String why}) async {
+    ctx.say('is asking Bhatkanti to search again', why: 'The plan is not finished: $why.', kind: FeedKind.delegate);
+    final found = await _runBhatkanti(
+      ctx,
+      st,
+      query,
+      title: query.radiusFactor > st.spotQuery.radiusFactor ? 'Look further out' : 'Search places again',
+      say: query.radiusFactor > st.spotQuery.radiusFactor ? 'asked Bhatkanti to look further out' : 'asked Bhatkanti to search again',
+    );
+    if (found == null) return false;
+    final before = st.spots?.pool.length ?? 0;
+    st.spotQuery = query;
+    st.spots = _mergeSpots(st.spots, found.$1, query);
+    st.notes.addAll(found.$1.warnings.where((w) => !st.notes.contains(w)));
+    return (st.spots?.pool.length ?? 0) > before;
+  }
+
+  /// Puts [gap] to the traveller as a choice of real options. Returns whether
+  /// the plan changed and the days must be laid out again.
+  Future<bool> _askGap(TaskContext ctx, _State st, PlanGap gap) async {
+    final used = st.usedOptions.putIfAbsent(gap.id, () => {});
+    final attempt = st.gapAsks[gap.id] = (st.gapAsks[gap.id] ?? 0) + 1;
+    final near = gap.kind == GapKind.places || gap.kind == GapKind.day ? _nearMisses(st, gap) : const <(Hotspot, String)>[];
+    final issue = PlanCompleteness.issueFor(
+      gap,
+      destination: st.brief.destination ?? 'the destination',
+      used: used,
+      rainBanned: gap.date != null && st.bannedOutdoor.contains(gap.date),
+      nearMisses: near.length,
+      transport: st.transport,
+      chosen: st.chosen,
+      origin: st.brief.originCity,
+      attempt: attempt,
+    );
+    ctx.say('needs your decision to finish the plan', why: issue.why, kind: FeedKind.ask);
+    final option = await _askIssue(ctx, issue);
+    used.add(option.id);
+    ctx.say('you chose: ${option.label}', why: 'Yatri acts on it and keeps going until the trip is whole.', kind: FeedKind.decide);
+
+    switch (option.effect['action']) {
+      case 'acceptGap':
+        st.accepted.add(gap.id);
+        st.notes.add(switch (gap.kind) {
+          GapKind.day => 'You chose to keep day ${gap.day} light.',
+          GapKind.places => 'You chose to explore on your own rather than have places planned.',
+          GapKind.time => 'You chose to keep a journey that leaves little time at the destination.',
+          GapKind.journey => 'You will book the journey yourself, so it is not in the plan or the budget.',
+          GapKind.stay => 'You will arrange your own stay.',
+        });
+        return false;
+      case 'stayOwn':
+        st.stayOwn = true;
+        st.accepted.add(gap.id);
+        return true;
+      case 'unbanOutdoor':
+        final dates = option.effect['dates'];
+        if (dates is List) st.bannedOutdoor.removeAll(dates.whereType<String>());
+        st.notes.add('You chose to keep outdoor places on a rainy day; carry rain gear.');
+        return true;
+      case 'widenPlaces':
+        final factor = st.spotQuery.radiusFactor * (st.repairs.contains('places.wider') ? 1.5 : 1.6);
+        st.repairs.add('places.wider');
+        return _searchPlaces(ctx, st, st.spotQuery.copyWith(radiusFactor: factor), why: 'you asked to look further out');
+      case 'pickNearMiss':
+        return _pickNearMisses(ctx, st, near);
+      case 'widenStay':
+        final before = st.hotel;
+        await _hotelPhase(ctx, st, st.hotelQuery.copyWith(radiusKm: HotelGates.maxRadiusKm));
+        return st.hotel != before;
+      case 'retryJourney':
+        if (st.origin == null && (st.brief.originCity ?? '').trim().isNotEmpty) st.origin = await _locateOrigin(st.brief.originCity!.trim());
+        await _transportPhase(ctx, st);
+        return st.chosen != null;
+      default:
+        return _applyChoice(ctx, st, option);
+    }
+  }
+
+  /// Places Bhatkanti found that were not picked, with what keeps each from
+  /// fitting, so the traveller can decide what is good enough.
+  List<(Hotspot, String)> _nearMisses(_State st, PlanGap gap) {
+    final spots = st.spots;
+    if (spots == null) return const [];
+    final picked = {...spots.selected.map((h) => h.id), ...st.forcedIds};
+    final q = st.spotQuery;
+    final rainy = gap.date != null && st.bannedOutdoor.contains(gap.date);
+    final out = <(Hotspot, String)>[];
+    for (final h in spots.pool) {
+      if (picked.contains(h.id) || st.droppedIds.contains(h.id) || h.kind == HotspotKind.food || HotspotFinder.lodgingWords.hasMatch(h.name)) continue;
+      if (rainy && h.isOutdoor) continue;
+      final ruledOut = [for (final n in q.needs) if (h.access[n]?.level == SupportLevel.no) n];
+      final unknown = [for (final n in q.needs) if (n != AccessibilityNeed.none && (h.access[n]?.level ?? SupportLevel.unknown) == SupportLevel.unknown) n];
+      final reason = ruledOut.isNotEmpty
+          ? 'Reported not to suit ${ruledOut.first.label.toLowerCase()}'
+          : q.avoidsStairs && (h.kind == HotspotKind.adventure || HotspotFinder.stairWords.hasMatch(h.name) || RegExp(r'\b(trek|climb|steps|stairs|caves?)\b', caseSensitive: false).hasMatch(h.name))
+          ? 'May involve stairs or a climb'
+          : q.walksLittle && HotspotFinder.longWalkWords.hasMatch(h.name)
+          ? 'Means a long walk'
+          : unknown.isNotEmpty
+          ? 'Access not confirmed for ${unknown.first.label.toLowerCase()}'
+          : 'Further away or less known';
+      out.add((h, reason));
+      if (out.length >= 6) break;
+    }
+    return out;
+  }
+
+  /// The traveller picks which near misses are good enough; they join the plan.
+  Future<bool> _pickNearMisses(TaskContext ctx, _State st, List<(Hotspot, String)> near) async {
+    if (near.isEmpty) return false;
+    final question = YatriQuestion(
+      id: 'plan.places.nearMiss.${st.gapAsks.values.fold<int>(0, (a, b) => a + b)}',
+      fields: const [],
+      widget: AnswerWidget.multiSelect,
+      defaultText: 'These places did not fully match your needs. Pick any that would be good enough:',
+      reason: IssueKind.conflict,
+      agent: AgentKind.yatri.name,
+      why: 'Yatri left them out because of what is shown under each. You know your group best, so the choice is yours.',
+      options: [
+        for (final (h, reason) in near)
+          QuestionOption(id: h.id, label: h.name, subtitle: '$reason · ${h.kind.name} · about ${durationLabel(h.visitMinutes)}'),
+      ],
+    );
+    final answer = await _askQuestion(ctx, question);
+    final ids = switch (answer) {
+      MultiChoiceAnswer(:final optionIds) => optionIds,
+      ChoiceAnswer(:final optionId) => {optionId},
+      _ => const <String>{},
+    };
+    final chosen = [for (final (h, _) in near) if (ids.contains(h.id)) h];
+    if (chosen.isEmpty) {
+      ctx.say('added none of them', why: 'Yatri will offer the other ways to fill the day.', kind: FeedKind.decide);
+      return false;
+    }
+    st.forcedIds.addAll(chosen.map((h) => h.id));
+    st.notes.add('You added ${chosen.map((h) => h.name).join(', ')} knowing ${chosen.length == 1 ? 'it does' : 'they do'} not fully match your needs.');
+    ctx.say(
+      'added ${chosen.map((h) => h.name).take(3).join(', ')}${chosen.length > 3 ? ' and ${chosen.length - 3} more' : ''} to the plan',
+      why: 'You chose them; Raah fits them into the days.',
+      kind: FeedKind.decide,
+    );
+    return true;
   }
 
   /// Seconds each agent spent working, by agent name, and the active total.
@@ -776,7 +1249,6 @@ class PlannerOrchestrator {
         title: pass == 0 ? 'Audit accessibility' : 'Re-audit accessibility',
         why: 'Saksham checks every step of the trip (the stay, the journey, each place, each transfer) against every access need in your group.',
         parents: ['raah.days.$pass'],
-        timeout: const Duration(seconds: 25),
       ),
       (c) => SakshamAgent(estimator: toolkit.estimator).run(
         c,
@@ -802,7 +1274,6 @@ class PlannerOrchestrator {
         title: pass == 0 ? 'Score the footprint' : 'Re-score the footprint',
         why: 'Hariyali measures the carbon and eco impact of every choice and looks for greener ones.',
         parents: ['raah.days.$pass'],
-        timeout: const Duration(seconds: 8),
       ),
       (c) => HariyaliAgent().run(
         c,
@@ -834,7 +1305,6 @@ class PlannerOrchestrator {
         title: pass == 0 ? 'Price the plan' : 'Re-price the plan',
         why: 'Hisab adds up the stay, travel, entry fees, meals and a small buffer, and compares the total with your budget.',
         parents: ['raah.days.$pass'],
-        timeout: const Duration(seconds: 10),
       ),
       (c) async {
         final b = BudgetEngine.build(
@@ -879,6 +1349,15 @@ class PlannerOrchestrator {
     );
   }
 
+  /// The farthest the group can walk between stops, from their own answer.
+  static double? _walkLimitKm(TripBrief b) {
+    final w = b.accessibilityDetails['a11y.mobility.walking'] ?? const {};
+    if (w.contains('lt100')) return 0.1;
+    if (w.contains('100_500')) return 0.4;
+    if (w.contains('500_1000')) return 0.8;
+    return null;
+  }
+
   /// Raah's layout for one pass, with any weather question it raises.
   Future<(DayPlanResult, List<Issue>)?> _dayPlan(TaskContext ctx, _State st, int round) async {
     final brief = st.brief;
@@ -892,12 +1371,14 @@ class PlannerOrchestrator {
         title: round == 0 ? 'Plan the days' : 'Re-plan the days',
         why: 'Raah groups places that are close together, checks opening hours and weather, and orders each day so the walking and waiting stay short.',
         parents: parents,
-        timeout: const Duration(seconds: 20),
       ),
       (c) async {
-        final chosen = st.spots?.selected ?? const <Hotspot>[];
+        final pool = st.spots?.pool ?? const <Hotspot>[];
+        final forced = [for (final h in pool) if (st.forcedIds.contains(h.id)) h];
+        final chosen = [...?st.spots?.selected, for (final h in forced) if (!(st.spots?.selected.any((s) => s.id == h.id) ?? false)) h];
         final chosenIds = chosen.map((h) => h.id).toSet();
-        final alternates = [for (final h in st.spots?.pool ?? const <Hotspot>[]) if (!chosenIds.contains(h.id)) h];
+        // Spares may fill a short day, but never with a place the group must avoid.
+        final alternates = [for (final h in pool) if (!chosenIds.contains(h.id) && !HotspotFinder.isExcluded(h, st.spotQuery)) h];
         final input = DayPlanInput(
           start: brief.start!,
           end: brief.end!,
@@ -915,6 +1396,10 @@ class PlannerOrchestrator {
           pace: brief.pace,
           bannedOutdoorDates: st.bannedOutdoor,
           excludedIds: st.droppedIds,
+          walkLimitKm: _walkLimitKm(brief),
+          slowPace: _slowPace(brief),
+          restStops: brief.accessibilityDetails['a11y.mobility.support']?.contains('rest_stops') ?? false,
+          dietary: brief.dietary,
         );
         final r = DayPlanner.plan(input);
         out = r;
@@ -986,6 +1471,9 @@ class PlannerOrchestrator {
         if (ids is! List || ids.isEmpty) return false;
         _replacePlaces(ctx, st, ids.whereType<String>().toList());
         return true;
+      case 'keepUnconfirmed':
+        st.notes.add('Some places have no confirmed access for your group; check with them before going.');
+        return false;
       case 'banOutdoor':
         final dates = e['dates'];
         if (dates is! List || dates.isEmpty) return false;
@@ -1087,6 +1575,18 @@ class PlannerOrchestrator {
       // not found
     }
     return null;
+  }
+
+  /// The destination, with its extent when it is a region rather than a town.
+  Future<GeoArea?> _geocodeArea(String place) async {
+    try {
+      final a = await toolkit.geocoder.lookupArea(place);
+      if (a != null) return a;
+    } catch (_) {
+      // fall through to the next geocoder
+    }
+    final p = await _geocode(place);
+    return p == null ? null : GeoArea(p);
   }
 
   /// A starting point: geocoders first, then the model's knowledge of where

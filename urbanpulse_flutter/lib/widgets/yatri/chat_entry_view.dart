@@ -88,7 +88,7 @@ class ChatEntryView extends StatelessWidget {
       case PlanningEntry():
         return const _PlanningCard();
       case TaskGraphEntry():
-        return TaskGraphCard(graph: e.graph, clock: e.clock);
+        return TaskGraphCard(graph: e.graph, clock: e.clock, onStop: e.onStop);
       case RouteMapEntry():
         if (!e.ready) return const _MapLoadingCard();
         return Padding(

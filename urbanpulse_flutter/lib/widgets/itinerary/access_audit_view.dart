@@ -127,11 +127,14 @@ class _ItemCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final overall = item.overall;
     final color = levelColor(context, overall);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(color: scheme.surfaceContainerLow, borderRadius: BorderRadius.circular(16), border: Border.all(color: scheme.outlineVariant)),
-      clipBehavior: Clip.antiAlias,
-      child: Theme(
+    // The card's colour is painted by a Material, so the tile's ink shows on it.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: scheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: scheme.outlineVariant)),
+        clipBehavior: Clip.antiAlias,
+        child: Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
@@ -165,6 +168,7 @@ class _ItemCard extends StatelessWidget {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

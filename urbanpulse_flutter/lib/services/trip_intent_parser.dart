@@ -24,11 +24,9 @@ Respond with ONLY a raw JSON object (no markdown fences, no commentary) matching
 }''';
 
   static const _groqCandidateModels = [
-    'llama-3.3-70b-versatile',
     'openai/gpt-oss-120b',
-    'llama-3.1-8b-instant',
-    'groq/compound',
     'openai/gpt-oss-20b',
+    'qwen/qwen3.8-27b',
   ];
 
   static Future<TripIntent> parse(String freeText) async {

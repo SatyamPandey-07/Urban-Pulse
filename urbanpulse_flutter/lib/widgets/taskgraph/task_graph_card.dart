@@ -35,9 +35,13 @@ String planStatusLine(TaskGraph graph) {
 /// The inline card in the chat: a compact live graph, the latest feed lines
 /// and a stopwatch. Tap it to open the full-screen view.
 class TaskGraphCard extends StatefulWidget {
-  const TaskGraphCard({required this.graph, this.clock, this.title = 'Planning your trip', super.key});
+  const TaskGraphCard({required this.graph, this.clock, this.title = 'Planning your trip', this.onStop, super.key});
 
   final TaskGraph graph;
+
+  /// Stops the plan and shows what is ready. The agents otherwise keep going
+  /// until the whole trip is planned, however long that takes.
+  final VoidCallback? onStop;
 
   /// Drives the stopwatch (which excludes time spent waiting on the user).
   final PlanClock? clock;
@@ -143,6 +147,12 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
+                      ),
+                    if (widget.onStop != null && !graph.isFinished)
+                      IconButton(
+                        tooltip: 'Stop and show what is ready',
+                        onPressed: widget.onStop,
+                        icon: const Icon(Icons.stop_circle_outlined, size: 20),
                       ),
                     IconButton(
                       tooltip: 'Open full view',

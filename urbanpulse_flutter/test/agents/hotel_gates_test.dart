@@ -59,15 +59,21 @@ void main() {
       final i = HotelGates.checkAtithi(result([hotel('a', 2000), hotel('b', 2500, access: {wc: SupportLevel.no})], q)).single;
       expect(i.id, startsWith('hotels.access@'));
       expect(i.message, contains('none is confirmed'));
-      expect(i.options.map((o) => o.id), ['accept', 'wider']);
+      expect(i.options.map((o) => o.id).take(2), ['accept', 'wider']);
       expect(i.options.first.recommended, isTrue);
+      // Then the real stays, best fit first, each saying what it meets.
+      final stays = i.options.skip(2).toList();
+      expect(stays.map((o) => o.id), ['hotel.a', 'hotel.b']);
+      expect(stays.first.effect, {'action': 'swapHotel', 'hotelId': 'a'});
+      expect(stays.first.subtitle, contains('not confirmed'));
+      expect(stays.last.subtitle, contains('wheelchair: no'));
     });
 
     test('only hotels known to fail: accepting is possible but widening is recommended', () {
       final q = munnarQuery(needs: {wc});
       final i = HotelGates.checkAtithi(result([hotel('a', 2000, access: {wc: SupportLevel.no})], q)).single;
       expect(i.message, contains('suits wheelchair access'));
-      expect(i.options.map((o) => o.id), ['wider', 'accept']);
+      expect(i.options.map((o) => o.id), ['wider', 'accept', 'hotel.a']);
       expect(i.options.firstWhere((o) => o.id == 'wider').recommended, isTrue);
       expect(i.options.firstWhere((o) => o.id == 'accept').recommended, isFalse);
     });

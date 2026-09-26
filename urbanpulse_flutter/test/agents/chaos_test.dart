@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -186,21 +185,21 @@ void main() {
         final agent = AgentKind.values[rng.nextInt(AgentKind.values.length)];
         final parents = [for (var p = 0; p < i; p++) if (rng.nextInt(4) == 0) 't$p'];
         final behaviour = rng.nextInt(8);
-        final optional = rng.nextInt(5) == 0;
         futures.add(
           board.submit(
-            TaskSpec(id: 't$i', agent: agent, title: 'task $i', parents: parents, optional: optional, timeout: const Duration(milliseconds: 60)),
+            TaskSpec(id: 't$i', agent: agent, title: 'task $i', parents: parents),
             (ctx) async {
               await Future<void>.delayed(Duration(milliseconds: rng.nextInt(15)));
               switch (behaviour) {
                 case 0:
                   throw StateError('worker $i exploded');
                 case 1:
-                  await Completer<void>().future; // never finishes: must time out
-                  return AgentReport.failed(agent, 'unreachable');
+                  // Slow, but it always finishes: nothing is abandoned for time.
+                  await Future<void>.delayed(Duration(milliseconds: 20 + rng.nextInt(60)));
+                  return AgentReport(agent: agent, status: ReportStatus.done, summary: 'slow but done');
                 case 2:
                   final child = await ctx.delegate(
-                    TaskSpec(id: 't$i.child', agent: AgentKind.khoji, title: 'child', timeout: const Duration(milliseconds: 60)),
+                    TaskSpec(id: 't$i.child', agent: AgentKind.khoji, title: 'child'),
                     (c) async => rng.nextBool() ? throw Exception('child failed') : AgentReport(agent: AgentKind.khoji, status: ReportStatus.done, summary: 'ok'),
                   );
                   return AgentReport(agent: agent, status: ReportStatus.done, summary: 'delegated: ${child.status.name}');

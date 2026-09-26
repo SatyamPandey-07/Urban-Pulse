@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:urbanpulse/agents/runtime/plan_clock.dart';
 import 'package:urbanpulse/agents/yatri/planner_orchestrator.dart';
 import 'package:urbanpulse/models/trip_brief.dart';
 import 'package:urbanpulse/models/yatri_question.dart';
@@ -72,7 +71,6 @@ void main() {
       final asked = <String>[];
       final o = PlannerOrchestrator(
         toolkit: toolkitFor(world, llm: llm, places: {if (rng.nextInt(6) != 0) PlannerOrchestrator.cleanPlace(dest).toLowerCase(): munnarCenter, 'pune': bengaluruCenter}),
-        clock: PlanClock(degradeAfter: rng.nextInt(6) == 0 ? Duration.zero : const Duration(seconds: 35)),
         ask: (q) async {
           asked.add(q.id);
           switch (rng.nextInt(7)) {

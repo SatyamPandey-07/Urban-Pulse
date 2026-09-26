@@ -25,8 +25,6 @@ class TaskSpec {
     this.why,
     this.params = const {},
     this.parents = const [],
-    this.optional = false,
-    this.timeout = const Duration(seconds: 25),
   });
 
   final String id;
@@ -44,10 +42,6 @@ class TaskSpec {
 
   /// Task ids that must finish first (drawn as edges).
   final List<String> parents;
-
-  /// Skipped when the plan is running out of time.
-  final bool optional;
-  final Duration timeout;
 }
 
 /// One node of the graph the user watches. Mutated only by the board.

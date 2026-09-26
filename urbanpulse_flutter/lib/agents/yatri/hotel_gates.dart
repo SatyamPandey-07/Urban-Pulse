@@ -1,3 +1,4 @@
+import '../../core/formatting.dart';
 import '../../models/itinerary/itinerary_parts.dart';
 import '../../models/trip_brief.dart';
 import '../atithi/hotel_finder.dart';
@@ -122,6 +123,7 @@ abstract final class HotelGates {
             effect: const {'action': 'accept'},
             recommended: !wider,
           ),
+        ..._stayOptions(r.options, needs),
       ],
     );
   }
@@ -162,8 +164,95 @@ abstract final class HotelGates {
           label: 'Keep ₹$cap and show me the closest options',
           effect: const {'action': 'accept'},
         ),
+        ..._stayOptions(priced, needs),
       ],
     );
+  }
+
+  /// When nothing meets everything: up to three real stays to choose from,
+  /// each saying what it meets, what is unconfirmed and what fails, and its
+  /// price, so the traveller decides what is good enough.
+  static List<IssueOption> _stayOptions(List<HotelOption> options, Set<AccessibilityNeed> needs) {
+    int count(HotelOption h, SupportLevel l) => needs.where((n) => (h.access[n]?.level ?? SupportLevel.unknown) == l).length;
+    final ranked = [for (var i = 0; i < options.length; i++) (i, options[i])]
+      ..sort((a, b) {
+        final byFail = count(a.$2, SupportLevel.no).compareTo(count(b.$2, SupportLevel.no));
+        if (byFail != 0) return byFail;
+        final byUnknown = count(a.$2, SupportLevel.unknown).compareTo(count(b.$2, SupportLevel.unknown));
+        return byUnknown != 0 ? byUnknown : a.$1.compareTo(b.$1);
+      });
+    return [
+      for (final (_, h) in ranked.take(3))
+        IssueOption(
+          id: 'hotel.${h.id}',
+          label: 'Stay at ${h.name}',
+          subtitle: _fitLine(h, needs),
+          effect: {'action': 'swapHotel', 'hotelId': h.id},
+        ),
+    ];
+  }
+
+  /// “wheelchair: yes · elderly: not confirmed · ≈ ₹4,200 a night”.
+  static String _fitLine(HotelOption h, Set<AccessibilityNeed> needs) {
+    final parts = [
+      for (final n in needs)
+        '${n.label.split(' ').first.toLowerCase()}: ${switch (h.access[n]?.level) {
+          SupportLevel.yes => 'yes',
+          SupportLevel.partial => 'partly',
+          SupportLevel.no => 'no',
+          _ => 'not confirmed',
+        }}',
+      if (h.nightlyInr != null) '${h.priceIsEstimated ? '≈ ' : ''}${rupees(h.nightlyInr!)} a night',
+    ];
+    return parts.join(' · ');
+  }
+
+  /// [issue] once no more searches are allowed: only the choices that need no
+  /// new search (a real stay, accepting, skipping) are left.
+  static Issue withoutSearching(Issue issue) {
+    final left = [
+      for (final o in issue.options)
+        if (o.effect['action'] == 'accept' || o.effect['action'] == 'skip' || o.effect['action'] == 'swapHotel') o,
+    ];
+    final options = left.isEmpty ? issue.options : left;
+    final hasRecommended = options.any((o) => o.recommended);
+    return Issue(
+      id: '${issue.id}#last',
+      agent: issue.agent,
+      severity: issue.severity,
+      message: '${issue.message} (I have searched as widely as I can.)',
+      why: issue.why,
+      options: [
+        for (var i = 0; i < options.length; i++)
+          i == 0 && !hasRecommended
+              ? IssueOption(id: options[i].id, label: options[i].label, subtitle: options[i].subtitle, badge: options[i].badge, effect: options[i].effect, recommended: true)
+              : options[i],
+      ],
+    );
+  }
+
+  // --- how well a stay suits the group ------------------------------------------
+
+  /// How well [h] suits [needs], lower is better: needs known to fail, then
+  /// needs nobody has confirmed, then needs only partly met. A hostel (shared
+  /// rooms and bathrooms, rarely a lift) counts as one more unconfirmed need for
+  /// a wheelchair user or an elderly traveller.
+  static List<int> fitKey(HotelOption h, Set<AccessibilityNeed> needs) {
+    final relevant = {for (final n in needs) if (n != AccessibilityNeed.none) n};
+    int count(SupportLevel l) => relevant.where((n) => (h.access[n]?.level ?? SupportLevel.unknown) == l).length;
+    final hostel = (relevant.contains(AccessibilityNeed.wheelchair) || relevant.contains(AccessibilityNeed.elderlyCare)) &&
+        RegExp(r'hostel|dorm|backpacker', caseSensitive: false).hasMatch('${h.type} ${h.name}');
+    return [count(SupportLevel.no), count(SupportLevel.unknown) + (hostel ? 1 : 0), count(SupportLevel.partial)];
+  }
+
+  /// [a] suits the group at least as well as [b].
+  static bool fitsAsWell(HotelOption a, HotelOption b, Set<AccessibilityNeed> needs) {
+    final ka = fitKey(a, needs);
+    final kb = fitKey(b, needs);
+    for (var i = 0; i < ka.length; i++) {
+      if (ka[i] != kb[i]) return ka[i] < kb[i];
+    }
+    return true;
   }
 
   // --- helpers --------------------------------------------------------------

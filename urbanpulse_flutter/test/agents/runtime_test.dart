@@ -13,13 +13,7 @@ import 'package:urbanpulse/services/groq_api_client.dart';
 AgentReport ok(AgentKind a, String s) =>
     AgentReport(agent: a, status: ReportStatus.done, summary: s);
 
-TaskSpec spec(
-  String id,
-  AgentKind a, {
-  List<String> parents = const [],
-  bool optional = false,
-  Duration timeout = const Duration(seconds: 5),
-}) => TaskSpec(id: id, agent: a, title: id, parents: parents, optional: optional, timeout: timeout);
+TaskSpec spec(String id, AgentKind a, {List<String> parents = const []}) => TaskSpec(id: id, agent: a, title: id, parents: parents);
 
 void main() {
   group('lenient JSON', () {
@@ -60,11 +54,10 @@ void main() {
   group('plan clock', () {
     test('waiting on the user does not count', () {
       var now = DateTime(2026, 1, 1, 12);
-      final clock = PlanClock(now: () => now, degradeAfter: const Duration(seconds: 10), deadline: const Duration(seconds: 20));
+      final clock = PlanClock(now: () => now);
       clock.start();
       now = now.add(const Duration(seconds: 6));
       expect(clock.elapsed, const Duration(seconds: 6));
-      expect(clock.degraded, isFalse);
 
       clock.pause();
       now = now.add(const Duration(minutes: 5));
@@ -73,11 +66,6 @@ void main() {
 
       now = now.add(const Duration(seconds: 5));
       expect(clock.elapsed, const Duration(seconds: 11));
-      expect(clock.degraded, isTrue);
-      expect(clock.expired, isFalse);
-      now = now.add(const Duration(seconds: 10));
-      expect(clock.expired, isTrue);
-      expect(clock.remaining, Duration.zero);
     });
 
     test('pauses are re-entrant', () {
@@ -149,37 +137,47 @@ void main() {
       expect(graph.node('good')!.status, TaskStatus.done);
     });
 
-    test('a task that never finishes times out and is abandoned', () async {
-      final never = Completer<AgentReport>();
-      final r = await board.submit(
-        spec('slow', AgentKind.khoji, timeout: const Duration(milliseconds: 200)),
-        (c) => never.future,
-      );
-      expect(r.status, ReportStatus.failed);
-      expect(r.summary, contains('timed out'));
-      // A late result is ignored.
-      never.complete(ok(AgentKind.khoji, 'late'));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(graph.node('slow')!.status, TaskStatus.failed);
+    test('a slow task is never abandoned: its result arrives, however long it takes', () async {
+      final slow = Completer<AgentReport>();
+      final r = board.submit(spec('slow', AgentKind.khoji), (c) => slow.future);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(graph.node('slow')!.status, TaskStatus.running);
+      slow.complete(ok(AgentKind.khoji, 'found it'));
+      final report = await r;
+      expect(report.status, ReportStatus.done);
+      expect(report.summary, 'found it');
+      expect(graph.node('slow')!.status, TaskStatus.done);
     });
 
-    test('optional work is skipped once the plan is running long', () async {
-      final late = TaskBoard(
-        graph: graph,
-        clock: PlanClock(degradeAfter: Duration.zero),
-      );
-      late.clock.start();
+    test('there is no time budget: work runs in full however long the plan has taken', () async {
+      var now = DateTime(2026, 1, 1, 12);
+      final long = TaskBoard(graph: graph, clock: PlanClock(now: () => now));
+      long.clock.start();
+      now = now.add(const Duration(hours: 3));
       var ran = false;
-      final r = await late.submit(spec('extra', AgentKind.khoji, optional: true), (c) async {
+      final r = await long.submit(spec('extra', AgentKind.khoji), (c) async {
         ran = true;
         return ok(AgentKind.khoji, 'x');
       });
+      expect(ran, isTrue);
+      expect(r.status, ReportStatus.done);
+    });
+
+    test('stopping starts nothing new, but running work still reports', () async {
+      final running = Completer<AgentReport>();
+      final first = board.submit(spec('first', AgentKind.atithi), (c) => running.future);
+      await Future<void>.delayed(Duration.zero);
+      board.cancel();
+      var ran = false;
+      final second = await board.submit(spec('second', AgentKind.raah), (c) async {
+        ran = true;
+        return ok(AgentKind.raah, 'y');
+      });
       expect(ran, isFalse);
-      expect(graph.node('extra')!.status, TaskStatus.skipped);
-      expect(r.summary, contains('Skipped'));
-      // Non-optional work still runs.
-      final must = await late.submit(spec('must', AgentKind.atithi), (c) async => ok(AgentKind.atithi, 'y'));
-      expect(must.status, ReportStatus.done);
+      expect(second.summary, 'Cancelled');
+      expect(graph.node('second')!.status, TaskStatus.skipped);
+      running.complete(ok(AgentKind.atithi, 'done anyway'));
+      expect((await first).summary, 'done anyway');
     });
 
     test('delegating never deadlocks, even with a single slot', () async {
@@ -211,14 +209,14 @@ void main() {
       expect(results.map((r) => r.summary), ['v0', 'v1', 'v2', 'v3']);
     });
 
-    test('waiting for the user pauses the clock and never times the task out', () async {
+    test('waiting for the user pauses the clock', () async {
       final r = await board.submit(
-        spec('ask', AgentKind.yatri, timeout: const Duration(milliseconds: 250)),
+        spec('ask', AgentKind.yatri),
         (c) async {
           final answer = await c.waitForUser(() async {
             expect(graph.node('ask')!.status, TaskStatus.waitingUser);
             expect(c.clock.isPaused, isTrue);
-            await Future<void>.delayed(const Duration(milliseconds: 600));
+            await Future<void>.delayed(const Duration(milliseconds: 200));
             return 'yes';
           });
           return ok(AgentKind.yatri, 'user said $answer');
@@ -229,72 +227,19 @@ void main() {
       expect(board.clock.isPaused, isFalse);
     });
 
-    test('regression: a task that times out while waiting on a child does not leak its slot', () async {
+    test('a parent waiting on a slow child gives its slot up, and nothing leaks', () async {
       final one = TaskBoard(graph: graph, maxConcurrent: 1);
-      final hang = Completer<AgentReport>();
-      final parent = one.submit(
-        spec('parent', AgentKind.atithi, timeout: const Duration(milliseconds: 120)),
-        (c) async {
-          // The child outlives the parent's timeout.
-          final r = await c.delegate(spec('child', AgentKind.khoji), (cc) => hang.future);
-          return ok(AgentKind.atithi, 'never gets here ${r.summary}');
-        },
-      );
-      final pr = await parent;
-      expect(pr.status, ReportStatus.failed);
-      expect(pr.summary, contains('timed out'));
-
-      // Now the abandoned worker resumes, as it would when its child finishes late.
-      hang.complete(ok(AgentKind.khoji, 'late'));
-      await Future<void>.delayed(const Duration(milliseconds: 60));
-
-      // The single slot is still usable, and not held by the abandoned worker.
-      expect(one.debugRunning, 0);
-      final next = await one
-          .submit(spec('next', AgentKind.raah), (c) async => ok(AgentKind.raah, 'ran'))
-          .timeout(const Duration(seconds: 2));
-      expect(next.summary, 'ran');
-    });
-
-    test('regression: a hung task can still time out while another waits for the user', () async {
-      final one = TaskBoard(graph: graph, maxConcurrent: 1);
-      final asked = Completer<String>();
-      final waiting = one.submit(spec('waiting', AgentKind.yatri, timeout: const Duration(seconds: 5)), (c) async {
-        final a = await c.waitForUser(() => asked.future);
-        return ok(AgentKind.yatri, 'answered $a');
+      final child = Completer<AgentReport>();
+      final parent = one.submit(spec('parent', AgentKind.atithi), (c) async {
+        final r = await c.delegate(spec('child', AgentKind.khoji), (cc) => child.future);
+        return ok(AgentKind.atithi, 'child said ${r.summary}');
       });
-      // A worker that takes the only slot while the first one waits, then hangs.
-      final hung = one.submit(
-        spec('hung', AgentKind.khoji, timeout: const Duration(milliseconds: 150)),
-        (c) => Completer<AgentReport>().future,
-      );
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      // The user answers: the clock resumes at once, so the hung task can expire
-      // even though the waiting task now needs the slot it holds.
-      asked.complete('yes');
-      final results = await Future.wait([waiting, hung]).timeout(const Duration(seconds: 3));
-      expect(results[0].summary, 'answered yes');
-      expect(results[1].status, ReportStatus.failed);
-      expect(one.clock.isPaused, isFalse);
-    });
-
-    test('regression: when a task times out its running children are stopped, not left spinning', () async {
-      final hang = Completer<AgentReport>();
-      final r = await board.submit(
-        spec('parent', AgentKind.atithi, timeout: const Duration(milliseconds: 100)),
-        (c) async {
-          await c.delegate(spec('child', AgentKind.khoji), (cc) => hang.future);
-          return ok(AgentKind.atithi, 'x');
-        },
-      );
-      expect(r.status, ReportStatus.failed);
-      expect(graph.node('child')!.status, TaskStatus.skipped);
-      expect(graph.node('child')!.summary, contains('timed out'));
-      expect(graph.isFinished, isTrue);
-      // The child finishing later does not resurrect it.
-      hang.complete(ok(AgentKind.khoji, 'late'));
-      await Future<void>.delayed(const Duration(milliseconds: 40));
-      expect(graph.node('child')!.status, TaskStatus.skipped);
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      child.complete(ok(AgentKind.khoji, 'late but welcome'));
+      expect((await parent).summary, 'child said late but welcome');
+      expect(one.debugRunning, 0);
+      final next = await one.submit(spec('next', AgentKind.raah), (c) async => ok(AgentKind.raah, 'ran')).timeout(const Duration(seconds: 2));
+      expect(next.summary, 'ran');
     });
 
     test('the same task id is only ever run once', () async {
@@ -397,7 +342,8 @@ void main() {
       await pool.ask(AgentKind.yatri, msgs, tier: LlmTier.heavy);
       await pool.ask(AgentKind.atithi, msgs);
       await pool.ask(AgentKind.khoji, msgs, tier: LlmTier.search);
-      expect(calls.map((c) => c.model), ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound']);
+      // The search tier is a model that really searches (gpt-oss with browser_search), never one that cannot.
+      expect(calls.map((c) => c.model), ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'openai/gpt-oss-20b']);
     });
 
     test('a rate-limited key fails over to another and then cools down', () async {

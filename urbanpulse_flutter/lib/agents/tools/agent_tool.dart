@@ -56,17 +56,22 @@ class ToolRegistry {
 /// A hard cap on paid or rate-limited lookups for one plan, so the free
 /// tiers last. Shared by every agent through the same instance.
 class ToolBudget {
-  ToolBudget({this.maxSearches = 8, this.maxFetches = 8, this.maxLlmSearches = 3});
+  ToolBudget({this.maxSearches = 8, this.maxFetches = 8, this.maxLlmSearches = 3, this.maxReviewSearches = 6});
 
   final int maxSearches;
   final int maxFetches;
 
-  /// `groq/compound` searches are billed per tool use; keep them rare.
+  /// Searches made by a Groq model itself cost a model call each; keep them rare.
   final int maxLlmSearches;
+
+  /// Khoji's own model searches for reviews, kept apart so the other agents'
+  /// searches can never use them up.
+  final int maxReviewSearches;
 
   int _searches = 0;
   int _fetches = 0;
   int _llmSearches = 0;
+  int _reviewSearches = 0;
 
   int get searchesUsed => _searches;
   int get fetchesUsed => _fetches;
@@ -86,6 +91,12 @@ class ToolBudget {
   bool trySpendLlmSearch() {
     if (_llmSearches >= maxLlmSearches) return false;
     _llmSearches++;
+    return true;
+  }
+
+  bool trySpendReviewSearch() {
+    if (_reviewSearches >= maxReviewSearches) return false;
+    _reviewSearches++;
     return true;
   }
 

@@ -20,8 +20,8 @@ abstract final class GroqApiClient {
   /// (`groq/compound-mini` was decommissioned on 2026-09-21.)
   static const candidateModels = [
     'openai/gpt-oss-120b',
-    'groq/compound',
     'openai/gpt-oss-20b',
+    'qwen/qwen3.8-27b',
   ];
 
   static const _defaultSystemPrompt =

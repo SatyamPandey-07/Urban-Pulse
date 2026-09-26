@@ -51,6 +51,8 @@ class HotspotQuery {
     this.year,
     this.mix = HotspotMix.balanced,
     this.radiusFactor = 1,
+    this.extra = 0,
+    this.details = const {},
   });
 
   final String destination;
@@ -66,6 +68,37 @@ class HotspotQuery {
   /// Widens (or narrows) the search area after the first try.
   final double radiusFactor;
 
+  /// Places wanted beyond the usual count, when Yatri needs more to fill the days.
+  final int extra;
+
+  /// The traveller's answers to the access follow-ups (`a11y.mobility.walking`
+  /// -> {`lt100`}, ...), so their own limits shape what is picked.
+  final Map<String, Set<String>> details;
+
+  bool _said(String question, String option) => details[question]?.contains(option) ?? false;
+
+  /// Stairs and long walks are out: "avoid stairs", step-free entry, or walking under 100 m.
+  bool get avoidsStairs =>
+      _said('a11y.mobility.support', 'avoid_stairs') || _said('a11y.mobility.walking', 'lt100') || _said('a11y.wheelchair.facilities', 'step_free');
+
+  /// Long walks are out: the traveller can walk under 500 m at a time.
+  bool get walksLittle => _said('a11y.mobility.walking', 'lt100') || _said('a11y.mobility.walking', '100_500');
+
+  bool get hasMobilityNeed => needs.any(
+    (n) => n == AccessibilityNeed.wheelchair || n == AccessibilityNeed.limitedMobility || n == AccessibilityNeed.elderlyCare,
+  );
+
+  /// The group's own limits in plain words, for prompts.
+  List<String> get limits => [
+    if (_said('a11y.mobility.walking', 'lt100')) 'can walk under 100 m at a time',
+    if (_said('a11y.mobility.walking', '100_500')) 'can walk 100 to 500 m at a time',
+    if (_said('a11y.mobility.support', 'avoid_stairs')) 'must avoid stairs',
+    if (_said('a11y.mobility.support', 'rest_stops')) 'needs frequent rest stops and seating',
+    if (_said('a11y.wheelchair.facilities', 'step_free')) 'needs step-free entry',
+    if (_said('a11y.wheelchair.facilities', 'toilet')) 'needs an accessible toilet',
+    if (_said('a11y.elderly.support', 'slow_pace')) 'prefers a slow pace',
+  ];
+
   /// Places worth a visit per day: roughly five or six.
   int get perDay => switch (pace) {
     TripPace.relaxed => 4,
@@ -74,14 +107,14 @@ class HotspotQuery {
   };
 
   /// One day gives the top five or six; ten days give fifty or sixty.
-  int get target => (days * perDay).clamp(5, 60);
+  int get target => (days * perDay + extra).clamp(5, 90);
 
   /// How far from the centre to look: wider for longer stays.
   double get radiusKm => (days >= 7 ? 30 : (days >= 4 ? 20 : 12)) * radiusFactor;
 
   HotspotQuery withMix(HotspotMix m) => copyWith(mix: m);
 
-  HotspotQuery copyWith({HotspotMix? mix, double? radiusFactor}) => HotspotQuery(
+  HotspotQuery copyWith({HotspotMix? mix, double? radiusFactor, int? extra}) => HotspotQuery(
     destination: destination,
     center: center,
     days: days,
@@ -92,6 +125,8 @@ class HotspotQuery {
     year: year,
     mix: mix ?? this.mix,
     radiusFactor: radiusFactor ?? this.radiusFactor,
+    extra: extra ?? this.extra,
+    details: details,
   );
 }
 
@@ -156,50 +191,52 @@ class HotspotFinder {
   Future<HotspotSearchResult> find(
     HotspotQuery q, {
     HotelProgress? onProgress,
-    bool Function()? isDegraded,
+    bool Function()? isCancelled,
   }) async {
     final warnings = <String>[];
     final used = <String>{};
-    bool degraded() => isDegraded?.call() ?? false;
+    bool degraded() => isCancelled?.call() ?? false;
 
-    // 1. Every source at once.
+    // 1. Every source at once, the model's own knowledge of the famous sights
+    //    included (it names places; they are only kept once located).
     final osmF = _guard(() => _fromOverpass(q), warnings, 'OpenStreetMap');
     final geoF = _guard(() => _fromGeoapify(q), warnings, 'Geoapify');
     final wikiF = _guard(() => wikipedia.geosearch(q.center.latitude, q.center.longitude, radiusM: (q.radiusKm * 1000).round().clamp(1000, 10000), limit: 40), warnings, 'Wikipedia');
-    final webF = degraded() ? Future<List<HotspotCandidate>?>.value(null) : _guard(() => _fromWeb(q), warnings, 'web search');
+    final webF = degraded() ? Future<List<_WebPlace>?>.value(null) : _guard(() => _namesFromWeb(q), warnings, 'web search');
+    final llmF = degraded() ? Future<List<_WebPlace>?>.value(null) : _guard(() => _namesFromKnowledge(q), warnings, 'the model');
     final osm = await osmF ?? const <HotspotCandidate>[];
     final geo = await geoF ?? const <HotspotCandidate>[];
     final wiki = await wikiF ?? const <WikiPage>[];
-    final web = await webF ?? const <HotspotCandidate>[];
+    final webNames = await webF ?? const <_WebPlace>[];
+    final llmNames = await llmF ?? const <_WebPlace>[];
+
+    // 2. Put the named places on the map: first by matching what the maps
+    //    already returned, then by geocoding the rest, a few at a time.
+    final known = HotspotCandidates.merge([...osm, ...geo]);
+    final web = await _place(webNames, q, known, wiki, source: 'Web search');
+    final fromModel = await _place(llmNames, q, known, wiki, source: 'AI destination knowledge');
     if (osm.isNotEmpty) used.add('OpenStreetMap');
     if (geo.isNotEmpty) used.add('Geoapify');
     if (wiki.isNotEmpty) used.add('Wikipedia');
     if (web.isNotEmpty) used.add('Web search');
+    if (fromModel.isNotEmpty) used.add('AI destination knowledge');
     onProgress?.call(
-      'gathered ${osm.length + geo.length + web.length + wiki.length} possible places near ${q.destination}',
-      why: 'Places come from maps, Wikipedia and web searches together, so a famous sight is never missed because one source lacks it.',
+      'gathered ${osm.length + geo.length + web.length + fromModel.length + wiki.length} possible places near ${q.destination}',
+      why: 'Places come from maps, Wikipedia, web searches and the model\'s knowledge together, so a famous sight is never missed because one source lacks it.',
     );
 
-    // 2. Merge, then let Wikipedia vouch for (or add) places.
-    var merged = HotspotCandidates.merge([...osm, ...geo, ...web]);
+    // Merge, then let Wikipedia vouch for (or add) places.
+    var merged = HotspotCandidates.merge([...osm, ...geo, ...web, ...fromModel]);
     final reach = q.radiusKm * 1.6;
     merged = [for (final c in merged) if (_within(c.location, q.center, reach)) c];
     _attachWikipedia(merged, wiki, q);
 
-    // 2b. Guaranteed Fallback: if external sources provided fewer places than target,
-    // supplement with curated travel guide and AI destination knowledge.
+    // Thin sources: the curated guide for well-known destinations.
     if (merged.length < q.target) {
       final curated = CuratedDestinations.getCurated(q.destination, q.center);
       if (curated.isNotEmpty) {
         used.add('Curated Travel Guide');
         merged = HotspotCandidates.merge([...merged, ...curated]);
-      }
-    }
-    if (merged.length < q.target && !degraded()) {
-      final llmPlaces = await _fromLlmKnowledge(q);
-      if (llmPlaces.isNotEmpty) {
-        used.add('AI Destination Knowledge');
-        merged = HotspotCandidates.merge([...merged, ...llmPlaces]);
       }
     }
 
@@ -287,17 +324,18 @@ class HotspotFinder {
             s -= 0.35;
           case SupportLevel.yes:
             s += 0.06;
+          case SupportLevel.unknown || null:
+            // Unconfirmed access is a risk for a mobility need: prefer confirmed places.
+            if (_mobility.contains(n)) s -= 0.08;
           default:
         }
       }
-      final mobility = q.needs.any(
-        (n) => n == AccessibilityNeed.wheelchair || n == AccessibilityNeed.limitedMobility || n == AccessibilityNeed.elderlyCare,
-      );
-      if (mobility && h.kind == HotspotKind.adventure) s -= 0.15;
+      if (q.hasMobilityNeed && h.kind == HotspotKind.adventure) s -= 0.15;
+      if (q.avoidsStairs && stairWords.hasMatch(h.name)) s -= 0.2;
       return s;
     }
 
-    final ranked = [...pool]..sort((a, b) => adjusted(b).compareTo(adjusted(a)));
+    final ranked = [for (final h in pool) if (!isExcluded(h, q)) h]..sort((a, b) => adjusted(b).compareTo(adjusted(a)));
     final target = q.target;
     final foodCap = (target / 5).ceil() + 1;
     final kindCap = math.max(3, (target * 0.6).ceil());
@@ -333,6 +371,45 @@ class HotspotFinder {
     }
     return picked;
   }
+
+  static const _mobility = {AccessibilityNeed.wheelchair, AccessibilityNeed.limitedMobility, AccessibilityNeed.elderlyCare};
+  static final _trekWords = RegExp(r'\b(trek|trail|hike|climb|summit|peak|steps|stairs|caves?)\b', caseSensitive: false);
+  /// Places that usually mean steps.
+  static final stairWords = RegExp(r'\b(fort|hill|hills|temple|mandir|stepwell|baoli|ghat|tower)\b', caseSensitive: false);
+
+  /// Places that mean a long walk, whatever the paths are like.
+  static final longWalkWords = RegExp(r'\b(zoo|safari|sanctuary|wildlife|reserve|national park|biological park|trek|trail|hike|nature walk)\b', caseSensitive: false);
+
+  /// A place the plan must never use for [q]'s group, whatever else is short:
+  /// a place to stay rather than a sight; one a real source rules out for a
+  /// mobility need; or one that is all stairs, trekking or a long walk when the
+  /// group must avoid them and no real source says it is manageable. Used for
+  /// the picks and for every spare place Raah may fill a day with.
+  static bool isExcluded(Hotspot h, HotspotQuery q) {
+    if (lodgingWords.hasMatch(h.name)) return true;
+    if (q.hasMobilityNeed && q.needs.any((n) => _mobility.contains(n) && h.access[n]?.level == SupportLevel.no)) return true;
+    if (q.avoidsStairs && (h.kind == HotspotKind.adventure || _trekWords.hasMatch(h.name))) return true;
+    if (q.avoidsStairs && stairWords.hasMatch(h.name) && !accessConfirmed(h, q.needs)) return true;
+    if (q.walksLittle && longWalkWords.hasMatch(h.name) && !accessConfirmed(h, q.needs)) return true;
+    return false;
+  }
+
+  /// A real source (a map tag, a review, the place's own page) says the place
+  /// works, fully or partly, for every mobility need in the group. A model's
+  /// guess or a low-confidence hint is not confirmation.
+  static bool accessConfirmed(Hotspot h, Set<AccessibilityNeed> needs) {
+    final relevant = [for (final n in needs) if (_mobility.contains(n)) n];
+    return relevant.isNotEmpty &&
+        relevant.every((n) {
+          final s = h.access[n];
+          if (s == null || (s.level != SupportLevel.yes && s.level != SupportLevel.partial)) return false;
+          final p = s.provenance;
+          return !p.isEstimated && p.confidence >= 0.5 && p.source != 'AI estimate';
+        });
+  }
+
+  /// Places to stay, which are never sights in their own right here.
+  static final lodgingWords = RegExp(r'\b(hotel|resort|hostel|homestay|guest ?house|lodge|inn|motel)\b', caseSensitive: false);
 
   static double _styleBoost(TripStyle? style, HotspotKind? kind) {
     if (style == null || kind == null) return 0;
@@ -422,8 +499,9 @@ class HotspotFinder {
     return out;
   }
 
-  /// The `web_search` loop: what to see, what is new, where to eat.
-  Future<List<HotspotCandidate>> _fromWeb(HotspotQuery q) async {
+  /// The `web_search` loop: what to see, what is new, where to eat. Returns the
+  /// places the results mention, not yet on the map.
+  Future<List<_WebPlace>> _namesFromWeb(HotspotQuery q) async {
     final registry = tools;
     final model = llm;
     if (registry == null || model == null || !model.isConfigured || !registry.has('web_search')) return const [];
@@ -433,7 +511,10 @@ class HotspotFinder {
     final fallback = <Map<String, Object?>>[
       {'tool': 'web_search', 'args': {'query': 'top tourist attractions and must-see places in $dest'}},
       {'tool': 'web_search', 'args': {'query': 'new and trending places to visit in $dest $year'}},
-      {'tool': 'web_search', 'args': {'query': 'famous local food to try in $dest'}},
+      if (q.hasMobilityNeed)
+        {'tool': 'web_search', 'args': {'query': 'wheelchair accessible places to visit in $dest'}}
+      else
+        {'tool': 'web_search', 'args': {'query': 'famous local food to try in $dest'}},
     ];
     final loop = ToolLoop(llm: model, tools: registry, maxCalls: 3);
     final r = await loop.run(
@@ -441,16 +522,20 @@ class HotspotFinder {
       system:
           'You are Bhatkanti, the hotspot finder of a sustainable, accessibility-first trip planner. '
           'Use web_search to find (1) the must-see places, (2) newly opened or currently trending '
-          'places, and (3) one or two famous local food places. Only report places the search '
-          'results actually mention. Reply {"final": {"places": [{"name": "...", "kind": '
+          'places, and (3) one or two famous local food places. When the group has access needs, '
+          'also search for places known to be accessible and prefer them. Only report places the '
+          'search results actually mention. Reply {"final": {"places": [{"name": "the place\'s own name", '
+          '"area": "the neighbourhood or town it is in", "kind": '
           '"heritage|nature|culture|religious|food|adventure|viewpoint|shopping|other", "why": "one sentence", '
           '"trending": true or false, "url": "the result URL", "feeInr": null or a number per person, '
-          '"visitMinutes": null or a number, "outdoor": true, false or null}]}}. Never invent names or URLs.',
+          '"visitMinutes": null or a number, "outdoor": true, false or null, '
+          '"stepFree": true, false or null (null unless a result says so)}]}}. Never invent names or URLs.',
       context: [
         'Destination: $dest',
         'Trip length: ${q.days} day(s), pace ${q.pace?.label ?? 'balanced'}',
         if (q.style != null) 'Style: ${q.style!.label}',
         if (needsText.isNotEmpty) 'Access needs: $needsText',
+        if (q.limits.isNotEmpty) 'Hard limits: ${q.limits.join('; ')}',
         if (q.notes != null) 'Preferences: ${q.notes}',
         'Wanted: about ${math.min(q.target + 6, 40)} distinct places.',
       ].join('\n'),
@@ -459,199 +544,177 @@ class HotspotFinder {
       tier: LlmTier.light,
       timeout: const Duration(seconds: 35),
     );
+    return _entries(r.finalJson?['places'] ?? r.finalJson?['final']?['places'], max: 45);
+  }
 
-    final places = r.finalJson?['places'] ?? r.finalJson?['final']?['places'];
+  /// The model's own knowledge of the destination's best-known places: the
+  /// most reliable source for famous sights that the maps tag poorly. Names
+  /// only; nothing is kept unless it can be found on the map.
+  Future<List<_WebPlace>> _namesFromKnowledge(HotspotQuery q) async {
+    final model = llm;
+    if (model == null || !model.isConfigured) return const [];
+    final needsText = [for (final n in AccessRules.relevant(q.needs)) n.label].join(', ');
+    final r = await model.ask(
+      AgentKind.bhatkanti,
+      [
+        const GroqMessage(
+          'system',
+          'You are Bhatkanti, the hotspot finder of an accessibility-first, sustainable trip planner for India. '
+              'You list real, well-known places only, under the exact names locals and maps use. '
+              'If you are not sure a place exists, leave it out. Reply with JSON only.',
+        ),
+        GroqMessage('user', [
+          'Destination: ${q.destination}',
+          'Trip: ${q.days} day(s), pace ${q.pace?.label ?? 'balanced'}${q.style == null ? '' : ', style ${q.style!.label}'}',
+          if (needsText.isNotEmpty) 'Access needs in the group: $needsText',
+          if (q.limits.isNotEmpty) 'Hard limits: ${q.limits.join('; ')}. Prefer places that fit them; skip treks, long climbs and stair-only sights.',
+          '',
+          'List the ${math.max(q.target, 10)} places a first-time visitor should consider: sights, heritage, nature, '
+              'viewpoints, markets and one or two famous local food places, in and around the destination.',
+          'Reply: {"places": [{"name": "exact name", "area": "neighbourhood or town", '
+              '"kind": "heritage|nature|culture|religious|food|adventure|viewpoint|shopping|other", '
+              '"why": "one sentence", "outdoor": true or false, "feeInr": number or null, '
+              '"visitMinutes": number, "stepFree": true, false or null, "trending": false}]}',
+        ].join('\n')),
+      ],
+      tier: LlmTier.heavy,
+      json: true,
+      maxTokens: 2400,
+      timeout: const Duration(seconds: 40),
+    );
+    if (r is! GroqSuccess) return const [];
+    final j = parseLenientObject(r.content);
+    return _entries(j?['places'] ?? j?['final']?['places'], max: 30);
+  }
+
+  static List<_WebPlace> _entries(Object? places, {required int max}) {
     if (places is! List) return const [];
-    final entries = <_WebPlace>[];
-    for (final p in places.take(45)) {
+    final out = <_WebPlace>[];
+    for (final p in places.take(max)) {
       if (p is! Map) continue;
       final name = (p['name'] as String?)?.trim();
       if (name == null || name.isEmpty || name.length > 90) continue;
-      entries.add(_WebPlace(
+      final area = (p['area'] as String?)?.trim();
+      final url = p['url'];
+      out.add(_WebPlace(
         name: name,
+        area: area == null || area.isEmpty || area.length > 60 ? null : area,
         kind: HotspotCandidates.parseKind(p['kind']) ?? HotspotCandidates.kindFromName(name),
         why: (p['why'] as String?)?.trim(),
         trending: p['trending'] == true,
-        url: p['url'] as String?,
+        url: url is String && url.startsWith('http') ? url : null,
         fee: p['feeInr'] is num ? AiEstimator.intIn(p['feeInr'], 0, 20000) : null,
         minutes: p['visitMinutes'] is num ? AiEstimator.intIn(p['visitMinutes'], 15, 480) : null,
         outdoor: p['outdoor'] is bool ? p['outdoor'] as bool : null,
+        stepFree: p['stepFree'] is bool ? p['stepFree'] as bool : null,
       ));
-    }
-
-    // Put them on the map, a few at a time, without hammering any service.
-    final out = <HotspotCandidate>[];
-    for (var i = 0; i < entries.length; i += 6) {
-      final chunk = entries.skip(i).take(6).toList();
-      final located = await Future.wait([for (final e in chunk) _locate(e.name, q)]);
-      for (var j = 0; j < chunk.length; j++) {
-        final at = located[j];
-        if (at == null) continue;
-        final e = chunk[j];
-        out.add(
-          HotspotCandidate(
-            name: e.name,
-            location: at,
-            source: 'Web search',
-            kind: e.kind,
-            why: e.why,
-            visitMinutes: e.minutes,
-            feeInr: e.fee,
-            feeIsEstimated: e.fee != null,
-            isOutdoor: e.outdoor,
-            isTrending: e.trending,
-            website: e.url,
-            sources: [if (e.url != null) SourceRef(title: e.name, url: e.url!, source: 'Web search')],
-          )..webMentions = 1,
-        );
-      }
     }
     return out;
   }
 
-  Future<LatLng?> _locate(String name, HotspotQuery q) async {
+  /// Puts named places on the map. A name that matches a place the maps or
+  /// Wikipedia already returned takes its position (no network); the rest are
+  /// geocoded six at a time. A place that cannot be found is left out rather
+  /// than given a guessed position.
+  Future<List<HotspotCandidate>> _place(List<_WebPlace> entries, HotspotQuery q, List<HotspotCandidate> known, List<WikiPage> wiki, {required String source}) async {
+    if (entries.isEmpty) return const [];
+    LatLng? match(String name) {
+      for (final c in known) {
+        if (HotelCandidates.similarity(c.name, name) >= 0.8) return c.location;
+      }
+      for (final w in wiki) {
+        if (w.lat != null && w.lon != null && HotelCandidates.similarity(w.title, name) >= 0.8) return LatLng(w.lat!, w.lon!);
+      }
+      return null;
+    }
+
+    final located = List<LatLng?>.filled(entries.length, null);
+    final toGeocode = <int>[];
+    for (var i = 0; i < entries.length; i++) {
+      located[i] = match(entries[i].name);
+      if (located[i] == null) toGeocode.add(i);
+    }
+    for (var k = 0; k < toGeocode.length; k += 6) {
+      final chunk = toGeocode.skip(k).take(6).toList();
+      final found = await Future.wait([for (final i in chunk) _locate(entries[i], q)]);
+      for (var j = 0; j < chunk.length; j++) {
+        located[chunk[j]] = found[j];
+      }
+    }
+
+    final fromWeb = source == 'Web search';
+    final out = <HotspotCandidate>[];
+    for (var i = 0; i < entries.length; i++) {
+      final at = located[i];
+      if (at == null) continue;
+      final e = entries[i];
+      final c = HotspotCandidate(
+        name: e.name,
+        location: at,
+        source: source,
+        kind: e.kind,
+        why: e.why,
+        visitMinutes: e.minutes,
+        feeInr: e.fee,
+        feeIsEstimated: e.fee != null,
+        isOutdoor: e.outdoor,
+        isTrending: e.trending,
+        website: e.url,
+        sources: [if (e.url != null) SourceRef(title: e.name, url: e.url!, source: source)],
+      );
+      if (!fromWeb && e.why != null) c.whyIsEstimated = true;
+      if (fromWeb) c.webMentions = 1;
+      final sf = e.stepFree;
+      if (sf != null) {
+        for (final n in AccessRules.relevant(q.needs)) {
+          if (!_mobility.contains(n)) continue;
+          c.access[n] = NeedSupport(
+            need: n,
+            level: sf ? SupportLevel.partial : SupportLevel.no,
+            detail: sf ? 'Reported step-free; not confirmed' : 'Reported to have steps',
+            provenance: Provenance(source: fromWeb ? 'Web search' : 'AI estimate', url: e.url, confidence: 0.35, isEstimated: !fromWeb),
+          );
+        }
+      }
+      out.add(c);
+    }
+    return out;
+  }
+
+  /// Finds one named place near the destination: TomTom (or Nominatim when
+  /// there is no TomTom key), then Geoapify, then OpenStreetMap by name.
+  Future<LatLng?> _locate(_WebPlace e, HotspotQuery q) async {
+    final where = e.area == null ? q.destination : '${e.area}, ${q.destination}';
     try {
-      // 1. Try TomTom POI search / bounded search
-      final tomtomHits = await TomTomService.searchPlacesBounded(
-        '$name, ${q.destination}',
+      final hits = await TomTomService.searchPlacesBounded(
+        '${e.name}, $where',
         lat: q.center.latitude,
         lon: q.center.longitude,
         radiusKm: q.radiusKm * 1.5,
         limit: 1,
       );
-      if (tomtomHits.isNotEmpty) {
-        final hit = tomtomHits.first;
-        final pt = LatLng(hit.lat, hit.lon);
-        if (_within(pt, q.center, q.radiusKm * 2.2)) {
-          return pt;
-        }
-      }
-
-      // 2. Try Geoapify if configured
+      final hit = hits.firstOrNull;
+      if (hit != null && _within(LatLng(hit.lat, hit.lon), q.center, q.radiusKm * 1.8)) return LatLng(hit.lat, hit.lon);
+    } catch (_) {
+      // next source
+    }
+    try {
       final g = geoapify;
       if (g != null && g.isConfigured) {
-        final c = await g.geocode('$name, ${q.destination}', limit: 1);
-        final first = c?.firstOrNull;
-        if (first != null && _within(LatLng(first.lat, first.lon), q.center, q.radiusKm * 1.8)) {
-          return LatLng(first.lat, first.lon);
-        }
+        final first = (await g.geocode('${e.name}, $where', limit: 1))?.firstOrNull;
+        if (first != null && _within(LatLng(first.lat, first.lon), q.center, q.radiusKm * 1.8)) return LatLng(first.lat, first.lon);
       }
-
-      // 3. Try Overpass
-      final osm = await overpass.byName(name, q.center.latitude, q.center.longitude, radiusM: (q.radiusKm * 1000).round());
+    } catch (_) {
+      // next source
+    }
+    try {
+      final osm = await overpass.byName(e.name, q.center.latitude, q.center.longitude, radiusM: (q.radiusKm * 1000).round());
       final hit = osm?.where((p) => _within(LatLng(p.lat, p.lon), q.center, q.radiusKm * 1.8)).firstOrNull;
       if (hit != null) return LatLng(hit.lat, hit.lon);
     } catch (_) {
-      // Fall through to dispersion
+      // not found
     }
-
-    // 4. Safe deterministic geographic dispersion around destination center:
-    // Never drop a valid attraction just because a geocoding service lacked it.
-    final hash = name.codeUnits.fold(0, (a, b) => a * 31 + b).abs();
-    final angle = (hash % 360) * math.pi / 180.0;
-    final distKm = 1.2 + ((hash % 100) / 100.0) * (math.min(q.radiusKm * 0.6, 6.0) - 1.2);
-    final dLat = distKm / 111.0;
-    final cosLat = math.cos(q.center.latitude * math.pi / 180.0).abs();
-    final dLon = distKm / (111.0 * (cosLat < 0.01 ? 1.0 : cosLat));
-    return LatLng(
-      (q.center.latitude + dLat * math.sin(angle)).clamp(-90.0, 90.0),
-      (q.center.longitude + dLon * math.cos(angle)).clamp(-180.0, 180.0),
-    );
-  }
-
-  /// Direct LLM knowledge fallback for destination hotspots when maps or web lack data.
-  Future<List<HotspotCandidate>> _fromLlmKnowledge(HotspotQuery q) async {
-    final model = llm;
-    if (model == null || !model.isConfigured) return const [];
-    final dest = q.destination;
-    final targetCount = math.max(q.target, 8);
-    final styleText = q.style != null ? 'Style: ${q.style!.label}' : '';
-    final needsText = [for (final n in AccessRules.relevant(q.needs)) n.label].join(', ');
-
-    final prompt = '''
-Destination: $dest
-Trip length: ${q.days} day(s), pace: ${q.pace?.label ?? 'balanced'}
-$styleText
-${needsText.isNotEmpty ? 'Access needs: $needsText' : ''}
-
-You are Bhatkanti, an expert travel guide AI for sustainable and accessible travel.
-List $targetCount top, famous sights, viewpoints, natural attractions, cultural heritage sites, and local food spots in and around $dest.
-Reply ONLY with valid JSON:
-{
-  "places": [
-    {
-      "name": "Exact Name of Attraction",
-      "kind": "heritage|nature|culture|religious|food|adventure|viewpoint|shopping|other",
-      "why": "One sentence explaining why travellers visit",
-      "outdoor": true,
-      "feeInr": 0,
-      "visitMinutes": 90,
-      "trending": false
-    }
-  ]
-}
-''';
-
-    try {
-      final r = await model.ask(
-        AgentKind.bhatkanti,
-        [
-          const GroqMessage(
-            'system',
-            'You are Bhatkanti, the hotspot finder of UrbanPulse. Return high-quality, real attractions and landmarks for the destination in JSON.',
-          ),
-          GroqMessage('user', prompt),
-        ],
-        tier: LlmTier.heavy,
-        json: true,
-        maxTokens: 1800,
-        timeout: const Duration(seconds: 25),
-      );
-
-      if (r is! GroqSuccess) return const [];
-      final j = parseLenientObject(r.content);
-      final rawPlaces = j?['places'] ?? j?['final']?['places'];
-      if (rawPlaces is! List || rawPlaces.isEmpty) return const [];
-
-      final out = <HotspotCandidate>[];
-      for (final p in rawPlaces.take(30)) {
-        if (p is! Map) continue;
-        final name = (p['name'] as String?)?.trim();
-        if (name == null || name.isEmpty || name.length > 90) continue;
-        final loc = await _locate(name, q);
-        if (loc == null) continue;
-
-        final kind = HotspotCandidates.parseKind(p['kind']) ?? HotspotCandidates.kindFromName(name);
-        final fee = p['feeInr'] is num ? AiEstimator.intIn(p['feeInr'], 0, 15000) : null;
-        final mins = p['visitMinutes'] is num ? AiEstimator.intIn(p['visitMinutes'], 20, 360) : 90;
-        final outdoor = p['outdoor'] is bool ? p['outdoor'] as bool : true;
-
-        out.add(
-          HotspotCandidate(
-            name: name,
-            location: loc,
-            source: 'AI Knowledge',
-            kind: kind,
-            why: (p['why'] as String?)?.trim(),
-            visitMinutes: mins,
-            feeInr: fee,
-            feeIsEstimated: fee != null,
-            isOutdoor: outdoor,
-            isTrending: p['trending'] == true,
-            sources: [
-              SourceRef(
-                title: name,
-                url: 'https://en.wikipedia.org/wiki/${Uri.encodeComponent(name)}',
-                source: 'AI Guide',
-              ),
-            ],
-          ),
-        );
-      }
-      return out;
-    } catch (_) {
-      return const [];
-    }
+    return null;
   }
 
   // --- enrichment -----------------------------------------------------------
@@ -857,9 +920,11 @@ Reply ONLY with valid JSON:
 }
 
 class _WebPlace {
-  const _WebPlace({required this.name, this.kind, this.why, this.trending = false, this.url, this.fee, this.minutes, this.outdoor});
+  const _WebPlace({required this.name, this.area, this.kind, this.why, this.trending = false, this.url, this.fee, this.minutes, this.outdoor, this.stepFree});
 
   final String name;
+  final String? area;
+  final bool? stepFree;
   final HotspotKind? kind;
   final String? why;
   final bool trending;

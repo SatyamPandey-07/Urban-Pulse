@@ -37,7 +37,7 @@ class SakshamAgent {
 
     // Gaps: one careful model reading for places nothing could speak to.
     final est = estimator;
-    if (est != null && result.unknownPlaces.isNotEmpty && !ctx.degraded && !ctx.cancelled) {
+    if (est != null && result.unknownPlaces.isNotEmpty && !ctx.cancelled) {
       final inferred = await _infer(est, result.unknownPlaces, needs);
       if (inferred.isNotEmpty) {
         result = AuditEngine.run(
