@@ -187,6 +187,21 @@ abstract final class AppConfig {
   static List<String> get tavilyKeys =>
       realKeys([tavilyApiKey, tavilyApiKey2, tavilyApiKey3]);
 
+  // --- Supabase: accounts and the traveller's data ---------------------------
+
+  /// The project URL and its public anon (publishable) key. The key is meant
+  /// to be shipped in the app: row level security keeps every traveller to
+  /// their own rows. The database password never belongs here.
+  static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  static const _supabasePublishableKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+
+  static String get supabaseKey => realKeys([_supabasePublishableKey, _supabaseAnonKey]).firstOrNull ?? '';
+
+  /// Real accounts and cloud storage are on. Without them the app runs on the
+  /// device only, as before.
+  static bool get hasSupabase => realKeys([supabaseUrl]).isNotEmpty && supabaseKey.isNotEmpty;
+
   static bool get hasGeoapifyKey => realKeys([geoapifyApiKey]).isNotEmpty;
 
   static bool get hasXoteloRapidApiKey =>

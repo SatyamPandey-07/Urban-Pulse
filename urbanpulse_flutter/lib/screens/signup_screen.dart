@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/routes.dart';
 import '../state/app_scope.dart';
+import '../state/auth_controller.dart';
 import '../widgets/common.dart';
 import '../widgets/urbanpulse_logo.dart';
 
@@ -59,11 +60,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     final fullName = lastName.isNotEmpty ? '$firstName $lastName' : firstName;
     final navigator = Navigator.of(context);
-    await AppScope.of(context).auth.signUp(fullName: fullName, email: email);
+    final result = await AppScope.of(context).auth.signUp(fullName: fullName, email: email, password: password);
 
     if (!mounted) return;
-    showToast(context, 'Account created successfully! Welcome, $firstName');
-    navigator.pushNamedAndRemoveUntil(Routes.home, (route) => false);
+    switch (result) {
+      case AuthOk():
+        showToast(context, 'Account created successfully! Welcome, $firstName');
+        navigator.pushNamedAndRemoveUntil(Routes.home, (route) => false);
+      case AuthNeedsConfirmation(:final email):
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirm your email'),
+            content: Text('We sent a confirmation link to $email. Open it, then sign in.'),
+            actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK'))],
+          ),
+        );
+        if (!mounted) return;
+        navigator.pushReplacementNamed(Routes.login);
+      case AuthFailed(:final message):
+        showToast(context, message);
+    }
   }
 
   @override

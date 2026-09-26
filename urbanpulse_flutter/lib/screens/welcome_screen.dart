@@ -13,8 +13,12 @@ class WelcomeScreen extends StatelessWidget {
   Future<void> _enterDemo(BuildContext context) async {
     final auth = AppScope.of(context).auth;
     final navigator = Navigator.of(context);
-    await auth.signIn(AuthController.demoEmail);
+    final result = await auth.signIn(email: AuthController.demoEmail, password: AuthController.demoPassword);
     if (!context.mounted) return;
+    if (result is AuthFailed) {
+      showToast(context, result.message);
+      return;
+    }
     showToast(context, 'Welcome! Logged in as Demo Explorer.');
     navigator.pushNamedAndRemoveUntil(Routes.home, (route) => false);
   }

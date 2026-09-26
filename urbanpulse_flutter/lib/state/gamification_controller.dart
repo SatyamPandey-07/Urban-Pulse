@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/gamification.dart';
+import '../services/cloud/cloud_store.dart';
 import 'activity_tracker.dart';
 
 /// XP / PULSE credits / login streak / lifetime CO2, persisted exactly as
 /// `GamificationManager.kt` did. Notifies listeners so the Carbon Wallet and
 /// Achievements screens refresh without manual `onResume` plumbing.
 class GamificationController extends ChangeNotifier {
-  GamificationController(this._prefs, this._activity) {
+  GamificationController(this._prefs, this._activity, {this.cloud}) {
     _activity.addListener(notifyListeners);
     _checkDailyLogin();
   }
@@ -24,6 +25,38 @@ class GamificationController extends ChangeNotifier {
 
   final SharedPreferences _prefs;
   final ActivityTracker _activity;
+  final CloudStore? cloud;
+
+  /// XP, PULSE, streak and CO2 as the account stores them (`user_progress`).
+  Map<String, Object?> snapshot() => {
+    'xp': xp,
+    'pulse': pulse,
+    'streak': streak,
+    'last_login_day': _prefs.getInt(_keyLastLogin),
+    'co2_saved_kg': co2SavedGrams / 1000,
+  };
+
+  Future<void> _sync() async => cloud?.saveProgress(snapshot());
+
+  /// The device values become the account's.
+  Future<void> applyCloud(Map<String, dynamic> row) async {
+    int asInt(Object? v) => v is num ? v.toInt() : int.tryParse('$v') ?? 0;
+    await _prefs.setInt(_keyXp, asInt(row['xp']));
+    await _prefs.setInt(_keyPulse, asInt(row['pulse']));
+    await _prefs.setInt(_keyStreak, asInt(row['streak']));
+    final day = row['last_login_day'];
+    if (day is num) await _prefs.setInt(_keyLastLogin, day.toInt());
+    final kg = row['co2_saved_kg'];
+    await _prefs.setDouble(_keyCo2, (kg is num ? kg.toDouble() : double.tryParse('$kg') ?? 0) * 1000);
+    notifyListeners();
+  }
+
+  Future<void> clear() async {
+    for (final k in [_keyXp, _keyPulse, _keyStreak, _keyLastLogin, _keyCo2]) {
+      await _prefs.remove(k);
+    }
+    notifyListeners();
+  }
 
   @override
   void dispose() {
@@ -48,17 +81,20 @@ class GamificationController extends ChangeNotifier {
   Future<void> addXp(int amount) async {
     await _prefs.setInt(_keyXp, xp + amount);
     notifyListeners();
+    await _sync();
   }
 
   Future<void> addPulse(int amount) async {
     await _prefs.setInt(_keyPulse, pulse + amount);
     notifyListeners();
+    await _sync();
   }
 
   Future<bool> spendPulse(int amount) async {
     if (pulse < amount) return false;
     await _prefs.setInt(_keyPulse, pulse - amount);
     notifyListeners();
+    await _sync();
     return true;
   }
 
@@ -84,6 +120,7 @@ class GamificationController extends ChangeNotifier {
       await _prefs.setInt(_keyStreak, 1);
     }
     notifyListeners();
+    await _sync();
   }
 
   // --- CO2 ---
@@ -93,6 +130,7 @@ class GamificationController extends ChangeNotifier {
   Future<void> addCo2Saved(double grams) async {
     await _prefs.setDouble(_keyCo2, co2SavedGrams + grams);
     notifyListeners();
+    await _sync();
   }
 
   // --- Challenges & badges ---
