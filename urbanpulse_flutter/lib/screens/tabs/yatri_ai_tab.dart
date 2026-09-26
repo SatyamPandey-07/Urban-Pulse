@@ -302,6 +302,8 @@ class _YatriAiTabState extends State<YatriAiTab> {
                 ),
                 Text(
                   status,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.primary,
                   ),

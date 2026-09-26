@@ -45,31 +45,57 @@ abstract final class AppTheme {
         foregroundColor: scheme.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: false,
       ),
       cardTheme: CardThemeData(
-        color: scheme.surfaceContainerLow,
+        color: isDark ? AppColors.surfaceCard : scheme.surfaceContainerLow,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder.withValues(alpha: 0.8)
+                : scheme.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          ),
+        ),
         margin: EdgeInsets.zero,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: scheme.surfaceContainerLow,
-        indicatorColor: scheme.primary.withValues(alpha: 0.22),
+        backgroundColor: isDark ? AppColors.surfaceDark : scheme.surfaceContainerLow,
+        indicatorColor: scheme.primary.withValues(alpha: 0.16),
         elevation: 0,
+        height: 68,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: scheme.surfaceContainerLow,
-        selectedColor: scheme.primary.withValues(alpha: 0.22),
-        side: BorderSide.none,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        labelStyle: TextStyle(color: scheme.onSurface),
+        backgroundColor: isDark ? AppColors.surfaceDark : scheme.surfaceContainerLow,
+        selectedColor: scheme.primary.withValues(alpha: 0.18),
+        side: BorderSide(
+          color: isDark
+              ? AppColors.surfaceBorder.withValues(alpha: 0.8)
+              : scheme.outlineVariant.withValues(alpha: 0.6),
+          width: 1,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        labelStyle: TextStyle(
+          color: scheme.onSurface,
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark
+            ? AppColors.surfaceDark
+            : scheme.surfaceContainerHighest.withValues(alpha: 0.4),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: scheme.outlineVariant),
+          borderSide: BorderSide(
+            color: isDark ? AppColors.surfaceBorder : scheme.outlineVariant,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -78,11 +104,36 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: const TextStyle(fontWeight: FontWeight.bold),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        elevation: 2,
+        highlightElevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        elevation: 8,
+      ),
+      dividerTheme: DividerThemeData(
+        color: isDark
+            ? AppColors.surfaceBorder.withValues(alpha: 0.6)
+            : scheme.outlineVariant.withValues(alpha: 0.6),
+        thickness: 1,
+        space: 1,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

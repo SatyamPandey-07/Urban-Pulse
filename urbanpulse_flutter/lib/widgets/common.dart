@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Small building blocks shared by the migrated screens, standing in for the
 /// repeated `MaterialCardView` / header / chip-group blocks in the XML layouts.
 
-/// The filled, 24dp-rounded surface card every screen is built out of.
+/// The filled, 20dp-rounded surface card with subtle border every screen is built out of.
 class SectionCard extends StatelessWidget {
   const SectionCard({
     required this.child,
@@ -22,14 +22,24 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final border = borderWidth > 0
+        ? BorderSide(color: borderColor ?? scheme.primary, width: borderWidth)
+        : BorderSide(
+            color: isDark
+                ? const Color(0xFF334155).withValues(alpha: 0.8)
+                : scheme.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          );
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(24),
-      side: borderWidth > 0
-          ? BorderSide(color: borderColor ?? scheme.primary, width: borderWidth)
-          : BorderSide.none,
+      borderRadius: BorderRadius.circular(20),
+      side: border,
     );
     return Card(
+      elevation: 0,
+      color: isDark ? const Color(0xFF1E293B) : scheme.surfaceContainerLow,
       shape: shape,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -100,6 +110,8 @@ class StatTile extends StatelessWidget {
     required this.value,
     this.caption,
     this.valueColor,
+    this.icon,
+    this.trailing,
     super.key,
   });
 
@@ -107,30 +119,56 @@ class StatTile extends StatelessWidget {
   final String value;
   final String? caption;
   final Color? valueColor;
+  final IconData? icon;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = valueColor ?? theme.colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  letterSpacing: 0.8,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+            if (icon != null)
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 14, color: primaryColor),
+              )
+            else if (trailing != null)
+              trailing!,
+          ],
         ),
         const SizedBox(height: 6),
         Text(
           value,
           style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             color: valueColor ?? theme.colorScheme.onSurface,
+            letterSpacing: -0.5,
           ),
         ),
         if (caption != null) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           Text(
             caption!,
             style: theme.textTheme.bodySmall?.copyWith(

@@ -100,6 +100,36 @@ class _DashboardTabState extends State<DashboardTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: traffic != null ? AppColors.primaryGreen : AppColors.solidWarning,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (traffic != null ? AppColors.primaryGreen : AppColors.solidWarning)
+                          .withValues(alpha: 0.5),
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'LIVE SENSOR TELEMETRY',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           Text(
             'Real-Time Geo-Intelligence',
             style: theme.textTheme.titleLarge?.copyWith(
@@ -213,6 +243,14 @@ class _DashboardTabState extends State<DashboardTab> {
     final aqi = _telemetry?.usAqi;
     final temperature = _telemetry?.temperatureC;
 
+    final aqiColor = aqi == null
+        ? null
+        : aqi <= 50
+        ? AppColors.solidSuccess
+        : aqi <= 100
+        ? AppColors.solidWarning
+        : AppColors.solidError;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -220,7 +258,9 @@ class _DashboardTabState extends State<DashboardTab> {
           child: SectionCard(
             child: StatTile(
               label: 'Air Quality',
+              icon: Icons.air_rounded,
               value: aqi?.toString() ?? (_isLoading ? '…' : '—'),
+              valueColor: aqiColor,
               caption: aqi == null
                   ? (_isLoading ? 'Reading sensors…' : 'Unavailable offline')
                   : '${_aqiBand(aqi)} • PM2.5',
@@ -232,6 +272,7 @@ class _DashboardTabState extends State<DashboardTab> {
           child: SectionCard(
             child: StatTile(
               label: 'City Weather',
+              icon: Icons.thermostat_rounded,
               value: temperature == null
                   ? (_isLoading ? '…' : '—')
                   : '${fixed(temperature, 0)}°C',

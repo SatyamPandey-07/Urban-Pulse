@@ -21,6 +21,13 @@ class AgentAvatar extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.35),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Icon(Icons.auto_awesome, size: size * 0.55, color: scheme.onPrimary),
     );
@@ -61,6 +68,10 @@ class AgentBubble extends StatelessWidget {
                       bottomLeft: Radius.circular(20),
                       bottomRight: Radius.circular(20),
                     ),
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                      width: 1,
+                    ),
                   ),
                   child: InlineBoldText(text, style: theme.textTheme.bodyMedium),
                 ),
@@ -95,11 +106,19 @@ class UserBubble extends StatelessWidget {
             bottomLeft: Radius.circular(20),
             bottomRight: Radius.circular(20),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.primary.withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(
           text,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onPrimary,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),

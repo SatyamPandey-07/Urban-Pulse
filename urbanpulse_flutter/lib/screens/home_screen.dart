@@ -52,16 +52,27 @@ class _HomeScreenState extends State<HomeScreen> {
   static const _destinations = <NavigationDestination>[
     NavigationDestination(
       icon: Icon(Icons.dashboard_outlined),
+      selectedIcon: Icon(Icons.dashboard_rounded),
       label: 'Dashboard',
     ),
-    NavigationDestination(icon: Icon(Icons.map_outlined), label: 'Live Map'),
-    NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Trips'),
+    NavigationDestination(
+      icon: Icon(Icons.map_outlined),
+      selectedIcon: Icon(Icons.map_rounded),
+      label: 'Live Map',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.alt_route_outlined),
+      selectedIcon: Icon(Icons.alt_route_rounded),
+      label: 'Trips',
+    ),
     NavigationDestination(
       icon: Icon(Icons.auto_awesome_outlined),
+      selectedIcon: Icon(Icons.auto_awesome_rounded),
       label: 'Yatri AI',
     ),
     NavigationDestination(
       icon: Icon(Icons.settings_outlined),
+      selectedIcon: Icon(Icons.settings_rounded),
       label: 'Settings',
     ),
   ];
@@ -127,12 +138,19 @@ class _LocationAppBarState extends State<_LocationAppBar> {
           onTap: () => location.resolve(force: true),
           child: Row(
             children: [
-              Icon(
-                Icons.navigation,
-                size: 20,
-                color: theme.colorScheme.onSurface,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.near_me_rounded,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +163,7 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                             location.displayTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleLarge?.copyWith(
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -159,14 +177,21 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                             ),
                           )
                         else
-                          const Icon(Icons.refresh, size: 18),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: Icon(
+                              Icons.sync_rounded,
+                              size: 15,
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            ),
+                          ),
                       ],
                     ),
                     Text(
                       location.displaySubtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -179,16 +204,63 @@ class _LocationAppBarState extends State<_LocationAppBar> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.celebration),
+          icon: Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.military_tech_outlined,
+              size: 18,
+              color: theme.colorScheme.primary,
+            ),
+          ),
           tooltip: 'Achievements',
           onPressed: () => Navigator.of(context).pushNamed(Routes.achievements),
         ),
-        IconButton(
-          icon: const Icon(Icons.sos, color: AppColors.sosRed),
-          tooltip: 'SOS',
-          onPressed: () => Navigator.of(context).pushNamed(Routes.sos),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, right: 12),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => Navigator.of(context).pushNamed(Routes.sos),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.sosRed, AppColors.sosDeepRed],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.sosRed.withValues(alpha: 0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.emergency_outlined, size: 15, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text(
+                      'SOS',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
-        const SizedBox(width: 4),
       ],
     );
   }

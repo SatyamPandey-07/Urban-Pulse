@@ -90,7 +90,7 @@ IconData _iconForOption(QuestionOption option) {
     'custom' => Icons.tune_outlined,
     '1' => Icons.person_outline,
     'manual' => Icons.accessible_outlined,
-    'electric' => Icons.electric_wheelchair_outlined,
+    'electric' => Icons.accessible_forward_outlined,
     'walking_aid' => Icons.nordic_walking_outlined,
     'audio' => Icons.volume_up_outlined,
     'screen_reader' => Icons.phone_android_outlined,
