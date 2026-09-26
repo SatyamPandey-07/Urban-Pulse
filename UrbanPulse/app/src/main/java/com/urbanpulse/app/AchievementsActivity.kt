@@ -16,6 +16,7 @@ import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.security.MessageDigest
 import java.util.UUID
 
 class AchievementsActivity : AppCompatActivity() {
@@ -24,6 +25,7 @@ class AchievementsActivity : AppCompatActivity() {
     private lateinit var tvWalletAddress: TextView
     private lateinit var btnConnectWallet: MaterialButton
     private lateinit var achievementsRecyclerView: RecyclerView
+    private lateinit var adapter: AchievementsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,54 +40,101 @@ class AchievementsActivity : AppCompatActivity() {
         btnConnectWallet = findViewById(R.id.btnConnectWallet)
         achievementsRecyclerView = findViewById(R.id.achievementsRecyclerView)
 
+        achievementsRecyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = AchievementsAdapter(emptyList())
+        achievementsRecyclerView.adapter = adapter
+
+        updateWalletDisplay()
+
         btnConnectWallet.setOnClickListener {
-            connectWallet()
+            val current = GamificationManager.getWalletAddress()
+            if (current.isNullOrBlank()) {
+                connectWallet()
+            } else {
+                disconnectWallet()
+            }
         }
 
-        setupAchievementsList()
+        loadAchievements()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateWalletDisplay()
+        loadAchievements()
+    }
+
+    private fun updateWalletDisplay() {
+        val address = GamificationManager.getWalletAddress()
+        if (!address.isNullOrBlank()) {
+            tvWalletStatus.text = "Connected (Polygon / Green Carbon Ledger)"
+            tvWalletAddress.text = address
+            tvWalletAddress.visibility = View.VISIBLE
+            btnConnectWallet.text = "Disconnect Wallet"
+        } else {
+            tvWalletStatus.text = "No Web3 Wallet Linked"
+            tvWalletAddress.text = ""
+            tvWalletAddress.visibility = View.GONE
+            btnConnectWallet.text = "Link Web3 Carbon Wallet"
+        }
     }
 
     private fun connectWallet() {
-        tvWalletStatus.text = "Connecting..."
+        tvWalletStatus.text = "Generating Green Keypair & Connecting..."
         btnConnectWallet.isEnabled = false
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val address = "0x" + UUID.randomUUID().toString().replace("-", "").take(40)
+                // Generate a deterministic or randomized checksummed 0x address
+                val randomSeed = UUID.randomUUID().toString() + System.currentTimeMillis()
+                val md = MessageDigest.getInstance("SHA-256")
+                val hashBytes = md.digest(randomSeed.toByteArray())
+                val hex = hashBytes.take(20).joinToString("") { "%02x".format(it) }
+                val address = "0x$hex"
+
+                GamificationManager.setWalletAddress(address)
 
                 withContext(Dispatchers.Main) {
-                    tvWalletStatus.text = "Wallet Connected"
-                    tvWalletAddress.text = address
-                    btnConnectWallet.visibility = View.GONE
-                    Toast.makeText(this@AchievementsActivity, "Connected: $address", Toast.LENGTH_SHORT).show()
-                    
-                    (achievementsRecyclerView.adapter as AchievementsAdapter).unlockAchievement()
+                    btnConnectWallet.isEnabled = true
+                    updateWalletDisplay()
+                    loadAchievements()
+                    Toast.makeText(this@AchievementsActivity, "Wallet linked: $address (+50 PULSE, +200 XP)", Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    tvWalletStatus.text = "Failed to connect"
+                    tvWalletStatus.text = "Connection failed"
                     btnConnectWallet.isEnabled = true
                 }
             }
         }
     }
 
-    private fun setupAchievementsList() {
-        val achievements = listOf(
-            Achievement("First Step", "Walk 1,000 steps in a day", R.drawable.ic_map, true),
-            Achievement("Eco Commuter", "Use public transit 5 times", R.drawable.ic_traffic, true),
-            Achievement("Clean Air Champion", "Report 3 low-pollution zones", R.drawable.ic_dashboard, false),
-            Achievement("Web3 Pioneer", "Connect a Web3 Wallet", R.drawable.ic_settings, false)
-        )
+    private fun disconnectWallet() {
+        GamificationManager.setWalletAddress(null)
+        updateWalletDisplay()
+        loadAchievements()
+        Toast.makeText(this, "Wallet unlinked.", Toast.LENGTH_SHORT).show()
+    }
 
-        achievementsRecyclerView.layoutManager = LinearLayoutManager(this)
-        achievementsRecyclerView.adapter = AchievementsAdapter(achievements.toMutableList())
+    private fun loadAchievements() {
+        val badges = GamificationManager.getAllBadges()
+        val items = badges.map { b ->
+            val isUnlocked = b.progress >= b.target
+            val progressText = if (isUnlocked) "Completed (${b.target}/${b.target})" else "Progress: ${b.progress}/${b.target}"
+            Achievement(
+                title = b.title,
+                description = "${b.description} • $progressText",
+                iconRes = b.iconRes,
+                isUnlocked = isUnlocked
+            )
+        }
+        adapter.updateData(items)
     }
 }
 
 data class Achievement(val title: String, val description: String, val iconRes: Int, var isUnlocked: Boolean)
 
-class AchievementsAdapter(private val list: MutableList<Achievement>) :
+class AchievementsAdapter(private var list: List<Achievement>) :
     RecyclerView.Adapter<AchievementsAdapter.ViewHolder>() {
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -104,15 +153,13 @@ class AchievementsAdapter(private val list: MutableList<Achievement>) :
         holder.title.text = item.title
         holder.desc.text = item.description
         holder.icon.setImageResource(item.iconRes)
-        holder.itemView.alpha = if (item.isUnlocked) 1.0f else 0.5f
+        holder.itemView.alpha = if (item.isUnlocked) 1.0f else 0.45f
     }
 
     override fun getItemCount() = list.size
 
-    fun unlockAchievement() {
-        if (list.size > 3) {
-            list[3].isUnlocked = true
-            notifyItemChanged(3)
-        }
+    fun updateData(newList: List<Achievement>) {
+        list = newList
+        notifyDataSetChanged()
     }
 }

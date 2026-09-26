@@ -9,5 +9,6 @@ class UrbanPulseApplication : Application() {
         // Initialize managers that need application context
         GamificationManager.init(this)
         TripPlanManager.init(this)
+        UserLocationManager.getInstance(this)
     }
 }

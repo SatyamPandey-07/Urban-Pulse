@@ -23,8 +23,14 @@ class MainActivity : BaseActivity() {
         tvLocationTitle = findViewById(R.id.tvLocationTitle)
         tvLocationSubtitle = findViewById(R.id.tvLocationSubtitle)
 
-        tvLocationTitle.text = "Mumbai"
-        tvLocationSubtitle.text = "Maharashtra, India"
+        val locMgr = UserLocationManager.getInstance(this)
+        tvLocationTitle.text = locMgr.currentCityName
+        tvLocationSubtitle.text = locMgr.currentSubArea
+
+        locMgr.addLocationListener { _, _, city, region ->
+            tvLocationTitle.text = city
+            tvLocationSubtitle.text = region
+        }
 
         val adapter = MainPagerAdapter(this)
         viewPager.adapter = adapter

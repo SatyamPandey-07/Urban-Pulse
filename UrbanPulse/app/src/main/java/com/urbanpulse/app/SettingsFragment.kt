@@ -59,18 +59,23 @@ class SettingsFragment : Fragment() {
     }
 
     private fun getSettingsList(): List<SettingItem> {
-        val accessMgr = context?.let { AccessibilityManager.getInstance(it) }
+        val ctx = context
+        val accessMgr = ctx?.let { AccessibilityManager.getInstance(it) }
         val wheelchairStatus = if (accessMgr?.isWheelchairModeEnabled == true) "Active (Step-Free Rerouting)" else "Disabled"
+        val co2Kg = GamificationManager.getCo2Saved() / 1000.0
+        val level = GamificationManager.getLevel()
+        val locMgr = ctx?.let { UserLocationManager.getInstance(it) }
+        val cityHub = if (locMgr != null) "${locMgr.currentCityName}, ${locMgr.currentSubArea}" else "Mumbai, Maharashtra, India"
 
         return listOf(
             SettingItem("Inclusive Accessibility Profile", "Wheelchair: $wheelchairStatus, Visual & Hearing alerts", R.drawable.ic_settings, "#D3E3FD", SettingType.ACCESSIBILITY_PROFILE),
-            SettingItem("Green Travel Passport", "142.8 kg CO2 saved • Gold Explorer", R.drawable.ic_map, "#C3E7A1", SettingType.CARBON_WALLET),
+            SettingItem("Green Travel Passport", String.format(java.util.Locale.US, "%.1f kg CO2 saved • Level %d Explorer", co2Kg, level), R.drawable.ic_map, "#C3E7A1", SettingType.CARBON_WALLET),
             SettingItem("Sustainable & Inclusive Stays", "Verified solar hotels, zero-waste resorts & accessibility audits", R.drawable.ic_dashboard, "#A7F3D0", SettingType.HOSPITALITY_EXPLORER),
             SettingItem("Multimodal Green Route Planner", "Tradeoff optimizer for Metro, EV Cab, and bus emissions", R.drawable.ic_traffic, "#FDE293", SettingType.ROUTE_PLANNER),
             SettingItem("AI Eco & Inclusive Itinerary", "Personalized step-free & low-carbon day itineraries", R.drawable.ic_confetti, "#FED7AA", SettingType.ITINERARY_PLANNER),
             SettingItem("Hotel Resource & Waste Hub", "B2B Energy, Water, food surplus & ESG compliance", R.drawable.ic_digital_twin, "#FBCFE8", SettingType.HOTEL_OPTIMIZER),
             SettingItem("Appearance & Theme", "System Default Dark Surface", R.drawable.ic_light_mode, "#FDE293", SettingType.APPEARANCE),
-            SettingItem("Default City Hub", "Mumbai, Maharashtra, India", R.drawable.ic_location_pin, "#D3E3FD", SettingType.LOCATION),
+            SettingItem("Default City Hub", cityHub, R.drawable.ic_location_pin, "#D3E3FD", SettingType.LOCATION),
             SettingItem("Measurement Units", "Metric (°C, km/h, kg CO2e)", R.drawable.ic_dashboard, "#F8D7DA", SettingType.UNITS),
             SettingItem("Language", "English", R.drawable.ic_yatri_ai, "#E9D5FF", SettingType.LANGUAGE)
         )

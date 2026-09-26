@@ -211,19 +211,21 @@
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
                     <TextView
+                        android:id="@+id/tvAqiValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="136"
+                        android:text="--"
                         android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
                         android:textStyle="bold"
                         android:textColor="?attr/colorOnSurface" />
 
                     <TextView
+                        android:id="@+id/tvAqiStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Moderate • PM2.5"
+                        android:text="Fetching AQI..."
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
@@ -254,19 +256,21 @@
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
                     <TextView
+                        android:id="@+id/tvWeatherTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="28°C"
+                        android:text="--°C"
                         android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
                         android:textStyle="bold"
                         android:textColor="?attr/colorOnSurface" />
 
                     <TextView
+                        android:id="@+id/tvWeatherCondition"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Partly Cloudy"
+                        android:text="Loading..."
                         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                         android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
