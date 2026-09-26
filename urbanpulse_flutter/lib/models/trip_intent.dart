@@ -24,13 +24,12 @@ class TripIntent {
   final int? maxPriceRupees;
   final String searchKeywords;
 
-  /// `groq`, `gemini` or `rules` — surfaced in the UI so the user can see which
+  /// `groq` or `rules` — surfaced in the UI so the user can see which
   /// engine actually parsed their request.
   final String parsedBy;
 
   String get engineLabel => switch (parsedBy) {
     'groq' => 'Groq LPU',
-    'gemini' => 'Gemini',
     _ => 'keyword rules',
   };
 }

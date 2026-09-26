@@ -299,7 +299,6 @@ cd Urban-Pulse/UrbanPulse
 # 2. Add your own API keys to local.properties (gitignored, not committed)
 echo "GROQ_API_KEY=your_groq_api_key" >> local.properties
 echo "TOMTOM_API_KEY=your_tomtom_key" >> local.properties
-echo "GEMINI_API_KEY=your_gemini_key" >> local.properties
 # Optional — only needed on a physical device; the emulator default (10.0.2.2) reaches
 # the Central Registry server running on your dev machine automatically:
 echo "CENTRAL_REGISTRY_BASE_URL=http://<your-lan-ip>:3001" >> local.properties

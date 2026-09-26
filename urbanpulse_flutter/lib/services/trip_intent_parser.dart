@@ -7,14 +7,9 @@ import '../models/trip_intent.dart';
 import 'groq_api_client.dart';
 
 /// Turns a traveler's free-text request into structured [TripIntent]
-/// constraints. Tries the real Groq LPU cloud first (sub-400ms structured JSON
-/// extraction), falls back to Gemini if Groq is unavailable/fails, and finally
-/// falls back to a deterministic keyword parser so the feature still works with
-/// no live config at all.
-///
-/// Port of `intent/TripIntentParser.kt`. The Gemini step used the
-/// `generativeai` Android SDK there; here it is the same model over Google's
-/// public `generativelanguage` REST endpoint, which needs no extra dependency.
+/// constraints using the Groq LPU cloud (sub-400ms structured JSON
+/// extraction), and falls back to a deterministic keyword parser so the feature
+/// still works with no live config at all.
 abstract final class TripIntentParser {
   static const _schema = '''
 Respond with ONLY a raw JSON object (no markdown fences, no commentary) matching exactly this shape:
@@ -31,7 +26,9 @@ Respond with ONLY a raw JSON object (no markdown fences, no commentary) matching
 }''';
 
   static const _groqCandidateModels = [
+    'llama-3.3-70b-versatile',
     'openai/gpt-oss-120b',
+    'llama-3.1-8b-instant',
     'groq/compound',
     'openai/gpt-oss-20b',
   ];
@@ -41,12 +38,6 @@ Respond with ONLY a raw JSON object (no markdown fences, no commentary) matching
 
     if (AppConfig.hasGroqKey) {
       final intent = await _parseWithGroq(freeText);
-      // Fall through to Gemini, then rules — never block the user on an LLM failure.
-      if (intent != null) return intent;
-    }
-
-    if (AppConfig.hasGeminiKey) {
-      final intent = await _parseWithGemini(freeText);
       if (intent != null) return intent;
     }
 
@@ -72,47 +63,6 @@ Respond with ONLY a raw JSON object (no markdown fences, no commentary) matching
       if (intent != null) return intent;
     }
     return null;
-  }
-
-  static Future<TripIntent?> _parseWithGemini(String freeText) async {
-    final prompt =
-        'Extract structured travel-planning constraints from this traveler '
-        'request.\n$_schema\n\nTraveler request: "${freeText.replaceAll('"', "'")}"';
-
-    try {
-      final response = await http
-          .post(
-            Uri.parse(
-              'https://generativelanguage.googleapis.com/v1beta/models/'
-              'gemini-1.5-flash:generateContent?key=${AppConfig.geminiApiKey}',
-            ),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'contents': [
-                {
-                  'parts': [
-                    {'text': prompt},
-                  ],
-                },
-              ],
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode < 200 || response.statusCode >= 300) return null;
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      final candidates = json['candidates'] as List<dynamic>?;
-      if (candidates == null || candidates.isEmpty) return null;
-      final parts =
-          ((candidates.first as Map<String, dynamic>)['content']
-                  as Map<String, dynamic>?)?['parts']
-              as List<dynamic>?;
-      if (parts == null || parts.isEmpty) return null;
-      final text = (parts.first as Map<String, dynamic>)['text'] as String?;
-      return _decodeIntent(text, parsedBy: 'gemini');
-    } catch (_) {
-      return null;
-    }
   }
 
   static TripIntent? _decodeIntent(

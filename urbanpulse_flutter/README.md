@@ -18,7 +18,7 @@ cd server && npm install && npm start      # listens on :3001
 # 2. Configure your own API keys. No key is committed to this repository.
 cd ../urbanpulse_flutter
 cp config.example.json config.json         # config.json is gitignored
-#   …then edit config.json and fill in GROQ_API_KEY / TOMTOM_API_KEY / GEMINI_API_KEY
+#   …then edit config.json and fill in GROQ_API_KEY / TOMTOM_API_KEY
 
 # 3. Run.
 flutter pub get
@@ -37,7 +37,6 @@ estimate as live data.
 |---|---|---|
 | `GROQ_API_KEY` | Yatri AI chat, agentic trip planner, intent parsing | Grounded fallback answers; itineraries labelled "offline template estimate" |
 | `TOMTOM_API_KEY` | Live Map dual routing, POI search, traffic, real route distance | Straight-line route estimate, labelled as such |
-| `GEMINI_API_KEY` | Second-choice intent parser after Groq | Falls through to the keyword parser |
 | `CENTRAL_REGISTRY_BASE_URL` | Shared experiences/bookings/reports backend | On-device SQLite store only |
 
 `CENTRAL_REGISTRY_BASE_URL` defaults to `http://10.0.2.2:3001` — the Android
@@ -120,8 +119,6 @@ Dependencies from the Kotlin build with no Flutter counterpart here:
 - **TomTom Search SDK** — search now uses the same TomTom *REST* POI endpoint the rest
   of the app already used. Identical data, one fewer SDK.
 - **Firebase Auth / Firestore / Storage** — see the notes below.
-- **Google Generative AI SDK** — Gemini is now called over its public REST endpoint,
-  so no SDK is needed for the one request the app makes.
 
 ---
 

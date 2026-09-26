@@ -13,11 +13,6 @@ abstract final class AppConfig {
     defaultValue: 'DEMO_TOMTOM_KEY',
   );
 
-  static const geminiApiKey = String.fromEnvironment(
-    'GEMINI_API_KEY',
-    defaultValue: 'DEMO_GEMINI_KEY',
-  );
-
   static const groqApiKey = String.fromEnvironment(
     'GROQ_API_KEY',
     defaultValue: 'DEMO_GROQ_KEY',
@@ -36,9 +31,4 @@ abstract final class AppConfig {
 
   static bool get hasGroqKey =>
       groqApiKey.isNotEmpty && groqApiKey != 'DEMO_GROQ_KEY';
-
-  static bool get hasGeminiKey =>
-      geminiApiKey.isNotEmpty &&
-      geminiApiKey != 'DEMO_GEMINI_KEY' &&
-      geminiApiKey != 'null';
 }
