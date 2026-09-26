@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -340,7 +342,16 @@ class _LiveMapTabState extends State<LiveMapTab> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned.fill(child: WebViewWidget(controller: _webView)),
+        Positioned.fill(
+          child: WebViewWidget(
+            controller: _webView,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<OneSequenceGestureRecognizer>(
+                () => EagerGestureRecognizer(),
+              ),
+            },
+          ),
+        ),
         _topOverlay(context),
         _floatingControls(context),
         _comparisonHud(context),
@@ -356,6 +367,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
       right: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Card(
             shape: RoundedRectangleBorder(
@@ -536,6 +548,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
     right: 16,
     bottom: 240,
     child: Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         FloatingActionButton.small(
           heroTag: 'map-traffic',
@@ -608,29 +621,31 @@ class _LiveMapTabState extends State<LiveMapTab> {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: _routeColumn(
-                    context,
-                    title: '🌿 GREEN PATH',
-                    accent: AppColors.primaryGreen,
-                    metrics: comparison?.greenMetrics ?? '—',
-                    carbon: comparison?.greenCarbon ?? 'Awaiting live route',
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _routeColumn(
+                      context,
+                      title: '🌿 GREEN PATH',
+                      accent: AppColors.primaryGreen,
+                      metrics: comparison?.greenMetrics ?? '—',
+                      carbon: comparison?.greenCarbon ?? 'Awaiting live route',
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _routeColumn(
-                    context,
-                    title: '🚗 STANDARD PATH',
-                    accent: AppColors.solidError,
-                    metrics: comparison?.normalMetrics ?? '—',
-                    carbon: comparison?.normalCarbon ?? 'Awaiting live route',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _routeColumn(
+                      context,
+                      title: '🚗 STANDARD PATH',
+                      accent: AppColors.solidError,
+                      metrics: comparison?.normalMetrics ?? '—',
+                      carbon: comparison?.normalCarbon ?? 'Awaiting live route',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
