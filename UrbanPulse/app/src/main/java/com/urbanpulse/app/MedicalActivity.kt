@@ -18,13 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
-import com.tomtom.sdk.location.GeoPoint
-import com.tomtom.sdk.search.Search
-import com.tomtom.sdk.search.SearchCallback
-import com.tomtom.sdk.search.common.error.SearchFailure
-import com.tomtom.sdk.search.SearchOptions
-import com.tomtom.sdk.search.SearchResponse
-import com.tomtom.sdk.search.online.OnlineSearch
+import androidx.lifecycle.lifecycleScope
+import com.urbanpulse.app.network.LiveCityIntelligenceService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class MedicalFacility(
     val name: String,
@@ -37,7 +35,6 @@ data class MedicalFacility(
 class MedicalActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private var searchApi: Search? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,20 +47,7 @@ class MedicalActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        try {
-            searchApi = OnlineSearch.create(this, BuildConfig.TOMTOM_API_KEY)
-        } catch (e: Exception) {
-            // SDK fallback
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fetchMedicalPlaces()
-        } else {
-            // Load with default / network location
-            fetchMedicalPlaces()
-        }
+        fetchMedicalPlaces()
     }
 
     private fun fetchMedicalPlaces() {
