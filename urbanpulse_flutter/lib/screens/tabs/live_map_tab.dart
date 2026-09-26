@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -31,6 +32,8 @@ class LiveMapTab extends StatefulWidget {
 class _LiveMapTabState extends State<LiveMapTab> {
   late final WebViewController _webView;
   final _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  bool _isSearching = false;
 
   // Initial viewport, replaced by the real fix as soon as one resolves.
   double _currentLat = LocationService.defaultLat;
@@ -71,6 +74,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -187,32 +191,64 @@ class _LiveMapTabState extends State<LiveMapTab> {
     showToast(context, 'Traffic Overlay: ${_isTrafficEnabled ? "ON" : "OFF"}');
   }
 
-  Future<void> _performSearch(String query) async {
-    if (query.trim().isEmpty) return;
-    final results = await TomTomService.searchNearbyPoi(
-      query,
-      _currentLat,
-      _currentLon,
-      limit: 5,
-    );
-    if (!mounted) return;
-    if (results.isEmpty) {
-      setState(() => _searchResults = const []);
-      showToast(
-        context,
-        'No places matched "$query" — check your connection or TomTom key.',
-      );
+  void _onSearchChanged(String query) {
+    _searchDebounce?.cancel();
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _searchResults = const [];
+        _isSearching = false;
+      });
       return;
     }
-    setState(() => _searchResults = results);
+    if (trimmed.length < 2) return;
+    setState(() => _isSearching = true);
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      _performSearch(trimmed);
+    });
+  }
+
+  Future<void> _performSearch(String query) async {
+    _searchDebounce?.cancel();
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _searchResults = const [];
+        _isSearching = false;
+      });
+      return;
+    }
+    setState(() => _isSearching = true);
+
+    final results = await TomTomService.searchPlacesBounded(
+      trimmed,
+      lat: _currentLat,
+      lon: _currentLon,
+      radiusKm: 60.0,
+      limit: 6,
+    );
+    if (!mounted) return;
+    setState(() {
+      _isSearching = false;
+      _searchResults = results;
+    });
+    if (results.isEmpty) {
+      showToast(
+        context,
+        'No places matched "$trimmed" in region.',
+      );
+    }
   }
 
   void _selectSearchResult(LivePoiResult result) {
+    _searchDebounce?.cancel();
     setState(() {
       _searchResults = const [];
+      _isSearching = false;
       _searchController.text = result.name;
     });
     FocusScope.of(context).unfocus();
+    _centerMap(result.lat, result.lon, 14);
     _calculateAndDrawDualRoutes(result.lat, result.lon, result.name);
   }
 
@@ -399,7 +435,11 @@ class _LiveMapTabState extends State<LiveMapTab> {
                   child: TextField(
                     controller: _searchController,
                     textInputAction: TextInputAction.search,
-                    onSubmitted: _performSearch,
+                    onChanged: _onSearchChanged,
+                    onSubmitted: (val) {
+                      _searchDebounce?.cancel();
+                      _performSearch(val);
+                    },
                     style: const TextStyle(fontSize: 13),
                     decoration: const InputDecoration(
                       hintText: 'Search places, facilities, destinations...',
@@ -415,14 +455,30 @@ class _LiveMapTabState extends State<LiveMapTab> {
                     ),
                   ),
                 ),
-                if (_searchController.text.isNotEmpty)
+                if (_isSearching)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6),
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primaryGreen,
+                      ),
+                    ),
+                  )
+                else if (_searchController.text.isNotEmpty)
                   IconButton(
                     icon: const Icon(Icons.close, size: 18),
                     tooltip: 'Clear search',
-                    onPressed: () => setState(() {
-                      _searchController.clear();
-                      _searchResults = const [];
-                    }),
+                    onPressed: () {
+                      _searchDebounce?.cancel();
+                      setState(() {
+                        _searchController.clear();
+                        _searchResults = const [];
+                        _isSearching = false;
+                      });
+                    },
                   ),
                 Container(
                   padding: const EdgeInsets.all(6),
@@ -443,30 +499,122 @@ class _LiveMapTabState extends State<LiveMapTab> {
           const SizedBox(height: 8),
           _filterChips(context),
           if (_searchResults.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 220),
-              child: Card(
-                child: ListView.builder(
+            const SizedBox(height: 8),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 260),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceCard,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.surfaceBorder,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: ListView.separated(
                   shrinkWrap: true,
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
                   itemCount: _searchResults.length,
+                  separatorBuilder: (_, __) => const Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: AppColors.surfaceBorder,
+                  ),
                   itemBuilder: (context, index) {
                     final result = _searchResults[index];
-                    return ListTile(
-                      dense: true,
-                      leading: const Icon(Icons.place_outlined),
-                      title: Text(
-                        result.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        '${result.address} • ${fixed(result.distanceMeters / 1000)} km',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    return InkWell(
                       onTap: () => _selectSearchResult(result),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryGreen
+                                    .withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: AppColors.primaryGreen
+                                      .withValues(alpha: 0.3),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.near_me_rounded,
+                                size: 16,
+                                color: AppColors.primaryGreen,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    result.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  if (result.address.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      result.address,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceElevated,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: AppColors.surfaceBorder,
+                                  width: 0.6,
+                                ),
+                              ),
+                              child: Text(
+                                '${fixed(result.distanceMeters / 1000)} km',
+                                style: const TextStyle(
+                                  color: AppColors.primaryGreen,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 ),
