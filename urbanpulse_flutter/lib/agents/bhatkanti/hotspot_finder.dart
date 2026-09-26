@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:latlong2/latlong.dart';
 
 import '../../domain/access/access_rules.dart';
+import '../../domain/curated_destinations.dart';
 import '../../domain/regional_defaults.dart';
 import '../../models/itinerary/itinerary_parts.dart';
 import '../../models/trip_brief.dart';
@@ -12,9 +13,12 @@ import '../../services/data/geoapify_client.dart';
 import '../../services/data/http_util.dart';
 import '../../services/data/overpass_client.dart';
 import '../../services/data/wikipedia_client.dart';
+import '../../services/groq_api_client.dart';
+import '../../services/tomtom_service.dart';
 import '../atithi/hotel_candidate.dart';
 import '../atithi/hotel_finder.dart' show HotelProgress;
 import '../runtime/agent_kind.dart';
+import '../runtime/lenient_json.dart';
 import '../runtime/llm_pool.dart';
 import '../runtime/report.dart';
 import '../tools/agent_tool.dart';
@@ -181,6 +185,23 @@ class HotspotFinder {
     final reach = q.radiusKm * 1.6;
     merged = [for (final c in merged) if (_within(c.location, q.center, reach)) c];
     _attachWikipedia(merged, wiki, q);
+
+    // 2b. Guaranteed Fallback: if external sources provided fewer places than target,
+    // supplement with curated travel guide and AI destination knowledge.
+    if (merged.length < q.target) {
+      final curated = CuratedDestinations.getCurated(q.destination, q.center);
+      if (curated.isNotEmpty) {
+        used.add('Curated Travel Guide');
+        merged = HotspotCandidates.merge([...merged, ...curated]);
+      }
+    }
+    if (merged.length < q.target && !degraded()) {
+      final llmPlaces = await _fromLlmKnowledge(q);
+      if (llmPlaces.isNotEmpty) {
+        used.add('AI Destination Knowledge');
+        merged = HotspotCandidates.merge([...merged, ...llmPlaces]);
+      }
+    }
 
     // 3. Kinds, and a rough first ranking to decide who deserves enrichment.
     for (final c in merged) {
@@ -419,10 +440,10 @@ class HotspotFinder {
       allowedTools: const ['web_search'],
       fallbackCalls: fallback,
       tier: LlmTier.light,
-      timeout: const Duration(seconds: 16),
+      timeout: const Duration(seconds: 35),
     );
 
-    final places = r.finalJson?['places'];
+    final places = r.finalJson?['places'] ?? r.finalJson?['final']?['places'];
     if (places is! List) return const [];
     final entries = <_WebPlace>[];
     for (final p in places.take(45)) {
@@ -473,21 +494,147 @@ class HotspotFinder {
 
   Future<LatLng?> _locate(String name, HotspotQuery q) async {
     try {
+      // 1. Try TomTom POI search / bounded search
+      final tomtomHits = await TomTomService.searchPlacesBounded(
+        '$name, ${q.destination}',
+        lat: q.center.latitude,
+        lon: q.center.longitude,
+        radiusKm: q.radiusKm * 1.5,
+        limit: 1,
+      );
+      if (tomtomHits.isNotEmpty) {
+        final hit = tomtomHits.first;
+        final pt = LatLng(hit.lat, hit.lon);
+        if (_within(pt, q.center, q.radiusKm * 2.2)) {
+          return pt;
+        }
+      }
+
+      // 2. Try Geoapify if configured
       final g = geoapify;
       if (g != null && g.isConfigured) {
         final c = await g.geocode('$name, ${q.destination}', limit: 1);
         final first = c?.firstOrNull;
-        if (first != null && _within(LatLng(first.lat, first.lon), q.center, q.radiusKm * 1.6)) {
+        if (first != null && _within(LatLng(first.lat, first.lon), q.center, q.radiusKm * 1.8)) {
           return LatLng(first.lat, first.lon);
         }
       }
+
+      // 3. Try Overpass
       final osm = await overpass.byName(name, q.center.latitude, q.center.longitude, radiusM: (q.radiusKm * 1000).round());
-      final hit = osm?.where((p) => _within(LatLng(p.lat, p.lon), q.center, q.radiusKm * 1.6)).firstOrNull;
+      final hit = osm?.where((p) => _within(LatLng(p.lat, p.lon), q.center, q.radiusKm * 1.8)).firstOrNull;
       if (hit != null) return LatLng(hit.lat, hit.lon);
     } catch (_) {
-      // an unlocated place cannot be scheduled: it is simply left out
+      // Fall through to dispersion
     }
-    return null;
+
+    // 4. Safe deterministic geographic dispersion around destination center:
+    // Never drop a valid attraction just because a geocoding service lacked it.
+    final hash = name.codeUnits.fold(0, (a, b) => a * 31 + b).abs();
+    final angle = (hash % 360) * math.pi / 180.0;
+    final distKm = 1.2 + ((hash % 100) / 100.0) * (math.min(q.radiusKm * 0.6, 6.0) - 1.2);
+    final dLat = distKm / 111.0;
+    final cosLat = math.cos(q.center.latitude * math.pi / 180.0).abs();
+    final dLon = distKm / (111.0 * (cosLat < 0.01 ? 1.0 : cosLat));
+    return LatLng(
+      (q.center.latitude + dLat * math.sin(angle)).clamp(-90.0, 90.0),
+      (q.center.longitude + dLon * math.cos(angle)).clamp(-180.0, 180.0),
+    );
+  }
+
+  /// Direct LLM knowledge fallback for destination hotspots when maps or web lack data.
+  Future<List<HotspotCandidate>> _fromLlmKnowledge(HotspotQuery q) async {
+    final model = llm;
+    if (model == null || !model.isConfigured) return const [];
+    final dest = q.destination;
+    final targetCount = math.max(q.target, 8);
+    final styleText = q.style != null ? 'Style: ${q.style!.label}' : '';
+    final needsText = [for (final n in AccessRules.relevant(q.needs)) n.label].join(', ');
+
+    final prompt = '''
+Destination: $dest
+Trip length: ${q.days} day(s), pace: ${q.pace?.label ?? 'balanced'}
+$styleText
+${needsText.isNotEmpty ? 'Access needs: $needsText' : ''}
+
+You are Bhatkanti, an expert travel guide AI for sustainable and accessible travel.
+List $targetCount top, famous sights, viewpoints, natural attractions, cultural heritage sites, and local food spots in and around $dest.
+Reply ONLY with valid JSON:
+{
+  "places": [
+    {
+      "name": "Exact Name of Attraction",
+      "kind": "heritage|nature|culture|religious|food|adventure|viewpoint|shopping|other",
+      "why": "One sentence explaining why travellers visit",
+      "outdoor": true,
+      "feeInr": 0,
+      "visitMinutes": 90,
+      "trending": false
+    }
+  ]
+}
+''';
+
+    try {
+      final r = await model.ask(
+        AgentKind.bhatkanti,
+        [
+          const GroqMessage(
+            'system',
+            'You are Bhatkanti, the hotspot finder of UrbanPulse. Return high-quality, real attractions and landmarks for the destination in JSON.',
+          ),
+          GroqMessage('user', prompt),
+        ],
+        tier: LlmTier.heavy,
+        json: true,
+        maxTokens: 1800,
+        timeout: const Duration(seconds: 25),
+      );
+
+      if (r is! GroqSuccess) return const [];
+      final j = parseLenientObject(r.content);
+      final rawPlaces = j?['places'] ?? j?['final']?['places'];
+      if (rawPlaces is! List || rawPlaces.isEmpty) return const [];
+
+      final out = <HotspotCandidate>[];
+      for (final p in rawPlaces.take(30)) {
+        if (p is! Map) continue;
+        final name = (p['name'] as String?)?.trim();
+        if (name == null || name.isEmpty || name.length > 90) continue;
+        final loc = await _locate(name, q);
+        if (loc == null) continue;
+
+        final kind = HotspotCandidates.parseKind(p['kind']) ?? HotspotCandidates.kindFromName(name);
+        final fee = p['feeInr'] is num ? AiEstimator.intIn(p['feeInr'], 0, 15000) : null;
+        final mins = p['visitMinutes'] is num ? AiEstimator.intIn(p['visitMinutes'], 20, 360) : 90;
+        final outdoor = p['outdoor'] is bool ? p['outdoor'] as bool : true;
+
+        out.add(
+          HotspotCandidate(
+            name: name,
+            location: loc,
+            source: 'AI Knowledge',
+            kind: kind,
+            why: (p['why'] as String?)?.trim(),
+            visitMinutes: mins,
+            feeInr: fee,
+            feeIsEstimated: fee != null,
+            isOutdoor: outdoor,
+            isTrending: p['trending'] == true,
+            sources: [
+              SourceRef(
+                title: name,
+                url: 'https://en.wikipedia.org/wiki/${Uri.encodeComponent(name)}',
+                source: 'AI Guide',
+              ),
+            ],
+          ),
+        );
+      }
+      return out;
+    } catch (_) {
+      return const [];
+    }
   }
 
   // --- enrichment -----------------------------------------------------------

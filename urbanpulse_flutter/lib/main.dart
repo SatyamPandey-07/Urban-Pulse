@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/app_theme.dart';
+import 'core/config.dart';
 import 'core/routes.dart';
 import 'state/app_scope.dart';
 
@@ -10,6 +11,7 @@ Future<void> main() async {
   // `UrbanPulseApplication.onCreate` eagerly initialised the preference-backed
   // managers; doing it here keeps every controller synchronous at call sites.
   final prefs = await SharedPreferences.getInstance();
+  await AppConfig.loadOverrides(prefs);
   runApp(UrbanPulseApp(services: AppServices(prefs)));
 }
 

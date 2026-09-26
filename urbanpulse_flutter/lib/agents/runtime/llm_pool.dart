@@ -228,9 +228,9 @@ class LlmPool implements AgentLlm {
   final List<LlmCallRecord> _calls = [];
 
   static const models = <LlmTier, List<String>>{
-    LlmTier.heavy: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'],
-    LlmTier.light: ['openai/gpt-oss-20b', 'llama-3.1-8b-instant'],
-    LlmTier.search: ['groq/compound'],
+    LlmTier.heavy: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'],
+    LlmTier.light: ['openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b'],
+    LlmTier.search: ['groq/compound', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'],
   };
 
   List<LlmCallRecord> get calls => List.unmodifiable(_calls);
