@@ -105,7 +105,8 @@ class SocialSignalFeed {
 
   Future<List<SocialPost>> _news(String city) async {
     try {
-      final q = Uri.encodeQueryComponent('"$city" ($_weatherWords)');
+      // The last three days only: older headlines are not live signals.
+      final q = Uri.encodeQueryComponent('"$city" ($_weatherWords) when:3d');
       final res = await _client.get(Uri.parse('https://news.google.com/rss/search?q=$q&hl=en-IN&gl=IN&ceid=IN:en')).timeout(timeout);
       if (res.statusCode != 200) return const [];
       final posts = parseGoogleNewsRss(utf8.decode(res.bodyBytes));
@@ -158,7 +159,17 @@ class SocialSignalFeed {
 
       final title = tag('title');
       if (title == null || title.isEmpty) continue;
-      out.add(SocialPost(text: title, source: 'Google News', url: tag('link'), at: _rfc822(tag('pubDate'))));
+      // "Headline - Publisher": the model reads the headline, the app credits the outlet.
+      final cut = title.lastIndexOf(' - ');
+      final publisher = cut > 0 && title.length - cut <= 40 ? title.substring(cut + 3).trim() : null;
+      out.add(
+        SocialPost(
+          text: publisher == null ? title : title.substring(0, cut).trim(),
+          source: publisher == null ? 'Google News' : 'Google News · $publisher',
+          url: tag('link'),
+          at: _rfc822(tag('pubDate')),
+        ),
+      );
     }
     return out;
   }
