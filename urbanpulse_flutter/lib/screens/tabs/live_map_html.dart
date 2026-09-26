@@ -45,24 +45,23 @@ const String liveMapHtml = r'''
 <body>
     <div id="map"></div>
     <script>
-        // Placeholder camera for the first paint only; Dart calls setCenter with
-        // the real fix as soon as the page finishes loading.
-        // Carto voyager tiles with fallback to standard OpenStreetMap
-        var voyagerLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            subdomains: 'abcd'
-        });
-        var osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
-        });
-        voyagerLayer.on('tileerror', function() {
-            if (!map.hasLayer(osmLayer)) {
-                osmLayer.addTo(map);
-            }
-        });
-        voyagerLayer.addTo(map);
+        // Initialize Leaflet map
+        var map = L.map('map', { zoomControl: false }).setView([19.0760, 72.8777], 13);
 
-        var userMarker = L.marker([0, 0], {
+        // Primary clean OpenStreetMap tiles (no watermarks, no API key required)
+        var osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        setTimeout(function() {
+            if (map) map.invalidateSize();
+        }, 350);
+        window.addEventListener('resize', function() {
+            if (map) map.invalidateSize();
+        });
+
+        var userMarker = L.marker([19.0760, 72.8777], {
             icon: L.divIcon({ className: 'user-pulse', iconSize: [18, 18], iconAnchor: [9, 9] })
         }).addTo(map).bindPopup("<b>Your Current Location</b><br>GPS Grounded");
 
@@ -102,8 +101,13 @@ const String liveMapHtml = r'''
         };
 
         window.setCenter = function(lat, lon, zoom) {
-            map.flyTo([lat, lon], zoom, { duration: 1.2 });
-            userMarker.setLatLng([lat, lon]);
+            if (map) {
+                map.invalidateSize();
+                map.flyTo([lat, lon], zoom, { duration: 1.2 });
+            }
+            if (userMarker) {
+                userMarker.setLatLng([lat, lon]);
+            }
         };
 
         window.drawDualRoutes = function(greenCoords, normalCoords, destTitle, greenSummary, normalSummary) {
