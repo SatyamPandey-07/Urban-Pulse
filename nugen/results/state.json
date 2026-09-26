@@ -1,0 +1,32 @@
+{
+  "base_model_id": "llama-v3p2-3b-reasoning",
+  "failed_alignments": [
+    {
+      "alignment_id": "alignment_01m3fxm99a3m34qn",
+      "error": "Synthetic data generation failed: QAPair answer was an int (150), Nugen-side validation"
+    },
+    {
+      "alignment_id": "alignment_01m3fxrb8474nra8",
+      "error": "same QAPair int answer (150); fixed by all-string answer format"
+    },
+    {
+      "alignment_id": "alignment_01m3fy3nzv2tnvh9",
+      "error": "Finetuning failed: Nugen job creation failed: HTTP 502 Bad Gateway"
+    }
+  ],
+  "old_document_ids": [
+    "document_01m3fxkxgk8bbj9d",
+    "document_01m3fxkxgyh7vcqj",
+    "document_01m3fxkxhbesj9k7",
+    "document_01m3fxkxhnh5bstp"
+  ],
+  "old_benchmark_id": "benchmark_01m3fxm1q0fab5t9",
+  "document_ids": [
+    "document_01m3fy2g8b1tf1vs",
+    "document_01m3fy2g8nmv64b4",
+    "document_01m3fy2g93taztm1",
+    "document_01m3fy2g9g4fm8wm"
+  ],
+  "benchmark_id": "benchmark_01m3fy3k05b73jhv",
+  "benchmark_samples": 76
+}

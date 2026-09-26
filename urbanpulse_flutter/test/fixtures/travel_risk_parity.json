@@ -1,0 +1,8347 @@
+{
+ "impacts": [
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 0,
+    "rain_prob": 12,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 10,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 25,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 5,
+    "rain_prob": 79,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 52.2,
+    "rain_prob": 87,
+    "wind_kmh": 31,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 88.1,
+    "rain_prob": 85,
+    "wind_kmh": 42,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 233.4,
+    "rain_prob": 98,
+    "wind_kmh": 25,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 19.1,
+    "rain_prob": 68,
+    "wind_kmh": 62,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 108.5,
+    "rain_prob": 100,
+    "wind_kmh": 104,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 0,
+    "rain_prob": 11,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 22,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 13,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 2.8,
+    "rain_prob": 70,
+    "wind_kmh": 21,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 57.2,
+    "rain_prob": 80,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 95.9,
+    "rain_prob": 92,
+    "wind_kmh": 25,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 140.9,
+    "rain_prob": 90,
+    "wind_kmh": 33,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 24.1,
+    "rain_prob": 86,
+    "wind_kmh": 69,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 211.8,
+    "rain_prob": 100,
+    "wind_kmh": 100,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 18,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 14,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 12.5,
+    "rain_prob": 56,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 24.2,
+    "rain_prob": 62,
+    "wind_kmh": 26,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 94.3,
+    "rain_prob": 81,
+    "wind_kmh": 25,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 165.5,
+    "rain_prob": 96,
+    "wind_kmh": 44,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 23.7,
+    "rain_prob": 65,
+    "wind_kmh": 46,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 200,
+    "rain_prob": 100,
+    "wind_kmh": 119,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 0,
+    "rain_prob": 9,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 15,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 10,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 14.5,
+    "rain_prob": 56,
+    "wind_kmh": 10,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 55.9,
+    "rain_prob": 87,
+    "wind_kmh": 20,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 111.5,
+    "rain_prob": 88,
+    "wind_kmh": 28,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 236,
+    "rain_prob": 99,
+    "wind_kmh": 30,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 32,
+    "rain_mm": 28.7,
+    "rain_prob": 79,
+    "wind_kmh": 64,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 133.2,
+    "rain_prob": 100,
+    "wind_kmh": 82,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 0,
+    "rain_prob": 11,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 43,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 21,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 11,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 9,
+    "rain_prob": 50,
+    "wind_kmh": 24,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 57.1,
+    "rain_prob": 68,
+    "wind_kmh": 33,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 93,
+    "rain_prob": 100,
+    "wind_kmh": 34,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 207.7,
+    "rain_prob": 91,
+    "wind_kmh": 39,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 6.1,
+    "rain_prob": 61,
+    "wind_kmh": 58,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 215.9,
+    "rain_prob": 100,
+    "wind_kmh": 110,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 43,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 20,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 7,
+    "rain_prob": 53,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 41.2,
+    "rain_prob": 88,
+    "wind_kmh": 32,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 106.3,
+    "rain_prob": 95,
+    "wind_kmh": 33,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 237.6,
+    "rain_prob": 98,
+    "wind_kmh": 35,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 5.5,
+    "rain_prob": 70,
+    "wind_kmh": 70,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 127,
+    "rain_prob": 100,
+    "wind_kmh": 116,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 0,
+    "rain_prob": 8,
+    "wind_kmh": 5,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 18,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 12,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 9,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 8.9,
+    "rain_prob": 75,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 52.9,
+    "rain_prob": 61,
+    "wind_kmh": 32,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 105.3,
+    "rain_prob": 83,
+    "wind_kmh": 30,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 150.2,
+    "rain_prob": 95,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 11.1,
+    "rain_prob": 71,
+    "wind_kmh": 65,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 174.9,
+    "rain_prob": 100,
+    "wind_kmh": 116,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 0,
+    "rain_prob": 16,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 15,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 9,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 4.8,
+    "rain_prob": 51,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 37.8,
+    "rain_prob": 90,
+    "wind_kmh": 26,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 83.8,
+    "rain_prob": 83,
+    "wind_kmh": 40,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 206.9,
+    "rain_prob": 99,
+    "wind_kmh": 25,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 32.1,
+    "rain_prob": 71,
+    "wind_kmh": 53,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 86.4,
+    "rain_prob": 100,
+    "wind_kmh": 95,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 0,
+    "rain_prob": 9,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 23,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 19,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 13.1,
+    "rain_prob": 60,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 51.8,
+    "rain_prob": 79,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 103.2,
+    "rain_prob": 89,
+    "wind_kmh": 38,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 179.5,
+    "rain_prob": 93,
+    "wind_kmh": 31,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 12.4,
+    "rain_prob": 80,
+    "wind_kmh": 53,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 159.4,
+    "rain_prob": 100,
+    "wind_kmh": 97,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 40,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 13,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 8,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 14.2,
+    "rain_prob": 68,
+    "wind_kmh": 10,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 41.9,
+    "rain_prob": 70,
+    "wind_kmh": 23,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 110.8,
+    "rain_prob": 82,
+    "wind_kmh": 26,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 207,
+    "rain_prob": 97,
+    "wind_kmh": 33,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 32,
+    "rain_mm": 26.4,
+    "rain_prob": 88,
+    "wind_kmh": 70,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 146.6,
+    "rain_prob": 100,
+    "wind_kmh": 85,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 7,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 43,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 16,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 8.7,
+    "rain_prob": 46,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 35.2,
+    "rain_prob": 70,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 74.3,
+    "rain_prob": 88,
+    "wind_kmh": 15,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 206,
+    "rain_prob": 91,
+    "wind_kmh": 30,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 32,
+    "rain_mm": 10,
+    "rain_prob": 69,
+    "wind_kmh": 61,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 143.3,
+    "rain_prob": 100,
+    "wind_kmh": 71,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 15,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 8,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 5.1,
+    "rain_prob": 61,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 44.4,
+    "rain_prob": 73,
+    "wind_kmh": 13,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 99.6,
+    "rain_prob": 91,
+    "wind_kmh": 30,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 211.2,
+    "rain_prob": 100,
+    "wind_kmh": 36,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 33.3,
+    "rain_prob": 68,
+    "wind_kmh": 61,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 210.2,
+    "rain_prob": 100,
+    "wind_kmh": 84,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 0,
+    "rain_prob": 19,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 7,
+    "wind_kmh": 22,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 16,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 4,
+    "rain_prob": 41,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 49.6,
+    "rain_prob": 88,
+    "wind_kmh": 35,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 104.7,
+    "rain_prob": 90,
+    "wind_kmh": 31,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 229.6,
+    "rain_prob": 96,
+    "wind_kmh": 33,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 37.4,
+    "rain_prob": 74,
+    "wind_kmh": 68,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 219.5,
+    "rain_prob": 100,
+    "wind_kmh": 75,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 18,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 44,
+    "rain_mm": 0,
+    "rain_prob": 9,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 14,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 2.7,
+    "rain_prob": 67,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 52.9,
+    "rain_prob": 86,
+    "wind_kmh": 34,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 100.3,
+    "rain_prob": 83,
+    "wind_kmh": 24,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 163.9,
+    "rain_prob": 91,
+    "wind_kmh": 24,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 15.6,
+    "rain_prob": 87,
+    "wind_kmh": 68,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 118.4,
+    "rain_prob": 100,
+    "wind_kmh": 77,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 12,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 9,
+    "wind_kmh": 23,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 16,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 8.2,
+    "rain_prob": 49,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 38.5,
+    "rain_prob": 85,
+    "wind_kmh": 26,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 95.1,
+    "rain_prob": 82,
+    "wind_kmh": 22,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 187,
+    "rain_prob": 95,
+    "wind_kmh": 45,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 19.8,
+    "rain_prob": 73,
+    "wind_kmh": 59,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 80.7,
+    "rain_prob": 100,
+    "wind_kmh": 75,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 8,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 8,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 8,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 7.6,
+    "rain_prob": 72,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 44.5,
+    "rain_prob": 68,
+    "wind_kmh": 25,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 82.4,
+    "rain_prob": 81,
+    "wind_kmh": 37,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 221.5,
+    "rain_prob": 100,
+    "wind_kmh": 53,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 38.6,
+    "rain_prob": 79,
+    "wind_kmh": 56,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 152.5,
+    "rain_prob": 100,
+    "wind_kmh": 104,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 18,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 40,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 25,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 13,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 11.6,
+    "rain_prob": 58,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 34.6,
+    "rain_prob": 80,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 96.4,
+    "rain_prob": 95,
+    "wind_kmh": 27,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 162.2,
+    "rain_prob": 100,
+    "wind_kmh": 44,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 37.1,
+    "rain_prob": 84,
+    "wind_kmh": 56,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 116.6,
+    "rain_prob": 100,
+    "wind_kmh": 76,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 12,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 7,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 44,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 17,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 12,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 14.6,
+    "rain_prob": 41,
+    "wind_kmh": 25,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 22.3,
+    "rain_prob": 73,
+    "wind_kmh": 26,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 80.2,
+    "rain_prob": 92,
+    "wind_kmh": 17,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 21,
+    "rain_mm": 227.1,
+    "rain_prob": 93,
+    "wind_kmh": 50,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 35.8,
+    "rain_prob": 67,
+    "wind_kmh": 69,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 143.5,
+    "rain_prob": 100,
+    "wind_kmh": 120,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 40,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 8,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 24,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 10.4,
+    "rain_prob": 40,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 42.7,
+    "rain_prob": 64,
+    "wind_kmh": 30,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 109.4,
+    "rain_prob": 97,
+    "wind_kmh": 29,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 21,
+    "rain_mm": 211.5,
+    "rain_prob": 90,
+    "wind_kmh": 39,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 6.1,
+    "rain_prob": 67,
+    "wind_kmh": 63,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 132,
+    "rain_prob": 100,
+    "wind_kmh": 118,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 0,
+    "rain_prob": 9,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 44,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 25,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 16,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 8.5,
+    "rain_prob": 45,
+    "wind_kmh": 20,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 47.7,
+    "rain_prob": 68,
+    "wind_kmh": 29,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 65,
+    "rain_prob": 85,
+    "wind_kmh": 39,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 144.7,
+    "rain_prob": 100,
+    "wind_kmh": 21,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 35.2,
+    "rain_prob": 69,
+    "wind_kmh": 53,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 130.2,
+    "rain_prob": 100,
+    "wind_kmh": 80,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 5,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 17,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 43,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 23,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 13,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 11.1,
+    "rain_prob": 43,
+    "wind_kmh": 24,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 40.4,
+    "rain_prob": 78,
+    "wind_kmh": 14,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 90,
+    "rain_prob": 92,
+    "wind_kmh": 25,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 156.7,
+    "rain_prob": 93,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 39.1,
+    "rain_prob": 84,
+    "wind_kmh": 52,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 216.1,
+    "rain_prob": 100,
+    "wind_kmh": 115,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 6,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 40,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 23,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 16,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 8.8,
+    "rain_prob": 51,
+    "wind_kmh": 25,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 42.2,
+    "rain_prob": 80,
+    "wind_kmh": 23,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 101.8,
+    "rain_prob": 85,
+    "wind_kmh": 34,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 186.5,
+    "rain_prob": 92,
+    "wind_kmh": 50,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 11.4,
+    "rain_prob": 81,
+    "wind_kmh": 61,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 163.4,
+    "rain_prob": 100,
+    "wind_kmh": 104,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 0,
+    "rain_prob": 14,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 19,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 21,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 11.6,
+    "rain_prob": 48,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 57.9,
+    "rain_prob": 89,
+    "wind_kmh": 34,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 71.3,
+    "rain_prob": 86,
+    "wind_kmh": 19,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 118.5,
+    "rain_prob": 90,
+    "wind_kmh": 22,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 11.7,
+    "rain_prob": 90,
+    "wind_kmh": 64,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 152.4,
+    "rain_prob": 100,
+    "wind_kmh": 70,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 0,
+    "rain_prob": 8,
+    "wind_kmh": 20,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 0,
+    "rain_prob": 11,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 13,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 12.5,
+    "rain_prob": 65,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 31,
+    "rain_prob": 82,
+    "wind_kmh": 31,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 97.7,
+    "rain_prob": 100,
+    "wind_kmh": 30,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 21,
+    "rain_mm": 174.2,
+    "rain_prob": 94,
+    "wind_kmh": 54,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 8.8,
+    "rain_prob": 89,
+    "wind_kmh": 45,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 209.6,
+    "rain_prob": 100,
+    "wind_kmh": 93,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 0,
+    "rain_prob": 11,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 0,
+    "rain_prob": 18,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 16,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 15,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 3.6,
+    "rain_prob": 70,
+    "wind_kmh": 10,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 46,
+    "rain_prob": 63,
+    "wind_kmh": 21,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 113.8,
+    "rain_prob": 87,
+    "wind_kmh": 16,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 215.6,
+    "rain_prob": 96,
+    "wind_kmh": 30,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 16,
+    "rain_prob": 72,
+    "wind_kmh": 53,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 191.1,
+    "rain_prob": 100,
+    "wind_kmh": 80,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 6,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 0,
+    "rain_prob": 11,
+    "wind_kmh": 20,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 12,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 16,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 14.1,
+    "rain_prob": 43,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 35,
+    "rain_prob": 63,
+    "wind_kmh": 29,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 65.1,
+    "rain_prob": 98,
+    "wind_kmh": 36,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 176.7,
+    "rain_prob": 95,
+    "wind_kmh": 28,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 37.5,
+    "rain_prob": 86,
+    "wind_kmh": 61,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 138.3,
+    "rain_prob": 100,
+    "wind_kmh": 82,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 0,
+    "rain_prob": 9,
+    "wind_kmh": 6,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 25,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 9,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 13.3,
+    "rain_prob": 67,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 19.8,
+    "rain_prob": 60,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 68.7,
+    "rain_prob": 82,
+    "wind_kmh": 15,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 212.6,
+    "rain_prob": 92,
+    "wind_kmh": 48,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 6.6,
+    "rain_prob": 65,
+    "wind_kmh": 60,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 144.8,
+    "rain_prob": 100,
+    "wind_kmh": 74,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 0,
+    "rain_prob": 9,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 15,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 5.9,
+    "rain_prob": 75,
+    "wind_kmh": 21,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 21.4,
+    "rain_prob": 65,
+    "wind_kmh": 25,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 75.1,
+    "rain_prob": 85,
+    "wind_kmh": 35,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 188.9,
+    "rain_prob": 94,
+    "wind_kmh": 25,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 34.2,
+    "rain_prob": 84,
+    "wind_kmh": 62,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 166.4,
+    "rain_prob": 100,
+    "wind_kmh": 113,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 0,
+    "rain_prob": 8,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 14,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 44,
+    "rain_mm": 0,
+    "rain_prob": 7,
+    "wind_kmh": 25,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 3.4,
+    "rain_prob": 44,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 54.9,
+    "rain_prob": 76,
+    "wind_kmh": 14,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 105,
+    "rain_prob": 89,
+    "wind_kmh": 27,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 224.9,
+    "rain_prob": 99,
+    "wind_kmh": 23,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 11.9,
+    "rain_prob": 76,
+    "wind_kmh": 68,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 98.6,
+    "rain_prob": 100,
+    "wind_kmh": 79,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 14,
+    "wind_kmh": 10,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 0,
+    "rain_prob": 11,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 16,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 11.2,
+    "rain_prob": 48,
+    "wind_kmh": 23,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 44.5,
+    "rain_prob": 74,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 102.6,
+    "rain_prob": 96,
+    "wind_kmh": 29,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 21,
+    "rain_mm": 221.4,
+    "rain_prob": 90,
+    "wind_kmh": 44,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 23.8,
+    "rain_prob": 77,
+    "wind_kmh": 47,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 186.6,
+    "rain_prob": 100,
+    "wind_kmh": 106,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 32,
+    "rain_mm": 0,
+    "rain_prob": 11,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 43,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 21,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 24,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 10.2,
+    "rain_prob": 69,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 31.2,
+    "rain_prob": 63,
+    "wind_kmh": 32,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 104.5,
+    "rain_prob": 87,
+    "wind_kmh": 37,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 214.9,
+    "rain_prob": 99,
+    "wind_kmh": 50,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 12.6,
+    "rain_prob": 86,
+    "wind_kmh": 66,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 115.7,
+    "rain_prob": 100,
+    "wind_kmh": 116,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 34,
+    "rain_mm": 0,
+    "rain_prob": 12,
+    "wind_kmh": 10,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 44,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 11,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 12.9,
+    "rain_prob": 71,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 52.4,
+    "rain_prob": 89,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 77.3,
+    "rain_prob": 89,
+    "wind_kmh": 30,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 188.7,
+    "rain_prob": 99,
+    "wind_kmh": 40,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 9.8,
+    "rain_prob": 67,
+    "wind_kmh": 49,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 147.5,
+    "rain_prob": 100,
+    "wind_kmh": 93,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 6,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 15,
+    "wind_kmh": 5,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 43,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 21,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 14,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 9.9,
+    "rain_prob": 80,
+    "wind_kmh": 21,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 16.8,
+    "rain_prob": 67,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 73.6,
+    "rain_prob": 100,
+    "wind_kmh": 22,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 196.6,
+    "rain_prob": 100,
+    "wind_kmh": 42,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 31.9,
+    "rain_prob": 80,
+    "wind_kmh": 60,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 107.7,
+    "rain_prob": 100,
+    "wind_kmh": 105,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 5,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 22,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 14.1,
+    "rain_prob": 50,
+    "wind_kmh": 8,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 52.2,
+    "rain_prob": 90,
+    "wind_kmh": 28,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 90,
+    "rain_prob": 89,
+    "wind_kmh": 29,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 21,
+    "rain_mm": 174.6,
+    "rain_prob": 92,
+    "wind_kmh": 38,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 6.3,
+    "rain_prob": 81,
+    "wind_kmh": 53,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 161.2,
+    "rain_prob": 100,
+    "wind_kmh": 116,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Outdoor sites close during a cyclone warning."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 16,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 2,
+    "wind_kmh": 23,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 15,
+    "rain_prob": 78,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 23,
+    "rain_mm": 49.1,
+    "rain_prob": 64,
+    "wind_kmh": 22,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 77.7,
+    "rain_prob": 84,
+    "wind_kmh": 35,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 21,
+    "rain_mm": 147.9,
+    "rain_prob": 95,
+    "wind_kmh": 50,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 32,
+    "rain_mm": 20.5,
+    "rain_prob": 87,
+    "wind_kmh": 54,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 149.9,
+    "rain_prob": 100,
+    "wind_kmh": 110,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 7,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 5,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 41,
+    "rain_mm": 0,
+    "rain_prob": 6,
+    "wind_kmh": 24,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 21,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 13.4,
+    "rain_prob": 44,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 43.1,
+    "rain_prob": 64,
+    "wind_kmh": 34,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 92.3,
+    "rain_prob": 92,
+    "wind_kmh": 16,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 226,
+    "rain_prob": 92,
+    "wind_kmh": 24,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 36,
+    "rain_mm": 6.9,
+    "rain_prob": 63,
+    "wind_kmh": 62,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 201.1,
+    "rain_prob": 100,
+    "wind_kmh": 103,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 9,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 11,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 47,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 10,
+    "alert": "orange",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 31,
+    "rain_mm": 11.1,
+    "rain_prob": 62,
+    "wind_kmh": 25,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 55.2,
+    "rain_prob": 84,
+    "wind_kmh": 25,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 73.1,
+    "rain_prob": 81,
+    "wind_kmh": 17,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 179.4,
+    "rain_prob": 98,
+    "wind_kmh": 33,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 11.2,
+    "rain_prob": 75,
+    "wind_kmh": 64,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 194.3,
+    "rain_prob": 100,
+    "wind_kmh": 98,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 15,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 8,
+    "wind_kmh": 12,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 10,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 18,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 4.8,
+    "rain_prob": 67,
+    "wind_kmh": 13,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 18.1,
+    "rain_prob": 61,
+    "wind_kmh": 33,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 66.5,
+    "rain_prob": 93,
+    "wind_kmh": 29,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 139.9,
+    "rain_prob": 93,
+    "wind_kmh": 46,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 14.6,
+    "rain_prob": 81,
+    "wind_kmh": 52,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 212.9,
+    "rain_prob": 100,
+    "wind_kmh": 70,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "fort",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 17,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "palace",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 7,
+    "wind_kmh": 7,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "museum",
+   "weather": {
+    "temp_max_c": 44,
+    "rain_mm": 0,
+    "rain_prob": 3,
+    "wind_kmh": 19,
+    "alert": "yellow",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "temple",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 16,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Stone floors get too hot to walk barefoot by midday; go early."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 8.1,
+    "rain_prob": 64,
+    "wind_kmh": 22,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "stepwell",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 31.3,
+    "rain_prob": 87,
+    "wind_kmh": 35,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "beach",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 99.9,
+    "rain_prob": 97,
+    "wind_kmh": 19,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "lake",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 187.8,
+    "rain_prob": 98,
+    "wind_kmh": 46,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "closed",
+    "sensitive_to": [
+     "rain",
+     "wind",
+     "flood"
+    ],
+    "best_time": "avoid",
+    "reason": "Water activities and shores are usually shut in heavy rain or strong wind."
+   }
+  },
+  {
+   "category": "boat_ride",
+   "weather": {
+    "temp_max_c": 33,
+    "rain_mm": 23.3,
+    "rain_prob": 69,
+    "wind_kmh": 54,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "garden",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 116.4,
+    "rain_prob": 100,
+    "wind_kmh": 88,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "zoo",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "market",
+   "weather": {
+    "temp_max_c": 37,
+    "rain_mm": 0,
+    "rain_prob": 18,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "evening",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "mall",
+   "weather": {
+    "temp_max_c": 43,
+    "rain_mm": 0,
+    "rain_prob": 1,
+    "wind_kmh": 20,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "afternoon",
+    "reason": "Indoors, so a good place to spend the hottest hours."
+   }
+  },
+  {
+   "category": "waterfall",
+   "weather": {
+    "temp_max_c": 48,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 22,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "expected": {
+    "impact": "low",
+    "sensitive_to": [
+     "heat"
+    ],
+    "best_time": "morning",
+    "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+   }
+  },
+  {
+   "category": "trek",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 3.2,
+    "rain_prob": 75,
+    "wind_kmh": 23,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "morning",
+    "reason": "Showers are likely; go early and carry rain gear."
+   }
+  },
+  {
+   "category": "viewpoint",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 17.5,
+    "rain_prob": 61,
+    "wind_kmh": 20,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "tea_estate",
+   "weather": {
+    "temp_max_c": 25,
+    "rain_mm": 94.7,
+    "rain_prob": 87,
+    "wind_kmh": 36,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  },
+  {
+   "category": "restaurant",
+   "weather": {
+    "temp_max_c": 26,
+    "rain_mm": 188.1,
+    "rain_prob": 96,
+    "wind_kmh": 27,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "expected": {
+    "impact": "moderate",
+    "sensitive_to": [
+     "rain",
+     "flood"
+    ],
+    "best_time": "any",
+    "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."
+   }
+  },
+  {
+   "category": "hotel",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 21.1,
+    "rain_prob": 88,
+    "wind_kmh": 51,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "expected": {
+    "impact": "none",
+    "sensitive_to": [],
+    "best_time": "any",
+    "reason": "The weather should not affect this visit."
+   }
+  },
+  {
+   "category": "monument",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 168,
+    "rain_prob": 100,
+    "wind_kmh": 79,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "expected": {
+    "impact": "high",
+    "sensitive_to": [
+     "rain",
+     "wind"
+    ],
+    "best_time": "avoid",
+    "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+   }
+  }
+ ],
+ "categories": [
+  {
+   "name": "Amber Fort",
+   "category": "fort"
+  },
+  {
+   "name": "Nahargarh Fort",
+   "category": "fort"
+  },
+  {
+   "name": "Jaigarh Fort",
+   "category": "fort"
+  },
+  {
+   "name": "City Palace",
+   "category": "palace"
+  },
+  {
+   "name": "Hawa Mahal",
+   "category": "palace"
+  },
+  {
+   "name": "Jantar Mantar",
+   "category": "monument"
+  },
+  {
+   "name": "Albert Hall Museum",
+   "category": "museum"
+  },
+  {
+   "name": "Jal Mahal",
+   "category": "palace"
+  },
+  {
+   "name": "Birla Mandir",
+   "category": "temple"
+  },
+  {
+   "name": "Panna Meena ka Kund",
+   "category": "monument"
+  },
+  {
+   "name": "Johari Bazaar",
+   "category": "market"
+  },
+  {
+   "name": "Galtaji Temple",
+   "category": "temple"
+  },
+  {
+   "name": "Sisodia Rani Garden",
+   "category": "garden"
+  },
+  {
+   "name": "Central Park Jaipur",
+   "category": "garden"
+  },
+  {
+   "name": "Patrika Gate",
+   "category": "monument"
+  },
+  {
+   "name": "World Trade Park",
+   "category": "garden"
+  },
+  {
+   "name": "Baga Beach",
+   "category": "beach"
+  },
+  {
+   "name": "Calangute Beach",
+   "category": "beach"
+  },
+  {
+   "name": "Palolem Beach",
+   "category": "beach"
+  },
+  {
+   "name": "Basilica of Bom Jesus",
+   "category": "temple"
+  },
+  {
+   "name": "Fort Aguada",
+   "category": "fort"
+  },
+  {
+   "name": "Dudhsagar Falls",
+   "category": "waterfall"
+  },
+  {
+   "name": "Anjuna Flea Market",
+   "category": "market"
+  },
+  {
+   "name": "Chapora Fort",
+   "category": "fort"
+  },
+  {
+   "name": "Mandovi River Cruise",
+   "category": "boat_ride"
+  },
+  {
+   "name": "Goa State Museum",
+   "category": "museum"
+  },
+  {
+   "name": "Se Cathedral",
+   "category": "temple"
+  },
+  {
+   "name": "Mapusa Market",
+   "category": "market"
+  },
+  {
+   "name": "Colva Beach",
+   "category": "beach"
+  },
+  {
+   "name": "Salim Ali Bird Sanctuary",
+   "category": "zoo"
+  },
+  {
+   "name": "Eravikulam National Park",
+   "category": "garden"
+  },
+  {
+   "name": "Mattupetty Dam Lake",
+   "category": "lake"
+  },
+  {
+   "name": "Top Station",
+   "category": "viewpoint"
+  },
+  {
+   "name": "Tea Museum Munnar",
+   "category": "museum"
+  },
+  {
+   "name": "Attukal Waterfalls",
+   "category": "waterfall"
+  },
+  {
+   "name": "Echo Point",
+   "category": "viewpoint"
+  },
+  {
+   "name": "Kolukkumalai Tea Estate",
+   "category": "tea_estate"
+  },
+  {
+   "name": "Anamudi Peak Trek",
+   "category": "trek"
+  },
+  {
+   "name": "Kundala Lake",
+   "category": "lake"
+  },
+  {
+   "name": "Gateway of India",
+   "category": "monument"
+  },
+  {
+   "name": "Marine Drive",
+   "category": "monument"
+  },
+  {
+   "name": "Elephanta Caves Ferry",
+   "category": "boat_ride"
+  },
+  {
+   "name": "Chhatrapati Shivaji Maharaj Vastu Sangrahalaya",
+   "category": "museum"
+  },
+  {
+   "name": "Juhu Beach",
+   "category": "beach"
+  },
+  {
+   "name": "Colaba Causeway Market",
+   "category": "market"
+  },
+  {
+   "name": "Siddhivinayak Temple",
+   "category": "temple"
+  },
+  {
+   "name": "Haji Ali Dargah",
+   "category": "temple"
+  },
+  {
+   "name": "Sanjay Gandhi National Park",
+   "category": "garden"
+  },
+  {
+   "name": "Phoenix Palladium Mall",
+   "category": "mall"
+  },
+  {
+   "name": "Crawford Market",
+   "category": "market"
+  },
+  {
+   "name": "Kanheri Caves Trail",
+   "category": "trek"
+  },
+  {
+   "name": "Red Fort",
+   "category": "fort"
+  },
+  {
+   "name": "Qutub Minar",
+   "category": "monument"
+  },
+  {
+   "name": "India Gate",
+   "category": "monument"
+  },
+  {
+   "name": "Humayun's Tomb",
+   "category": "monument"
+  },
+  {
+   "name": "Lodhi Garden",
+   "category": "garden"
+  },
+  {
+   "name": "Chandni Chowk",
+   "category": "market"
+  },
+  {
+   "name": "National Museum Delhi",
+   "category": "museum"
+  },
+  {
+   "name": "Akshardham Temple",
+   "category": "temple"
+  },
+  {
+   "name": "Agrasen ki Baoli",
+   "category": "stepwell"
+  },
+  {
+   "name": "Dilli Haat",
+   "category": "market"
+  },
+  {
+   "name": "Select Citywalk Mall",
+   "category": "mall"
+  },
+  {
+   "name": "Lotus Temple",
+   "category": "temple"
+  },
+  {
+   "name": "Delhi Zoo",
+   "category": "zoo"
+  },
+  {
+   "name": "Dashashwamedh Ghat",
+   "category": "lake"
+  },
+  {
+   "name": "Assi Ghat",
+   "category": "lake"
+  },
+  {
+   "name": "Kashi Vishwanath Temple",
+   "category": "temple"
+  },
+  {
+   "name": "Ganga Boat Ride",
+   "category": "boat_ride"
+  },
+  {
+   "name": "Sarnath Stupa",
+   "category": "monument"
+  },
+  {
+   "name": "Ramnagar Fort",
+   "category": "fort"
+  },
+  {
+   "name": "Banaras Hindu University Museum",
+   "category": "museum"
+  },
+  {
+   "name": "Vishwanath Gali Market",
+   "category": "market"
+  },
+  {
+   "name": "City Palace Udaipur",
+   "category": "palace"
+  },
+  {
+   "name": "Lake Pichola",
+   "category": "lake"
+  },
+  {
+   "name": "Sajjangarh Monsoon Palace",
+   "category": "fort"
+  },
+  {
+   "name": "Saheliyon ki Bari",
+   "category": "monument"
+  },
+  {
+   "name": "Fateh Sagar Lake",
+   "category": "lake"
+  },
+  {
+   "name": "Bagore ki Haveli",
+   "category": "palace"
+  },
+  {
+   "name": "Jagdish Temple",
+   "category": "temple"
+  },
+  {
+   "name": "Hathi Pol Bazaar",
+   "category": "market"
+  },
+  {
+   "name": "Taj Mahal",
+   "category": "palace"
+  },
+  {
+   "name": "Agra Fort",
+   "category": "fort"
+  },
+  {
+   "name": "Mehtab Bagh",
+   "category": "garden"
+  },
+  {
+   "name": "Itmad-ud-Daulah Tomb",
+   "category": "monument"
+  },
+  {
+   "name": "Kinari Bazaar",
+   "category": "market"
+  },
+  {
+   "name": "Fatehpur Sikri Ruins",
+   "category": "monument"
+  },
+  {
+   "name": "Laxman Jhula",
+   "category": "monument"
+  },
+  {
+   "name": "Triveni Ghat",
+   "category": "lake"
+  },
+  {
+   "name": "Neer Garh Waterfall",
+   "category": "waterfall"
+  },
+  {
+   "name": "Kunjapuri Temple Trek",
+   "category": "trek"
+  },
+  {
+   "name": "Beatles Ashram",
+   "category": "monument"
+  },
+  {
+   "name": "Ganga River Rafting Boat",
+   "category": "boat_ride"
+  },
+  {
+   "name": "The Ridge Viewpoint",
+   "category": "viewpoint"
+  },
+  {
+   "name": "Jakhu Temple Trek",
+   "category": "trek"
+  },
+  {
+   "name": "Mall Road Market",
+   "category": "market"
+  },
+  {
+   "name": "Kufri Viewpoint",
+   "category": "viewpoint"
+  },
+  {
+   "name": "Christ Church Shimla",
+   "category": "temple"
+  },
+  {
+   "name": "Himachal State Museum",
+   "category": "museum"
+  },
+  {
+   "name": "Virupaksha Temple",
+   "category": "temple"
+  },
+  {
+   "name": "Vittala Temple Ruins",
+   "category": "temple"
+  },
+  {
+   "name": "Hampi Bazaar",
+   "category": "market"
+  },
+  {
+   "name": "Tungabhadra Coracle Boat",
+   "category": "boat_ride"
+  },
+  {
+   "name": "Matanga Hill Trek",
+   "category": "trek"
+  },
+  {
+   "name": "Fort Kochi Beach",
+   "category": "beach"
+  },
+  {
+   "name": "Mattancherry Palace",
+   "category": "palace"
+  },
+  {
+   "name": "Jew Town Market",
+   "category": "market"
+  },
+  {
+   "name": "Kerala Backwater Houseboat",
+   "category": "boat_ride"
+  },
+  {
+   "name": "Lulu Mall Kochi",
+   "category": "mall"
+  },
+  {
+   "name": "Mehrangarh Fort",
+   "category": "fort"
+  },
+  {
+   "name": "Umaid Bhawan Palace Museum",
+   "category": "palace"
+  },
+  {
+   "name": "Toorji ka Jhalra Stepwell",
+   "category": "stepwell"
+  },
+  {
+   "name": "Sardar Market",
+   "category": "market"
+  },
+  {
+   "name": "Mandore Garden",
+   "category": "garden"
+  },
+  {
+   "name": "Abbey Falls",
+   "category": "waterfall"
+  },
+  {
+   "name": "Raja's Seat Viewpoint",
+   "category": "viewpoint"
+  },
+  {
+   "name": "Dubare Elephant Camp",
+   "category": "monument"
+  },
+  {
+   "name": "Tadiandamol Peak Trek",
+   "category": "trek"
+  },
+  {
+   "name": "Victoria Memorial",
+   "category": "monument"
+  },
+  {
+   "name": "Howrah Bridge",
+   "category": "monument"
+  },
+  {
+   "name": "Indian Museum Kolkata",
+   "category": "museum"
+  },
+  {
+   "name": "New Market Kolkata",
+   "category": "market"
+  },
+  {
+   "name": "Princep Ghat Boat",
+   "category": "boat_ride"
+  }
+ ],
+ "prompts": [
+  {
+   "task": "weather_impact",
+   "place": "Amber Fort",
+   "category": "unknown",
+   "city": "Jaipur",
+   "date": "2026-01-01",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Amber Fort (category: unknown), Jaipur\nDate: 2026-01-01\nWeather: max 29°C, rain 0 mm (4% chance), wind 14 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "City Palace",
+   "category": "palace",
+   "city": "Jaipur",
+   "date": "2026-02-02",
+   "weather": {
+    "temp_max_c": 35,
+    "rain_mm": 0,
+    "rain_prob": 0,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: City Palace (category: palace), Jaipur\nDate: 2026-02-02\nWeather: max 35°C, rain 0 mm (0% chance), wind 16 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Albert Hall Museum",
+   "category": "museum",
+   "city": "Jaipur",
+   "date": "2026-03-03",
+   "weather": {
+    "temp_max_c": 42,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Albert Hall Museum (category: museum), Jaipur\nDate: 2026-03-03\nWeather: max 42°C, rain 0 mm (4% chance), wind 11 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Panna Meena ka Kund",
+   "category": "unknown",
+   "city": "Jaipur",
+   "date": "2026-04-04",
+   "weather": {
+    "temp_max_c": 46,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 19,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Panna Meena ka Kund (category: unknown), Jaipur\nDate: 2026-04-04\nWeather: max 46°C, rain 0 mm (4% chance), wind 19 km/h, alert: red for heat\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Sisodia Rani Garden",
+   "category": "garden",
+   "city": "Jaipur",
+   "date": "2026-05-05",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 13.9,
+    "rain_prob": 80,
+    "wind_kmh": 14,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Sisodia Rani Garden (category: garden), Jaipur\nDate: 2026-05-05\nWeather: max 30°C, rain 13.9 mm (80% chance), wind 14 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "World Trade Park",
+   "category": "garden",
+   "city": "Jaipur",
+   "date": "2026-06-06",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 28.7,
+    "rain_prob": 68,
+    "wind_kmh": 27,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: World Trade Park (category: garden), Jaipur\nDate: 2026-06-06\nWeather: max 28°C, rain 28.7 mm (68% chance), wind 27 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Palolem Beach",
+   "category": "unknown",
+   "city": "Jaipur",
+   "date": "2026-07-07",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 97.2,
+    "rain_prob": 90,
+    "wind_kmh": 34,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Palolem Beach (category: unknown), Jaipur\nDate: 2026-07-07\nWeather: max 28°C, rain 97.2 mm (90% chance), wind 34 km/h, alert: yellow for heavy rain\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Dudhsagar Falls",
+   "category": "waterfall",
+   "city": "Jaipur",
+   "date": "2026-08-08",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 221,
+    "rain_prob": 91,
+    "wind_kmh": 42,
+    "alert": "orange",
+    "alert_for": "heavy rain"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Dudhsagar Falls (category: waterfall), Jaipur\nDate: 2026-08-08\nWeather: max 28°C, rain 221 mm (91% chance), wind 42 km/h, alert: orange for heavy rain\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Mandovi River Cruise",
+   "category": "boat_ride",
+   "city": "Jaipur",
+   "date": "2026-09-09",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 34.1,
+    "rain_prob": 73,
+    "wind_kmh": 59,
+    "alert": "orange",
+    "alert_for": "thunderstorm"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Mandovi River Cruise (category: boat_ride), Jaipur\nDate: 2026-09-09\nWeather: max 28°C, rain 34.1 mm (73% chance), wind 59 km/h, alert: orange for thunderstorm\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Mapusa Market",
+   "category": "unknown",
+   "city": "Jaipur",
+   "date": "2026-10-10",
+   "weather": {
+    "temp_max_c": 24,
+    "rain_mm": 135.9,
+    "rain_prob": 100,
+    "wind_kmh": 100,
+    "alert": "red",
+    "alert_for": "cyclone"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Mapusa Market (category: unknown), Jaipur\nDate: 2026-10-10\nWeather: max 24°C, rain 135.9 mm (100% chance), wind 100 km/h, alert: red for cyclone\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Eravikulam National Park",
+   "category": "garden",
+   "city": "Jaipur",
+   "date": "2026-11-11",
+   "weather": {
+    "temp_max_c": 30,
+    "rain_mm": 0,
+    "rain_prob": 10,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Eravikulam National Park (category: garden), Jaipur\nDate: 2026-11-11\nWeather: max 30°C, rain 0 mm (10% chance), wind 19 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Tea Museum Munnar",
+   "category": "museum",
+   "city": "Jaipur",
+   "date": "2026-12-12",
+   "weather": {
+    "temp_max_c": 38,
+    "rain_mm": 0,
+    "rain_prob": 13,
+    "wind_kmh": 11,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Tea Museum Munnar (category: museum), Jaipur\nDate: 2026-12-12\nWeather: max 38°C, rain 0 mm (13% chance), wind 11 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Kolukkumalai Tea Estate",
+   "category": "unknown",
+   "city": "Jaipur",
+   "date": "2026-01-13",
+   "weather": {
+    "temp_max_c": 44,
+    "rain_mm": 0,
+    "rain_prob": 7,
+    "wind_kmh": 16,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Kolukkumalai Tea Estate (category: unknown), Jaipur\nDate: 2026-01-13\nWeather: max 44°C, rain 0 mm (7% chance), wind 16 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Gateway of India",
+   "category": "monument",
+   "city": "Jaipur",
+   "date": "2026-02-14",
+   "weather": {
+    "temp_max_c": 45,
+    "rain_mm": 0,
+    "rain_prob": 4,
+    "wind_kmh": 12,
+    "alert": "red",
+    "alert_for": "heat"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Gateway of India (category: monument), Jaipur\nDate: 2026-02-14\nWeather: max 45°C, rain 0 mm (4% chance), wind 12 km/h, alert: red for heat\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Chhatrapati Shivaji Maharaj Vastu Sangrahalaya",
+   "category": "museum",
+   "city": "Jaipur",
+   "date": "2026-03-15",
+   "weather": {
+    "temp_max_c": 28,
+    "rain_mm": 4.6,
+    "rain_prob": 68,
+    "wind_kmh": 25,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Chhatrapati Shivaji Maharaj Vastu Sangrahalaya (category: museum), Jaipur\nDate: 2026-03-15\nWeather: max 28°C, rain 4.6 mm (68% chance), wind 25 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Siddhivinayak Temple",
+   "category": "unknown",
+   "city": "Jaipur",
+   "date": "2026-04-16",
+   "weather": {
+    "temp_max_c": 29,
+    "rain_mm": 21.2,
+    "rain_prob": 79,
+    "wind_kmh": 19,
+    "alert": "none",
+    "alert_for": ""
+   },
+   "prompt": "TASK: weather_impact\nPlace: Siddhivinayak Temple (category: unknown), Jaipur\nDate: 2026-04-16\nWeather: max 29°C, rain 21.2 mm (79% chance), wind 19 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Phoenix Palladium Mall",
+   "category": "mall",
+   "city": "Jaipur",
+   "date": "2026-05-17",
+   "weather": {
+    "temp_max_c": 22,
+    "rain_mm": 114.1,
+    "rain_prob": 98,
+    "wind_kmh": 15,
+    "alert": "yellow",
+    "alert_for": "heavy rain"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Phoenix Palladium Mall (category: mall), Jaipur\nDate: 2026-05-17\nWeather: max 22°C, rain 114.1 mm (98% chance), wind 15 km/h, alert: yellow for heavy rain\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Red Fort",
+   "category": "fort",
+   "city": "Jaipur",
+   "date": "2026-06-18",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 162.7,
+    "rain_prob": 94,
+    "wind_kmh": 40,
+    "alert": "red",
+    "alert_for": "heavy rain"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Red Fort (category: fort), Jaipur\nDate: 2026-06-18\nWeather: max 27°C, rain 162.7 mm (94% chance), wind 40 km/h, alert: red for heavy rain\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "Humayun's Tomb",
+   "category": "unknown",
+   "city": "Jaipur",
+   "date": "2026-07-19",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 23.8,
+    "rain_prob": 64,
+    "wind_kmh": 59,
+    "alert": "yellow",
+    "alert_for": "thunderstorm"
+   },
+   "prompt": "TASK: weather_impact\nPlace: Humayun's Tomb (category: unknown), Jaipur\nDate: 2026-07-19\nWeather: max 27°C, rain 23.8 mm (64% chance), wind 59 km/h, alert: yellow for thunderstorm\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "weather_impact",
+   "place": "National Museum Delhi",
+   "category": "museum",
+   "city": "Jaipur",
+   "date": "2026-08-20",
+   "weather": {
+    "temp_max_c": 27,
+    "rain_mm": 143.3,
+    "rain_prob": 100,
+    "wind_kmh": 78,
+    "alert": "orange",
+    "alert_for": "cyclone"
+   },
+   "prompt": "TASK: weather_impact\nPlace: National Museum Delhi (category: museum), Jaipur\nDate: 2026-08-20\nWeather: max 27°C, rain 143.3 mm (100% chance), wind 78 km/h, alert: orange for cyclone\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}"
+  },
+  {
+   "task": "access_claims",
+   "place": "Amber Fort",
+   "kind": "sight",
+   "city": "Jaipur",
+   "snippet": "There are about 40 steep steps up to the main palace. Great views.",
+   "prompt": "TASK: access_claims\nPlace: Amber Fort (sight), Jaipur\nSnippet: \"There are about 40 steep steps up to the main palace. Great views.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}"
+  },
+  {
+   "task": "weather_event",
+   "city": "Mumbai",
+   "post": "Knee-deep water at Andheri Subway, cars stuck, avoid the route!",
+   "prompt": "TASK: weather_event\nCity: Mumbai\nPost: \"Knee-deep water at Andheri Subway, cars stuck, avoid the route!\"\nAnswer with JSON only: {\"is_weather_event\": \"yes|no\", \"event\": \"waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none\", \"place\": \"name or none\", \"severity\": \"none|low|moderate|high\", \"affects\": \"roads, transport, attraction, hotel, power or none\"}"
+  }
+ ]
+}

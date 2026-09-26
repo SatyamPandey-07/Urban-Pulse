@@ -10,6 +10,7 @@ import '../widgets/itinerary/budget_breakdown.dart';
 import '../widgets/itinerary/day_view.dart';
 import '../widgets/itinerary/green_view.dart';
 import '../widgets/itinerary/trip_overview.dart';
+import 'weather_twin_screen.dart';
 
 /// The finished plan from the multi-agent planner: a map and timeline for each
 /// day, the budget line by line, and the trip overview with its sources.
@@ -103,6 +104,11 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
             ],
           ),
           actions: [
+            IconButton(
+              tooltip: 'Weather what-if (digital twin)',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WeatherTwinScreen(itinerary: it))),
+              icon: const Icon(Icons.thunderstorm_outlined),
+            ),
             IconButton(
               tooltip: 'Share or print as PDF',
               onPressed: _pdfBusy ? null : _sharePdf,

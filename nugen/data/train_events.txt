@@ -1,0 +1,2242 @@
+UrbanPulse Travel-Risk: weather_event worked examples
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Juhu Beach closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Juhu Beach", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "It is 46 degrees today, Assi Ghat is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Assi Ghat", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Local trains suspended between stations near Mall Road due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Mall Road", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Hotel lobby near Old Munnar flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Old Munnar", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Munnar-Top Station road mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Munnar-Top Station road", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Margao station road mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Margao station road", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Kurla completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Kurla", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Scorching heat at Attukal Waterfalls, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Attukal Waterfalls", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Ankle-deep water at Old Munnar since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Old Munnar", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Hindmata mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Hindmata", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Aaj Jal Mahal band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Jal Mahal", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Monsoon vibes! Clouds over the hills look magical"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Hotel lobby near Godowlia flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Godowlia", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Police have closed Tonk Road because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Tonk Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Aaj Elephanta Caves ferry band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Elephanta Caves ferry", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Knee-deep water at Amer Road, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Amer Road", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Anyone know a good hotel near the station? Travelling next week"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Police have closed ITO because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "ITO", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Aaj Attukal Waterfalls band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Attukal Waterfalls", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Ankle-deep water at Lanka since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Lanka", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Thunderstorm with strong winds hit Malviya Nagar, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Malviya Nagar", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Scorching heat at Amber Fort, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Amber Fort", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Slight drizzle at , roads fine, no problem"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Mapusa completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Mapusa", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Kitna accha mausam hai aaj"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Hotel lobby near Devikulam flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Devikulam", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Hotel lobby near Dhalli tunnel flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Dhalli tunnel", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Power cut for 5 hours around Mapusa after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Mapusa", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Thunderstorm with strong winds hit Minto Bridge, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Minto Bridge", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Aaj Amber Fort band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Amber Fort", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Tree fell on Malviya Nagar in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Malviya Nagar", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Jal Mahal closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Jal Mahal", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Scorching heat at Nahargarh Fort, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Nahargarh Fort", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Traffic is normal today, reached office in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "It is 46 degrees today, Connaught Place is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Connaught Place", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Power cut for 5 hours around Dashashwamedh Ghat after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Dashashwamedh Ghat", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "The sunset tonight was unreal"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Knee-deep water at Calangute junction, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Calangute junction", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Hotel lobby near Calangute junction flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Calangute junction", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Traffic is normal today, reached office in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Aaj India Gate lawns band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "India Gate lawns", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "It is 46 degrees today, ITO is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "ITO", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Landslide on Panjim market, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Panjim market", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Ganga boat rides closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Ganga boat rides", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Knee-deep water at Assi Ghat, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Assi Ghat", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Mall Road mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Mall Road", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Monsoon vibes! Clouds over the hills look magical"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Aaj Elephanta Caves ferry band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Elephanta Caves ferry", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Ankle-deep water at Yamuna Bazaar since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Yamuna Bazaar", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "It is 46 degrees today, Assi Ghat is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Assi Ghat", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "It is 46 degrees today, Dadar TT is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Dadar TT", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Ankle-deep water at Godowlia since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Godowlia", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Police have closed Pragati Maidan tunnel because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Pragati Maidan tunnel", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Scorching heat at Eravikulam National Park, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Eravikulam National Park", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "It is 46 degrees today, Porvorim is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Porvorim", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Monsoon vibes! Clouds over the hills look magical"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Tree fell on Cart Road in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Cart Road", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Scorching heat at Palolem Beach, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Palolem Beach", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Tonk Road completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Tonk Road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Red Fort shut for tourists till further notice after red alert"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Red Fort", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Thunderstorm with strong winds hit Mall Road, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Mall Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Tree fell on Assi Ghat in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Assi Ghat", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "It is 46 degrees today, Milan Subway is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Milan Subway", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Anyone know a good hotel near the station? Travelling next week"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Kitna accha mausam hai aaj"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Knee-deep water at Assi Ghat, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Assi Ghat", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Thunderstorm with strong winds hit Tonk Road, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Tonk Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Landslide on Milan Subway, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Milan Subway", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Landslide on Johari Bazaar, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Johari Bazaar", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Thunderstorm with strong winds hit Tonk Road, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Tonk Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Local trains suspended between stations near Minto Bridge due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Minto Bridge", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Hotel lobby near Old Munnar flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Old Munnar", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Local trains suspended between stations near Munnar-Top Station road due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Munnar-Top Station road", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Porvorim mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Porvorim", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Hotel lobby near Pragati Maidan tunnel flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Pragati Maidan tunnel", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Knee-deep water at Cart Road, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Cart Road", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Landslide on Tonk Road, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Tonk Road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Gateway of India closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Gateway of India", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Knee-deep water at Sion, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Sion", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Knee-deep water at Dashashwamedh Ghat, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Dashashwamedh Ghat", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Landslide on Calangute junction, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Calangute junction", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Local trains suspended between stations near Yamuna Bazaar due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Yamuna Bazaar", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Landslide on Mattupetty road, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Mattupetty road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Scorching heat at Gateway of India, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Gateway of India", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Police have closed Yamuna Bazaar because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Yamuna Bazaar", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Landslide on Kufri road, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Kufri road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Local trains suspended between stations near Mall Road due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Mall Road", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Ankle-deep water at Calangute junction since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Calangute junction", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Aaj Jakhu Temple ropeway band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Jakhu Temple ropeway", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Slight drizzle at , roads fine, no problem"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "The sunset tonight was unreal"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Attukal Waterfalls shut for tourists till further notice after red alert"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Attukal Waterfalls", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Traffic is normal today, reached office in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "India Gate lawns closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "India Gate lawns", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Kitna accha mausam hai aaj"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "It is 46 degrees today, Amer Road is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Amer Road", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Power cut for 5 hours around Connaught Place after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Connaught Place", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "India Gate lawns closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "India Gate lawns", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Hotel lobby near Old Munnar flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Old Munnar", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Police have closed Mall Road because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Mall Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Thunderstorm with strong winds hit Assi Ghat, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Assi Ghat", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "It is 46 degrees today, Calangute junction is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Calangute junction", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Tree fell on Munnar-Top Station road in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Munnar-Top Station road", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Hotel lobby near Mall Road flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Mall Road", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Slight drizzle at , roads fine, no problem"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Landslide on Mapusa, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Mapusa", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Anyone know a good hotel near the station? Travelling next week"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Slight drizzle at , roads fine, no problem"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Ganga Aarti at Dashashwamedh closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Ganga Aarti at Dashashwamedh", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Hotel lobby near Minto Bridge flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Minto Bridge", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Ankle-deep water at Johari Bazaar since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Johari Bazaar", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Police have closed Dashashwamedh Ghat because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Dashashwamedh Ghat", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Slight drizzle at , roads fine, no problem"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "India Gate lawns shut for tourists till further notice after red alert"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "India Gate lawns", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "It is 46 degrees today, Pragati Maidan tunnel is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Pragati Maidan tunnel", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Thunderstorm with strong winds hit Ring Road, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Ring Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Ankle-deep water at Assi Ghat since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Assi Ghat", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Thunderstorm with strong winds hit Amer Road, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Amer Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Aaj Qutub Minar band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Qutub Minar", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Police have closed Yamuna Bazaar because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Yamuna Bazaar", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Tree fell on Dadar TT in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Dadar TT", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Knee-deep water at ITO, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "ITO", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Local trains suspended between stations near Tonk Road due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Tonk Road", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Power cut for 5 hours around Margao station road after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Margao station road", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Tree fell on Assi Ghat in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Assi Ghat", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Police have closed Ring Road because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Ring Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Power cut for 5 hours around Old Munnar after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Old Munnar", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Tree fell on Milan Subway in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Milan Subway", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Aaj Ganga boat rides band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Ganga boat rides", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Monsoon vibes! Clouds over the hills look magical"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Tree fell on Panjim market in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Panjim market", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Scorching heat at Gateway of India, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Gateway of India", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Kitna accha mausam hai aaj"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Local trains suspended between stations near Dhalli tunnel due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Dhalli tunnel", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Landslide on Lanka, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Lanka", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "It is 46 degrees today, Porvorim is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Porvorim", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Thunderstorm with strong winds hit Cart Road, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Cart Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "The sunset tonight was unreal"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Minto Bridge completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Minto Bridge", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Tree fell on Margao station road in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Margao station road", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Aaj Gateway of India band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Gateway of India", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Ganga boat rides shut for tourists till further notice after red alert"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Ganga boat rides", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Yamuna Bazaar mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Yamuna Bazaar", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Aaj Juhu Beach band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Juhu Beach", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Eravikulam National Park shut for tourists till further notice after red alert"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Eravikulam National Park", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Kitna accha mausam hai aaj"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Minto Bridge mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Minto Bridge", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Johari Bazaar mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Johari Bazaar", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "It is 46 degrees today, Ring Road is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Ring Road", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Scorching heat at Baga Beach, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Baga Beach", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Knee-deep water at Panjim market, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Panjim market", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Anyone know a good hotel near the station? Travelling next week"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Anyone know a good hotel near the station? Travelling next week"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Landslide on Cart Road, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Cart Road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Monsoon vibes! Clouds over the hills look magical"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Local trains suspended between stations near Dashashwamedh Ghat due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Dashashwamedh Ghat", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Thunderstorm with strong winds hit Porvorim, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Porvorim", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Police have closed Andheri Subway because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Andheri Subway", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Aaj Qutub Minar band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Qutub Minar", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Power cut for 5 hours around Panjim market after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Panjim market", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Police have closed Porvorim because of rising water"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "road_closed", "place": "Porvorim", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Hotel lobby near Milan Subway flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Milan Subway", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Aaj Elephanta Caves ferry band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Elephanta Caves ferry", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Power cut for 5 hours around Old Munnar after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Old Munnar", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Aaj Attukal Waterfalls band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Attukal Waterfalls", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Kurla completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Kurla", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Ankle-deep water at Godowlia since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Godowlia", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "The sunset tonight was unreal"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Best biryani in town, rain or shine #foodie"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Flat 50% off on monsoon collection, visit our store"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Knee-deep water at Godowlia, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Godowlia", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "It is 46 degrees today, Yamuna Bazaar is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Yamuna Bazaar", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Aaj Baga Beach band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Baga Beach", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "It is 46 degrees today, Connaught Place is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Connaught Place", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "It is 46 degrees today, Amer Road is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Amer Road", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Margao station road completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Margao station road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Tree fell on Lanka in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Lanka", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Scorching heat at Top Station, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Top Station", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Knee-deep water at Amer Road, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Amer Road", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Local trains suspended between stations near ITO due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "ITO", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Yamuna Bazaar completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Yamuna Bazaar", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Tree fell on Milan Subway in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Milan Subway", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Minto Bridge mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Minto Bridge", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Landslide on Mattupetty road, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Mattupetty road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Power cut for 5 hours around Porvorim after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Porvorim", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Traffic is normal today, reached office in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "India Gate lawns shut for tourists till further notice after red alert"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "India Gate lawns", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Dadar TT mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Dadar TT", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Local trains suspended between stations near Devikulam due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Devikulam", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Power cut for 5 hours around Tonk Road after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Tonk Road", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Power cut for 5 hours around Sindhi Camp after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Sindhi Camp", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Cart Road completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Cart Road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Jakhu Temple ropeway closed today due to heavy rain, officials say"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Jakhu Temple ropeway", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Hotel lobby near Devikulam flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Devikulam", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Scorching heat at Jal Mahal, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Jal Mahal", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Tree fell on Old Munnar in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Old Munnar", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Tree fell on Calangute junction in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Calangute junction", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Assi Ghat completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Assi Ghat", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Landslide on Lanka, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Lanka", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Top Station shut for tourists till further notice after red alert"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Top Station", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Knee-deep water at Hindmata, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Hindmata", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Hotel lobby near Dashashwamedh Ghat flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Dashashwamedh Ghat", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Slight drizzle at , roads fine, no problem"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Slight drizzle at , roads fine, no problem"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Devikulam completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Devikulam", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Knee-deep water at Lanka, cars stuck, avoid the route!"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Lanka", "severity": "moderate", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Dashashwamedh Ghat mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Dashashwamedh Ghat", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Hotel lobby near Munnar-Top Station road flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Munnar-Top Station road", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Scorching heat at Jakhu Temple ropeway, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Jakhu Temple ropeway", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Local trains suspended between stations near Yamuna Bazaar due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Yamuna Bazaar", "severity": "high", "affects": "transport"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Landslide on Andheri Subway, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Andheri Subway", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Ankle-deep water at Marine Drive since morning, traffic crawling #rains"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Marine Drive", "severity": "low", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Hotel lobby near Margao station road flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Margao station road", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Landslide on Johari Bazaar, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Johari Bazaar", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Hotel lobby near Marine Drive flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Marine Drive", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Thunderstorm with strong winds hit Amer Road, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Amer Road", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Kitna accha mausam hai aaj"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Power cut for 5 hours around Margao station road after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Margao station road", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Carry an umbrella this week, forecast says showers"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Thunderstorm with strong winds hit Lanka, hoardings down"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Lanka", "severity": "high", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "Kitna accha mausam hai aaj"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Goa
+Post: "Tree fell on Porvorim in the storm, one lane closed"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "storm", "place": "Porvorim", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Landslide on Yamuna Bazaar, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Yamuna Bazaar", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Hotel lobby near Dhalli tunnel flooded, guests moved to upper floors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Dhalli tunnel", "severity": "high", "affects": "hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Milan Subway mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Milan Subway", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Scorching heat at Gateway of India, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Gateway of India", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Anyone know a good hotel near the station? Travelling next week"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Landslide on Munnar-Top Station road, road blocked both ways, stay where you are"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "landslide", "place": "Munnar-Top Station road", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Delhi
+Post: "Lovely weather today, perfect for chai and pakode"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Anyone know a good hotel near the station? Travelling next week"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "no", "event": "none", "place": "none", "severity": "none", "affects": "none"}
+
+### Instruction:
+TASK: weather_event
+City: Jaipur
+Post: "It is 46 degrees today, Johari Bazaar is deserted by noon, stay indoors"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Johari Bazaar", "severity": "high", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Mall Road mein paani bhar gaya hai, gaadi mat lana"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "waterlogging", "place": "Mall Road", "severity": "moderate", "affects": "roads"}
+
+### Instruction:
+TASK: weather_event
+City: Munnar
+Post: "Scorching heat at Attukal Waterfalls, stone floor burning, we left in 20 minutes"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "heat", "place": "Attukal Waterfalls", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Power cut for 5 hours around Dashashwamedh Ghat after the storm, hotels on generators"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "power_cut", "place": "Dashashwamedh Ghat", "severity": "moderate", "affects": "power, hotel"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Marine Drive completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Marine Drive", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Varanasi
+Post: "Godowlia completely flooded, water up to the waist, buses diverted"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Godowlia", "severity": "high", "affects": "roads, transport"}
+
+### Instruction:
+TASK: weather_event
+City: Shimla
+Post: "Aaj Kufri band hai, barish ki wajah se"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "attraction_closed", "place": "Kufri", "severity": "moderate", "affects": "attraction"}
+
+### Instruction:
+TASK: weather_event
+City: Mumbai
+Post: "Local trains suspended between stations near Andheri Subway due to water on tracks"
+Answer with JSON only: {"is_weather_event": "yes|no", "event": "waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none", "place": "name or none", "severity": "none|low|moderate|high", "affects": "roads, transport, attraction, hotel, power or none"}
+### Response:
+{"is_weather_event": "yes", "event": "flooding", "place": "Andheri Subway", "severity": "high", "affects": "transport"}
+

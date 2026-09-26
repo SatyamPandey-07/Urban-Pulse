@@ -11,6 +11,7 @@ import '../runtime/report.dart';
 import '../tools/agent_tool.dart';
 import '../tools/fetch_page_tool.dart';
 import '../tools/web_search_tool.dart';
+import '../travel_risk/travel_risk.dart';
 
 enum KhojiSubject { hotel, hotspot }
 
@@ -87,6 +88,9 @@ class KhojiFinding {
 ///    returns the pages it actually visited (heavy on the model's rate limit,
 ///    since every page it reads counts);
 /// 3. simple rules over the snippets when no model can read them.
+/// Alongside 1, for travellers with mobility needs, the Nugen-aligned
+/// Travel-Risk model reads every snippet for step-free access, lifts, ramps,
+/// toilets and stair counts, quoting the snippet word for word.
 /// Nothing is ever taken on trust: a verdict or a quote only counts when it
 /// points at a page that really came back from a search.
 class Khoji {
@@ -96,6 +100,7 @@ class Khoji {
     this.search,
     this.fetchPage,
     this.wikipedia,
+    this.travelRisk,
   });
 
   final AgentLlm llm;
@@ -103,6 +108,12 @@ class Khoji {
   final WebSearchTool? search;
   final FetchPageTool? fetchPage;
   final WikipediaClient? wikipedia;
+
+  /// Reads access facts from snippets; used only when it is the aligned model
+  /// (the keyword rules add nothing over [_heuristic] here).
+  final TravelRiskModel? travelRisk;
+
+  static const _mobilityNeeds = {AccessibilityNeed.wheelchair, AccessibilityNeed.limitedMobility, AccessibilityNeed.elderlyCare};
 
   static const maxReviews = 3;
   static const _quoteMax = 220;
@@ -113,14 +124,31 @@ class Khoji {
     _Extraction? ex;
     var pool = <_Snippet>[];
 
-    // 1. The search chain plus the listing page, read by a light model.
+    // 1. The search chain plus the listing page, read by a light model and,
+    // for mobility needs, by the aligned Travel-Risk model.
     pool = await _gather(r, degraded);
+    final risk = travelRisk;
+    final readAccess = pool.isNotEmpty && risk != null && risk.isAligned && r.needs.any(_mobilityNeeds.contains) && !degraded();
+    final accessRead = readAccess ? _viaTravelRisk(r, pool, risk) : Future.value(const <_AccessResult>[]);
     if (pool.isNotEmpty && llm.isConfigured && !degraded()) {
       final viaModel = await _viaSnippets(r, pool);
       if (viaModel != null && !viaModel.isEmpty) {
         ex = viaModel;
         methods.add(search?.lastProvider ?? 'Web search');
       }
+    }
+    final aligned = await accessRead;
+    if (aligned.isNotEmpty) {
+      final base = ex ?? _Extraction(sourceNames: {for (final s in pool) _norm(s.url): s.provider}, titles: {for (final s in pool) _norm(s.url): s.title});
+      ex = _Extraction(
+        claims: base.claims,
+        reviews: base.reviews,
+        access: [...base.access, ...aligned],
+        closed: base.closed,
+        titles: base.titles,
+        sourceNames: base.sourceNames,
+      );
+      methods.add(risk!.label);
     }
 
     // 2. Nothing yet: the model that searches for itself.
@@ -272,6 +300,48 @@ class Khoji {
       }
       return null;
     }, visited: {for (final s in pool) _norm(s.url)}, titles: {for (final s in pool) _norm(s.url): s.title}, sourceNames: {for (final s in pool) _norm(s.url): s.provider});
+  }
+
+  /// The aligned model reads each review snippet (not encyclopedia text) for
+  /// access facts. A fact only counts with a quote found in that snippet, and
+  /// the snippet's own page is the source.
+  Future<List<_AccessResult>> _viaTravelRisk(KhojiRequest r, List<_Snippet> pool, TravelRiskModel risk) async {
+    final kind = r.subject == KhojiSubject.hotel ? 'hotel' : 'sight';
+    final snippets = [for (final s in pool) if (s.provider != 'Wikipedia') s].take(6).toList();
+    final facts = await Future.wait([
+      for (final s in snippets)
+        risk.accessClaims(place: r.name, kind: kind, city: r.destination, snippet: _clip(s.text, 900)).catchError((_) => const AccessFacts()),
+    ]);
+    final out = <_AccessResult>[];
+    for (var i = 0; i < snippets.length; i++) {
+      final f = facts[i];
+      if (f.isEmpty || f.evidence.isEmpty) continue;
+      final quote = _clip(f.evidence.take(2).join(' … '), _quoteMax);
+      for (final need in r.needs.where(_mobilityNeeds.contains)) {
+        final level = accessLevel(need, f, hotel: r.subject == KhojiSubject.hotel);
+        if (level != null) out.add(_AccessResult(need, level, quote, snippets[i].url));
+      }
+    }
+    return out;
+  }
+
+  /// What one snippet's access facts mean for one need, or null when they say
+  /// nothing about it.
+  static SupportLevel? accessLevel(AccessibilityNeed need, AccessFacts f, {required bool hotel}) {
+    if (need == AccessibilityNeed.wheelchair) {
+      if (f.stepFree == Tri.no) return SupportLevel.no;
+      if (f.stepFree == Tri.yes) return f.accessibleToilet == Tri.no || (hotel && f.lift == Tri.no) ? SupportLevel.partial : SupportLevel.yes;
+      if (f.ramp == Tri.yes) return SupportLevel.partial;
+      if (hotel && f.lift == Tri.no) return SupportLevel.partial;
+      if (f.accessibleToilet == Tri.yes) return SupportLevel.partial;
+      return null;
+    }
+    // limited mobility and elderly care: steps matter by how many
+    if (f.stepFree == Tri.yes) return SupportLevel.yes;
+    if (f.stepFree == Tri.no) return (f.stairs ?? 0) >= 40 ? SupportLevel.no : SupportLevel.partial;
+    if (hotel && f.lift == Tri.yes) return SupportLevel.yes;
+    if (hotel && f.lift == Tri.no) return SupportLevel.partial;
+    return null;
   }
 
   /// Without a model: the snippets that read like complaints are the reviews.

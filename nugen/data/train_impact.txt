@@ -1,0 +1,2882 @@
+UrbanPulse Travel-Risk: weather_impact worked examples
+
+### Instruction:
+TASK: weather_impact
+Place: Red Fort (category: fort), Delhi
+Date: 2026-04-16
+Weather: max 28°C, rain 6.1 mm (73% chance), wind 20 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Goa State Museum (category: museum), Goa
+Date: 2026-05-17
+Weather: max 29°C, rain 105.8 mm (96% chance), wind 39 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "any", "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chandni Chowk (category: unknown), Delhi
+Date: 2026-04-05
+Weather: max 36°C, rain 0 mm (10% chance), wind 12 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sarnath Stupa (category: unknown), Varanasi
+Date: 2026-08-01
+Weather: max 40°C, rain 0 mm (1% chance), wind 23 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ramnagar Fort (category: unknown), Varanasi
+Date: 2026-04-09
+Weather: max 35°C, rain 10.4 mm (60% chance), wind 54 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Hathi Pol Bazaar (category: market), Udaipur
+Date: 2026-09-04
+Weather: max 25°C, rain 0 mm (3% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Vishwanath Gali Market (category: market), Varanasi
+Date: 2026-01-13
+Weather: max 35°C, rain 21.2 mm (81% chance), wind 63 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Red Fort (category: unknown), Delhi
+Date: 2026-05-21
+Weather: max 29°C, rain 70.6 mm (93% chance), wind 32 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Bagore ki Haveli (category: palace), Udaipur
+Date: 2026-12-09
+Weather: max 29°C, rain 179.5 mm (100% chance), wind 84 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Beatles Ashram (category: monument), Rishikesh
+Date: 2026-04-24
+Weather: max 27°C, rain 162 mm (100% chance), wind 75 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sarnath Stupa (category: monument), Varanasi
+Date: 2026-10-03
+Weather: max 28°C, rain 193 mm (100% chance), wind 91 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Outdoor sites close during a cyclone warning."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mall Road Market (category: market), Shimla
+Date: 2026-09-07
+Weather: max 25°C, rain 5 mm (69% chance), wind 24 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Laxman Jhula (category: monument), Rishikesh
+Date: 2026-10-21
+Weather: max 27°C, rain 206.6 mm (100% chance), wind 87 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Outdoor sites close during a cyclone warning."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: temple), Shimla
+Date: 2026-01-14
+Weather: max 24°C, rain 11.5 mm (47% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Se Cathedral (category: unknown), Goa
+Date: 2026-07-26
+Weather: max 36°C, rain 0 mm (14% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga River Rafting Boat (category: boat_ride), Rishikesh
+Date: 2026-04-14
+Weather: max 27°C, rain 0 mm (5% chance), wind 20 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: unknown), Shimla
+Date: 2026-06-16
+Weather: max 38°C, rain 0 mm (1% chance), wind 12 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Goa State Museum (category: unknown), Goa
+Date: 2026-01-23
+Weather: max 42°C, rain 0 mm (3% chance), wind 13 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kufri Viewpoint (category: viewpoint), Shimla
+Date: 2026-08-05
+Weather: max 32°C, rain 21.4 mm (67% chance), wind 65 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: palace), Agra
+Date: 2026-04-16
+Weather: max 28°C, rain 28.1 mm (77% chance), wind 12 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Phoenix Palladium Mall (category: mall), Mumbai
+Date: 2026-05-07
+Weather: max 30°C, rain 212.2 mm (100% chance), wind 84 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, flood", "best_time": "any", "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chapora Fort (category: fort), Goa
+Date: 2026-08-27
+Weather: max 24°C, rain 198.9 mm (100% chance), wind 92 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Outdoor sites close during a cyclone warning."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: palace), Agra
+Date: 2026-04-20
+Weather: max 25°C, rain 70.9 mm (98% chance), wind 35 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Juhu Beach (category: beach), Mumbai
+Date: 2026-08-03
+Weather: max 45°C, rain 0 mm (2% chance), wind 8 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kunjapuri Temple Trek (category: trek), Rishikesh
+Date: 2026-10-07
+Weather: max 47°C, rain 0 mm (4% chance), wind 13 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "avoid", "reason": "Severe heat on an exposed trail; heat stroke risk."}
+
+### Instruction:
+TASK: weather_impact
+Place: Palolem Beach (category: unknown), Goa
+Date: 2026-06-14
+Weather: max 43°C, rain 0 mm (10% chance), wind 23 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Anamudi Peak Trek (category: unknown), Munnar
+Date: 2026-08-14
+Weather: max 37°C, rain 0 mm (15% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Assi Ghat (category: unknown), Varanasi
+Date: 2026-12-20
+Weather: max 44°C, rain 0 mm (2% chance), wind 19 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jaigarh Fort (category: fort), Jaipur
+Date: 2026-09-26
+Weather: max 24°C, rain 69.7 mm (88% chance), wind 41 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sarnath Stupa (category: monument), Varanasi
+Date: 2026-06-26
+Weather: max 22°C, rain 101.7 mm (80% chance), wind 35 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Tea Museum Munnar (category: unknown), Munnar
+Date: 2026-09-09
+Weather: max 29°C, rain 13.5 mm (60% chance), wind 8 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kanheri Caves Trail (category: unknown), Mumbai
+Date: 2026-04-04
+Weather: max 42°C, rain 0 mm (3% chance), wind 11 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "avoid", "reason": "Severe heat on an exposed trail; heat stroke risk."}
+
+### Instruction:
+TASK: weather_impact
+Place: Select Citywalk Mall (category: mall), Delhi
+Date: 2026-05-25
+Weather: max 44°C, rain 0 mm (4% chance), wind 14 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Lodhi Garden (category: garden), Delhi
+Date: 2026-07-21
+Weather: max 27°C, rain 74.7 mm (100% chance), wind 21 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kundala Lake (category: lake), Munnar
+Date: 2026-04-27
+Weather: max 48°C, rain 0 mm (3% chance), wind 17 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Palolem Beach (category: unknown), Goa
+Date: 2026-01-02
+Weather: max 41°C, rain 0 mm (2% chance), wind 24 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fatehpur Sikri Ruins (category: unknown), Agra
+Date: 2026-07-19
+Weather: max 30°C, rain 12 mm (60% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Albert Hall Museum (category: museum), Jaipur
+Date: 2026-08-15
+Weather: max 32°C, rain 0 mm (10% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: The Ridge Viewpoint (category: viewpoint), Shimla
+Date: 2026-07-20
+Weather: max 29°C, rain 5.6 mm (53% chance), wind 25 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: The Ridge Viewpoint (category: viewpoint), Shimla
+Date: 2026-05-23
+Weather: max 25°C, rain 14.2 mm (59% chance), wind 17 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Elephanta Caves Ferry (category: unknown), Mumbai
+Date: 2026-04-10
+Weather: max 27°C, rain 97 mm (92% chance), wind 23 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Beatles Ashram (category: monument), Rishikesh
+Date: 2026-08-03
+Weather: max 23°C, rain 89 mm (97% chance), wind 23 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mall Road Market (category: market), Shimla
+Date: 2026-12-07
+Weather: max 27°C, rain 78.9 mm (93% chance), wind 31 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, flood", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga Boat Ride (category: unknown), Varanasi
+Date: 2026-05-25
+Weather: max 23°C, rain 102.5 mm (90% chance), wind 33 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Dashashwamedh Ghat (category: lake), Varanasi
+Date: 2026-05-04
+Weather: max 22°C, rain 73.4 mm (87% chance), wind 21 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chandni Chowk (category: unknown), Delhi
+Date: 2026-05-18
+Weather: max 29°C, rain 11.6 mm (78% chance), wind 23 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Anjuna Flea Market (category: unknown), Goa
+Date: 2026-08-07
+Weather: max 46°C, rain 0 mm (0% chance), wind 25 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kundala Lake (category: unknown), Munnar
+Date: 2026-04-11
+Weather: max 30°C, rain 6.7 mm (55% chance), wind 23 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Amber Fort (category: fort), Jaipur
+Date: 2026-05-10
+Weather: max 24°C, rain 107.4 mm (80% chance), wind 18 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Palolem Beach (category: beach), Goa
+Date: 2026-12-17
+Weather: max 42°C, rain 0 mm (0% chance), wind 10 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Crawford Market (category: unknown), Mumbai
+Date: 2026-10-24
+Weather: max 25°C, rain 113 mm (92% chance), wind 32 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Agrasen ki Baoli (category: stepwell), Delhi
+Date: 2026-07-10
+Weather: max 31°C, rain 0 mm (12% chance), wind 7 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Eravikulam National Park (category: garden), Munnar
+Date: 2026-12-05
+Weather: max 25°C, rain 131.3 mm (96% chance), wind 42 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Neer Garh Waterfall (category: waterfall), Rishikesh
+Date: 2026-10-25
+Weather: max 27°C, rain 226.6 mm (96% chance), wind 51 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Juhu Beach (category: beach), Mumbai
+Date: 2026-09-25
+Weather: max 25°C, rain 2.8 mm (53% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Se Cathedral (category: temple), Goa
+Date: 2026-08-09
+Weather: max 25°C, rain 105 mm (89% chance), wind 24 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chhatrapati Shivaji Maharaj Vastu Sangrahalaya (category: museum), Mumbai
+Date: 2026-07-02
+Weather: max 26°C, rain 180.8 mm (100% chance), wind 116 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, flood", "best_time": "any", "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."}
+
+### Instruction:
+TASK: weather_impact
+Place: Dilli Haat (category: market), Delhi
+Date: 2026-09-16
+Weather: max 25°C, rain 12.9 mm (71% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Eravikulam National Park (category: garden), Munnar
+Date: 2026-10-06
+Weather: max 34°C, rain 0 mm (2% chance), wind 11 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: palace), Agra
+Date: 2026-01-14
+Weather: max 28°C, rain 0 mm (12% chance), wind 7 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fateh Sagar Lake (category: unknown), Udaipur
+Date: 2026-09-10
+Weather: max 26°C, rain 48.7 mm (84% chance), wind 23 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jakhu Temple Trek (category: trek), Shimla
+Date: 2026-05-22
+Weather: max 32°C, rain 0 mm (12% chance), wind 10 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sarnath Stupa (category: monument), Varanasi
+Date: 2026-10-26
+Weather: max 22°C, rain 223 mm (92% chance), wind 51 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Top Station (category: viewpoint), Munnar
+Date: 2026-01-18
+Weather: max 26°C, rain 0 mm (4% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Beatles Ashram (category: monument), Rishikesh
+Date: 2026-01-08
+Weather: max 34°C, rain 0 mm (16% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Echo Point (category: viewpoint), Munnar
+Date: 2026-05-10
+Weather: max 27°C, rain 11 mm (60% chance), wind 17 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Bagore ki Haveli (category: unknown), Udaipur
+Date: 2026-07-03
+Weather: max 29°C, rain 11.1 mm (84% chance), wind 52 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga River Rafting Boat (category: boat_ride), Rishikesh
+Date: 2026-06-09
+Weather: max 27°C, rain 197.1 mm (100% chance), wind 54 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: The Ridge Viewpoint (category: viewpoint), Shimla
+Date: 2026-04-23
+Weather: max 34°C, rain 29.1 mm (83% chance), wind 62 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: monument), Udaipur
+Date: 2026-09-13
+Weather: max 22°C, rain 127.3 mm (92% chance), wind 39 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Dilli Haat (category: unknown), Delhi
+Date: 2026-04-25
+Weather: max 27°C, rain 31.2 mm (80% chance), wind 23 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Agra Fort (category: fort), Agra
+Date: 2026-10-02
+Weather: max 48°C, rain 0 mm (2% chance), wind 18 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: an exposed climb with little shade; go before 10 am."}
+
+### Instruction:
+TASK: weather_impact
+Place: Tea Museum Munnar (category: museum), Munnar
+Date: 2026-07-09
+Weather: max 26°C, rain 40 mm (70% chance), wind 13 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga River Rafting Boat (category: unknown), Rishikesh
+Date: 2026-01-19
+Weather: max 26°C, rain 99.3 mm (89% chance), wind 40 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: India Gate (category: monument), Delhi
+Date: 2026-10-14
+Weather: max 36°C, rain 32.2 mm (67% chance), wind 52 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat, rain", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Eravikulam National Park (category: garden), Munnar
+Date: 2026-06-20
+Weather: max 44°C, rain 0 mm (2% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kufri Viewpoint (category: viewpoint), Shimla
+Date: 2026-01-12
+Weather: max 36°C, rain 0 mm (9% chance), wind 20 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Panna Meena ka Kund (category: unknown), Jaipur
+Date: 2026-01-12
+Weather: max 27°C, rain 0 mm (14% chance), wind 19 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kufri Viewpoint (category: unknown), Shimla
+Date: 2026-05-22
+Weather: max 43°C, rain 0 mm (1% chance), wind 8 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: palace), Agra
+Date: 2026-09-22
+Weather: max 30°C, rain 28.6 mm (86% chance), wind 58 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Panna Meena ka Kund (category: unknown), Jaipur
+Date: 2026-06-09
+Weather: max 23°C, rain 113.2 mm (94% chance), wind 19 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Central Park Jaipur (category: garden), Jaipur
+Date: 2026-01-09
+Weather: max 25°C, rain 101 mm (87% chance), wind 30 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga Boat Ride (category: boat_ride), Varanasi
+Date: 2026-08-03
+Weather: max 29°C, rain 0 mm (2% chance), wind 11 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: unknown), Agra
+Date: 2026-08-20
+Weather: max 35°C, rain 0 mm (13% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Elephanta Caves Ferry (category: boat_ride), Mumbai
+Date: 2026-12-13
+Weather: max 22°C, rain 74.5 mm (97% chance), wind 36 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chhatrapati Shivaji Maharaj Vastu Sangrahalaya (category: museum), Mumbai
+Date: 2026-04-05
+Weather: max 28°C, rain 53.1 mm (77% chance), wind 28 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Neer Garh Waterfall (category: waterfall), Rishikesh
+Date: 2026-08-17
+Weather: max 42°C, rain 0 mm (1% chance), wind 14 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Juhu Beach (category: beach), Mumbai
+Date: 2026-09-25
+Weather: max 24°C, rain 152.7 mm (92% chance), wind 39 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: National Museum Delhi (category: museum), Delhi
+Date: 2026-09-10
+Weather: max 43°C, rain 0 mm (8% chance), wind 13 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Galtaji Temple (category: unknown), Jaipur
+Date: 2026-06-10
+Weather: max 48°C, rain 0 mm (2% chance), wind 8 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Panna Meena ka Kund (category: monument), Jaipur
+Date: 2026-05-07
+Weather: max 31°C, rain 0 mm (8% chance), wind 8 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kufri Viewpoint (category: viewpoint), Shimla
+Date: 2026-04-04
+Weather: max 36°C, rain 0 mm (0% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fatehpur Sikri Ruins (category: unknown), Agra
+Date: 2026-04-27
+Weather: max 37°C, rain 0 mm (13% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fort Aguada (category: unknown), Goa
+Date: 2026-08-04
+Weather: max 26°C, rain 6.8 mm (49% chance), wind 21 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: monument), Udaipur
+Date: 2026-08-18
+Weather: max 32°C, rain 0 mm (7% chance), wind 18 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Triveni Ghat (category: lake), Rishikesh
+Date: 2026-12-22
+Weather: max 23°C, rain 193.8 mm (99% chance), wind 42 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jantar Mantar (category: monument), Jaipur
+Date: 2026-05-12
+Weather: max 27°C, rain 80.2 mm (84% chance), wind 23 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Vishwanath Gali Market (category: market), Varanasi
+Date: 2026-06-25
+Weather: max 28°C, rain 0 mm (12% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Itmad-ud-Daulah Tomb (category: monument), Agra
+Date: 2026-08-16
+Weather: max 24°C, rain 31.4 mm (78% chance), wind 30 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Anamudi Peak Trek (category: trek), Munnar
+Date: 2026-09-04
+Weather: max 26°C, rain 22.5 mm (86% chance), wind 33 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Triveni Ghat (category: lake), Rishikesh
+Date: 2026-01-15
+Weather: max 30°C, rain 21.5 mm (85% chance), wind 50 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, wind", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Crawford Market (category: market), Mumbai
+Date: 2026-07-04
+Weather: max 47°C, rain 0 mm (2% chance), wind 15 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Echo Point (category: viewpoint), Munnar
+Date: 2026-12-16
+Weather: max 24°C, rain 104.7 mm (100% chance), wind 78 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kinari Bazaar (category: market), Agra
+Date: 2026-08-15
+Weather: max 29°C, rain 54.1 mm (71% chance), wind 32 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Top Station (category: viewpoint), Munnar
+Date: 2026-01-21
+Weather: max 29°C, rain 47.4 mm (64% chance), wind 12 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: unknown), Agra
+Date: 2026-07-26
+Weather: max 42°C, rain 0 mm (0% chance), wind 12 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Colaba Causeway Market (category: unknown), Mumbai
+Date: 2026-09-27
+Weather: max 27°C, rain 182.5 mm (94% chance), wind 43 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Nahargarh Fort (category: unknown), Jaipur
+Date: 2026-05-19
+Weather: max 26°C, rain 41.5 mm (72% chance), wind 29 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Se Cathedral (category: temple), Goa
+Date: 2026-09-08
+Weather: max 43°C, rain 0 mm (9% chance), wind 14 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Colva Beach (category: unknown), Goa
+Date: 2026-12-18
+Weather: max 29°C, rain 0 mm (14% chance), wind 8 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Bagore ki Haveli (category: palace), Udaipur
+Date: 2026-07-08
+Weather: max 23°C, rain 67.4 mm (92% chance), wind 28 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chandni Chowk (category: market), Delhi
+Date: 2026-04-05
+Weather: max 43°C, rain 0 mm (2% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Elephanta Caves Ferry (category: boat_ride), Mumbai
+Date: 2026-12-09
+Weather: max 21°C, rain 180.2 mm (97% chance), wind 38 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Patrika Gate (category: monument), Jaipur
+Date: 2026-06-07
+Weather: max 23°C, rain 179.9 mm (98% chance), wind 40 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kufri Viewpoint (category: unknown), Shimla
+Date: 2026-04-03
+Weather: max 35°C, rain 0 mm (2% chance), wind 17 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Juhu Beach (category: unknown), Mumbai
+Date: 2026-08-24
+Weather: max 30°C, rain 33.9 mm (73% chance), wind 26 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: palace), Agra
+Date: 2026-08-04
+Weather: max 28°C, rain 179.8 mm (95% chance), wind 49 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Laxman Jhula (category: monument), Rishikesh
+Date: 2026-06-24
+Weather: max 47°C, rain 0 mm (4% chance), wind 22 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Banaras Hindu University Museum (category: museum), Varanasi
+Date: 2026-09-01
+Weather: max 36°C, rain 0 mm (3% chance), wind 20 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mehtab Bagh (category: garden), Agra
+Date: 2026-07-24
+Weather: max 37°C, rain 0 mm (4% chance), wind 14 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jagdish Temple (category: temple), Udaipur
+Date: 2026-12-06
+Weather: max 26°C, rain 36.9 mm (81% chance), wind 27 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Triveni Ghat (category: unknown), Rishikesh
+Date: 2026-04-07
+Weather: max 23°C, rain 180.1 mm (97% chance), wind 51 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: temple), Shimla
+Date: 2026-10-16
+Weather: max 23°C, rain 147.4 mm (96% chance), wind 32 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Haji Ali Dargah (category: temple), Mumbai
+Date: 2026-08-06
+Weather: max 36°C, rain 31.5 mm (70% chance), wind 51 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat, rain", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Itmad-ud-Daulah Tomb (category: unknown), Agra
+Date: 2026-10-24
+Weather: max 29°C, rain 219.8 mm (100% chance), wind 81 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Qutub Minar (category: monument), Delhi
+Date: 2026-08-07
+Weather: max 47°C, rain 0 mm (0% chance), wind 23 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ramnagar Fort (category: fort), Varanasi
+Date: 2026-05-21
+Weather: max 46°C, rain 0 mm (0% chance), wind 25 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: an exposed climb with little shade; go before 10 am."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mapusa Market (category: market), Goa
+Date: 2026-09-08
+Weather: max 42°C, rain 0 mm (0% chance), wind 8 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Hawa Mahal (category: palace), Jaipur
+Date: 2026-09-05
+Weather: max 34°C, rain 18.6 mm (64% chance), wind 48 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: monument), Udaipur
+Date: 2026-10-19
+Weather: max 25°C, rain 48.4 mm (67% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Neer Garh Waterfall (category: waterfall), Rishikesh
+Date: 2026-05-15
+Weather: max 24°C, rain 177.6 mm (92% chance), wind 22 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jagdish Temple (category: temple), Udaipur
+Date: 2026-10-04
+Weather: max 25°C, rain 50.9 mm (82% chance), wind 21 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fatehpur Sikri Ruins (category: monument), Agra
+Date: 2026-12-27
+Weather: max 34°C, rain 0 mm (10% chance), wind 20 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: monument), Udaipur
+Date: 2026-05-05
+Weather: max 34°C, rain 0 mm (11% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sajjangarh Monsoon Palace (category: fort), Udaipur
+Date: 2026-07-18
+Weather: max 26°C, rain 137 mm (100% chance), wind 118 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kinari Bazaar (category: market), Agra
+Date: 2026-12-16
+Weather: max 41°C, rain 0 mm (9% chance), wind 8 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Agra Fort (category: fort), Agra
+Date: 2026-09-08
+Weather: max 26°C, rain 3.2 mm (50% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chandni Chowk (category: market), Delhi
+Date: 2026-09-24
+Weather: max 22°C, rain 200.6 mm (91% chance), wind 24 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Agra Fort (category: fort), Agra
+Date: 2026-08-27
+Weather: max 31°C, rain 0 mm (6% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mattupetty Dam Lake (category: unknown), Munnar
+Date: 2026-07-05
+Weather: max 26°C, rain 29.7 mm (77% chance), wind 51 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, wind", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Marine Drive (category: monument), Mumbai
+Date: 2026-04-04
+Weather: max 29°C, rain 66.8 mm (100% chance), wind 23 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kunjapuri Temple Trek (category: trek), Rishikesh
+Date: 2026-04-01
+Weather: max 30°C, rain 17 mm (65% chance), wind 32 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mall Road Market (category: market), Shimla
+Date: 2026-10-15
+Weather: max 25°C, rain 178.2 mm (100% chance), wind 84 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: unknown), Udaipur
+Date: 2026-01-15
+Weather: max 22°C, rain 113.7 mm (82% chance), wind 27 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kundala Lake (category: lake), Munnar
+Date: 2026-09-14
+Weather: max 24°C, rain 87 mm (100% chance), wind 108 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Vishwanath Gali Market (category: unknown), Varanasi
+Date: 2026-05-23
+Weather: max 25°C, rain 41.9 mm (86% chance), wind 33 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga Boat Ride (category: boat_ride), Varanasi
+Date: 2026-05-02
+Weather: max 25°C, rain 124.3 mm (98% chance), wind 35 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Tea Museum Munnar (category: museum), Munnar
+Date: 2026-05-14
+Weather: max 46°C, rain 0 mm (0% chance), wind 23 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fateh Sagar Lake (category: lake), Udaipur
+Date: 2026-04-13
+Weather: max 23°C, rain 169.2 mm (90% chance), wind 32 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Amber Fort (category: unknown), Jaipur
+Date: 2026-09-24
+Weather: max 38°C, rain 0 mm (7% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "An exposed climb with little shade; go before 10 am."}
+
+### Instruction:
+TASK: weather_impact
+Place: Triveni Ghat (category: lake), Rishikesh
+Date: 2026-08-05
+Weather: max 24°C, rain 49.5 mm (68% chance), wind 25 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Banaras Hindu University Museum (category: museum), Varanasi
+Date: 2026-04-24
+Weather: max 27°C, rain 187.1 mm (99% chance), wind 33 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, flood", "best_time": "any", "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."}
+
+### Instruction:
+TASK: weather_impact
+Place: Colaba Causeway Market (category: market), Mumbai
+Date: 2026-01-16
+Weather: max 23°C, rain 101.5 mm (100% chance), wind 41 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Laxman Jhula (category: unknown), Rishikesh
+Date: 2026-06-12
+Weather: max 31°C, rain 30 mm (61% chance), wind 56 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Anamudi Peak Trek (category: trek), Munnar
+Date: 2026-09-10
+Weather: max 24°C, rain 4.4 mm (56% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fort Aguada (category: fort), Goa
+Date: 2026-04-08
+Weather: max 23°C, rain 59.4 mm (68% chance), wind 28 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Gateway of India (category: monument), Mumbai
+Date: 2026-10-24
+Weather: max 46°C, rain 0 mm (4% chance), wind 14 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Hathi Pol Bazaar (category: market), Udaipur
+Date: 2026-06-07
+Weather: max 28°C, rain 193.8 mm (97% chance), wind 27 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kashi Vishwanath Temple (category: unknown), Varanasi
+Date: 2026-08-10
+Weather: max 30°C, rain 0 mm (11% chance), wind 17 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mall Road Market (category: market), Shimla
+Date: 2026-12-28
+Weather: max 29°C, rain 42.8 mm (70% chance), wind 27 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Banaras Hindu University Museum (category: museum), Varanasi
+Date: 2026-04-16
+Weather: max 41°C, rain 0 mm (4% chance), wind 23 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mandovi River Cruise (category: unknown), Goa
+Date: 2026-01-26
+Weather: max 34°C, rain 0 mm (5% chance), wind 6 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Marine Drive (category: unknown), Mumbai
+Date: 2026-10-04
+Weather: max 28°C, rain 0 mm (4% chance), wind 12 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fateh Sagar Lake (category: lake), Udaipur
+Date: 2026-12-19
+Weather: max 22°C, rain 158.4 mm (92% chance), wind 35 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Akshardham Temple (category: unknown), Delhi
+Date: 2026-08-13
+Weather: max 30°C, rain 38.1 mm (73% chance), wind 32 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Anamudi Peak Trek (category: unknown), Munnar
+Date: 2026-05-12
+Weather: max 36°C, rain 15.3 mm (80% chance), wind 61 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Hill trails and falls are closed or unsafe in heavy rain: landslides and flash floods."}
+
+### Instruction:
+TASK: weather_impact
+Place: Central Park Jaipur (category: unknown), Jaipur
+Date: 2026-09-10
+Weather: max 40°C, rain 0 mm (4% chance), wind 21 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Patrika Gate (category: monument), Jaipur
+Date: 2026-06-24
+Weather: max 25°C, rain 94.1 mm (100% chance), wind 111 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Assi Ghat (category: lake), Varanasi
+Date: 2026-05-06
+Weather: max 35°C, rain 38.5 mm (61% chance), wind 67 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga Boat Ride (category: boat_ride), Varanasi
+Date: 2026-10-06
+Weather: max 31°C, rain 7.3 mm (81% chance), wind 45 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: temple), Shimla
+Date: 2026-12-21
+Weather: max 21°C, rain 227.2 mm (92% chance), wind 27 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Dilli Haat (category: market), Delhi
+Date: 2026-09-18
+Weather: max 47°C, rain 0 mm (2% chance), wind 19 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Delhi Zoo (category: zoo), Delhi
+Date: 2026-08-26
+Weather: max 26°C, rain 0 mm (10% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kunjapuri Temple Trek (category: trek), Rishikesh
+Date: 2026-05-09
+Weather: max 25°C, rain 28.9 mm (75% chance), wind 17 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mehtab Bagh (category: garden), Agra
+Date: 2026-05-05
+Weather: max 26°C, rain 20.4 mm (61% chance), wind 27 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Calangute Beach (category: beach), Goa
+Date: 2026-10-21
+Weather: max 37°C, rain 0 mm (3% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: temple), Shimla
+Date: 2026-08-25
+Weather: max 35°C, rain 0 mm (17% chance), wind 18 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Basilica of Bom Jesus (category: temple), Goa
+Date: 2026-04-12
+Weather: max 25°C, rain 0 mm (13% chance), wind 14 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jaigarh Fort (category: fort), Jaipur
+Date: 2026-01-08
+Weather: max 37°C, rain 0 mm (20% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "An exposed climb with little shade; go before 10 am."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sarnath Stupa (category: unknown), Varanasi
+Date: 2026-06-11
+Weather: max 29°C, rain 132.2 mm (100% chance), wind 79 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Outdoor sites close during a cyclone warning."}
+
+### Instruction:
+TASK: weather_impact
+Place: Bagore ki Haveli (category: unknown), Udaipur
+Date: 2026-12-23
+Weather: max 29°C, rain 0 mm (10% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: unknown), Udaipur
+Date: 2026-09-11
+Weather: max 26°C, rain 30.2 mm (63% chance), wind 30 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Vishwanath Gali Market (category: unknown), Varanasi
+Date: 2026-12-04
+Weather: max 46°C, rain 0 mm (1% chance), wind 19 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Birla Mandir (category: temple), Jaipur
+Date: 2026-06-16
+Weather: max 38°C, rain 0 mm (0% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chapora Fort (category: fort), Goa
+Date: 2026-05-23
+Weather: max 27°C, rain 9 mm (73% chance), wind 22 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chandni Chowk (category: market), Delhi
+Date: 2026-06-24
+Weather: max 22°C, rain 94.7 mm (87% chance), wind 36 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, flood", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Anjuna Flea Market (category: market), Goa
+Date: 2026-04-05
+Weather: max 28°C, rain 65.4 mm (84% chance), wind 32 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, flood", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Select Citywalk Mall (category: unknown), Delhi
+Date: 2026-07-09
+Weather: max 36°C, rain 0 mm (9% chance), wind 7 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sarnath Stupa (category: unknown), Varanasi
+Date: 2026-08-17
+Weather: max 27°C, rain 12.6 mm (76% chance), wind 14 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Himachal State Museum (category: museum), Shimla
+Date: 2026-06-24
+Weather: max 43°C, rain 0 mm (8% chance), wind 18 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Top Station (category: viewpoint), Munnar
+Date: 2026-09-15
+Weather: max 28°C, rain 0 mm (14% chance), wind 5 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Siddhivinayak Temple (category: temple), Mumbai
+Date: 2026-12-22
+Weather: max 30°C, rain 17 mm (60% chance), wind 16 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Salim Ali Bird Sanctuary (category: zoo), Goa
+Date: 2026-05-21
+Weather: max 23°C, rain 162.3 mm (90% chance), wind 27 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Central Park Jaipur (category: unknown), Jaipur
+Date: 2026-08-09
+Weather: max 27°C, rain 111.9 mm (100% chance), wind 76 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Tea Museum Munnar (category: museum), Munnar
+Date: 2026-05-18
+Weather: max 27°C, rain 58.1 mm (72% chance), wind 13 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Lake Pichola (category: lake), Udaipur
+Date: 2026-08-12
+Weather: max 21°C, rain 212.9 mm (90% chance), wind 38 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mall Road Market (category: unknown), Shimla
+Date: 2026-01-26
+Weather: max 34°C, rain 0 mm (17% chance), wind 7 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mandovi River Cruise (category: boat_ride), Goa
+Date: 2026-08-07
+Weather: max 41°C, rain 0 mm (2% chance), wind 20 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Select Citywalk Mall (category: mall), Delhi
+Date: 2026-10-20
+Weather: max 46°C, rain 0 mm (3% chance), wind 19 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Humayun's Tomb (category: monument), Delhi
+Date: 2026-08-13
+Weather: max 35°C, rain 26.3 mm (63% chance), wind 53 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Se Cathedral (category: unknown), Goa
+Date: 2026-10-06
+Weather: max 33°C, rain 0 mm (12% chance), wind 11 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fatehpur Sikri Ruins (category: monument), Agra
+Date: 2026-06-19
+Weather: max 24°C, rain 0 mm (3% chance), wind 19 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Lake Pichola (category: lake), Udaipur
+Date: 2026-01-14
+Weather: max 27°C, rain 20.5 mm (89% chance), wind 63 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Patrika Gate (category: unknown), Jaipur
+Date: 2026-04-18
+Weather: max 25°C, rain 11.9 mm (59% chance), wind 25 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Colaba Causeway Market (category: unknown), Mumbai
+Date: 2026-10-20
+Weather: max 25°C, rain 47.1 mm (72% chance), wind 21 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sarnath Stupa (category: unknown), Varanasi
+Date: 2026-09-20
+Weather: max 22°C, rain 116.8 mm (100% chance), wind 42 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Salim Ali Bird Sanctuary (category: zoo), Goa
+Date: 2026-12-19
+Weather: max 42°C, rain 0 mm (1% chance), wind 9 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Laxman Jhula (category: monument), Rishikesh
+Date: 2026-08-23
+Weather: max 27°C, rain 5.2 mm (69% chance), wind 22 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Elephanta Caves Ferry (category: boat_ride), Mumbai
+Date: 2026-04-21
+Weather: max 29°C, rain 15.6 mm (84% chance), wind 50 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Siddhivinayak Temple (category: unknown), Mumbai
+Date: 2026-07-27
+Weather: max 25°C, rain 200.6 mm (100% chance), wind 23 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga River Rafting Boat (category: boat_ride), Rishikesh
+Date: 2026-04-04
+Weather: max 25°C, rain 107 mm (93% chance), wind 20 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Beatles Ashram (category: monument), Rishikesh
+Date: 2026-12-26
+Weather: max 22°C, rain 186.4 mm (90% chance), wind 26 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mattupetty Dam Lake (category: lake), Munnar
+Date: 2026-12-24
+Weather: max 25°C, rain 24.2 mm (63% chance), wind 17 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Bagore ki Haveli (category: unknown), Udaipur
+Date: 2026-08-28
+Weather: max 31°C, rain 39.4 mm (61% chance), wind 69 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, wind", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Birla Mandir (category: temple), Jaipur
+Date: 2026-08-18
+Weather: max 23°C, rain 43.2 mm (69% chance), wind 18 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jantar Mantar (category: unknown), Jaipur
+Date: 2026-04-05
+Weather: max 32°C, rain 0 mm (13% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Juhu Beach (category: beach), Mumbai
+Date: 2026-04-23
+Weather: max 26°C, rain 14.5 mm (76% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Baga Beach (category: unknown), Goa
+Date: 2026-06-17
+Weather: max 30°C, rain 31 mm (77% chance), wind 30 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Itmad-ud-Daulah Tomb (category: unknown), Agra
+Date: 2026-07-28
+Weather: max 23°C, rain 217.7 mm (91% chance), wind 20 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: The Ridge Viewpoint (category: viewpoint), Shimla
+Date: 2026-08-01
+Weather: max 45°C, rain 0 mm (0% chance), wind 15 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fatehpur Sikri Ruins (category: unknown), Agra
+Date: 2026-09-26
+Weather: max 22°C, rain 108.8 mm (86% chance), wind 36 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kanheri Caves Trail (category: trek), Mumbai
+Date: 2026-12-07
+Weather: max 26°C, rain 205.6 mm (100% chance), wind 108 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Hill trails and falls are closed or unsafe in heavy rain: landslides and flash floods."}
+
+### Instruction:
+TASK: weather_impact
+Place: Crawford Market (category: market), Mumbai
+Date: 2026-10-15
+Weather: max 28°C, rain 70.6 mm (96% chance), wind 41 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Dashashwamedh Ghat (category: unknown), Varanasi
+Date: 2026-09-02
+Weather: max 27°C, rain 71.4 mm (84% chance), wind 42 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Central Park Jaipur (category: unknown), Jaipur
+Date: 2026-05-27
+Weather: max 31°C, rain 15.9 mm (66% chance), wind 60 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Dilli Haat (category: market), Delhi
+Date: 2026-06-17
+Weather: max 25°C, rain 21.4 mm (84% chance), wind 29 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: monument), Udaipur
+Date: 2026-07-27
+Weather: max 35°C, rain 28.1 mm (60% chance), wind 49 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Elephanta Caves Ferry (category: unknown), Mumbai
+Date: 2026-01-26
+Weather: max 23°C, rain 27 mm (64% chance), wind 25 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Agra Fort (category: fort), Agra
+Date: 2026-01-21
+Weather: max 35°C, rain 0 mm (10% chance), wind 10 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: The Ridge Viewpoint (category: viewpoint), Shimla
+Date: 2026-04-24
+Weather: max 30°C, rain 4.5 mm (51% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Haji Ali Dargah (category: unknown), Mumbai
+Date: 2026-01-08
+Weather: max 24°C, rain 14.8 mm (46% chance), wind 8 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Attukal Waterfalls (category: waterfall), Munnar
+Date: 2026-08-01
+Weather: max 26°C, rain 160.9 mm (96% chance), wind 43 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Itmad-ud-Daulah Tomb (category: unknown), Agra
+Date: 2026-07-08
+Weather: max 24°C, rain 12.7 mm (73% chance), wind 23 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Hathi Pol Bazaar (category: unknown), Udaipur
+Date: 2026-08-25
+Weather: max 30°C, rain 0 mm (8% chance), wind 19 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jantar Mantar (category: monument), Jaipur
+Date: 2026-06-28
+Weather: max 30°C, rain 36.5 mm (76% chance), wind 56 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Assi Ghat (category: lake), Varanasi
+Date: 2026-07-10
+Weather: max 46°C, rain 0 mm (3% chance), wind 11 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Taj Mahal (category: unknown), Agra
+Date: 2026-10-23
+Weather: max 26°C, rain 21.2 mm (60% chance), wind 59 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Eravikulam National Park (category: garden), Munnar
+Date: 2026-08-14
+Weather: max 29°C, rain 35.6 mm (73% chance), wind 53 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kanheri Caves Trail (category: trek), Mumbai
+Date: 2026-06-04
+Weather: max 26°C, rain 34.1 mm (85% chance), wind 35 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Hathi Pol Bazaar (category: unknown), Udaipur
+Date: 2026-12-12
+Weather: max 30°C, rain 116.6 mm (100% chance), wind 103 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mehtab Bagh (category: garden), Agra
+Date: 2026-09-11
+Weather: max 30°C, rain 0 mm (3% chance), wind 20 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Elephanta Caves Ferry (category: unknown), Mumbai
+Date: 2026-08-11
+Weather: max 45°C, rain 0 mm (5% chance), wind 10 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mehtab Bagh (category: garden), Agra
+Date: 2026-05-17
+Weather: max 31°C, rain 0 mm (11% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Eravikulam National Park (category: garden), Munnar
+Date: 2026-08-26
+Weather: max 43°C, rain 0 mm (4% chance), wind 15 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Qutub Minar (category: monument), Delhi
+Date: 2026-09-04
+Weather: max 45°C, rain 0 mm (5% chance), wind 10 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Chapora Fort (category: fort), Goa
+Date: 2026-12-16
+Weather: max 41°C, rain 0 mm (5% chance), wind 10 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: an exposed climb with little shade; go before 10 am."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: temple), Shimla
+Date: 2026-10-04
+Weather: max 25°C, rain 107.3 mm (100% chance), wind 91 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Elephanta Caves Ferry (category: unknown), Mumbai
+Date: 2026-05-11
+Weather: max 26°C, rain 70.2 mm (86% chance), wind 35 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Delhi Zoo (category: zoo), Delhi
+Date: 2026-12-13
+Weather: max 41°C, rain 0 mm (7% chance), wind 17 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Assi Ghat (category: lake), Varanasi
+Date: 2026-07-23
+Weather: max 26°C, rain 11.1 mm (53% chance), wind 23 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Galtaji Temple (category: temple), Jaipur
+Date: 2026-10-08
+Weather: max 44°C, rain 0 mm (6% chance), wind 20 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fateh Sagar Lake (category: lake), Udaipur
+Date: 2026-12-02
+Weather: max 29°C, rain 192.3 mm (100% chance), wind 114 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Agrasen ki Baoli (category: stepwell), Delhi
+Date: 2026-04-17
+Weather: max 38°C, rain 0 mm (7% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Se Cathedral (category: temple), Goa
+Date: 2026-06-25
+Weather: max 21°C, rain 218.1 mm (96% chance), wind 29 km/h, alert: red for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mehtab Bagh (category: garden), Agra
+Date: 2026-09-02
+Weather: max 28°C, rain 0 mm (11% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kufri Viewpoint (category: viewpoint), Shimla
+Date: 2026-09-17
+Weather: max 23°C, rain 24.8 mm (76% chance), wind 21 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Delhi Zoo (category: zoo), Delhi
+Date: 2026-06-14
+Weather: max 26°C, rain 5.2 mm (61% chance), wind 12 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Triveni Ghat (category: lake), Rishikesh
+Date: 2026-09-12
+Weather: max 29°C, rain 0 mm (3% chance), wind 19 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Top Station (category: viewpoint), Munnar
+Date: 2026-10-05
+Weather: max 40°C, rain 0 mm (4% chance), wind 19 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Albert Hall Museum (category: unknown), Jaipur
+Date: 2026-04-15
+Weather: max 25°C, rain 4.3 mm (68% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Colaba Causeway Market (category: market), Mumbai
+Date: 2026-06-09
+Weather: max 36°C, rain 0 mm (12% chance), wind 17 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kunjapuri Temple Trek (category: trek), Rishikesh
+Date: 2026-01-16
+Weather: max 45°C, rain 0 mm (1% chance), wind 12 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "avoid", "reason": "Severe heat on an exposed trail; heat stroke risk."}
+
+### Instruction:
+TASK: weather_impact
+Place: Akshardham Temple (category: temple), Delhi
+Date: 2026-05-27
+Weather: max 38°C, rain 0 mm (14% chance), wind 11 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: temple), Shimla
+Date: 2026-09-01
+Weather: max 25°C, rain 131.5 mm (95% chance), wind 46 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Bagore ki Haveli (category: unknown), Udaipur
+Date: 2026-01-17
+Weather: max 35°C, rain 0 mm (11% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kolukkumalai Tea Estate (category: tea_estate), Munnar
+Date: 2026-12-07
+Weather: max 35°C, rain 5.4 mm (73% chance), wind 53 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Banaras Hindu University Museum (category: museum), Varanasi
+Date: 2026-06-12
+Weather: max 44°C, rain 0 mm (3% chance), wind 18 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jaigarh Fort (category: fort), Jaipur
+Date: 2026-05-12
+Weather: max 27°C, rain 88.9 mm (100% chance), wind 44 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Agra Fort (category: fort), Agra
+Date: 2026-09-20
+Weather: max 42°C, rain 0 mm (1% chance), wind 25 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: an exposed climb with little shade; go before 10 am."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mall Road Market (category: market), Shimla
+Date: 2026-12-27
+Weather: max 25°C, rain 190.6 mm (93% chance), wind 24 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain, flood", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: India Gate (category: unknown), Delhi
+Date: 2026-12-28
+Weather: max 28°C, rain 59.5 mm (77% chance), wind 21 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mall Road Market (category: market), Shimla
+Date: 2026-04-14
+Weather: max 31°C, rain 0 mm (2% chance), wind 5 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Eravikulam National Park (category: garden), Munnar
+Date: 2026-01-26
+Weather: max 47°C, rain 0 mm (4% chance), wind 19 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Select Citywalk Mall (category: mall), Delhi
+Date: 2026-06-13
+Weather: max 47°C, rain 0 mm (4% chance), wind 15 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: Dashashwamedh Ghat (category: lake), Varanasi
+Date: 2026-08-21
+Weather: max 24°C, rain 50.8 mm (81% chance), wind 27 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Banaras Hindu University Museum (category: unknown), Varanasi
+Date: 2026-10-08
+Weather: max 48°C, rain 0 mm (2% chance), wind 8 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "afternoon", "reason": "Indoors, so a good place to spend the hottest hours."}
+
+### Instruction:
+TASK: weather_impact
+Place: The Ridge Viewpoint (category: viewpoint), Shimla
+Date: 2026-12-13
+Weather: max 24°C, rain 16 mm (85% chance), wind 25 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jakhu Temple Trek (category: trek), Shimla
+Date: 2026-09-18
+Weather: max 29°C, rain 0 mm (10% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fateh Sagar Lake (category: lake), Udaipur
+Date: 2026-08-03
+Weather: max 26°C, rain 25 mm (80% chance), wind 12 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mandovi River Cruise (category: boat_ride), Goa
+Date: 2026-06-26
+Weather: max 35°C, rain 0 mm (4% chance), wind 19 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Beatles Ashram (category: unknown), Rishikesh
+Date: 2026-05-04
+Weather: max 25°C, rain 150.5 mm (100% chance), wind 75 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Outdoor sites close during a cyclone warning."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kunjapuri Temple Trek (category: unknown), Rishikesh
+Date: 2026-07-17
+Weather: max 26°C, rain 8.2 mm (66% chance), wind 21 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Assi Ghat (category: unknown), Varanasi
+Date: 2026-10-15
+Weather: max 47°C, rain 0 mm (2% chance), wind 15 km/h, alert: red for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "evening", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Red Fort (category: fort), Delhi
+Date: 2026-07-23
+Weather: max 41°C, rain 0 mm (2% chance), wind 10 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: an exposed climb with little shade; go before 10 am."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jakhu Temple Trek (category: unknown), Shimla
+Date: 2026-04-05
+Weather: max 29°C, rain 102.1 mm (100% chance), wind 112 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Hill trails and falls are closed or unsafe in heavy rain: landslides and flash floods."}
+
+### Instruction:
+TASK: weather_impact
+Place: Laxman Jhula (category: monument), Rishikesh
+Date: 2026-06-14
+Weather: max 37°C, rain 0 mm (6% chance), wind 9 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Sanjay Gandhi National Park (category: garden), Mumbai
+Date: 2026-07-05
+Weather: max 23°C, rain 134.7 mm (95% chance), wind 25 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Attukal Waterfalls (category: waterfall), Munnar
+Date: 2026-12-27
+Weather: max 28°C, rain 13.1 mm (71% chance), wind 63 km/h, alert: yellow for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Water activities and shores are usually shut in heavy rain or strong wind."}
+
+### Instruction:
+TASK: weather_impact
+Place: Attukal Waterfalls (category: unknown), Munnar
+Date: 2026-04-14
+Weather: max 27°C, rain 14.1 mm (53% chance), wind 22 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jagdish Temple (category: temple), Udaipur
+Date: 2026-10-20
+Weather: max 28°C, rain 0 mm (0% chance), wind 15 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Hathi Pol Bazaar (category: market), Udaipur
+Date: 2026-05-20
+Weather: max 45°C, rain 0 mm (3% chance), wind 12 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Kunjapuri Temple Trek (category: trek), Rishikesh
+Date: 2026-01-13
+Weather: max 24°C, rain 203.9 mm (100% chance), wind 76 km/h, alert: orange for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Hill trails and falls are closed or unsafe in heavy rain: landslides and flash floods."}
+
+### Instruction:
+TASK: weather_impact
+Place: Akshardham Temple (category: temple), Delhi
+Date: 2026-04-15
+Weather: max 24°C, rain 13 mm (75% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Haji Ali Dargah (category: temple), Mumbai
+Date: 2026-04-09
+Weather: max 26°C, rain 155 mm (90% chance), wind 45 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ganga River Rafting Boat (category: boat_ride), Rishikesh
+Date: 2026-06-14
+Weather: max 36°C, rain 0 mm (8% chance), wind 11 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Ramnagar Fort (category: fort), Varanasi
+Date: 2026-08-11
+Weather: max 34°C, rain 27.4 mm (83% chance), wind 54 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fatehpur Sikri Ruins (category: unknown), Agra
+Date: 2026-08-05
+Weather: max 24°C, rain 220.8 mm (95% chance), wind 48 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mehtab Bagh (category: garden), Agra
+Date: 2026-10-03
+Weather: max 26°C, rain 95.1 mm (100% chance), wind 75 km/h, alert: red for cyclone
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind", "best_time": "avoid", "reason": "Outdoor sites close during a cyclone warning."}
+
+### Instruction:
+TASK: weather_impact
+Place: India Gate (category: monument), Delhi
+Date: 2026-08-10
+Weather: max 30°C, rain 4.2 mm (47% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Phoenix Palladium Mall (category: mall), Mumbai
+Date: 2026-05-07
+Weather: max 35°C, rain 0 mm (14% chance), wind 16 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Bagore ki Haveli (category: palace), Udaipur
+Date: 2026-05-11
+Weather: max 26°C, rain 0 mm (12% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Eravikulam National Park (category: garden), Munnar
+Date: 2026-09-25
+Weather: max 30°C, rain 8.6 mm (67% chance), wind 25 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Albert Hall Museum (category: museum), Jaipur
+Date: 2026-01-03
+Weather: max 35°C, rain 39.7 mm (61% chance), wind 56 km/h, alert: orange for thunderstorm
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "any", "reason": "Indoors, but roads there may be waterlogged; allow extra travel time."}
+
+### Instruction:
+TASK: weather_impact
+Place: Basilica of Bom Jesus (category: unknown), Goa
+Date: 2026-12-16
+Weather: max 26°C, rain 76.8 mm (85% chance), wind 38 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Saheliyon ki Bari (category: monument), Udaipur
+Date: 2026-05-03
+Weather: max 35°C, rain 0 mm (2% chance), wind 8 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Christ Church Shimla (category: unknown), Shimla
+Date: 2026-05-03
+Weather: max 30°C, rain 0 mm (0% chance), wind 20 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jakhu Temple Trek (category: trek), Shimla
+Date: 2026-07-17
+Weather: max 22°C, rain 76.5 mm (87% chance), wind 40 km/h, alert: orange for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "closed", "sensitive_to": "rain, wind, flood", "best_time": "avoid", "reason": "Hill trails and falls are closed or unsafe in heavy rain: landslides and flash floods."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fatehpur Sikri Ruins (category: monument), Agra
+Date: 2026-08-19
+Weather: max 26°C, rain 9.8 mm (79% chance), wind 10 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "low", "sensitive_to": "rain", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
+### Instruction:
+TASK: weather_impact
+Place: Itmad-ud-Daulah Tomb (category: unknown), Agra
+Date: 2026-06-07
+Weather: max 40°C, rain 0 mm (4% chance), wind 23 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: City Palace (category: unknown), Jaipur
+Date: 2026-09-06
+Weather: max 42°C, rain 0 mm (6% chance), wind 13 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Banaras Hindu University Museum (category: unknown), Varanasi
+Date: 2026-12-24
+Weather: max 26°C, rain 55.1 mm (86% chance), wind 24 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Siddhivinayak Temple (category: temple), Mumbai
+Date: 2026-05-27
+Weather: max 47°C, rain 0 mm (2% chance), wind 21 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "morning", "reason": "Stone floors get too hot to walk barefoot by midday; go early."}
+
+### Instruction:
+TASK: weather_impact
+Place: Akshardham Temple (category: temple), Delhi
+Date: 2026-01-23
+Weather: max 34°C, rain 0 mm (3% chance), wind 18 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Marine Drive (category: monument), Mumbai
+Date: 2026-12-23
+Weather: max 43°C, rain 0 mm (2% chance), wind 24 km/h, alert: orange for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "heat", "best_time": "morning", "reason": "Severe heat: little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Fort Aguada (category: fort), Goa
+Date: 2026-06-07
+Weather: max 24°C, rain 20.8 mm (69% chance), wind 29 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "high", "sensitive_to": "rain", "best_time": "avoid", "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."}
+
+### Instruction:
+TASK: weather_impact
+Place: Banaras Hindu University Museum (category: museum), Varanasi
+Date: 2026-06-28
+Weather: max 29°C, rain 0 mm (11% chance), wind 8 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Mapusa Market (category: market), Goa
+Date: 2026-05-21
+Weather: max 43°C, rain 0 mm (9% chance), wind 15 km/h, alert: yellow for heat
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "heat", "best_time": "evening", "reason": "Little shade and high heat; avoid 11 am to 4 pm."}
+
+### Instruction:
+TASK: weather_impact
+Place: Itmad-ud-Daulah Tomb (category: monument), Agra
+Date: 2026-01-11
+Weather: max 25°C, rain 0 mm (4% chance), wind 14 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Jal Mahal (category: palace), Jaipur
+Date: 2026-12-14
+Weather: max 29°C, rain 10.5 mm (54% chance), wind 17 km/h, alert: none
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "none", "sensitive_to": "none", "best_time": "any", "reason": "The weather should not affect this visit."}
+
+### Instruction:
+TASK: weather_impact
+Place: Crawford Market (category: market), Mumbai
+Date: 2026-04-08
+Weather: max 28°C, rain 91.7 mm (82% chance), wind 42 km/h, alert: yellow for heavy rain
+Answer with JSON only: {"impact": "none|low|moderate|high|closed", "sensitive_to": "heat, rain, wind, flood or none", "best_time": "morning|afternoon|evening|any|avoid", "reason": "one short sentence"}
+### Response:
+{"impact": "moderate", "sensitive_to": "rain, flood", "best_time": "morning", "reason": "Showers are likely; go early and carry rain gear."}
+
