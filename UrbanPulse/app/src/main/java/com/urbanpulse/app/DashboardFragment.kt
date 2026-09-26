@@ -114,9 +114,10 @@ class DashboardFragment : Fragment() {
 
             withContext(Dispatchers.Main) {
                 if (liveInfo != null) {
-                    tvAqiValue.text = "${liveInfo.aqi}"
-                    tvAqiStatus.text = "${liveInfo.aqiCategory} • PM2.5 ${liveInfo.pm25} µg/m³"
-                    tvWeatherTemp.text = "${liveInfo.temperatureC}°C"
+                    val aqiCat = if (liveInfo.usAqi <= 50) "Good" else if (liveInfo.usAqi <= 100) "Moderate" else "Unhealthy"
+                    tvAqiValue.text = "${liveInfo.usAqi}"
+                    tvAqiStatus.text = "$aqiCat • PM2.5 ${liveInfo.pm25.roundToInt()} µg/m³"
+                    tvWeatherTemp.text = "${liveInfo.temperatureC.roundToInt()}°C"
                     tvWeatherCondition.text = "${liveInfo.condition} • Humidity ${liveInfo.humidityPercent}%"
                 } else {
                     tvAqiValue.text = "48"

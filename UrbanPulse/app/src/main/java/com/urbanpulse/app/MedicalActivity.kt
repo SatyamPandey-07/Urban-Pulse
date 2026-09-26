@@ -75,42 +75,25 @@ class MedicalActivity : AppCompatActivity() {
             longitude = lon
         }
 
-        val search = searchApi
-        if (search != null && BuildConfig.TOMTOM_API_KEY != "DEMO_TOMTOM_KEY") {
-            val options = SearchOptions(
-                query = "hospital",
-                geoBias = GeoPoint(lat, lon),
-                limit = 10
-            )
+        lifecycleScope.launch {
+            val poiList = withContext(Dispatchers.IO) {
+                LiveCityIntelligenceService.searchNearbyPoi("hospital", lat, lon)
+            }
 
-            search.search(options, object : SearchCallback {
-                override fun onSuccess(result: SearchResponse) {
-                    val places = result.results.map {
-                        MedicalFacility(
-                            name = it.place.name ?: "Hospital / Medical Center",
-                            address = it.place.address?.freeformAddress ?: "Emergency Care",
-                            phone = it.place.phone ?: "108",
-                            latitude = it.place.coordinate.latitude,
-                            longitude = it.place.coordinate.longitude
-                        )
-                    }
-                    runOnUiThread {
-                        if (places.isNotEmpty()) {
-                            recyclerView.adapter = MedicalAdapter(places, userLoc)
-                        } else {
-                            loadEmergencyMedicalFallback(userLoc)
-                        }
-                    }
+            if (poiList.isNotEmpty()) {
+                val places = poiList.map {
+                    MedicalFacility(
+                        name = it.name,
+                        address = it.address,
+                        phone = it.phone ?: "+91 22 4365 4365",
+                        latitude = it.lat,
+                        longitude = it.lon
+                    )
                 }
-
-                override fun onFailure(failure: SearchFailure) {
-                    runOnUiThread {
-                        loadEmergencyMedicalFallback(userLoc)
-                    }
-                }
-            })
-        } else {
-            loadEmergencyMedicalFallback(userLoc)
+                recyclerView.adapter = MedicalAdapter(places, userLoc)
+            } else {
+                loadEmergencyMedicalFallback(userLoc)
+            }
         }
     }
 
