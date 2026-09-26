@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/config.dart';
@@ -97,6 +100,38 @@ class AgentToolkit {
     'overpass': true,
     'wikipedia': true,
   };
+
+  final Set<String> _prefetched = {};
+
+  /// Warms the caches for a destination as soon as the traveller has fixed it
+  /// (while they are still answering questions), so the real search is faster.
+  /// Uses only the free, key-less sources (Overpass, Wikipedia) with the same
+  /// parameters the finders use, and never a paid search or a model call. Runs
+  /// at most once per destination and never throws.
+  Future<void> prefetch(String destination) async {
+    final key = destination.trim().toLowerCase();
+    if (key.isEmpty || key.length > 80 || !_prefetched.add(key)) return;
+    try {
+      var point = await geocoder.lookup(destination);
+      if (point == null) {
+        final g = geoapify;
+        if (g != null && g.isConfigured) {
+          final c = (await g.geocode(destination, limit: 1))?.firstOrNull;
+          if (c != null) point = LatLng(c.lat, c.lon);
+        }
+      }
+      if (point == null) return;
+      final lat = point.latitude;
+      final lon = point.longitude;
+      await Future.wait([
+        overpass.hotelsAround(lat, lon, radiusM: 10000).then<Object?>((v) => v).catchError((_) => null),
+        overpass.attractionsAround(lat, lon, radiusM: 12000, limit: 110).then<Object?>((v) => v).catchError((_) => null),
+        wikipedia.geosearch(lat, lon, radiusM: 10000, limit: 40).then<Object?>((v) => v).catchError((_) => null),
+      ]);
+    } catch (_) {
+      // a prefetch that fails just means the real search does the work
+    }
+  }
 
   /// A fresh set of tools with its own credit budget for one plan.
   PlanToolset newPlan({ToolBudget? budget}) {

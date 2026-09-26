@@ -13,6 +13,8 @@ import '../atithi/atithi_agent.dart';
 import '../atithi/hotel_finder.dart';
 import '../bhatkanti/bhatkanti_agent.dart';
 import '../bhatkanti/hotspot_finder.dart';
+import '../hariyali/carbon_engine.dart';
+import '../hariyali/hariyali_agent.dart';
 import '../hisab/budget_engine.dart';
 import '../khoji/khoji.dart';
 import '../khoji/khoji_agent.dart';
@@ -643,8 +645,10 @@ class PlannerOrchestrator {
     DayPlanResult? days;
     Budget? budget;
     AuditResult? audit;
+    GreenReport? green;
     var rainIssues = const <Issue>[];
     var budgetIssues = const <Issue>[];
+    var greenIssues = const <Issue>[];
     var pass = -1;
     var dirty = true;
     final needs = {for (final n in brief.accessibilityNeeds) if (n != AccessibilityNeed.none) n};
@@ -658,14 +662,17 @@ class PlannerOrchestrator {
         days = planned.$1;
         rainIssues = planned.$2;
 
-        // Saksham and Hisab work on the same days at the same time.
+        // Saksham, Hisab and Hariyali work on the same days at the same time.
         final reports = await Future.wait([
           _auditNode(ctx, st, planned.$1, pass),
           _budgetNode(ctx, st, planned.$1, pass),
+          _greenNode(ctx, st, planned.$1, pass),
         ]);
         if (reports[0].payload is AuditResult) audit = reports[0].payload as AuditResult;
         if (reports[1].payload is Budget) budget = reports[1].payload as Budget;
         budgetIssues = reports[1].issues;
+        if (reports[2].payload is GreenResult) green = (reports[2].payload as GreenResult).report;
+        greenIssues = reports[2].issues;
       }
       if (pass >= maxPasses || ctx.degraded) break;
 
@@ -689,7 +696,7 @@ class PlannerOrchestrator {
         continue;
       }
 
-      final issues = [...fixes.issues, ...rainIssues, ...budgetIssues].where((i) => !_asked.contains(i.id)).toList();
+      final issues = [...fixes.issues, ...rainIssues, ...budgetIssues, ...greenIssues].where((i) => !_asked.contains(i.id)).toList();
       if (issues.isEmpty) break;
 
       final issue = issues.first;
@@ -699,6 +706,7 @@ class PlannerOrchestrator {
           AgentKind.saksham => 'access',
           AgentKind.raah => 'the weather',
           AgentKind.hisab => 'the budget',
+          AgentKind.hariyali => 'a greener choice',
           _ => 'the plan',
         }}',
         why: issue.why,
@@ -725,14 +733,28 @@ class PlannerOrchestrator {
       chosenTransport: st.chosen,
       weather: st.weather,
       audit: audit?.audit,
+      green: green,
       extraAssumptions: [...st.notes, if (st.stayOwn) 'You chose to arrange your own stay, so no hotel is included.'],
     );
+    final timed = itinerary.copyWith(timings: _timings());
     ctx.say(
       'put the plan together: ${itinerary.dayCount} days, ${rupees(b.totalInr)}',
       why: 'Yatri combined the stay, places, journey, days, access audit and budget into one itinerary.',
       kind: FeedKind.decide,
     );
-    return itinerary;
+    return timed;
+  }
+
+  /// Seconds each agent spent working, by agent name, and the active total.
+  Map<String, int> _timings() {
+    final out = <String, int>{};
+    for (final n in graph.nodes) {
+      final e = n.elapsed;
+      if (e == null || n.agent == AgentKind.yatri) continue;
+      out[n.agent.displayName] = (out[n.agent.displayName] ?? 0) + e.inSeconds;
+    }
+    out['total'] = clock.elapsed.inSeconds;
+    return out;
   }
 
   final Set<String> _autoDone = {};
@@ -760,6 +782,38 @@ class PlannerOrchestrator {
         ),
       ),
       say: pass == 0 ? 'asked Saksham to audit the plan for access' : 'asked Saksham to audit the changed plan',
+    );
+  }
+
+  Future<AgentReport> _greenNode(TaskContext ctx, _State st, DayPlanResult days, int pass) {
+    final brief = st.brief;
+    return ctx.delegate(
+      TaskSpec(
+        id: 'hariyali.green.$pass',
+        agent: AgentKind.hariyali,
+        title: pass == 0 ? 'Score the footprint' : 'Re-score the footprint',
+        why: 'Hariyali measures the carbon and eco impact of every choice and looks for greener ones.',
+        parents: ['raah.days.$pass'],
+        timeout: const Duration(seconds: 8),
+      ),
+      (c) => HariyaliAgent().run(
+        c,
+        GreenInput(
+          days: days.days,
+          nights: BudgetEngine.nights(brief),
+          rooms: BudgetEngine.rooms(brief),
+          travellers: BudgetEngine.travellers(brief),
+          hotel: st.hotel,
+          outbound: st.chosen,
+          inbound: _mirror(st.chosen),
+          transport: st.transport,
+          hotelAlternatives: st.hotels?.options ?? const [],
+          needs: {for (final n in brief.accessibilityNeeds) if (n != AccessibilityNeed.none) n},
+          localModes: brief.transportModes,
+        ),
+        preferGreenest: brief.sustainability == SustainabilityPriority.greenest,
+      ),
+      say: pass == 0 ? 'asked Hariyali to score the footprint' : 'asked Hariyali to re-score the footprint',
     );
   }
 

@@ -23,6 +23,7 @@ import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
 import '../models/trip_models.dart';
 import '../models/yatri_question.dart';
+import '../repositories/itinerary_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
 import '../services/groq_api_client.dart';
@@ -163,6 +164,7 @@ class YatriController extends ChangeNotifier {
     this.onTripSaved,
     this.geocode,
     this.toolkit,
+    this.itineraries,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     brief = TripBrief.empty(_clock());
@@ -186,6 +188,9 @@ class YatriController extends ChangeNotifier {
 
   /// The multi-agent planner's tools. Null keeps the phase-1 single-call planner.
   final AgentToolkit? toolkit;
+
+  /// Where finished itineraries are kept so My Trips can reopen them.
+  final ItineraryRepository? itineraries;
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
@@ -599,6 +604,12 @@ class YatriController extends ChangeNotifier {
   /// and confirmed), and keeps it in step with later changes to the places or
   /// the selected transport modes.
   void _syncMap() {
+    // The destination is fixed: start warming the data the planner will need.
+    final dest = brief.destination?.trim();
+    if (dest != null && dest.isNotEmpty && !report.hasIssueFor(BriefField.destination)) {
+      final tk = toolkit;
+      if (tk != null) unawaited(tk.prefetch(dest));
+    }
     final lookup = geocode;
     if (lookup == null) return;
 
@@ -814,6 +825,7 @@ class YatriController extends ChangeNotifier {
 
   Future<void> saveItinerary(ItineraryEntry entry) async {
     if (entry.saved) return;
+    await itineraries?.save(entry.itinerary);
     await trips.addTrip(entry.itinerary.toTripPlan());
     entry.saved = true;
     await onTripSaved?.call();
