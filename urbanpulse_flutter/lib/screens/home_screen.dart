@@ -51,9 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _destinations = <NavigationDestination>[
     NavigationDestination(
-      icon: Icon(Icons.grid_view_outlined),
-      selectedIcon: Icon(Icons.grid_view_rounded),
-      label: 'Dashboard',
+      icon: Icon(Icons.home_outlined),
+      selectedIcon: Icon(Icons.home_rounded),
+      label: 'Home',
     ),
     NavigationDestination(
       icon: Icon(Icons.map_outlined),
@@ -143,23 +143,23 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.primaryGreen,
+                  shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.35),
+                      color: AppColors.primaryGreen.withValues(alpha: 0.35),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: const Icon(
-                  Icons.near_me_rounded,
+                  Icons.location_on_rounded,
                   size: 20,
-                  color: Color(0xFF0B1015),
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,26 +173,23 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
                             ),
                           ),
                         ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                         if (location.isResolving)
                           const Padding(
-                            padding: EdgeInsets.only(left: 8),
+                            padding: EdgeInsets.only(left: 6),
                             child: SizedBox.square(
                               dimension: 12,
                               child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          )
-                        else
-                          Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: Icon(
-                              Icons.sync_rounded,
-                              size: 14,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                             ),
                           ),
                       ],
@@ -214,64 +211,61 @@ class _LocationAppBarState extends State<_LocationAppBar> {
         ),
       ),
       actions: [
-        IconButton(
-          icon: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceCard,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.surfaceBorder,
-                width: 1,
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            IconButton(
+              icon: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerLow,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.colorScheme.outlineVariant,
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  Icons.notifications_none_rounded,
+                  size: 20,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              tooltip: 'Notifications & Achievements',
+              onPressed: () => Navigator.of(context).pushNamed(Routes.achievements),
+            ),
+            Positioned(
+              top: 16,
+              right: 14,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.solidError,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-            child: const Icon(
-              Icons.notifications_none_rounded,
-              size: 18,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          tooltip: 'Notifications & Achievements',
-          onPressed: () => Navigator.of(context).pushNamed(Routes.achievements),
+          ],
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 4, right: 14),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: () => Navigator.of(context).pushNamed(Routes.sos),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.sosRed, AppColors.sosDeepRed],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.sosRed.withValues(alpha: 0.45),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+          padding: const EdgeInsets.only(right: 14),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () => Navigator.of(context).pushNamed(Routes.carbonWallet),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primaryGreen.withValues(alpha: 0.5),
+                  width: 1.5,
                 ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.emergency_outlined, size: 15, color: Colors.white),
-                    SizedBox(width: 4),
-                    Text(
-                      'SOS',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                  ],
+                image: const DecorationImage(
+                  image: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&fit=crop&q=80'),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),

@@ -42,12 +42,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
   bool _isRouting = false;
 
   _RouteComparison? _comparison;
-  String _statusTitle = 'Dual Route Comparison';
-  String _statusSubtitle =
-      'Comparing Green Electric Corridor vs Standard Petrol Cab';
-
   List<LivePoiResult> _searchResults = const [];
-  LivePoiResult? _nearestHospital;
 
   @override
   void initState() {
@@ -161,23 +156,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
     );
   }
 
-  /// Routes to the nearest real result for a category, instead of a coordinate
-  /// pair written into the chip handler.
-  Future<void> _routeToNearest(String query, String emptyMessage) async {
-    final results = await TomTomService.searchNearbyPoi(
-      query,
-      _currentLat,
-      _currentLon,
-      limit: 1,
-    );
-    if (!mounted) return;
-    final nearest = results.firstOrNull;
-    if (nearest == null) {
-      showToast(context, emptyMessage);
-      return;
-    }
-    await _calculateAndDrawDualRoutes(nearest.lat, nearest.lon, nearest.name);
-  }
+
 
   Future<void> _centerMap(double lat, double lon, int zoom) =>
       _webView.runJavaScript('window.setCenter($lat, $lon, $zoom);');
@@ -390,13 +369,15 @@ class _LiveMapTabState extends State<LiveMapTab> {
         ),
         _topOverlay(context),
         _floatingControls(context),
-        _comparisonHud(context),
+        if (_comparison != null)
+          _comparisonHud(context)
+        else
+          _nearbyPlacesSheet(context),
       ],
     );
   }
 
   Widget _topOverlay(BuildContext context) {
-    final theme = Theme.of(context);
     return Positioned(
       top: 12,
       left: 16,
@@ -628,53 +609,40 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   Widget _filterChips(BuildContext context) {
     return SizedBox(
-      height: 38,
+      height: 36,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
           _filterChipItem(
-            label: 'Dual Routes',
-            icon: Icons.check_rounded,
-            isSelected: true,
-            onTap: () {
-              final destination = _searchResults.firstOrNull ?? _nearestHospital;
-              if (destination == null) {
-                showToast(
-                  context,
-                  'Search for a destination first, then compare the two routes to it.',
-                );
-                return;
-              }
-              _calculateAndDrawDualRoutes(
-                destination.lat,
-                destination.lon,
-                destination.name,
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-          _filterChipItem(
-            label: 'Hospitals',
-            icon: Icons.add_rounded,
+            label: 'Hotels',
+            icon: Icons.hotel_rounded,
+            iconColor: const Color(0xFF00A86B),
             isSelected: false,
-            onTap: () => _routeToNearest(
-              'hospital',
-              'No hospitals found near your location.',
-            ),
+            onTap: () => _performSearch('hotel'),
           ),
           const SizedBox(width: 8),
           _filterChipItem(
-            label: 'Traffic',
-            icon: Icons.traffic_rounded,
-            isSelected: _isTrafficEnabled,
-            onTap: _toggleTraffic,
+            label: 'Food',
+            icon: Icons.restaurant_rounded,
+            iconColor: const Color(0xFFEF4444),
+            isSelected: false,
+            onTap: () => _performSearch('restaurant'),
+          ),
+          const SizedBox(width: 8),
+          _filterChipItem(
+            label: 'Attractions',
+            icon: Icons.star_rounded,
+            iconColor: const Color(0xFFF59E0B),
+            isSelected: false,
+            onTap: () => _performSearch('tourist attraction'),
           ),
           const SizedBox(width: 8),
           _filterChipItem(
             label: '',
-            icon: Icons.accessible_rounded,
+            icon: Icons.more_horiz_rounded,
+            iconColor: const Color(0xFF64748B),
             isSelected: false,
-            onTap: () => showToast(context, 'Accessibility routing active'),
+            onTap: () => _toggleTraffic(),
           ),
         ],
       ),
@@ -684,41 +652,45 @@ class _LiveMapTabState extends State<LiveMapTab> {
   Widget _filterChipItem({
     required String label,
     required IconData icon,
+    required Color iconColor,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(19),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
         height: 36,
-        padding: EdgeInsets.symmetric(horizontal: label.isEmpty ? 10 : 12),
+        padding: EdgeInsets.symmetric(horizontal: label.isEmpty ? 10 : 14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryGreen.withValues(alpha: 0.16)
-              : AppColors.surfaceCard,
-          borderRadius: BorderRadius.circular(19),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primaryGreen
-                : AppColors.surfaceBorder,
+            color: AppColors.surfaceLightBorder,
             width: 1,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 15,
-              color: isSelected ? AppColors.primaryGreen : AppColors.textPrimary,
+              size: 16,
+              color: iconColor,
             ),
             if (label.isNotEmpty) ...[
               const SizedBox(width: 6),
               Text(
                 label,
-                style: TextStyle(
-                  color: isSelected ? AppColors.primaryGreen : AppColors.textPrimary,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -730,12 +702,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
     );
   }
 
-  /// Re-reads the live flow segment so the overlay reflects current conditions.
-  Future<void> _refreshTraffic() async {
-    await _drawLiveTrafficSegment();
-    if (!mounted) return;
-    showToast(context, 'Live traffic overlay refreshed.');
-  }
+
 
   Future<void> _centreOnUser() async {
     await _locateUser(zoom: 15, force: true);
@@ -745,7 +712,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   Widget _floatingControls(BuildContext context) => Positioned(
     right: 16,
-    bottom: 230,
+    bottom: _comparison != null ? 360 : 185,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -778,12 +745,12 @@ class _LiveMapTabState extends State<LiveMapTab> {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: AppColors.surfaceCard,
+            color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.surfaceBorder, width: 1),
+            border: Border.all(color: AppColors.surfaceLightBorder, width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -795,8 +762,152 @@ class _LiveMapTabState extends State<LiveMapTab> {
     );
   }
 
+  Widget _nearbyPlacesSheet(BuildContext context) {
+    return Positioned(
+      left: 16,
+      right: 16,
+      bottom: 16,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.surfaceLightBorder, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Nearby Places',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                InkWell(
+                  onTap: () => showToast(context, 'Showing all nearby places'),
+                  child: const Text(
+                    'See all >',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF00A86B),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _nearbyCategoryTile(
+                    title: 'Hotels',
+                    subtitle: '12 nearby',
+                    icon: Icons.hotel_rounded,
+                    color: const Color(0xFF00A86B),
+                    bg: const Color(0xFFE8F8F0),
+                    onTap: () => _performSearch('hotel'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _nearbyCategoryTile(
+                    title: 'Food',
+                    subtitle: '18 nearby',
+                    icon: Icons.restaurant_rounded,
+                    color: const Color(0xFFEF4444),
+                    bg: const Color(0xFFFEE2E2),
+                    onTap: () => _performSearch('restaurant'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _nearbyCategoryTile(
+                    title: 'Attractions',
+                    subtitle: '7 nearby',
+                    icon: Icons.star_rounded,
+                    color: const Color(0xFFF59E0B),
+                    bg: const Color(0xFFFEF3C7),
+                    onTap: () => _performSearch('tourist attraction'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _nearbyCategoryTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required Color bg,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: AppColors.bgLight,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.surfaceLightBorder, width: 0.8),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: bg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              maxLines: 1,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 12.5,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              maxLines: 1,
+              style: const TextStyle(
+                fontSize: 10.5,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _comparisonHud(BuildContext context) {
-    final theme = Theme.of(context);
     final comparison = _comparison;
 
     final greenDuration = comparison != null
@@ -817,9 +928,20 @@ class _LiveMapTabState extends State<LiveMapTab> {
       left: 16,
       right: 16,
       bottom: 16,
-      child: SectionCard(
+      child: Container(
         padding: const EdgeInsets.all(16),
-        borderWidth: 1,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.surfaceLightBorder, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -827,17 +949,25 @@ class _LiveMapTabState extends State<LiveMapTab> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Dual Route Comparison',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
                     fontSize: 16,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 if (_isRouting)
                   const SizedBox.square(
                     dimension: 14,
                     child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textSecondary),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => setState(() => _comparison = null),
                   ),
               ],
             ),
@@ -848,11 +978,11 @@ class _LiveMapTabState extends State<LiveMapTab> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryGreen.withValues(alpha: 0.08),
+                      color: const Color(0xFFE8F8F0),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.primaryGreen.withValues(alpha: 0.5),
-                        width: 1.2,
+                        color: const Color(0xFF00A86B),
+                        width: 1.5,
                       ),
                     ),
                     child: Column(
@@ -860,12 +990,12 @@ class _LiveMapTabState extends State<LiveMapTab> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.eco_rounded, size: 14, color: AppColors.primaryGreen),
+                            Icon(Icons.eco_rounded, size: 14, color: Color(0xFF00A86B)),
                             SizedBox(width: 4),
                             Text(
                               'Green Path',
                               style: TextStyle(
-                                color: AppColors.primaryGreen,
+                                color: Color(0xFF00A86B),
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -873,22 +1003,13 @@ class _LiveMapTabState extends State<LiveMapTab> {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Text(
-                              greenDuration,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              size: 18,
-                              color: AppColors.primaryGreen,
-                            ),
-                          ],
+                        Text(
+                          greenDuration,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -896,8 +1017,9 @@ class _LiveMapTabState extends State<LiveMapTab> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: AppColors.primaryGreen,
+                            color: Color(0xFF00A86B),
                             fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -909,10 +1031,10 @@ class _LiveMapTabState extends State<LiveMapTab> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceElevated.withValues(alpha: 0.4),
+                      color: AppColors.bgLight,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.surfaceBorder,
+                        color: AppColors.surfaceLightBorder,
                         width: 1,
                       ),
                     ),
@@ -921,12 +1043,12 @@ class _LiveMapTabState extends State<LiveMapTab> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.directions_car_rounded, size: 14, color: AppColors.solidError),
+                            Icon(Icons.directions_car_rounded, size: 14, color: AppColors.textSecondary),
                             SizedBox(width: 4),
                             Text(
                               'Standard Path',
                               style: TextStyle(
-                                color: AppColors.solidError,
+                                color: AppColors.textSecondary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -936,9 +1058,10 @@ class _LiveMapTabState extends State<LiveMapTab> {
                         const SizedBox(height: 6),
                         Text(
                           normalDuration,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
                             fontSize: 18,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -946,8 +1069,8 @@ class _LiveMapTabState extends State<LiveMapTab> {
                           normalDetail,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
                             fontSize: 11,
                           ),
                         ),
@@ -956,6 +1079,37 @@ class _LiveMapTabState extends State<LiveMapTab> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F8F0),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.eco_rounded, size: 15, color: Color(0xFF00A86B)),
+                      SizedBox(width: 6),
+                      Text(
+                        'Why choose green?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          color: Color(0xFF00A86B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  _whyChooseGreenItem('Lower carbon emissions'),
+                  _whyChooseGreenItem('Less traffic'),
+                  _whyChooseGreenItem('Smoother & scenic route'),
+                ],
+              ),
             ),
             const SizedBox(height: 14),
             SizedBox(
@@ -966,15 +1120,14 @@ class _LiveMapTabState extends State<LiveMapTab> {
                   showToast(context, 'Starting green multimodal navigation...');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryGreen,
-                  foregroundColor: const Color(0xFF0B1015),
-                  elevation: 4,
-                  shadowColor: AppColors.primaryGreen.withValues(alpha: 0.4),
+                  backgroundColor: const Color(0xFF00A86B),
+                  foregroundColor: Colors.white,
+                  elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                icon: const Icon(Icons.near_me_rounded, size: 18),
+                icon: const Icon(Icons.near_me_rounded, size: 18, color: Colors.white),
                 label: const Text(
                   'Start Navigation',
                   style: TextStyle(
@@ -987,6 +1140,26 @@ class _LiveMapTabState extends State<LiveMapTab> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _whyChooseGreenItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        children: [
+          const Icon(Icons.check_rounded, size: 13, color: Color(0xFF00A86B)),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
       ),
     );
   }

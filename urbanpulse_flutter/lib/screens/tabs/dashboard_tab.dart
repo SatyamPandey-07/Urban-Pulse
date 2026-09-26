@@ -64,36 +64,26 @@ class _DashboardTabState extends State<DashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final services = AppScope.of(context);
+    final city = services.location.hasFix &&
+            services.location.city != null &&
+            services.location.city!.isNotEmpty
+        ? services.location.city!
+        : 'Panvel';
+
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Dashboard',
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Smarter • Greener • More Inclusive',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 12,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _searchBar(context),
+          const SizedBox(height: 18),
+          _categoryIconsRow(context),
+          const SizedBox(height: 20),
+          _heroBannerCard(context, city),
+          const SizedBox(height: 22),
+          _popularDestinationsSection(context),
+          const SizedBox(height: 22),
           _geoIntelligenceCard(context),
           const SizedBox(height: 24),
           _travelHubSection(context),
@@ -103,6 +93,411 @@ class _DashboardTabState extends State<DashboardTab> {
           _congestionCard(context),
         ],
       ),
+    );
+  }
+
+  Widget _searchBar(BuildContext context) {
+    return InkWell(
+      onTap: () => HomeTabController.maybeOf(context)?.switchToTab(1),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.surfaceLightBorder,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.search_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Search places, hotels, facilities...',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.bgLight,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.tune_rounded,
+                color: AppColors.textSecondary,
+                size: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _categoryIconsRow(BuildContext context) {
+    final categories = [
+      (
+        'Hotels',
+        Icons.hotel_rounded,
+        const Color(0xFF00A86B),
+        const Color(0xFFE8F8F0),
+        () => Navigator.of(context).pushNamed(Routes.hospitality),
+      ),
+      (
+        'Flights',
+        Icons.flight_rounded,
+        const Color(0xFF1E88E5),
+        const Color(0xFFE8F2FE),
+        () => Navigator.of(context).pushNamed(Routes.greenRoutePlanner),
+      ),
+      (
+        'Trains',
+        Icons.train_rounded,
+        const Color(0xFF00ACC1),
+        const Color(0xFFE6F7FA),
+        () => Navigator.of(context).pushNamed(Routes.greenRoutePlanner),
+      ),
+      (
+        'Attractions',
+        Icons.star_rounded,
+        const Color(0xFFFB8C00),
+        const Color(0xFFFEF7E6),
+        () => Navigator.of(context).pushNamed(Routes.itinerary),
+      ),
+      (
+        'More',
+        Icons.more_horiz_rounded,
+        const Color(0xFF64748B),
+        const Color(0xFFF1F5F9),
+        () => Navigator.of(context).pushNamed(Routes.hotelOptimizer),
+      ),
+    ];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: categories.map((cat) {
+        return InkWell(
+          onTap: cat.$5,
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: cat.$4,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: cat.$3.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(cat.$2, color: cat.$3, size: 24),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                cat.$1,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _heroBannerCard(BuildContext context, String city) {
+    return InkWell(
+      onTap: () => HomeTabController.maybeOf(context)?.switchToTab(3),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        height: 145,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.network(
+                'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF064E3B), Color(0xFF047857), Color(0xFF0F766E)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.85),
+                      Colors.black.withValues(alpha: 0.5),
+                      Colors.black.withValues(alpha: 0.2),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Explore',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        Text(
+                          '$city & Beyond',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Nature, culture, food and\nunforgettable experiences',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 12,
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Color(0xFF00A86B),
+                      size: 22,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _popularDestinationsSection(BuildContext context) {
+    final destinations = [
+      (
+        'Lonavala',
+        '28 km • Hill station',
+        'https://images.unsplash.com/photo-1570789210967-2cac24afeb00?w=600&auto=format&fit=crop&q=80',
+        const Color(0xFF047857),
+      ),
+      (
+        'Alibaug',
+        '56 km • Beach',
+        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
+        const Color(0xFF0284C7),
+      ),
+      (
+        'Matheran',
+        '65 km • Hill station',
+        'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&auto=format&fit=crop&q=80',
+        const Color(0xFF059669),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Popular Destinations Near You',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.2,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            InkWell(
+              onTap: () => HomeTabController.maybeOf(context)?.switchToTab(2),
+              child: const Text(
+                'See all >',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF00A86B),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 170,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: destinations.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final d = destinations[index];
+              return InkWell(
+                onTap: () {
+                  HomeTabController.maybeOf(context)?.switchToTab(3);
+                  showToast(context, 'Ask Yatri AI: "Plan a trip to ${d.$1}"');
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: 140,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.surfaceLightBorder,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              d.$3,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: d.$4.withValues(alpha: 0.2),
+                                child: Icon(Icons.terrain_rounded, color: d.$4, size: 36),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.location_on_rounded,
+                                  size: 14,
+                                  color: Color(0xFF00A86B),
+                                ),
+                                const SizedBox(width: 3),
+                                Expanded(
+                                  child: Text(
+                                    d.$1,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 13,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              d.$2,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 10.5,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -481,52 +876,7 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _currentConditionsRow(BuildContext context) {
-    final aqi = _telemetry?.usAqi;
-    final temperature = _telemetry?.temperatureC;
 
-    final aqiColor = aqi == null
-        ? null
-        : aqi <= 50
-        ? AppColors.solidSuccess
-        : aqi <= 100
-        ? AppColors.solidWarning
-        : AppColors.solidError;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SectionCard(
-            child: StatTile(
-              label: 'Air Quality',
-              icon: Icons.air_rounded,
-              value: aqi?.toString() ?? (_isLoading ? '…' : '—'),
-              valueColor: aqiColor,
-              caption: aqi == null
-                  ? (_isLoading ? 'Reading sensors…' : 'Unavailable offline')
-                  : '${_aqiBand(aqi)} • PM2.5',
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SectionCard(
-            child: StatTile(
-              label: 'City Weather',
-              icon: Icons.thermostat_rounded,
-              value: temperature == null
-                  ? (_isLoading ? '…' : '—')
-                  : '${fixed(temperature, 0)}°C',
-              caption:
-                  _telemetry?.condition ??
-                  (_isLoading ? 'Reading sensors…' : 'Unavailable offline'),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _aqiTrendCard(BuildContext context) {
     final theme = Theme.of(context);

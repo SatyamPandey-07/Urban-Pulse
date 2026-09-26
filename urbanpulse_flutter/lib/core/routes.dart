@@ -12,6 +12,7 @@ import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/sos_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/sustainable_trips_hub_screen.dart';
 import '../screens/trip_detail_screen.dart';
 import '../screens/welcome_screen.dart';
 
@@ -32,6 +33,7 @@ abstract final class Routes {
   static const carbonWallet = '/carbon-wallet';
   static const itinerary = '/itinerary';
   static const tripDetail = '/trip-detail';
+  static const sustainableTripsHub = '/sustainable-trips-hub';
 
   static Map<String, WidgetBuilder> get table => {
     splash: (_) => const SplashScreen(),
@@ -46,6 +48,7 @@ abstract final class Routes {
     hotelOptimizer: (_) => const HotelOptimizerScreen(),
     carbonWallet: (_) => const CarbonWalletScreen(),
     itinerary: (_) => const ItineraryScreen(),
+    sustainableTripsHub: (_) => const SustainableTripsHubScreen(),
   };
 
   /// [tripDetail] is the one route that carries an argument.

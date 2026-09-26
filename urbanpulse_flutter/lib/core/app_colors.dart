@@ -6,16 +6,24 @@ import 'package:flutter/material.dart';
 /// original layouts did.
 abstract final class AppColors {
   // Base solid palette (accent options).
-  static const primaryGreen = Color(0xFF00E599); // Electric Cyber Emerald / Mint
-  static const primaryGreenDark = Color(0xFF00B87A);
-  static const primaryBlue = Color(0xFF38BDF8);
+  static const primaryGreen = Color(0xFF00A86B); // Rich Emerald Green matching UI reference
+  static const primaryGreenDark = Color(0xFF00875A);
+  static const primaryGreenLight = Color(0xFFE8F8F0); // Soft mint for category pills
+  static const primaryBlue = Color(0xFF2563EB);
   static const primaryIndigo = Color(0xFF6366F1);
   static const primaryPurple = Color(0xFF8B5CF6);
   static const primaryOrange = Color(0xFFF97316);
   static const primaryPink = Color(0xFFEC4899);
   static const primaryTeal = Color(0xFF14B8A6);
 
-  // Dark surface hierarchy (obsidian slate palette matching world-class reference).
+  // Light surface hierarchy (Clean white & slate matching world-class reference).
+  static const bgLight = Color(0xFFF8FAFC);
+  static const surfaceLight = Color(0xFFFFFFFF);
+  static const surfaceLightBorder = Color(0xFFE2E8F0);
+  static const textPrimaryLight = Color(0xFF0F172A);
+  static const textSecondaryLight = Color(0xFF64748B);
+
+  // Dark surface hierarchy (obsidian slate palette).
   static const bgDark = Color(0xFF0B1015);
   static const surfaceDark = Color(0xFF131A22);
   static const surfaceCard = Color(0xFF16212B);

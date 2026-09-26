@@ -35,6 +35,21 @@ abstract final class AppTheme {
         outlineVariant: AppColors.surfaceBorder,
         error: AppColors.solidError,
       );
+    } else {
+      scheme = scheme.copyWith(
+        primary: accent.seed,
+        onPrimary: Colors.white,
+        surface: AppColors.bgLight,
+        surfaceContainerLowest: Colors.white,
+        surfaceContainerLow: Colors.white,
+        surfaceContainer: Colors.white,
+        surfaceContainerHigh: const Color(0xFFF1F5F9),
+        surfaceContainerHighest: const Color(0xFFE2E8F0),
+        onSurface: AppColors.textPrimaryLight,
+        onSurfaceVariant: AppColors.textSecondaryLight,
+        outlineVariant: AppColors.surfaceLightBorder,
+        error: AppColors.solidError,
+      );
     }
 
     return ThemeData(
@@ -50,22 +65,22 @@ abstract final class AppTheme {
         centerTitle: false,
       ),
       cardTheme: CardThemeData(
-        color: isDark ? AppColors.surfaceCard : scheme.surfaceContainerLow,
+        color: isDark ? AppColors.surfaceCard : Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
             color: isDark
                 ? AppColors.surfaceBorder.withValues(alpha: 0.8)
-                : scheme.outlineVariant.withValues(alpha: 0.5),
+                : AppColors.surfaceLightBorder,
             width: 1,
           ),
         ),
         margin: EdgeInsets.zero,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: isDark ? AppColors.surfaceDark : scheme.surfaceContainerLow,
-        indicatorColor: scheme.primary.withValues(alpha: 0.20),
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+        indicatorColor: scheme.primary.withValues(alpha: isDark ? 0.20 : 0.12),
         elevation: 0,
         height: 68,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -73,7 +88,10 @@ abstract final class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(color: scheme.primary, size: 24);
           }
-          return const IconThemeData(color: AppColors.textSecondary, size: 22);
+          return IconThemeData(
+            color: isDark ? AppColors.textSecondary : const Color(0xFF94A3B8),
+            size: 22,
+          );
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -83,8 +101,8 @@ abstract final class AppTheme {
               fontSize: 12,
             );
           }
-          return const TextStyle(
-            color: AppColors.textSecondary,
+          return TextStyle(
+            color: isDark ? AppColors.textSecondary : const Color(0xFF64748B),
             fontWeight: FontWeight.w500,
             fontSize: 11,
           );
