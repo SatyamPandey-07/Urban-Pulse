@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _obscurePassword = true;
+  bool _busy = false;
 
   @override
   void dispose() {
@@ -26,51 +27,65 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _performLogin(String email) async {
+  Future<void> _performLogin(String email, String password) async {
+    if (_busy) return;
+    final auth = AppScope.of(context).auth;
     final navigator = Navigator.of(context);
-    await AppScope.of(context).auth.signIn(email);
+    setState(() => _busy = true);
+    final result = await auth.signIn(email: email, password: password);
     if (!mounted) return;
-    showToast(context, 'Logged in as $email (Demo Mode Active)');
-    navigator.pushNamedAndRemoveUntil(Routes.home, (route) => false);
+    setState(() => _busy = false);
+    switch (result) {
+      case AuthOk():
+        showToast(context, auth.usesAccounts ? 'Signed in as $email' : 'Logged in as $email (on this device only)');
+        navigator.pushNamedAndRemoveUntil(Routes.home, (route) => false);
+      case AuthNeedsConfirmation():
+        showToast(context, 'Please confirm your email first: check your inbox for the link.');
+      case AuthFailed(:final message):
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Login Failed'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+    }
   }
 
   Future<void> _onSignInPressed() async {
-    final auth = AppScope.of(context).auth;
     final email = _email.text.trim();
     final password = _password.text;
-
     if (email.isEmpty || password.isEmpty) {
       showToast(context, 'Please enter email and password');
       return;
     }
-
-    if (auth.validateCredentials(email, password)) {
-      await _performLogin(email);
-      return;
-    }
-
-    if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Failed'),
-        content: const Text(
-          'Invalid email or password. Password must be at least 6 characters.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    await _performLogin(email, password);
   }
 
   Future<void> _onDemoLoginPressed() async {
     _email.text = AuthController.demoEmail;
     _password.text = AuthController.demoPassword;
-    await _performLogin(AuthController.demoEmail);
+    await _performLogin(AuthController.demoEmail, AuthController.demoPassword);
+  }
+
+  Future<void> _onForgotPassword() async {
+    final email = _email.text.trim();
+    if (!email.contains('@')) {
+      showToast(context, 'Enter your email above, then tap Forgot password');
+      return;
+    }
+    final result = await AppScope.of(context).auth.resetPassword(email);
+    if (!mounted) return;
+    showToast(context, switch (result) {
+      AuthFailed(:final message) => message,
+      _ => 'If $email has an account, a reset link is on its way.',
+    });
   }
 
   @override
@@ -133,16 +148,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 height: 56,
                 child: FilledButton(
-                  onPressed: _onSignInPressed,
-                  child: const Text('Sign In'),
+                  onPressed: _busy ? null : _onSignInPressed,
+                  child: _busy
+                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
+                      : const Text('Sign In'),
                 ),
               ),
+              if (AppScope.of(context).auth.usesAccounts)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(onPressed: _busy ? null : _onForgotPassword, child: const Text('Forgot password?')),
+                ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: FilledButton.tonalIcon(
-                  onPressed: _onDemoLoginPressed,
+                  onPressed: _busy ? null : _onDemoLoginPressed,
                   icon: const Icon(Icons.celebration),
                   label: const Text('1-Tap Demo Login (Judge / Guest Mode)'),
                 ),

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/app_theme.dart';
 import 'core/config.dart';
@@ -12,7 +15,20 @@ Future<void> main() async {
   // managers; doing it here keeps every controller synchronous at call sites.
   final prefs = await SharedPreferences.getInstance();
   await AppConfig.loadOverrides(prefs);
-  runApp(UrbanPulseApp(services: AppServices(prefs)));
+  // Real accounts and cloud storage when the project is configured; the
+  // Supabase client keeps the session across launches.
+  SupabaseClient? supabase;
+  if (AppConfig.hasSupabase) {
+    try {
+      supabase = (await Supabase.initialize(url: AppConfig.supabaseUrl, publishableKey: AppConfig.supabaseKey)).client;
+    } catch (_) {
+      supabase = null; // the app still runs, on the device only
+    }
+  }
+  final services = AppServices(prefs, supabase: supabase);
+  runApp(UrbanPulseApp(services: services));
+  // A kept session: bring the traveller's data up to date in the background.
+  unawaited(services.auth.resume());
 }
 
 class UrbanPulseApp extends StatelessWidget {

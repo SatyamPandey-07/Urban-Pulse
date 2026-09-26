@@ -5,6 +5,7 @@ import '../domain/evidence_graph_service.dart';
 import '../models/evidence.dart';
 import '../models/experience_listing.dart';
 import '../models/hospitality_stay.dart';
+import '../services/cloud/cloud_store.dart';
 
 /// Owns the traveler's own step-free / visual / hearing / service-animal
 /// accessibility preference flags, and is the entry point for evidence-tagged
@@ -15,7 +16,7 @@ import '../models/hospitality_stay.dart';
 ///
 /// Port of `AccessibilityManager.kt`.
 class AccessibilityController extends ChangeNotifier {
-  AccessibilityController(this._prefs);
+  AccessibilityController(this._prefs, {this.cloud});
 
   static const _prefix = 'AccessibilityPrefs';
   static const _keyWheelchair = '$_prefix.key_wheelchair_mode';
@@ -24,6 +25,15 @@ class AccessibilityController extends ChangeNotifier {
   static const _keyServiceAnimal = '$_prefix.key_service_animal';
 
   final SharedPreferences _prefs;
+  final CloudStore? cloud;
+
+  /// The account's column for each flag (`user_settings`).
+  static const _columns = {
+    _keyWheelchair: 'wheelchair_mode',
+    _keyVisual: 'visual_assist',
+    _keyHearing: 'hearing_assist',
+    _keyServiceAnimal: 'service_animal_only',
+  };
 
   bool get isWheelchairModeEnabled => _prefs.getBool(_keyWheelchair) ?? false;
 
@@ -45,6 +55,25 @@ class AccessibilityController extends ChangeNotifier {
 
   Future<void> _set(String key, bool value) async {
     await _prefs.setBool(key, value);
+    notifyListeners();
+    await cloud?.saveSettings({_columns[key]!: value});
+  }
+
+  /// The flags as the account stores them.
+  Map<String, Object?> snapshot() => {for (final e in _columns.entries) e.value: _prefs.getBool(e.key) ?? false};
+
+  /// The device flags become the account's.
+  Future<void> applyCloud(Map<String, dynamic> row) async {
+    for (final e in _columns.entries) {
+      await _prefs.setBool(e.key, row[e.value] == true);
+    }
+    notifyListeners();
+  }
+
+  Future<void> clear() async {
+    for (final k in _columns.keys) {
+      await _prefs.remove(k);
+    }
     notifyListeners();
   }
 

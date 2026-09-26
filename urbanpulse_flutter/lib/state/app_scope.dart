@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../agents/runtime/agent_toolkit.dart';
 import '../repositories/experience_repository.dart';
@@ -10,6 +11,8 @@ import '../repositories/itinerary_repository.dart';
 import '../repositories/traffic_history_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
+import '../services/cloud/cloud_store.dart';
+import '../services/cloud/user_sync.dart';
 import '../services/location_service.dart';
 import 'accessibility_controller.dart';
 import 'activity_tracker.dart';
@@ -25,24 +28,48 @@ import 'trip_plan_manager.dart';
 /// `AppDatabaseHelper.getInstance`) with one place that owns their lifetime,
 /// which is also what makes the screens testable.
 class AppServices {
-  factory AppServices(SharedPreferences prefs) {
+  /// [supabase] turns on real accounts and cloud storage; without it the app
+  /// keeps everything on the device, as before.
+  factory AppServices(SharedPreferences prefs, {SupabaseClient? supabase}) {
     // Built once and shared: the gamification controller derives badge and
     // challenge progress from the same tracker the screens increment, and the
     // location controller wraps the same service the screens read fixes from.
-    final activity = ActivityTracker(prefs);
+    final cloud = CloudStore(prefs, supabase);
+    final activity = ActivityTracker(prefs, cloud: cloud);
+    final gamification = GamificationController(prefs, activity, cloud: cloud);
+    final accessibility = AccessibilityController(prefs, cloud: cloud);
+    final trips = TripRepository(prefs, cloud: cloud);
+    final itineraries = ItineraryRepository(prefs, cloud: cloud);
+    final tripBriefs = TripBriefRepository(prefs, cloud: cloud);
+    final auth = AuthController(prefs, client: supabase);
+    final sync = UserSync(
+      prefs: prefs,
+      cloud: cloud,
+      briefs: tripBriefs,
+      itineraries: itineraries,
+      trips: trips,
+      accessibility: accessibility,
+      gamification: gamification,
+      activity: activity,
+    );
+    auth
+      ..onSignedIn = sync.onSignedIn
+      ..beforeSignOut = sync.beforeSignOut
+      ..afterSignOut = sync.afterSignOut;
     final locationService = LocationService();
     return AppServices._(
       prefs: prefs,
-      auth: AuthController(prefs),
+      cloud: cloud,
+      auth: auth,
       theme: ThemeController(prefs),
       activity: activity,
-      gamification: GamificationController(prefs, activity),
-      accessibility: AccessibilityController(prefs),
+      gamification: gamification,
+      accessibility: accessibility,
       tripPlan: TripPlanManager(prefs),
       location: LocationController(locationService),
-      trips: TripRepository(prefs),
-      itineraries: ItineraryRepository(prefs),
-      tripBriefs: TripBriefRepository(prefs),
+      trips: trips,
+      itineraries: itineraries,
+      tripBriefs: tripBriefs,
       experiences: ExperienceRepository(),
       hospitality: HospitalityRepository(),
       hotelMetrics: HotelMetricsRepository(),
@@ -54,6 +81,7 @@ class AppServices {
 
   AppServices._({
     required this.prefs,
+    required this.cloud,
     required this.auth,
     required this.theme,
     required this.activity,
@@ -73,6 +101,9 @@ class AppServices {
   });
 
   final SharedPreferences prefs;
+
+  /// The traveller's account storage (does nothing without Supabase).
+  final CloudStore cloud;
   final AuthController auth;
   final ThemeController theme;
   final GamificationController gamification;

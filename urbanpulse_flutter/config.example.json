@@ -20,6 +20,10 @@
   "_XOTELO_RAPIDAPI_KEY": "Optional. Only Xotelo's /search endpoint (city -> TripAdvisor location key) needs it, via RapidAPI. Hotel lists, live rates and price heatmaps need no key.",
   "XOTELO_RAPIDAPI_KEY": "",
 
+  "_SUPABASE": "Accounts (email + password) and the traveller's data in Supabase. SUPABASE_URL is the project URL; SUPABASE_ANON_KEY is the public anon / publishable key from Project Settings > API (safe in the app: row level security keeps each traveller to their own rows). Never put the database password or the service_role key here. Leave them empty to run on the device only.",
+  "SUPABASE_URL": "https://your-project-ref.supabase.co",
+  "SUPABASE_ANON_KEY": "",
+
   "_CENTRAL_REGISTRY_BASE_URL": "Where the Central Registry backend (server/) is reachable. Default http://10.0.2.2:3001 is the Android emulator's alias for your dev machine's localhost. On a physical device use your host's LAN IP, e.g. http://192.168.1.23:3001",
   "CENTRAL_REGISTRY_BASE_URL": "http://10.0.2.2:3001"
 }

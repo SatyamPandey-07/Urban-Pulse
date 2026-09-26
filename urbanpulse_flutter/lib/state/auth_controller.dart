@@ -1,72 +1,212 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Session state for the login / sign-up / demo flows.
+/// What happened when the traveller tried to sign in or sign up.
+sealed class AuthResult {
+  const AuthResult();
+}
+
+final class AuthOk extends AuthResult {
+  const AuthOk();
+}
+
+/// Signed up; the account opens once they confirm their email.
+final class AuthNeedsConfirmation extends AuthResult {
+  const AuthNeedsConfirmation(this.email);
+
+  final String email;
+}
+
+final class AuthFailed extends AuthResult {
+  const AuthFailed(this.message);
+
+  /// Plain words for the traveller.
+  final String message;
+}
+
+/// Who is signed in.
 ///
-/// The Kotlin app kept the same three `app_prefs` keys and gated navigation on
-/// them; a Firebase `AuthManager` existed alongside but every screen treated it
-/// as best-effort and fell back to these local values, so the *observable*
-/// behaviour lived here. See the migration notes in README for what a real
-/// Firebase backend would need.
+/// With Supabase configured these are real accounts: email and password,
+/// sessions kept by the Supabase client, and the traveller's data synced to
+/// their account (see `UserSync`). Without it the app runs on the device only,
+/// with the old local sign-in, so it still works in a build without keys.
 class AuthController extends ChangeNotifier {
-  AuthController(this._prefs);
+  AuthController(this._prefs, {SupabaseClient? client}) : _client = client {
+    _sub = client?.auth.onAuthStateChange.listen((_) => notifyListeners());
+  }
 
   static const _keyEmail = 'app_prefs.user_email';
   static const _keyName = 'app_prefs.user_name';
   static const _keyLoggedIn = 'app_prefs.is_logged_in';
 
-  /// The demo identity used by the 1-tap judge/guest access buttons.
+  /// The demo identity used by the 1-tap judge/guest access buttons (a real,
+  /// already-confirmed account when Supabase is on: `supabase/seed/demo_user.sql`).
   static const demoEmail = 'demo.traveler@urbanpulse.ai';
   static const demoPassword = 'urbanpulse2026';
 
   final SharedPreferences _prefs;
+  final SupabaseClient? _client;
+  StreamSubscription<AuthState>? _sub;
 
-  bool get isLoggedIn => _prefs.getBool(_keyLoggedIn) ?? false;
+  /// Runs after every successful sign-in and at start with a kept session
+  /// (set by `AppServices` to sync the traveller's data).
+  Future<void> Function()? onSignedIn;
 
-  String get userEmail => _prefs.getString(_keyEmail) ?? '';
+  /// Runs just before signing out (to send what is still queued) and after.
+  Future<void> Function()? beforeSignOut;
+  Future<void> Function()? afterSignOut;
 
-  String get userName => _prefs.getString(_keyName) ?? '';
+  /// Real accounts are on.
+  bool get usesAccounts => _client != null;
 
-  /// Mirrors `LoginActivity`'s validation: the seeded admin account, a
-  /// previously registered email, or any well-formed email with a 6+ character
-  /// password.
-  bool validateCredentials(String email, String password) {
-    final savedEmail = userEmail;
-    return (email == 'admin@123.com' && password == 'password') ||
-        (savedEmail.isNotEmpty && email == savedEmail) ||
-        (email.contains('@') && password.length >= 6);
+  User? get _user => _client?.auth.currentUser;
+
+  bool get isLoggedIn => usesAccounts ? _client!.auth.currentSession != null : (_prefs.getBool(_keyLoggedIn) ?? false);
+
+  String? get userId => _user?.id;
+
+  String get userEmail => usesAccounts ? (_user?.email ?? '') : (_prefs.getString(_keyEmail) ?? '');
+
+  String get userName {
+    if (!usesAccounts) return _prefs.getString(_keyName) ?? '';
+    final meta = _user?.userMetadata?['full_name'];
+    return meta is String ? meta : '';
   }
 
-  Future<void> signIn(String email) async {
-    await _prefs.setString(_keyEmail, email);
-    await _prefs.setBool(_keyLoggedIn, true);
-    notifyListeners();
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
   }
 
-  Future<void> signUp({required String fullName, required String email}) async {
-    await _prefs.setString(_keyName, fullName);
-    await _prefs.setString(_keyEmail, email);
-    await _prefs.setBool(_keyLoggedIn, true);
-    notifyListeners();
+  // --- sign in, sign up, sign out -------------------------------------------------
+
+  Future<AuthResult> signIn({required String email, required String password}) async {
+    final c = _client;
+    if (c == null) return _localSignIn(email, password);
+    try {
+      final r = await c.auth.signInWithPassword(email: email.trim(), password: password);
+      if (r.session == null) return const AuthFailed('Could not sign in. Please try again.');
+      await _afterSignIn();
+      return const AuthOk();
+    } on AuthException catch (e) {
+      return AuthFailed(_explain(e));
+    } catch (_) {
+      return const AuthFailed('No connection. Check your internet and try again.');
+    }
+  }
+
+  Future<AuthResult> signUp({required String fullName, required String email, required String password}) async {
+    final c = _client;
+    if (c == null) {
+      await _prefs.setString(_keyName, fullName);
+      await _prefs.setString(_keyEmail, email);
+      await _prefs.setBool(_keyLoggedIn, true);
+      notifyListeners();
+      return const AuthOk();
+    }
+    try {
+      final r = await c.auth.signUp(email: email.trim(), password: password, data: {'full_name': fullName});
+      if (r.session == null) return AuthNeedsConfirmation(email.trim());
+      await _afterSignIn();
+      return const AuthOk();
+    } on AuthException catch (e) {
+      return AuthFailed(_explain(e));
+    } catch (_) {
+      return const AuthFailed('No connection. Check your internet and try again.');
+    }
   }
 
   Future<void> signOut() async {
-    await _prefs.setBool(_keyLoggedIn, false);
+    final c = _client;
+    if (c == null) {
+      await _prefs.setBool(_keyLoggedIn, false);
+      notifyListeners();
+      return;
+    }
+    try {
+      await beforeSignOut?.call();
+    } catch (_) {
+      // what could not be sent stays queued for the next sign-in
+    }
+    try {
+      await c.auth.signOut();
+    } catch (_) {
+      // signed out on this device even if the server could not be told
+    }
+    await afterSignOut?.call();
     notifyListeners();
   }
 
-  /// A stable per-device traveler name for real bookings — no server-side login
-  /// system exists, so this is a persisted pseudonymous identifier (not a
-  /// fabricated one-off), reused across sessions.
+  /// Sends a password reset link to [email].
+  Future<AuthResult> resetPassword(String email) async {
+    final c = _client;
+    if (c == null) return const AuthFailed('Password reset needs an account (not available in offline mode).');
+    try {
+      await c.auth.resetPasswordForEmail(email.trim());
+      return const AuthOk();
+    } on AuthException catch (e) {
+      return AuthFailed(_explain(e));
+    } catch (_) {
+      return const AuthFailed('No connection. Check your internet and try again.');
+    }
+  }
+
+  /// At start: a kept session syncs the traveller's data in the background.
+  Future<void> resume() async {
+    if (usesAccounts && isLoggedIn) await _afterSignIn();
+  }
+
+  Future<void> _afterSignIn() async {
+    notifyListeners();
+    try {
+      await onSignedIn?.call();
+    } catch (_) {
+      // the data syncs again on the next start or sign-in
+    }
+  }
+
+  /// The old device-only sign-in: the seeded admin account, a previously
+  /// registered email, or any well-formed email with a 6+ character password.
+  Future<AuthResult> _localSignIn(String email, String password) async {
+    final savedEmail = _prefs.getString(_keyEmail) ?? '';
+    final ok = (email == 'admin@123.com' && password == 'password') ||
+        (savedEmail.isNotEmpty && email == savedEmail) ||
+        (email.contains('@') && password.length >= 6);
+    if (!ok) return const AuthFailed('Invalid email or password. Password must be at least 6 characters.');
+    await _prefs.setString(_keyEmail, email);
+    await _prefs.setBool(_keyLoggedIn, true);
+    notifyListeners();
+    return const AuthOk();
+  }
+
+  static String _explain(AuthException e) {
+    final m = e.message.toLowerCase();
+    if (m.contains('invalid login') || m.contains('invalid credentials')) return 'Wrong email or password.';
+    if (m.contains('email not confirmed')) return 'Please confirm your email first: check your inbox for the link.';
+    if (m.contains('already registered') || m.contains('already been registered')) return 'An account with this email already exists. Sign in instead.';
+    if (m.contains('password') && (m.contains('short') || m.contains('at least') || m.contains('weak'))) return 'Please choose a longer, stronger password.';
+    if (m.contains('rate limit') || m.contains('too many')) return 'Too many attempts. Please wait a minute and try again.';
+    return e.message;
+  }
+
+  /// The traveller's name for real bookings: their account name when signed in
+  /// with one, otherwise a persisted per-device pseudonym (not a fabricated
+  /// one-off), reused across sessions.
   Future<String> getOrCreateTravelerName() async {
+    final name = userName;
+    if (usesAccounts && name.isNotEmpty) return name;
     const key = 'urbanpulse_traveler.traveler_name';
     final existing = _prefs.getString(key);
     if (existing != null) return existing;
     final shortId = DateTime.now().microsecondsSinceEpoch
         .toRadixString(36)
         .toUpperCase();
-    final name = 'Traveler-${shortId.substring(shortId.length - 6)}';
-    await _prefs.setString(key, name);
-    return name;
+    final generated = 'Traveler-${shortId.substring(shortId.length - 6)}';
+    await _prefs.setString(key, generated);
+    return generated;
   }
 }

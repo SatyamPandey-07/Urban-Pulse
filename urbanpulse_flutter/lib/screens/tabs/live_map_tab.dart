@@ -126,7 +126,6 @@ class _LiveMapTabState extends State<LiveMapTab> {
     ];
 
     if (!mounted) return;
-    setState(() => _nearestHospital = hospitals.firstOrNull);
     await _webView.runJavaScript('window.setPois(${jsonEncode(pins)});');
     await _drawLiveTrafficSegment();
   }
@@ -239,12 +238,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
     double destLon,
     String destName,
   ) async {
-    setState(() {
-      _isRouting = true;
-      _statusTitle = 'Routing to $destName';
-      _statusSubtitle =
-          'Fetching real TomTom multi-routing & Open-Meteo AQI telemetry...';
-    });
+    setState(() => _isRouting = true);
 
     final currentAqi = await OpenMeteoService.fetchCurrentUsAqi(
       _currentLat,
@@ -323,10 +317,6 @@ class _LiveMapTabState extends State<LiveMapTab> {
     setState(() {
       _comparison = comparison;
       _isRouting = false;
-      _statusTitle = 'Real Dual Routes: $destName (${fixed(distanceKm)} km)';
-      _statusSubtitle = isEstimated
-          ? 'Live TomTom routing unavailable — showing a straight-line estimate'
-          : 'Metro/E-Bus${currentAqi != null ? " (AQI $currentAqi)" : ""} vs Petrol Cab';
     });
 
     await _webView.runJavaScript(

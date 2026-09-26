@@ -64,6 +64,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
             geocode: _geocoder.lookup,
             toolkit: services.agentToolkit,
             itineraries: services.itineraries,
+            cloud: services.cloud,
           )
           ..addListener(_onChanged)
           ..start();

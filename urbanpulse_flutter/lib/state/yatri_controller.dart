@@ -26,6 +26,7 @@ import '../models/yatri_question.dart';
 import '../repositories/itinerary_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
+import '../services/cloud/cloud_store.dart';
 import '../services/groq_api_client.dart';
 
 enum YatriPhase { intake, review, planning, done }
@@ -168,6 +169,7 @@ class YatriController extends ChangeNotifier {
     this.geocode,
     this.toolkit,
     this.itineraries,
+    this.cloud,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     brief = TripBrief.empty(_clock());
@@ -194,6 +196,10 @@ class YatriController extends ChangeNotifier {
 
   /// Where finished itineraries are kept so My Trips can reopen them.
   final ItineraryRepository? itineraries;
+
+  /// The traveller's account: every planning run, its task graph and the
+  /// decisions they made are kept there (nothing happens without Supabase).
+  final CloudStore? cloud;
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
@@ -780,10 +786,17 @@ class YatriController extends ChangeNotifier {
   /// one, the phase-1 planner drafts a plan instead so there is always a result.
   Future<void> _planWithAgents(AgentToolkit tk, TripBrief confirmed) async {
     final token = ++_planToken;
+    final startedAt = DateTime.now();
+    final decisions = <Map<String, Object?>>[];
     final orchestrator = PlannerOrchestrator(
       toolkit: tk,
       // A stale run (the chat restarted) gets default answers, never a card.
-      ask: (q) => token == _planToken ? askPlanQuestion(q) : Future.value(const ChoiceAnswer('', '')),
+      ask: (q) async {
+        final askedAt = DateTime.now();
+        final answer = token == _planToken ? await askPlanQuestion(q) : const ChoiceAnswer('', '');
+        decisions.add(_decisionRow(decisions.length, q, answer, askedAt));
+        return answer;
+      },
       now: () => now,
     );
     _orchestrator = orchestrator;
@@ -796,6 +809,10 @@ class YatriController extends ChangeNotifier {
     } catch (_) {
       outcome = PlanOutcome.failed('Planning stopped unexpectedly');
     }
+    // Kept in the traveller's account whatever happens next: the itinerary,
+    // the run with its task graph, and every decision they made.
+    _recordRun(orchestrator, outcome, confirmed, decisions, startedAt);
+
     // The conversation was restarted (or the screen closed) while planning.
     if (_disposed || token != _planToken) return;
     _orchestrator = null;
@@ -879,10 +896,97 @@ class YatriController extends ChangeNotifier {
     _notify();
   }
 
+  /// One question Yatri asked during planning and what the traveller answered,
+  /// as a `plan_decisions` row.
+  static Map<String, Object?> _decisionRow(int seq, YatriQuestion q, YatriAnswer answer, DateTime askedAt) {
+    final id = q.id;
+    final topic = id.startsWith('plan.hotels')
+        ? 'hotels'
+        : id.startsWith('plan.access')
+        ? 'access'
+        : id.startsWith('plan.gap')
+        ? 'gap'
+        : id.startsWith('plan.budget')
+        ? 'budget'
+        : id.startsWith('plan.weather')
+        ? 'weather'
+        : id.startsWith('plan.transport')
+        ? 'transport'
+        : id.startsWith('plan.hotspots') || id.startsWith('plan.places')
+        ? 'places'
+        : 'other';
+    final chosen = switch (answer) {
+      ChoiceAnswer(:final optionId, :final label) => {'optionIds': [optionId], 'labels': [label]},
+      MultiChoiceAnswer(:final optionIds, :final labels) => {'optionIds': optionIds.toList(), 'labels': labels},
+      _ => {'other': answer.runtimeType.toString()},
+    };
+    return {
+      'seq': seq,
+      'question_id': id,
+      'topic': topic,
+      'agent': q.agent,
+      'question': q.displayText,
+      'why': q.why,
+      'options': [
+        for (final o in q.options) {'id': o.id, 'label': o.label, 'subtitle': o.subtitle, 'recommended': o.recommended},
+      ],
+      'answer': chosen,
+      'asked_at': askedAt.toUtc().toIso8601String(),
+    };
+  }
+
+  /// The itinerary (not yet saved to My Trips) and the run behind it go to
+  /// the traveller's account.
+  void _recordRun(PlannerOrchestrator o, PlanOutcome outcome, TripBrief brief, List<Map<String, Object?>> decisions, DateTime startedAt) {
+    final c = cloud;
+    if (c == null || !c.enabled) return;
+    final itinerary = outcome.itinerary;
+    if (itinerary != null) {
+      unawaited(c.saveItinerary(itinerary, saved: false, briefClientId: brief.id, partial: outcome.status == PlanStatus.partial));
+    }
+    String? iso(DateTime? t) => t?.toUtc().toIso8601String();
+    unawaited(
+      c.saveRun(
+        briefClientId: brief.id,
+        itineraryClientId: itinerary?.id,
+        decisions: decisions,
+        run: {
+          'client_id': 'run_${startedAt.microsecondsSinceEpoch}',
+          'status': outcome.status.name,
+          'summary': outcome.summary,
+          'notes': outcome.notes,
+          'active_seconds': o.clock.elapsed.inSeconds,
+          'timings': itinerary?.timings ?? const <String, int>{},
+          'task_graph': [
+            for (final n in o.graph.nodes)
+              {
+                'id': n.id,
+                'agent': n.agent.name,
+                'title': n.spec.title,
+                'status': n.status.name,
+                'summary': n.summary,
+                'parents': n.spec.parents,
+                'delegatedBy': n.delegatedBy,
+                'startedAt': iso(n.startedAt),
+                'endedAt': iso(n.endedAt),
+                'elapsedSeconds': n.elapsed?.inSeconds,
+              },
+          ],
+          'feed': [
+            for (final e in o.graph.events)
+              {'time': iso(e.time), 'agent': e.agent.name, 'kind': e.kind.name, 'text': e.text, 'why': e.why, 'nodeId': e.nodeId},
+          ],
+          'started_at': iso(startedAt),
+          'finished_at': iso(DateTime.now()),
+        },
+      ),
+    );
+  }
+
   Future<void> saveItinerary(ItineraryEntry entry) async {
     if (entry.saved) return;
     await itineraries?.save(entry.itinerary);
-    await trips.addTrip(entry.itinerary.toTripPlan());
+    await trips.addTrip(entry.itinerary.toTripPlan(), itineraryClientId: entry.itinerary.id);
     entry.saved = true;
     await onTripSaved?.call();
     _notify();
