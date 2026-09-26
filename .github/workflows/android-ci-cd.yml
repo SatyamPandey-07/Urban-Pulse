@@ -3,7 +3,7 @@ name: Android CI/CD & Release
 on:
   push:
     branches:
-      - main
+      - release
     tags:
       - 'v*'
   workflow_dispatch:
@@ -65,46 +65,46 @@ jobs:
 
       - name: Create / Update GitHub Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/release'
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0-hackcelestial' }}
-          name: 🌿 UrbanPulse v1.3.0 — Production Release (HackCelestial 3.0)
+          name: UrbanPulse v1.3.0 — Production Release (HackCelestial 3.0)
           body: |
-            ## 🌿 UrbanPulse — Intelligent Local Discovery, Sustainable Experience Platform & Autonomous Mobility 🚀
+            ## UrbanPulse — Intelligent Local Discovery, Sustainable Experience Platform & Autonomous Mobility
 
             **HackCelestial 3.0 — Pillai University Hackathon Production Release**
 
-            ### 📱 Download Android APK
+            ### Download Android APK
             Tap the `UrbanPulse-v1.0.0.apk` asset below to install directly on your Android phone (Android 8.0+ / API 26+).
 
-            ### ✨ What's New in v1.3.0
-            - ⚡ **Groq now does intent extraction, matching the pitch:** `TripIntentParser` previously only used Gemini; it now tries the real Groq LPU cloud first (sub-400ms structured JSON extraction), falling back to Gemini, then a deterministic keyword parser.
-            - ☔ **Circumstance Adaptation is now autonomous:** on both Android and web, a real live Open-Meteo check runs once per session — if it's actually raining at the user's location, adapted recommendations are pushed proactively, without the user needing to type "rain".
-            - 🦽 **`AccessibilityManager.kt` now really does what the architecture diagram says:** it's the entry point for evidence-tagged accessibility claims too (`evidenceFor(...)`, delegating to `EvidenceGraphService`), not just user preference toggles.
-            - 📦 **~300MB+ smaller debug APK:** removed the TomTom native map-display + route-planner SDK modules and the entire Jetpack Compose dependency stack — both were declared but had zero references anywhere in the codebase (all real map rendering here is WebView/Leaflet; all real routing is direct TomTom REST calls; every screen is a classic View/XML layout, not Compose).
+            ### What's New in v1.3.0
+            - **Groq now does intent extraction, matching the pitch:** `TripIntentParser` previously only used Gemini; it now tries the real Groq LPU cloud first (sub-400ms structured JSON extraction), falling back to Gemini, then a deterministic keyword parser.
+            - **Circumstance Adaptation is now autonomous:** on both Android and web, a real live Open-Meteo check runs once per session — if it's actually raining at the user's location, adapted recommendations are pushed proactively, without the user needing to type "rain".
+            - **`AccessibilityManager.kt` now really does what the architecture diagram says:** it's the entry point for evidence-tagged accessibility claims too (`evidenceFor(...)`, delegating to `EvidenceGraphService`), not just user preference toggles.
+            - **~300MB+ smaller debug APK:** removed the TomTom native map-display + route-planner SDK modules and the entire Jetpack Compose dependency stack — both were declared but had zero references anywhere in the codebase (all real map rendering here is WebView/Leaflet; all real routing is direct TomTom REST calls; every screen is a classic View/XML layout, not Compose).
 
-            ### ✨ What Shipped in v1.2.0
-            - 📅 **Real Bookings:** the Central Registry now persists genuine reservation records (`POST /api/experiences/:id/bookings`) — "📅 Book This Experience" in the chat creates a real, queryable booking on Android and web alike.
-            - ✅ **Real user reports feed the Evidence Graph:** travelers can "✅ Confirm Accessibility" or "⚠️ Report an Issue" on any listing — a genuinely independent second source that can upgrade a claim to Verified or surface a real flagged contradiction, not the provider's own data checked against itself.
-            - 🌐 **Live website redesign:** a full Bento Grid feature showcase at [satyampande.me/Urban-Pulse](http://satyampande.me/Urban-Pulse/) covering every real feature, and a fixed custom-domain HTTPS certificate.
-            - 🐛 **Follow-up audit fixes:** removed 3 fake pre-completed trips shown to new users, honestly labeled the offline AI-itinerary fallback instead of calling it "Verified", the chatbot's hotel picks now read the real hospitality registry instead of 3 hardcoded hotels, circumstance adaptation cross-checks live Open-Meteo weather, and the ESG dialog shows its own computed compliance status instead of a hardcoded "PASSED".
+            ### What Shipped in v1.2.0
+            - **Real Bookings:** the Central Registry now persists genuine reservation records (`POST /api/experiences/:id/bookings`) — "Book This Experience" in the chat creates a real, queryable booking on Android and web alike.
+            - **Real user reports feed the Evidence Graph:** travelers can "Confirm Accessibility" or "Report an Issue" on any listing — a genuinely independent second source that can upgrade a claim to Verified or surface a real flagged contradiction, not the provider's own data checked against itself.
+            - **Live website redesign:** a full Bento Grid feature showcase at [satyampande.me/Urban-Pulse](http://satyampande.me/Urban-Pulse/) covering every real feature, and a fixed custom-domain HTTPS certificate.
+            - **Follow-up audit fixes:** removed 3 fake pre-completed trips shown to new users, honestly labeled the offline AI-itinerary fallback instead of calling it "Verified", the chatbot's hotel picks now read the real hospitality registry instead of 3 hardcoded hotels, circumstance adaptation cross-checks live Open-Meteo weather, and the ESG dialog shows its own computed compliance status instead of a hardcoded "PASSED".
 
-            ### ✨ What Shipped in v1.1.0
-            - 🔗 **Central Registry Backend:** a real Express + SQLite service (`server/`) so provider listings published on web or Android sync to both, instead of separate per-device stores.
-            - 🦽 **Evidence-Based Accessibility, App-Wide:** the Verified/Reported/Inferred confidence-tagging engine now covers every experience listing (previously hospitality-only), with contradiction warnings when a rating outpaces its documentation.
-            - 🗺️ **Real TomTom + Open-Meteo on the Web App:** the live dual-route map and AQI HUD now call the real APIs, matching the Android app.
-            - 📍 **Real GPS + Live TomTom Routing in Green Route Planner:** "Use GPS" reads actual device location; "Recalculate Route" fetches a live TomTom distance.
-            - 📄 **ESG Audits With Real Math:** PASS/FAIL compliance computed from live occupancy-derived figures against stated benchmarks, plus a genuine SHA-256 content-integrity hash.
-            - 📊 **Real Interaction Counters:** provider views/inquiries now reflect actual chat & dashboard activity.
-            - 🔐 **Security Hardening:** no live API keys committed to the repo — all loaded from gitignored local config.
+            ### What Shipped in v1.1.0
+            - **Central Registry Backend:** a real Express + SQLite service (`server/`) so provider listings published on web or Android sync to both, instead of separate per-device stores.
+            - **Evidence-Based Accessibility, App-Wide:** the Verified/Reported/Inferred confidence-tagging engine now covers every experience listing (previously hospitality-only), with contradiction warnings when a rating outpaces its documentation.
+            - **Real TomTom + Open-Meteo on the Web App:** the live dual-route map and AQI HUD now call the real APIs, matching the Android app.
+            - **Real GPS + Live TomTom Routing in Green Route Planner:** "Use GPS" reads actual device location; "Recalculate Route" fetches a live TomTom distance.
+            - **ESG Audits With Real Math:** PASS/FAIL compliance computed from live occupancy-derived figures against stated benchmarks, plus a genuine SHA-256 content-integrity hash.
+            - **Real Interaction Counters:** provider views/inquiries now reflect actual chat & dashboard activity.
+            - **Security Hardening:** no live API keys committed to the repo — all loaded from gitignored local config.
 
-            ### ⚡ Core Platform Highlights
-            - 🚆 **TomTom Dual-Route Engine:** Live comparison of electrified trains & buses against private cabs with CO₂e savings.
-            - ⚡ **Sub-400ms Groq LPU Conversational Engine:** Grounded Yatri AI for personalized experience recommendations.
-            - ⏱️ **2-Hour Micro-Experience Finder:** Instant recommendations tailored to live GPS coordinates and tight schedules.
-            - ☔ **Real-Time Circumstance Adaptation:** 1-tap pivoting to indoor & covered workshops during sudden rain or transit delays.
-            - 👨‍👩‍👧‍👦 **Group Composition Filters:** Child-friendly, senior-friendly, and step-free accessibility concourse verification.
-            - 🏪 **Provider Business Hub:** Zero-commission portal for local artisans and guides to publish and toggle real-time availability.
+            ### Core Platform Highlights
+            - **TomTom Dual-Route Engine:** Live comparison of electrified trains & buses against private cabs with CO2e savings.
+            - **Sub-400ms Groq LPU Conversational Engine:** Grounded Yatri AI for personalized experience recommendations.
+            - **2-Hour Micro-Experience Finder:** Instant recommendations tailored to live GPS coordinates and tight schedules.
+            - **Real-Time Circumstance Adaptation:** 1-tap pivoting to indoor & covered workshops during sudden rain or transit delays.
+            - **Group Composition Filters:** Child-friendly, senior-friendly, and step-free accessibility concourse verification.
+            - **Provider Business Hub:** Zero-commission portal for local artisans and guides to publish and toggle real-time availability.
           files: ./UrbanPulse-v1.0.0.apk
           draft: false
           prerelease: false
