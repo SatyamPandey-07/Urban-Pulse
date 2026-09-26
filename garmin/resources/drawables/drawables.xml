@@ -1,0 +1,6 @@
+<resources>
+    <!-- 65x65 on the fr965; the resource compiler rescales for other devices.
+         Do not reference this resource anywhere else in the app - duplicate it
+         if the icon ever needs to be drawn on screen. -->
+    <bitmap id="LauncherIcon" filename="launcher.png" compress="true"/>
+</resources>

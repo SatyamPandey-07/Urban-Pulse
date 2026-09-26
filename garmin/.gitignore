@@ -1,0 +1,6 @@
+bin/
+*.prg
+*.prg.debug.xml
+*.iq
+*.der
+*.pem

@@ -1,0 +1,8 @@
+# Build configuration. One device for now; adding more is a matter of listing
+# them in manifest.xml (Monkey C: Edit Products) - every coordinate in CalcView
+# is derived from dc.getWidth(), so no code changes are needed.
+
+project.manifest = manifest.xml
+
+base.sourcePath   = source;tests
+base.resourcePath = resources

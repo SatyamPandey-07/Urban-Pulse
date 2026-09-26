@@ -1,0 +1,7 @@
+<properties>
+    <!-- Editable by the user in Garmin Connect / Garmin Express, and by you in
+         the simulator via Settings Editor. Persisted by the system. -->
+    <property id="degrees"  type="boolean">true</property>
+    <property id="haptics"  type="boolean">true</property>
+    <property id="decimals" type="number">10</property>
+</properties>

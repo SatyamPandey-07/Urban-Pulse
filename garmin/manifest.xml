@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+  Urban Pulse Calc - Connect IQ device app for the Forerunner 965.
+
+  type        watch-app  -> 786,432 bytes of RAM, unrestricted input, no timeout
+  minApiLevel 5.0.0      -> the fr965 is API 5.2; anything higher excludes it
+  permissions none yet   -> the calculator needs no network. When the Urban Pulse
+                            API work lands, add:
+                            <iq:uses-permission id="Communications"/>
+-->
+<iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
+    <iq:application
+        entry="UrbanPulseCalcApp"
+        id="2472afd8c18741dc8a5865971b46ff38"
+        launcherIcon="@Drawables.LauncherIcon"
+        name="@Strings.AppName"
+        type="watch-app"
+        minApiLevel="5.0.0">
+
+        <iq:products>
+            <iq:product id="fr965"/>
+        </iq:products>
+
+        <iq:permissions/>
+
+        <iq:languages>
+            <iq:language>eng</iq:language>
+        </iq:languages>
+
+        <iq:barrels/>
+    </iq:application>
+</iq:manifest>
