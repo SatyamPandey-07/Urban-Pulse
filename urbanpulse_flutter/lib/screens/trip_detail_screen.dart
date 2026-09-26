@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../core/formatting.dart';
+import '../domain/carbon_estimator.dart';
+import '../models/mobility.dart';
 import '../models/trip_models.dart';
 import '../state/app_scope.dart';
 import '../widgets/common.dart';
@@ -190,8 +192,10 @@ class TripDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Uses the plan's own transit options when the generator supplied them, and
-  /// otherwise the destination-specific comparison the Activity fell back to.
+  /// Uses the plan's own transit options when the planner supplied them, and
+  /// otherwise computes the comparison from the real distance between origin and
+  /// destination — the same estimator the Green Route Planner uses. The Kotlin
+  /// Activity carried four hand-written per-destination tables here.
   static List<(String, String)> _transitOptions(TripPlan trip) {
     if (trip.transitOpt1Name != null && trip.transitOpt1Name!.isNotEmpty) {
       return [
@@ -200,67 +204,33 @@ class TripDetailScreen extends StatelessWidget {
           trip.transitOpt1Metrics ?? 'Low Emission Transit',
         ),
         (
-          trip.transitOpt2Name ?? '⚡ Alternative Transit Option',
-          trip.transitOpt2Metrics ?? 'Eco Route',
+          trip.transitOpt2Name ?? 'Alternative transit option',
+          trip.transitOpt2Metrics ?? 'Eco route',
         ),
         (
-          trip.transitOpt3Name ?? '🚗 Private Standard Petrol Cab',
-          trip.transitOpt3Metrics ?? 'High Carbon Footprint',
+          trip.transitOpt3Name ?? 'Private standard petrol cab',
+          trip.transitOpt3Metrics ?? 'High carbon footprint',
         ),
       ];
     }
 
-    final dest = trip.destination.toLowerCase();
-    if (dest.contains('matheran')) {
-      return const [
-        (
-          '🚆 Central Railway Local + Toy Train',
-          '₹110 • Level Boarding • 35g CO2',
-        ),
-        ('⚡ Neral E-Rickshaw + Shuttle', '₹90 • Zero Emission • 18g CO2'),
-        (
-          '🚗 Standard Petrol Taxi (to Dasturi)',
-          '₹2,100 • 2h 30m • 1,600g CO2',
-        ),
-      ];
+    // Older saved trips predate the planner emitting transit options; derive the
+    // comparison instead of inventing one.
+    final distanceKm = CarbonEstimator.estimateDistanceKm(
+      trip.travelMode,
+      trip.destination,
+    );
+    final options = CarbonEstimator.estimateAllModes(distanceKm);
+    String metrics(TravelMode mode) {
+      final option = options.firstWhere((o) => o.mode == mode);
+      return '${rupees(option.fareRupees)} • ${option.durationMin} mins • '
+          '${fixed(option.carbonGrams, 0)}g CO2';
     }
-    if (dest.contains('kedar')) {
-      return const [
-        (
-          '🚆 Mumbai-Haridwar Superfast + E-Shuttle',
-          '₹1,450 • Level Boarding • 280g CO2',
-        ),
-        ('⚡ AC Pilgrim Express Coach', '₹2,200 • AC Seater • 350g CO2'),
-        (
-          '🚗 Private Highway Diesel SUV Taxi',
-          '₹18,500 • High Emissions • 24,000g CO2',
-        ),
-      ];
-    }
-    if (dest.contains('alibaug')) {
-      return const [
-        ('🚢 M2M Electric Hybrid Ro-Pax Ferry', '₹380 • 1h 15m • 45g CO2'),
-        ('⚡ Mandwa Electric Feeder Bus', '₹40 • 20m • 10g CO2'),
-        ('🚗 Standard Petrol Taxi (via Pen)', '₹2,800 • 3h 30m • 1,900g CO2'),
-      ];
-    }
-    if (dest.contains('manali')) {
-      return const [
-        (
-          '🚆 Vande Bharat + HRTC E-Coach',
-          '₹1,850 • Electric Transit • 310g CO2',
-        ),
-        ('⚡ AC Electric Sleeper Coach', '₹2,400 • Overnight • 380g CO2'),
-        (
-          '🚗 Private Mountain Petrol Cab',
-          '₹16,000 • Mountain Ghats • 22,000g CO2',
-        ),
-      ];
-    }
-    return const [
-      ('🚆 Indrayani Electric Express', '₹75 • 2h 05m • 28g CO2'),
-      ('⚡ MSRTC AC Shivneri E-Bus', '₹210 • 2h 20m • 54g CO2'),
-      ('🚗 Standard Petrol Taxi', '₹3,200 • 2h 45m • 2,400g CO2'),
+
+    return [
+      ('🚆 ${TravelMode.metro.label}', metrics(TravelMode.metro)),
+      ('⚡ ${TravelMode.bus.label}', metrics(TravelMode.bus)),
+      ('🚗 ${TravelMode.taxi.label}', metrics(TravelMode.taxi)),
     ];
   }
 }

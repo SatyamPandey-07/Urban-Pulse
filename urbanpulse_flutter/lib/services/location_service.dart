@@ -43,22 +43,48 @@ class LocationService {
     }
   }
 
-  /// Reverse-geocodes a fix to a city name (the `Geocoder` locality /
-  /// subAdminArea / adminArea chain from `YatriAiFragment`). Returns null if
-  /// nothing resolves, so callers keep their previous value.
-  Future<String?> resolveCityName(double lat, double lon) async {
+  /// Reverse-geocodes a fix to a place (the `Geocoder` locality /
+  /// subAdminArea / adminArea chain from `YatriAiFragment`, plus the
+  /// region/country line the app header shows). Returns null if nothing
+  /// resolves, so callers can show an honest "unavailable" rather than a
+  /// made-up city.
+  Future<ResolvedPlace?> resolvePlace(double lat, double lon) async {
     try {
       final placemarks = await placemarkFromCoordinates(lat, lon);
       if (placemarks.isEmpty) return null;
       final place = placemarks.first;
-      final detected = place.locality?.isNotEmpty == true
-          ? place.locality
-          : place.subAdministrativeArea?.isNotEmpty == true
-          ? place.subAdministrativeArea
-          : place.administrativeArea;
-      return (detected?.trim().isNotEmpty ?? false) ? detected!.trim() : null;
+
+      final city = _firstNonEmpty([
+        place.locality,
+        place.subAdministrativeArea,
+        place.administrativeArea,
+      ]);
+      if (city == null) return null;
+
+      final region = [place.administrativeArea, place.country]
+          .map((v) => v?.trim())
+          .where((v) => v != null && v.isNotEmpty && v != city)
+          .join(', ');
+
+      return ResolvedPlace(city: city, region: region.isEmpty ? null : region);
     } catch (_) {
       return null;
     }
   }
+
+  static String? _firstNonEmpty(List<String?> candidates) {
+    for (final candidate in candidates) {
+      final trimmed = candidate?.trim();
+      if (trimmed != null && trimmed.isNotEmpty) return trimmed;
+    }
+    return null;
+  }
+}
+
+/// A reverse-geocoded position.
+class ResolvedPlace {
+  const ResolvedPlace({required this.city, required this.region});
+
+  final String city;
+  final String? region;
 }

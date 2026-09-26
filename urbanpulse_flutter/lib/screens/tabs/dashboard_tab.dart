@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
-import '../../services/location_service.dart';
+import '../../models/live_city_data.dart';
+import '../../repositories/traffic_history_repository.dart';
 import '../../services/open_meteo_service.dart';
+import '../../services/tomtom_service.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
 import '../../widgets/mini_charts.dart';
@@ -12,11 +14,12 @@ import '../home_screen.dart';
 
 /// Port of `DashboardFragment` / `fragment_dashboard.xml`.
 ///
-/// The Kotlin charts plotted a fixed array of seven values. Here the same two
-/// cards are backed by the live Open-Meteo telemetry the app already fetches, so
-/// the AQI figure, the weather figure and the 7-day AQI trend are real readings;
-/// the screen says plainly when they can't be loaded rather than showing
-/// invented numbers.
+/// Every figure here is measured. The Kotlin version plotted two fixed
+/// seven-value arrays and hardcoded "136" / "28°C" tiles; this screen reads live
+/// Open-Meteo telemetry for air quality and weather, live TomTom flow data for
+/// congestion, and plots the AQI history the API returns plus the congestion
+/// readings the app has actually recorded. Where a reading is unavailable it
+/// says so instead of substituting a number.
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
 
@@ -25,26 +28,9 @@ class DashboardTab extends StatefulWidget {
 }
 
 class _DashboardTabState extends State<DashboardTab> {
-  static const _weekdayLabels = [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
-  ];
-  static const _trafficHours = [
-    '6 AM',
-    '8 AM',
-    '10 AM',
-    '12 PM',
-    '3 PM',
-    '6 PM',
-    '9 PM',
-  ];
-
   DashboardTelemetry? _telemetry;
+  LiveTrafficData? _traffic;
+  List<TrafficReading> _trafficHistory = const [];
   bool _isLoading = true;
 
   @override
@@ -57,14 +43,21 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Future<void> _load() async {
     setState(() => _isLoading = true);
-    final position = await AppScope.of(context).location.currentPosition();
-    final telemetry = await OpenMeteoService.fetchDashboardTelemetry(
-      position?.latitude ?? LocationService.defaultLat,
-      position?.longitude ?? LocationService.defaultLon,
-    );
+
+    final services = AppScope.of(context);
+    await services.location.resolve();
+    final (lat, lon) = services.location.coordinatesOrDefault;
+
+    final telemetry = await OpenMeteoService.fetchDashboardTelemetry(lat, lon);
+    final traffic = await TomTomService.getLiveTraffic(lat, lon);
+    if (traffic != null) await services.trafficHistory.record(traffic);
+    final history = await services.trafficHistory.recentReadings();
+
     if (!mounted) return;
     setState(() {
       _telemetry = telemetry;
+      _traffic = traffic;
+      _trafficHistory = history;
       _isLoading = false;
     });
   }
@@ -94,7 +87,7 @@ class _DashboardTabState extends State<DashboardTab> {
           const SizedBox(height: 16),
           _aqiTrendCard(context),
           const SizedBox(height: 16),
-          _trafficForecastCard(context),
+          _congestionCard(context),
         ],
       ),
     );
@@ -102,6 +95,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _geoIntelligenceCard(BuildContext context) {
     final theme = Theme.of(context);
+    final traffic = _traffic;
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +108,12 @@ class _DashboardTabState extends State<DashboardTab> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Live Traffic • Sensor Matrix Active',
+            traffic != null
+                ? '${traffic.roadName} • ${traffic.currentSpeedKmh} km/h now '
+                      '(free flow ${traffic.freeFlowSpeedKmh} km/h)'
+                : _isLoading
+                ? 'Reading the live sensor matrix…'
+                : 'Live traffic unavailable — check your connection or TomTom key',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -248,11 +247,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _aqiTrendCard(BuildContext context) {
     final theme = Theme.of(context);
-    final series = _telemetry?.dailyAqiAverages ?? const <double>[];
-    // The API returns the past seven days plus today; keep the last seven.
-    final trimmed = series.length > 7
-        ? series.sublist(series.length - 7)
-        : series;
+    final series = _telemetry?.dailyAqi ?? const <DailyAqi>[];
 
     return SectionCard(
       child: Column(
@@ -266,13 +261,13 @@ class _DashboardTabState extends State<DashboardTab> {
           ),
           const SizedBox(height: 2),
           Text(
-            'Daily sensor averages',
+            'Daily averages from the Open-Meteo sensor network',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 16),
-          if (trimmed.isEmpty)
+          if (series.isEmpty)
             SizedBox(
               height: 180,
               child: Center(
@@ -286,44 +281,92 @@ class _DashboardTabState extends State<DashboardTab> {
             )
           else
             TrendLineChart(
-              values: trimmed,
-              labels: _weekdayLabels.sublist(0, trimmed.length),
+              values: [for (final day in series) day.usAqi],
+              // Real weekday labels from the dates the API returned.
+              labels: [for (final day in series) _weekdayLabel(day.date)],
             ),
         ],
       ),
     );
   }
 
-  Widget _trafficForecastCard(BuildContext context) {
+  Widget _congestionCard(BuildContext context) {
     final theme = Theme.of(context);
+    final traffic = _traffic;
+    final history = _trafficHistory;
+
+    final congestionNow = traffic == null || traffic.freeFlowSpeedKmh <= 0
+        ? null
+        : (((traffic.freeFlowSpeedKmh - traffic.currentSpeedKmh) /
+                      traffic.freeFlowSpeedKmh) *
+                  100)
+              .clamp(0.0, 100.0);
+
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '12h Traffic Forecast',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Arterial Congestion',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              if (congestionNow != null)
+                Text(
+                  '${fixed(congestionNow, 0)}% below free flow',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: _congestionColor(congestionNow),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 2),
           Text(
-            'Typical arterial congestion by hour',
+            traffic != null
+                ? 'Live TomTom flow on ${traffic.roadName}, recorded across your recent '
+                      'sessions'
+                : 'Live TomTom flow, recorded across your recent sessions',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 16),
-          const ForecastBarChart(
-            // The same seven-point congestion profile the Kotlin BarChart plotted.
-            values: [25, 40, 75, 88, 60, 92, 50],
-            labels: _trafficHours,
-            barColor: AppColors.primaryGreen,
-          ),
+          if (history.isEmpty)
+            SizedBox(
+              height: 180,
+              child: Center(
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const EmptyState(
+                        message:
+                            'No congestion readings recorded yet. Readings are taken '
+                            'as you use the app and will chart here.',
+                        icon: Icons.timeline_outlined,
+                      ),
+              ),
+            )
+          else
+            ForecastBarChart(
+              values: [for (final r in history) r.congestionPercent],
+              labels: [for (final r in history) _clockLabel(r.recordedAt)],
+              barColor: AppColors.primaryGreen,
+            ),
         ],
       ),
     );
   }
+
+  static Color _congestionColor(double percent) => switch (percent) {
+    < 25 => AppColors.primaryGreen,
+    < 55 => AppColors.solidWarning,
+    _ => AppColors.solidError,
+  };
 
   static String _aqiBand(int aqi) => switch (aqi) {
     <= 50 => 'Good',
@@ -332,4 +375,21 @@ class _DashboardTabState extends State<DashboardTab> {
     <= 200 => 'Unhealthy',
     _ => 'Very Unhealthy',
   };
+
+  static const _weekdayNames = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
+
+  static String _weekdayLabel(DateTime date) => _weekdayNames[date.weekday - 1];
+
+  static String _clockLabel(DateTime at) {
+    final hour = at.hour % 12 == 0 ? 12 : at.hour % 12;
+    return '$hour${at.hour < 12 ? "a" : "p"}';
+  }
 }

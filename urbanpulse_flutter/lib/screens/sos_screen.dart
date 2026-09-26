@@ -34,6 +34,10 @@ class _SosScreenState extends State<SosScreen>
 
   bool _isSending = false;
 
+  /// The emergency type the traveler picked, included in the raised alert. The
+  /// Kotlin layout rendered these four cards with no listener at all.
+  String? _category;
+
   @override
   void dispose() {
     _holdController.dispose();
@@ -54,7 +58,8 @@ class _SosScreenState extends State<SosScreen>
     if (_isSending) return;
     setState(() => _isSending = true);
 
-    final position = await AppScope.of(context).location.currentPosition();
+    final location = AppScope.of(context).location;
+    await location.resolve(force: true);
     if (!mounted) return;
 
     setState(() => _isSending = false);
@@ -62,9 +67,9 @@ class _SosScreenState extends State<SosScreen>
 
     showToast(
       context,
-      position != null
-          ? 'SOS raised at ${fixed(position.latitude, 4)}, '
-                '${fixed(position.longitude, 4)}.'
+      location.hasFix
+          ? 'SOS raised${_category == null ? "" : " ($_category)"} at '
+                '${fixed(location.latitude!, 4)}, ${fixed(location.longitude!, 4)}.'
           : 'SOS raised — but your location could not be read. Enable location services '
                 'so responders can find you.',
     );
@@ -100,7 +105,11 @@ class _SosScreenState extends State<SosScreen>
               Center(child: _sosButton(context)),
               const SizedBox(height: 16),
               Text(
-                _isSending ? 'Raising alert…' : 'Press 3 sec for SOS',
+                _isSending
+                    ? 'Raising alert…'
+                    : _category == null
+                    ? 'Press 3 sec for SOS'
+                    : 'Press 3 sec to raise a $_category alert',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.labelLarge,
               ),
@@ -221,16 +230,24 @@ class _SosScreenState extends State<SosScreen>
     ),
   );
 
-  Widget _categoryCard(BuildContext context, String label, IconData icon) =>
-      SectionCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        onTap: () => showToast(context, '$label emergency selected'),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: AppColors.sosRed),
-            const SizedBox(width: 12),
-            Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
-      );
+  Widget _categoryCard(BuildContext context, String label, IconData icon) {
+    final isSelected = _category == label;
+    return SectionCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      borderWidth: isSelected ? 2 : 0,
+      borderColor: AppColors.sosRed,
+      onTap: () => setState(() => _category = isSelected ? null : label),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.sosRed),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+          if (isSelected)
+            const Icon(Icons.check_circle, size: 18, color: AppColors.sosRed),
+        ],
+      ),
+    );
+  }
 }

@@ -1,9 +1,11 @@
 /// The Leaflet map document loaded into the Live Map WebView.
 ///
-/// Carried over verbatim in behaviour from `LiveMapFragment.buildMapHtml()`:
-/// the same Carto voyager tiles, the same pulsing user marker, the same static
-/// traffic-flow polylines and POI pins, and the same three JS entry points the
-/// Dart side calls — `setCenter`, `drawDualRoutes` and `toggleTrafficOverlay`.
+/// Keeps the structure of `LiveMapFragment.buildMapHtml()` — the same Carto
+/// voyager tiles, the same pulsing user marker, the same dual-route rendering —
+/// but the traffic overlay and the POI pins are no longer drawn from coordinates
+/// baked into the page. Both are now injected from real API responses via
+/// `setTrafficSegment` and `setPois`, alongside the original `setCenter`,
+/// `drawDualRoutes` and `toggleTrafficOverlay` entry points.
 const String liveMapHtml = r'''
 <!DOCTYPE html>
 <html>
@@ -43,50 +45,53 @@ const String liveMapHtml = r'''
 <body>
     <div id="map"></div>
     <script>
-        var map = L.map('map', { zoomControl: false }).setView([19.1775, 72.9544], 13);
+        // Placeholder camera for the first paint only; Dart calls setCenter with
+        // the real fix as soon as the page finishes loading.
+        var map = L.map('map', { zoomControl: false }).setView([0, 0], 2);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
             subdomains: 'abcd'
         }).addTo(map);
 
-        var userMarker = L.marker([19.1775, 72.9544], {
+        var userMarker = L.marker([0, 0], {
             icon: L.divIcon({ className: 'user-pulse', iconSize: [18, 18], iconAnchor: [9, 9] })
         }).addTo(map).bindPopup("<b>Your Current Location</b><br>GPS Grounded");
 
         var routeLayerGroup = L.layerGroup().addTo(map);
-        var trafficLines = [];
+        var trafficLayerGroup = L.layerGroup().addTo(map);
+        var poiLayerGroup = L.layerGroup().addTo(map);
+        var trafficVisible = true;
 
-        function drawTraffic() {
-            var greenLine = L.polyline([
-                [19.0544, 72.8402], [19.0760, 72.8777], [19.1136, 72.8697]
-            ], { color: '#10B981', weight: 4, opacity: 0.6 }).addTo(map).bindPopup("Western Highway: Fast Flow (54 km/h)");
+        // Real TomTom flow-segment geometry, coloured by how far below free flow
+        // the corridor is actually running. Called from Dart with live data.
+        window.setTrafficSegment = function(coords, label, congestionPercent) {
+            trafficLayerGroup.clearLayers();
+            if (!coords || coords.length < 2) return;
+            var color = congestionPercent < 25 ? '#10B981'
+                      : congestionPercent < 55 ? '#F59E0B'
+                      : '#EF4444';
+            var line = L.polyline(coords, { color: color, weight: 5, opacity: 0.75 })
+                        .bindPopup(label);
+            trafficLayerGroup.addLayer(line);
+            if (!trafficVisible) map.removeLayer(trafficLayerGroup);
+        };
 
-            var yellowLine = L.polyline([
-                [19.0760, 72.8777], [19.0600, 72.8900], [19.0400, 72.9000]
-            ], { color: '#F59E0B', weight: 4, opacity: 0.6 }).addTo(map).bindPopup("Eastern Freeway: Moderate (38 km/h)");
-
-            trafficLines = [greenLine, yellowLine];
-        }
-        drawTraffic();
-
-        var pois = [
-            { lat: 19.1728, lon: 72.9564, code: "MED", title: "Fortis Hospital Mulund", desc: "24/7 Trauma Emergency", bg: "#EF4444" },
-            { lat: 19.2050, lon: 72.9734, code: "MED", title: "Jupiter Hospital Thane", desc: "Step-Free Critical Care", bg: "#EF4444" },
-            { lat: 19.0880, lon: 72.8890, code: "EV", title: "Fast Charging Hub", desc: "60 kW CCS2 (4 Available)", bg: "#38BDF8" },
-            { lat: 19.1200, lon: 72.9050, code: "ECO", title: "Powai Lake Eco Track", desc: "Dedicated Electric Mobility Corridor", bg: "#10B981" }
-        ];
-
-        pois.forEach(function(p) {
-            L.marker([p.lat, p.lon], {
-                icon: L.divIcon({
-                    className: 'custom-pin',
-                    html: '<div style="background:' + p.bg + '; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:9px;">' + p.code + '</div>',
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14]
-                })
-            }).addTo(map).bindPopup("<b>" + p.title + "</b><br>" + p.desc);
-        });
+        // Real nearby POIs from the TomTom POI search, injected from Dart.
+        window.setPois = function(pois) {
+            poiLayerGroup.clearLayers();
+            pois.forEach(function(p) {
+                var marker = L.marker([p.lat, p.lon], {
+                    icon: L.divIcon({
+                        className: 'custom-pin',
+                        html: '<div style="background:' + p.bg + '; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:9px;">' + p.code + '</div>',
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    })
+                }).bindPopup("<b>" + p.title + "</b><br>" + p.desc);
+                poiLayerGroup.addLayer(marker);
+            });
+        };
 
         window.setCenter = function(lat, lon, zoom) {
             map.flyTo([lat, lon], zoom, { duration: 1.2 });
@@ -139,9 +144,8 @@ const String liveMapHtml = r'''
         };
 
         window.toggleTrafficOverlay = function(show) {
-            trafficLines.forEach(function(l) {
-                if (show) map.addLayer(l); else map.removeLayer(l);
-            });
+            trafficVisible = show;
+            if (show) map.addLayer(trafficLayerGroup); else map.removeLayer(trafficLayerGroup);
         };
     </script>
 </body>

@@ -3,6 +3,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/routes.dart';
 import '../../models/trip_models.dart';
+import '../../state/activity_tracker.dart';
 import '../../state/app_scope.dart';
 import '../../state/yatri_ai_controller.dart';
 import '../../widgets/chat_bubble.dart';
@@ -98,6 +99,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
     final published = await AddExperienceDialog.show(
       context,
       services.experiences,
+      detectedCity: services.location.city,
     );
     if (!mounted) return;
     if (published == null) {
@@ -117,9 +119,11 @@ class _YatriAiTabState extends State<YatriAiTab> {
     );
   }
 
-  void _saveTrip(TripPlan trip) {
+  Future<void> _saveTrip(TripPlan trip) async {
     final services = AppScope.of(context);
-    services.trips.addTrip(trip);
+    await services.trips.addTrip(trip);
+    await services.activity.increment(TrackedAction.tripsSaved);
+    if (!mounted) return;
     showToast(context, '✅ Saved "${trip.title}" to My Trips!');
   }
 

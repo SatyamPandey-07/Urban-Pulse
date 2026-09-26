@@ -165,6 +165,42 @@ abstract final class CentralRegistryClient {
     }
   }
 
+  /// Real redeemable partner perks from the shared backend. Passing the
+  /// traveler's name returns any voucher they have already redeemed, so a
+  /// redemption survives a restart instead of living in screen state.
+  static Future<List<RegistryPerk>?> fetchPerks({String? travelerName}) async {
+    final query = travelerName == null
+        ? ''
+        : '?travelerName=${Uri.encodeQueryComponent(travelerName)}';
+    final body = await _get('/api/perks$query');
+    if (body == null) return null;
+    try {
+      return (jsonDecode(body) as List<dynamic>)
+          .map((e) => RegistryPerk.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Redeems a perk and returns it with its real, server-issued voucher code.
+  static Future<RegistryPerk?> redeemPerk(
+    String perkId, {
+    required String travelerName,
+  }) async {
+    final body = await _send(
+      'POST',
+      '/api/perks/$perkId/redeem',
+      payload: {'travelerName': travelerName},
+    );
+    if (body == null) return null;
+    try {
+      return RegistryPerk.fromJson(jsonDecode(body) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ---- transport helpers ----
 
   static RegistryExperience? _decodeExperience(String? body) {
@@ -255,7 +291,7 @@ class RegistryExperience {
         id: o['id'] as String,
         name: o['name'] as String,
         category: o['category'] as String? ?? 'General',
-        location: o['location'] as String? ?? 'Mumbai',
+        location: o['location'] as String? ?? 'Unspecified',
         duration: (o['duration'] as num?)?.toDouble() ?? 2.0,
         price: (o['price'] as num?)?.toInt() ?? 350,
         ecoScore: (o['ecoScore'] as num?)?.toInt() ?? 5,
@@ -354,5 +390,36 @@ class ImpactStats {
     bookedExperiencesCarbonFootprintKg:
         (o['bookedExperiencesCarbonFootprintKg'] as num?)?.toDouble() ?? 0.0,
     averageEcoScore: (o['averageEcoScore'] as num?)?.toDouble() ?? 0.0,
+  );
+}
+
+class RegistryPerk {
+  const RegistryPerk({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.partner,
+    required this.pulseCost,
+    required this.redeemedVoucherCode,
+  });
+
+  final String id;
+  final String title;
+  final String description;
+  final String partner;
+  final int pulseCost;
+
+  /// Non-null once this traveler has redeemed it.
+  final String? redeemedVoucherCode;
+
+  bool get isRedeemed => redeemedVoucherCode != null;
+
+  static RegistryPerk fromJson(Map<String, dynamic> o) => RegistryPerk(
+    id: o['id'] as String,
+    title: o['title'] as String,
+    description: o['description'] as String? ?? '',
+    partner: o['partner'] as String? ?? '',
+    pulseCost: (o['pulseCost'] as num?)?.toInt() ?? 0,
+    redeemedVoucherCode: o['redeemedVoucherCode'] as String?,
   );
 }

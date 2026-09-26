@@ -65,7 +65,17 @@ abstract final class TomTomService {
     return list;
   }
 
-  static Future<LiveTrafficData?> getLiveTraffic(double lat, double lon) async {
+  static Future<LiveTrafficData?> getLiveTraffic(
+    double lat,
+    double lon,
+  ) async => (await getLiveTrafficSegment(lat, lon))?.data;
+
+  /// The live flow segment *and* its real road geometry, so the map can draw the
+  /// actual corridor the reading describes rather than an invented polyline.
+  static Future<LiveTrafficSegment?> getLiveTrafficSegment(
+    double lat,
+    double lon,
+  ) async {
     if (!AppConfig.hasTomTomKey) return null;
     final uri = Uri.parse(
       'https://api.tomtom.com/traffic/services/4/flowSegmentData/relative0/10/json'
@@ -76,21 +86,42 @@ abstract final class TomTomService {
     final flow = json?['flowSegmentData'] as Map<String, dynamic>?;
     if (flow == null) return null;
 
-    final coordinates = flow['coordinates'] as List<dynamic>?;
-    final firstCoord = coordinates != null && coordinates.isNotEmpty
-        ? coordinates.first
-        : null;
+    // TomTom returns the segment shape under coordinates.coordinate.
+    final wrapper = flow['coordinates'];
+    final rawPoints = wrapper is Map<String, dynamic>
+        ? wrapper['coordinate'] as List<dynamic>?
+        : wrapper as List<dynamic>?;
+    final geometry = <List<double>>[
+      for (final p in rawPoints ?? const [])
+        if (p is Map<String, dynamic> &&
+            p['latitude'] != null &&
+            p['longitude'] != null)
+          [
+            (p['latitude'] as num).toDouble(),
+            (p['longitude'] as num).toDouble(),
+          ],
+    ];
 
-    return LiveTrafficData(
-      roadName:
-          (firstCoord is Map<String, dynamic>
-              ? firstCoord['roadName'] as String?
-              : null) ??
-          'Nearby Arterial Road',
-      currentSpeedKmh: (flow['currentSpeed'] as num?)?.toInt() ?? 35,
-      freeFlowSpeedKmh: (flow['freeFlowSpeed'] as num?)?.toInt() ?? 50,
-      delaySeconds: (flow['currentDelay'] as num?)?.toInt() ?? 0,
-      confidence: (flow['confidence'] as num?)?.toDouble() ?? 0.9,
+    final currentSpeed = (flow['currentSpeed'] as num?)?.toInt();
+    final freeFlowSpeed = (flow['freeFlowSpeed'] as num?)?.toInt();
+    // Without both speeds there is no congestion reading to report.
+    if (currentSpeed == null || freeFlowSpeed == null) return null;
+
+    return LiveTrafficSegment(
+      data: LiveTrafficData(
+        roadName: flow['frc'] as String? ?? 'Current corridor',
+        currentSpeedKmh: currentSpeed,
+        freeFlowSpeedKmh: freeFlowSpeed,
+        delaySeconds:
+            (flow['currentTravelTime'] as num?)?.toInt() != null &&
+                (flow['freeFlowTravelTime'] as num?)?.toInt() != null
+            ? ((flow['currentTravelTime'] as num).toInt() -
+                      (flow['freeFlowTravelTime'] as num).toInt())
+                  .clamp(0, 1 << 30)
+            : 0,
+        confidence: (flow['confidence'] as num?)?.toDouble() ?? 0.9,
+      ),
+      geometry: geometry,
     );
   }
 

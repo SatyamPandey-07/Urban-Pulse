@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/formatting.dart';
 import '../domain/carbon_estimator.dart';
 import '../domain/multi_objective_ranker.dart';
+import '../services/central_registry_client.dart';
 import '../state/app_scope.dart';
 import '../widgets/common.dart';
 
@@ -10,6 +11,11 @@ import '../widgets/common.dart';
 /// Travel Passport: lifetime savings, the combined stay + transport + activity
 /// footprint, its percentile against every other combination, and the
 /// redeemable partner perks.
+///
+/// Perks come from the Central Registry (`GET /api/perks`) and redeeming one
+/// issues a real server-side voucher tied to this traveler, so a redemption
+/// survives a restart. When the backend is unreachable the screen says so rather
+/// than offering perks it cannot actually issue.
 class CarbonWalletScreen extends StatefulWidget {
   const CarbonWalletScreen({super.key});
 
@@ -18,18 +24,36 @@ class CarbonWalletScreen extends StatefulWidget {
 }
 
 class _CarbonWalletScreenState extends State<CarbonWalletScreen> {
-  static const _orchidCost = 400;
-  static const _evCost = 250;
+  /// A mature urban tree absorbs roughly this much CO2 per year.
+  static const _kgCo2PerTreeYear = 21.0;
 
-  String? _orchidVoucher;
-  String? _evVoucher;
   String? _percentileText;
   bool _isComparing = false;
+
+  List<RegistryPerk>? _perks;
+  bool _isLoadingPerks = true;
+  String? _redeemingPerkId;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _computePercentile());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _computePercentile();
+      _loadPerks();
+    });
+  }
+
+  Future<void> _loadPerks() async {
+    final travelerName = await AppScope.of(context).auth
+        .getOrCreateTravelerName();
+    final perks = await CentralRegistryClient.fetchPerks(
+      travelerName: travelerName,
+    );
+    if (!mounted) return;
+    setState(() {
+      _perks = perks;
+      _isLoadingPerks = false;
+    });
   }
 
   /// Scores the traveler's actual chosen stay + transport + activities together
@@ -82,24 +106,52 @@ class _CarbonWalletScreenState extends State<CarbonWalletScreen> {
     });
   }
 
-  Future<void> _redeem({
-    required int cost,
-    required String voucherCode,
-    required String successMessage,
-    required ValueChanged<String> onRedeemed,
-  }) async {
+  Future<void> _redeem(RegistryPerk perk) async {
     final services = AppScope.of(context);
-    final granted = await services.gamification.spendPulse(cost);
+    setState(() => _redeemingPerkId = perk.id);
+
+    // Spend locally first so the balance check is authoritative on-device; the
+    // credits are refunded if the backend cannot issue the voucher.
+    final granted = await services.gamification.spendPulse(perk.pulseCost);
     if (!mounted) return;
     if (!granted) {
+      setState(() => _redeemingPerkId = null);
       showToast(
         context,
         'Not enough PULSE credits yet — keep taking green trips!',
       );
       return;
     }
-    setState(() => onRedeemed(voucherCode));
-    showToast(context, successMessage);
+
+    final travelerName = await services.auth.getOrCreateTravelerName();
+    final redeemed = await CentralRegistryClient.redeemPerk(
+      perk.id,
+      travelerName: travelerName,
+    );
+
+    if (redeemed == null) {
+      await services.gamification.addPulse(perk.pulseCost);
+      if (!mounted) return;
+      setState(() => _redeemingPerkId = null);
+      showToast(
+        context,
+        'Could not reach the rewards service — your credits were not spent.',
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _redeemingPerkId = null;
+      _perks = [
+        for (final p in _perks ?? const <RegistryPerk>[])
+          if (p.id == redeemed.id) redeemed else p,
+      ];
+    });
+    showToast(
+      context,
+      '${perk.title} unlocked — voucher ${redeemed.redeemedVoucherCode}',
+    );
   }
 
   @override
@@ -116,90 +168,105 @@ class _CarbonWalletScreenState extends State<CarbonWalletScreen> {
         animation: Listenable.merge([services.gamification, services.tripPlan]),
         builder: (context, _) {
           final co2Kg = services.gamification.co2SavedGrams / 1000.0;
-          final trees = (co2Kg / 21)
-              .floor(); // ~21 kg CO2 absorbed per urban tree/year
+          final trees = (co2Kg / _kgCo2PerTreeYear).floor();
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    StatTile(
-                      label: 'Total Lifetime CO₂ Saved',
-                      value: '${fixed(co2Kg)} kg',
-                      caption: trees > 0
-                          ? 'Equivalent to planting $trees mature urban tree(s)'
-                          : 'Take a green journey to start saving',
-                      valueColor: theme.colorScheme.primary,
-                    ),
-                    const Divider(height: 28),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: StatTile(
-                            label: 'PULSE Carbon Credits',
-                            value:
-                                '${grouped(services.gamification.pulse)} pts',
+          return RefreshIndicator(
+            onRefresh: _loadPerks,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: [
+                SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      StatTile(
+                        label: 'Total Lifetime CO₂ Saved',
+                        value: '${fixed(co2Kg)} kg',
+                        caption: trees > 0
+                            ? 'Equivalent to a year of absorption by $trees mature '
+                                  'urban tree(s)'
+                            : 'Take a green journey to start saving',
+                        valueColor: theme.colorScheme.primary,
+                      ),
+                      const Divider(height: 28),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              label: 'PULSE Carbon Credits',
+                              value:
+                                  '${grouped(services.gamification.pulse)} pts',
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: StatTile(
-                            label: 'Traveler Status',
-                            value: 'Level ${services.gamification.level}',
-                            caption:
-                                '${services.gamification.streak}-day streak',
+                          Expanded(
+                            child: StatTile(
+                              label: 'Traveler Status',
+                              value: 'Level ${services.gamification.level}',
+                              caption:
+                                  '${services.gamification.streak}-day streak',
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _tripSummaryCard(context),
-              const SizedBox(height: 16),
-              Text(
-                'Redeemable Hospitality Partner Perks',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 16),
+                _tripSummaryCard(context),
+                const SizedBox(height: 16),
+                Text(
+                  'Redeemable Hospitality Partner Perks',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              _perkCard(
-                context,
-                title: '15% Off at Orchid Eco-Resort',
-                description: 'Valid on certified zero-waste dining and solar room suites.',
-                cost: _orchidCost,
-                voucher: _orchidVoucher,
-                onRedeem: () => _redeem(
-                  cost: _orchidCost,
-                  voucherCode: 'ORCHID-ECO-15',
-                  successMessage: 'Orchid Eco-Resort voucher unlocked! Saved to your profile.',
-                  onRedeemed: (code) => _orchidVoucher = code,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _perkCard(
-                context,
-                title: 'Complimentary 60kW EV Fast Charge Session',
-                description:
-                    'Applicable at Tata Power charging hubs across Mumbai.',
-                cost: _evCost,
-                voucher: _evVoucher,
-                onRedeem: () => _redeem(
-                  cost: _evCost,
-                  voucherCode: 'TATA-EV-FREE',
-                  successMessage: 'Free EV Charging voucher unlocked!',
-                  onRedeemed: (code) => _evVoucher = code,
-                ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                ..._perkSection(context),
+              ],
+            ),
           );
         },
       ),
     );
+  }
+
+  List<Widget> _perkSection(BuildContext context) {
+    if (_isLoadingPerks) {
+      return const [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 32),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
+    }
+
+    final perks = _perks;
+    if (perks == null) {
+      return const [
+        EmptyState(
+          message:
+              'Partner perks live on the Central Registry, which is unreachable '
+              'right now. Start the backend (server/) or check your connection, then '
+              'pull to refresh.',
+          icon: Icons.cloud_off_outlined,
+        ),
+      ];
+    }
+    if (perks.isEmpty) {
+      return const [
+        EmptyState(
+          message: 'No partner perks are currently on offer.',
+          icon: Icons.redeem_outlined,
+        ),
+      ];
+    }
+
+    return [
+      for (final perk in perks) ...[
+        _perkCard(context, perk),
+        const SizedBox(height: 12),
+      ],
+    ];
   }
 
   Widget _tripSummaryCard(BuildContext context) {
@@ -292,28 +359,32 @@ class _CarbonWalletScreenState extends State<CarbonWalletScreen> {
     );
   }
 
-  Widget _perkCard(
-    BuildContext context, {
-    required String title,
-    required String description,
-    required int cost,
-    required String? voucher,
-    required VoidCallback onRedeem,
-  }) {
+  Widget _perkCard(BuildContext context, RegistryPerk perk) {
     final theme = Theme.of(context);
+    final isRedeeming = _redeemingPerkId == perk.id;
+
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            perk.title,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (perk.partner.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              perk.partner,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
           const SizedBox(height: 4),
           Text(
-            description,
+            perk.description,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -322,12 +393,19 @@ class _CarbonWalletScreenState extends State<CarbonWalletScreen> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.tonal(
-              onPressed: voucher == null ? onRedeem : null,
-              child: Text(
-                voucher == null
-                    ? 'Redeem for $cost pts'
-                    : 'Voucher Code: $voucher',
-              ),
+              onPressed: perk.isRedeemed || isRedeeming
+                  ? null
+                  : () => _redeem(perk),
+              child: isRedeeming
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      perk.isRedeemed
+                          ? 'Voucher Code: ${perk.redeemedVoucherCode}'
+                          : 'Redeem for ${perk.pulseCost} pts',
+                    ),
             ),
           ),
         ],

@@ -17,13 +17,15 @@ class AppDatabase {
   AppDatabase._();
 
   static const _dbName = 'urbanpulse_app.db';
-  static const _dbVersion = 4;
+  static const _dbVersion = 5;
 
   static const tableStays = 'hospitality_stays';
   static const tableHistory = 'hotel_metrics_history';
   static const tableExperiences = 'experiences';
   static const tableBookings = 'bookings';
   static const tableReports = 'experience_reports';
+  static const tableFacility = 'facility_profile';
+  static const tableTrafficHistory = 'traffic_history';
 
   static final AppDatabase instance = AppDatabase._();
 
@@ -47,6 +49,7 @@ class AppDatabase {
         await _seedHospitalityStays(db);
         await _seedHotelHistory(db);
         await _seedExperiences(db);
+        await _seedFacilityProfile(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         for (final table in [
@@ -55,6 +58,8 @@ class AppDatabase {
           tableExperiences,
           tableBookings,
           tableReports,
+          tableFacility,
+          tableTrafficHistory,
         ]) {
           await db.execute('DROP TABLE IF EXISTS $table');
         }
@@ -62,6 +67,7 @@ class AppDatabase {
         await _seedHospitalityStays(db);
         await _seedHotelHistory(db);
         await _seedExperiences(db);
+        await _seedFacilityProfile(db);
       },
     );
   }
@@ -134,6 +140,46 @@ class AppDatabase {
         created_at TEXT NOT NULL
       )
     ''');
+
+    // Operator-declared facility parameters for the Hotel Optimizer — a single
+    // editable row rather than literals compiled into the screen.
+    await db.execute('''
+      CREATE TABLE $tableFacility (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        total_rooms INTEGER NOT NULL,
+        solar_mix_percent REAL NOT NULL,
+        greywater_rate_percent REAL NOT NULL,
+        energy_target_kwh_per_room REAL NOT NULL,
+        water_target_liters_per_room REAL NOT NULL
+      )
+    ''');
+
+    // Real TomTom traffic readings recorded as the app is used, so the Dashboard
+    // congestion chart plots measured history rather than a fixed array.
+    await db.execute('''
+      CREATE TABLE $tableTrafficHistory (
+        recorded_at TEXT PRIMARY KEY,
+        congestion_percent REAL NOT NULL,
+        current_speed_kmh INTEGER NOT NULL,
+        free_flow_speed_kmh INTEGER NOT NULL
+      )
+    ''');
+  }
+
+  /// Starting values for the facility profile. Unlike the seeded catalogs these
+  /// are plainly operator inputs, and the Hotel Optimizer lets the operator edit
+  /// every one of them.
+  Future<void> _seedFacilityProfile(Database db) async {
+    await db.insert(tableFacility, {
+      'id': 'default',
+      'name': 'The Orchid Eco-Heritage Resort & Conference Center',
+      'total_rooms': 120,
+      'solar_mix_percent': 38.5,
+      'greywater_rate_percent': 85.0,
+      'energy_target_kwh_per_room': 20.0,
+      'water_target_liters_per_room': 220.0,
+    });
   }
 
   // ---- Seed generation (procedural, not literal hardcoded records) ----

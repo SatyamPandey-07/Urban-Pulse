@@ -29,16 +29,25 @@ class PublishedExperience {
 /// which writes to the Central Registry when reachable and always to the local
 /// store.
 class AddExperienceDialog extends StatefulWidget {
-  const AddExperienceDialog({required this.repository, super.key});
+  const AddExperienceDialog({
+    required this.repository,
+    this.detectedCity,
+    super.key,
+  });
 
   final ExperienceRepository repository;
 
+  /// Pre-fills the location field with where the provider actually is.
+  final String? detectedCity;
+
   static Future<PublishedExperience?> show(
     BuildContext context,
-    ExperienceRepository repository,
-  ) => showDialog<PublishedExperience>(
+    ExperienceRepository repository, {
+    String? detectedCity,
+  }) => showDialog<PublishedExperience>(
     context: context,
-    builder: (_) => AddExperienceDialog(repository: repository),
+    builder: (_) =>
+        AddExperienceDialog(repository: repository, detectedCity: detectedCity),
   );
 
   @override
@@ -48,7 +57,7 @@ class AddExperienceDialog extends StatefulWidget {
 class _AddExperienceDialogState extends State<AddExperienceDialog> {
   final _name = TextEditingController();
   final _category = TextEditingController(text: 'Cultural Workshop');
-  final _location = TextEditingController();
+  late final _location = TextEditingController(text: widget.detectedCity ?? '');
   final _duration = TextEditingController(text: '2.0');
   final _price = TextEditingController(text: '350');
   final _sustainability = TextEditingController(
@@ -82,7 +91,7 @@ class _AddExperienceDialogState extends State<AddExperienceDialog> {
         ? 'Cultural Workshop'
         : _category.text.trim();
     final location = _location.text.trim().isEmpty
-        ? 'Mumbai'
+        ? (widget.detectedCity ?? 'Unspecified')
         : _location.text.trim();
     final duration = double.tryParse(_duration.text) ?? 2.0;
     final price = int.tryParse(_price.text) ?? 350;

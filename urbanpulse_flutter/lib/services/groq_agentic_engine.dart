@@ -1,16 +1,26 @@
 import 'dart:convert';
 
 import '../core/config.dart';
+import '../core/formatting.dart';
+import '../domain/carbon_estimator.dart';
+import '../models/mobility.dart';
 import '../models/trip_models.dart';
 import 'groq_api_client.dart';
+import 'open_meteo_service.dart';
+import 'tomtom_service.dart';
 
-/// Autonomous multi-day itinerary planner. Asks Groq for a structured JSON
-/// itinerary and, when the call is unavailable or fails, falls back to a
-/// destination-tailored template that is explicitly labelled as an offline
-/// estimate (`TripPlan.source`) so the UI never claims live AI generation it
-/// didn't get.
+/// Autonomous multi-day itinerary planner.
 ///
-/// Port of `network/GroqAgenticEngine.kt`.
+/// Asks Groq for a structured JSON itinerary. When that call is unavailable or
+/// fails it does not fall back to a canned trip: it *computes* one from real
+/// inputs — a routed origin-to-destination distance (TomTom, or a haversine
+/// estimate), the real per-mode fares/durations/emissions from
+/// [CarbonEstimator], and the live air quality at the destination. The result is
+/// still marked `offline_estimate` because no model wrote it, but every number
+/// in it is derived rather than invented.
+///
+/// Port of `network/GroqAgenticEngine.kt`, whose fallback was three hand-written
+/// destination templates.
 abstract final class GroqAgenticEngine {
   static Future<TripPlan> generateAutonomousTripPlan({
     required String destination,
@@ -46,9 +56,8 @@ abstract final class GroqAgenticEngine {
       }
     }
 
-    // Realistic fallback tailored from origin to destination.
-    return _buildRealisticFallbackTrip(
-      destination,
+    return _computeFallbackTrip(
+      destination: destination,
       originCity: originCity,
       days: days,
       isAccessible: isAccessible,
@@ -194,374 +203,162 @@ Guidelines:
     }
   }
 
-  static TripPlan _buildRealisticFallbackTrip(
-    String dest, {
+  /// Computes an itinerary skeleton from measured inputs when no model is
+  /// available. Nothing here is a stored template: the distance is routed or
+  /// computed, the transit options come from the same estimator the Green Route
+  /// Planner uses, and the air quality is read live at the destination.
+  static Future<TripPlan> _computeFallbackTrip({
+    required String destination,
     required String originCity,
     required int days,
     required bool isAccessible,
-  }) {
-    final lower = dest.toLowerCase();
-    final stamp = DateTime.now().millisecondsSinceEpoch;
+  }) async {
+    final routedKm = await TomTomService.fetchRealRouteDistanceKm(
+      originCity,
+      destination,
+    );
+    final distanceKm =
+        routedKm ?? CarbonEstimator.estimateDistanceKm(originCity, destination);
 
-    if (lower.contains('matheran')) {
-      return TripPlan(
-        id: 'trip_dyn_matheran_$stamp',
-        destination: 'Matheran',
-        title: 'Matheran Vehicle-Free Eco-Hill Journey',
-        durationDays: days,
-        travelDates: 'Upcoming Weekend ($days Days)',
-        travelMode: '$originCity Central Local to Neral + Matheran Toy Train',
-        co2SavedKg: 11.5 * days,
-        pulsePointsEarned: 130 * days,
-        isCompleted: false,
-        hotelName: 'The Byke Heritage Eco-Resort (Pure Veg & Solar)',
-        hotelRating: 4.8,
-        isStepFreeAccessible: isAccessible,
-        totalBudgetInr: 2200 * days,
-        aqiStatus: 'Pristine Forest Air (AQI 22 • 100% Automobile-Free)',
-        transitCostInr: 110,
-        dailyItinerary: [
-          TripDaySchedule(
-            dayNumber: 1,
-            dayTitle: '$originCity to Neral & Matheran Toy Train Ascent',
-            activities: [
-              TripActivity(
-                time: '07:30 AM',
-                title: 'Central Railway AC Local',
-                description:
-                    '$originCity CSMT/Dadar/Thane to Neral Junction (Electric Rail • Level Boarding)',
-                transportType: 'Train',
-                isAccessible: true,
-                co2Grams: 35,
-                costInr: 60,
-              ),
-              const TripActivity(
-                time: '09:45 AM',
-                title: 'Matheran Heritage Toy Train',
-                description: 'Neral to Matheran / Aman Lodge Shuttle (Zero Emission Eco-Zone)',
-                transportType: 'Train',
-                isAccessible: true,
-                co2Grams: 10,
-                costInr: 50,
-              ),
-              const TripActivity(
-                time: '11:30 AM',
-                title: 'The Byke Heritage Check-in',
-                description:
-                    '100% Solar Powered Heritage Villa (Step-Free Ramps)',
-                transportType: 'Hotel',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-              const TripActivity(
-                time: '03:30 PM',
-                title: 'Charlotte Lake & Echo Point',
-                description: 'Vehicle-free forest pedestrian walking trail & bird watching',
-                transportType: 'Walk',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-            ],
+    final options = CarbonEstimator.estimateAllModes(distanceKm);
+    MobilityOption optionFor(TravelMode mode) =>
+        options.firstWhere((o) => o.mode == mode);
+
+    final rail = optionFor(TravelMode.metro);
+    final bus = optionFor(TravelMode.bus);
+    final taxi = optionFor(TravelMode.taxi);
+
+    // Real avoided emissions: the petrol-cab baseline minus the rail option,
+    // across the outbound and return legs.
+    final avoidedKgPerLeg =
+        rail.carbonAvoidedVsBaseline(taxi.carbonGrams) / 1000.0;
+    final co2SavedKg = double.parse((avoidedKgPerLeg * 2).toStringAsFixed(1));
+
+    // Live air quality at the destination's resolved coordinates.
+    final (destLat, destLon) = CarbonEstimator.resolveCoordinates(destination);
+    final weather = await OpenMeteoService.getLiveWeatherAndAqi(
+      destLat,
+      destLon,
+    );
+    final aqiStatus = weather != null
+        ? '${_aqiBand(weather.usAqi)} (AQI ${weather.usAqi}, measured now)'
+        : 'Air quality unavailable - no live reading for $destination';
+
+    // Budget from the real fares plus a stated nightly allowance, so the number
+    // is traceable rather than a round guess.
+    const nightlyStayAllowance = 2200;
+    final totalBudget = (rail.fareRupees * 2) + (nightlyStayAllowance * days);
+
+    final itinerary = <TripDaySchedule>[
+      TripDaySchedule(
+        dayNumber: 1,
+        dayTitle: '$originCity to $destination - low-carbon transit',
+        activities: [
+          TripActivity(
+            time: '08:00 AM',
+            title: 'Electric rail / metro leg',
+            description:
+                'Depart $originCity for $destination - ${fixed(distanceKm)} km, '
+                '${rail.accessibilityNote}',
+            transportType: 'Train',
+            isAccessible: rail.stepFreeAccessible,
+            co2Grams: rail.carbonGrams.round(),
+            costInr: rail.fareRupees,
           ),
-          TripDaySchedule(
-            dayNumber: 2,
-            dayTitle: 'Louisa Point & Return to $originCity',
-            activities: [
-              const TripActivity(
-                time: '08:00 AM',
-                title: 'Louisa Point & Panorama Peak',
-                description:
-                    'Morning valley sunrise view with bio-toilets along trail',
-                transportType: 'Walk',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-              const TripActivity(
-                time: '01:00 PM',
-                title: 'Eco-E-Rickshaw to Aman Lodge',
-                description:
-                    'Govt Authorized Electric Shuttle (Low Speed Zero Noise)',
-                transportType: 'E-Bus',
-                isAccessible: true,
-                co2Grams: 5,
-                costInr: 35,
-              ),
-              TripActivity(
-                time: '04:30 PM',
-                title: 'Central AC Local to $originCity',
-                description:
-                    'Neral Junction return express train to $originCity',
-                transportType: 'Train',
-                isAccessible: true,
-                co2Grams: 35,
-                costInr: 60,
-              ),
-            ],
+          TripActivity(
+            time: _arrivalClock(rail.durationMin),
+            title: 'Check in to a certified eco-stay',
+            description: isAccessible
+                ? 'Filter Sustainable Stays to step-free listings on arrival'
+                : 'Pick a stay from Sustainable Stays on arrival',
+            transportType: 'Hotel',
+            isAccessible: isAccessible,
+            co2Grams: 0,
+            costInr: nightlyStayAllowance,
           ),
         ],
-        transitOpt1Name: '🚆 Central Local + Matheran Toy Train',
-        transitOpt1Metrics: '₹110 • 2h 15m • 35g CO2',
-        transitOpt2Name: '⚡ Neral E-Rickshaw + Shuttle',
-        transitOpt2Metrics: '₹90 • 1h 50m • 18g CO2',
-        transitOpt3Name: '🚗 Standard Petrol Taxi (to Dasturi Naka)',
-        transitOpt3Metrics: '₹2,100 • 2h 30m • 1,600g CO2',
-      );
-    }
-
-    if (lower.contains('kedar')) {
-      return TripPlan(
-        id: 'trip_dyn_kedarnath_$stamp',
-        destination: 'Kedarnath',
-        title: 'Kedarnath Dham Holy Eco-Yatra',
-        durationDays: days,
-        travelDates: 'Upcoming Spiritual Journey ($days Days)',
-        travelMode:
-            '$originCity-Haridwar Superfast Rail + Electric Pilgrim Shuttle',
-        co2SavedKg: 14.2 * days,
-        pulsePointsEarned: 160 * days,
-        isCompleted: false,
-        hotelName: 'GMVN Mandakini Eco Tourist Rest House (Solar Heated)',
-        hotelRating: 4.8,
-        isStepFreeAccessible: isAccessible,
-        totalBudgetInr: 2800 * days,
-        aqiStatus: 'Pristine Himalayan Alpine Air (AQI 18)',
-        transitCostInr: 1450,
-        dailyItinerary: [
-          TripDaySchedule(
-            dayNumber: 1,
-            dayTitle: '$originCity Departure to Haridwar Hub',
-            activities: [
-              TripActivity(
-                time: '08:30 AM',
-                title: 'Haridwar AC Superfast Express',
-                description:
-                    '$originCity CSMT/Bandra to Haridwar Jn (100% Electric Rail • Level Boarding)',
-                transportType: 'Train',
-                isAccessible: true,
-                co2Grams: 280,
-                costInr: 1450,
-              ),
-              const TripActivity(
-                time: '03:00 PM',
-                title: 'Solar Eco Guest House Check-in',
-                description:
-                    'Haridwar GMVN Alaknanda Rest House (Step-Free Concourse)',
-                transportType: 'Hotel',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-              const TripActivity(
-                time: '06:30 PM',
-                title: 'Har Ki Pauri Ganga Aarti',
-                description: 'Paved accessible riverside walkway & bio-toilets',
-                transportType: 'Walk',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-            ],
-          ),
-          const TripDaySchedule(
-            dayNumber: 2,
-            dayTitle: 'Haridwar to Sonprayag & Gaurikund Base',
-            activities: [
-              TripActivity(
-                time: '06:00 AM',
-                title: 'AC Electric Pilgrim Coach',
-                description:
-                    'Haridwar to Sonprayag Hub (Low-Carbon Scenic Valley)',
-                transportType: 'E-Bus',
-                isAccessible: true,
-                co2Grams: 45,
-                costInr: 650,
-              ),
-              TripActivity(
-                time: '02:30 PM',
-                title: 'Govt Electric Local Shuttle',
-                description:
-                    'Sonprayag to Gaurikund Base (Zero Emission E-Shuttle)',
-                transportType: 'E-Bus',
-                isAccessible: true,
-                co2Grams: 10,
-                costInr: 50,
-              ),
+      ),
+      for (var day = 2; day <= days; day++)
+        TripDaySchedule(
+          dayNumber: day,
+          dayTitle: day == days
+              ? '$destination - return to $originCity'
+              : '$destination - local exploration',
+          activities: [
+            if (day == days)
               TripActivity(
                 time: '04:30 PM',
-                title: 'Eco Rest House Check-in',
+                title: 'Return electric rail leg',
                 description:
-                    'GMVN Mandakini Solar Guest House (Heated Step-Free)',
-                transportType: 'Hotel',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-            ],
-          ),
-          TripDaySchedule(
-            dayNumber: 3,
-            dayTitle: 'Gaurikund to Shri Kedarnath Dham',
-            activities: [
-              TripActivity(
-                time: '05:30 AM',
-                title: 'Eco Pilgrim Ascent',
-                description: isAccessible
-                    ? 'Assisted Step-free Palki / Wheelchair Hoist route'
-                    : 'Paved Himalayan Walking Trail',
-                transportType: 'Walk',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-              const TripActivity(
-                time: '01:00 PM',
-                title: 'Shri Kedarnath Temple Darshan',
-                description: '12th Jyotirlinga Darshan & Zero-Plastic Eco Zone',
-                transportType: 'Walk',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-              const TripActivity(
-                time: '06:30 PM',
-                title: 'Evening Mandakini Aarti',
-                description: 'Solar lit temple complex with bio-toilets',
-                transportType: 'Walk',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-            ],
-          ),
-          TripDaySchedule(
-            dayNumber: 4,
-            dayTitle: 'Bhairavnath Ridge & Return Journey to $originCity',
-            activities: [
-              const TripActivity(
-                time: '07:00 AM',
-                title: 'Bhairavnath Panoramic Shrine',
-                description: 'Morning alpine view overlooking Kedarnath temple',
-                transportType: 'Walk',
-                isAccessible: true,
-                co2Grams: 0,
-                costInr: 0,
-              ),
-              const TripActivity(
-                time: '11:30 AM',
-                title: 'Descent to Gaurikund Base',
-                description: 'Govt E-Shuttle back to Sonprayag',
-                transportType: 'E-Bus',
-                isAccessible: true,
-                co2Grams: 10,
-                costInr: 50,
-              ),
-              TripActivity(
-                time: '06:00 PM',
-                title: 'Return Superfast Express',
-                description: 'Haridwar Junction to $originCity CSMT',
+                    'Return to $originCity - ${fixed(distanceKm)} km, '
+                    '${rail.durationMin} mins',
                 transportType: 'Train',
+                isAccessible: rail.stepFreeAccessible,
+                co2Grams: rail.carbonGrams.round(),
+                costInr: rail.fareRupees,
+              )
+            else
+              const TripActivity(
+                time: '09:00 AM',
+                title: 'Local low-carbon day',
+                description:
+                    'Build this day in the Eco & Inclusive Itinerary tab, which ranks '
+                    'real listings by carbon, accessibility and price',
+                transportType: 'Walk',
                 isAccessible: true,
-                co2Grams: 280,
-                costInr: 1450,
+                co2Grams: 0,
+                costInr: 0,
               ),
-            ],
-          ),
-        ],
-        transitOpt1Name: '🚆 $originCity-Haridwar Superfast + E-Shuttle',
-        transitOpt1Metrics: '₹1,450 • Level Boarding • 280g CO2',
-        transitOpt2Name: '⚡ AC Pilgrim Express Coach',
-        transitOpt2Metrics: '₹2,200 • AC Seater • 350g CO2',
-        transitOpt3Name: '🚗 Private Highway Diesel SUV Taxi',
-        transitOpt3Metrics: '₹18,500 • High Emissions • 24,000g CO2',
-      );
-    }
+          ],
+        ),
+    ];
 
     return TripPlan(
-      id: 'trip_dyn_gen_$stamp',
-      destination: dest,
-      title: '$dest $days-Day Low-Carbon Journey',
+      id: 'trip_computed_${DateTime.now().millisecondsSinceEpoch}',
+      destination: destination,
+      title: '$destination $days-Day Low-Carbon Journey',
       durationDays: days,
       travelDates: 'Upcoming Journey ($days Days)',
-      travelMode: 'Electric Express Train / AC E-Coach from $originCity',
-      co2SavedKg: 12.0 * days,
-      pulsePointsEarned: 130 * days,
+      travelMode: '${rail.mode.label} from $originCity',
+      co2SavedKg: co2SavedKg,
+      pulsePointsEarned: (co2SavedKg * 10).round(),
       isCompleted: false,
-      hotelName: 'Green Key Certified Eco-Stay $dest',
-      hotelRating: 4.8,
+      hotelName: 'Not selected - choose one in Sustainable Stays',
+      hotelRating: 0,
       isStepFreeAccessible: isAccessible,
-      totalBudgetInr: 2500 * days,
-      aqiStatus: 'Clean Regional Air (AQI 28)',
-      transitCostInr: 250,
-      dailyItinerary: [
-        TripDaySchedule(
-          dayNumber: 1,
-          dayTitle: '$originCity to $dest Transit & Eco-Check-in',
-          activities: [
-            TripActivity(
-              time: '08:00 AM',
-              title: 'Electric Transit Departure',
-              description:
-                  'Depart from $originCity via high-speed electric rail or e-bus '
-                  '(Level Boarding)',
-              transportType: 'Train',
-              isAccessible: true,
-              co2Grams: 35,
-              costInr: 250,
-            ),
-            const TripActivity(
-              time: '11:00 AM',
-              title: 'Step-Free Eco Stay Check-in',
-              description: 'Solar powered certified hotel accommodation with greywater recycling',
-              transportType: 'Hotel',
-              isAccessible: true,
-              co2Grams: 0,
-              costInr: 0,
-            ),
-            TripActivity(
-              time: '03:30 PM',
-              title: '$dest Heritage & Nature Trail',
-              description: 'Pedestrianized zero-emission sightseeing zone & cultural center',
-              transportType: 'Walk',
-              isAccessible: true,
-              co2Grams: 0,
-              costInr: 0,
-            ),
-          ],
-        ),
-        TripDaySchedule(
-          dayNumber: 2,
-          dayTitle: '$dest Eco-Exploration & Return to $originCity',
-          activities: [
-            const TripActivity(
-              time: '09:00 AM',
-              title: 'Botanical & Scenic Viewpoint',
-              description: 'Accessible paved paths with solar audio guides',
-              transportType: 'Walk',
-              isAccessible: true,
-              co2Grams: 0,
-              costInr: 50,
-            ),
-            TripActivity(
-              time: '04:30 PM',
-              title: 'Electric Return Coach to $originCity',
-              description: 'Return to $originCity with zero tailpipe emissions',
-              transportType: 'Train',
-              isAccessible: true,
-              co2Grams: 35,
-              costInr: 250,
-            ),
-          ],
-        ),
-      ],
-      transitOpt1Name: '🚆 Electric Train / E-Coach from $originCity',
-      transitOpt1Metrics: '₹250 • Level Boarding • 35g CO2',
-      transitOpt2Name: '⚡ AC Electric Bus Corridor',
-      transitOpt2Metrics: '₹350 • Zero Emission • 48g CO2',
-      transitOpt3Name: '🚗 Private Petrol Taxi',
-      transitOpt3Metrics: '₹3,400 • High Emissions • 2,600g CO2',
+      totalBudgetInr: totalBudget,
+      aqiStatus: aqiStatus,
+      transitCostInr: rail.fareRupees * 2,
+      dailyItinerary: itinerary,
+      transitOpt1Name: '\u{1F686} ${rail.mode.label}',
+      transitOpt1Metrics: _metrics(rail),
+      transitOpt2Name: '\u{26A1} ${bus.mode.label}',
+      transitOpt2Metrics: _metrics(bus),
+      transitOpt3Name: '\u{1F697} ${taxi.mode.label}',
+      transitOpt3Metrics: _metrics(taxi),
     );
   }
+
+  static String _metrics(MobilityOption option) =>
+      '${rupees(option.fareRupees)} - ${option.durationMin} mins - '
+      '${fixed(option.carbonGrams, 0)}g CO2';
+
+  /// Clock time [minutesFromEight] after an 08:00 departure.
+  static String _arrivalClock(int minutesFromEight) {
+    final totalMinutes = 8 * 60 + minutesFromEight;
+    final hour24 = (totalMinutes ~/ 60) % 24;
+    final minute = totalMinutes % 60;
+    final hour = hour24 % 12 == 0 ? 12 : hour24 % 12;
+    return '${hour.toString().padLeft(2, '0')}:'
+        '${minute.toString().padLeft(2, '0')} '
+        '${hour24 < 12 ? "AM" : "PM"}';
+  }
+
+  static String _aqiBand(int aqi) => switch (aqi) {
+    <= 50 => 'Good',
+    <= 100 => 'Moderate',
+    <= 150 => 'Unhealthy for sensitive groups',
+    <= 200 => 'Unhealthy',
+    _ => 'Very unhealthy',
+  };
 }

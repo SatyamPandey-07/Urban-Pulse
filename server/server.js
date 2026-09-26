@@ -54,6 +54,26 @@ db.exec(`
     note TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS perks (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    partner TEXT NOT NULL,
+    pulse_cost INTEGER NOT NULL,
+    code_prefix TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS perk_redemptions (
+    id TEXT PRIMARY KEY,
+    perk_id TEXT NOT NULL REFERENCES perks(id),
+    traveler_name TEXT NOT NULL,
+    pulse_spent INTEGER NOT NULL,
+    voucher_code TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL
+  );
 `);
 
 const SEED_EXPERIENCES = [
@@ -105,6 +125,34 @@ if (seedIfEmpty.n === 0) {
         }
     });
     seedTx(SEED_EXPERIENCES);
+}
+
+const SEED_PERKS = [
+    {
+        id: "perk_orchid_15", title: "15% Off at Orchid Eco-Resort",
+        description: "Valid on certified zero-waste dining and solar room suites.",
+        partner: "The Orchid Eco-Heritage Resort", pulseCost: 400, codePrefix: "ORCHID-ECO"
+    },
+    {
+        id: "perk_tata_ev", title: "Complimentary 60kW EV Fast Charge Session",
+        description: "Applicable at Tata Power charging hubs across Mumbai.",
+        partner: "Tata Power EZ Charge", pulseCost: 250, codePrefix: "TATA-EV"
+    },
+    {
+        id: "perk_metro_day", title: "Metro Line 3 All-Day Green Pass",
+        description: "Unlimited step-free travel on the Aqua Line for one day.",
+        partner: "Mumbai Metro Rail Corporation", pulseCost: 180, codePrefix: "MMRC-DAY"
+    }
+];
+
+if (db.prepare("SELECT COUNT(*) AS n FROM perks").get().n === 0) {
+    const insertPerk = db.prepare(`
+        INSERT INTO perks (id, title, description, partner, pulse_cost, code_prefix, is_active, created_at)
+        VALUES (@id, @title, @description, @partner, @pulseCost, @codePrefix, 1, @createdAt)
+    `);
+    db.transaction((rows) => {
+        for (const row of rows) insertPerk.run({ ...row, createdAt: new Date().toISOString() });
+    })(SEED_PERKS);
 }
 
 const countBookings = db.prepare("SELECT COUNT(*) AS n FROM bookings WHERE experience_id = ? AND status = 'confirmed'");
@@ -317,6 +365,62 @@ app.get("/api/impact-stats", (req, res) => {
         topExperiences: topExperiences.map(e => ({ id: e.id, name: e.name, location: e.location, bookingCount: e.bookingCount })),
         generatedAt: new Date().toISOString()
     });
+});
+
+/**
+ * Redeemable partner perks. Real rows, with real redemption records — a voucher
+ * code is generated once, persisted, and returned again on re-fetch, so a redeemed
+ * perk survives an app restart instead of living in screen state.
+ */
+function perkRowToJson(row, redemption) {
+    return {
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        partner: row.partner,
+        pulseCost: row.pulse_cost,
+        isActive: !!row.is_active,
+        redeemedVoucherCode: redemption ? redemption.voucher_code : null,
+        redeemedAt: redemption ? redemption.created_at : null
+    };
+}
+
+const findRedemption = db.prepare(
+    "SELECT * FROM perk_redemptions WHERE perk_id = ? AND traveler_name = ? ORDER BY created_at DESC LIMIT 1"
+);
+
+app.get("/api/perks", (req, res) => {
+    const travelerName = (req.query.travelerName || "").trim();
+    const rows = db.prepare("SELECT * FROM perks WHERE is_active = 1 ORDER BY pulse_cost ASC").all();
+    res.json(rows.map(row => perkRowToJson(row, travelerName ? findRedemption.get(row.id, travelerName) : null)));
+});
+
+app.post("/api/perks/:id/redeem", (req, res) => {
+    const perk = db.prepare("SELECT * FROM perks WHERE id = ?").get(req.params.id);
+    if (!perk) return res.status(404).json({ error: "Perk not found" });
+
+    const travelerName = (req.body.travelerName || "").trim();
+    if (!travelerName) return res.status(400).json({ error: "travelerName is required" });
+
+    // Redeeming twice returns the original voucher rather than minting a second one.
+    const existing = findRedemption.get(perk.id, travelerName);
+    if (existing) return res.json(perkRowToJson(perk, existing));
+
+    const voucherCode = `${perk.code_prefix}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+    const redemption = {
+        id: `redemption_${crypto.randomUUID()}`,
+        perkId: perk.id,
+        travelerName,
+        pulseSpent: perk.pulse_cost,
+        voucherCode,
+        createdAt: new Date().toISOString()
+    };
+    db.prepare(`
+        INSERT INTO perk_redemptions (id, perk_id, traveler_name, pulse_spent, voucher_code, created_at)
+        VALUES (@id, @perkId, @travelerName, @pulseSpent, @voucherCode, @createdAt)
+    `).run(redemption);
+
+    res.status(201).json(perkRowToJson(perk, findRedemption.get(perk.id, travelerName)));
 });
 
 app.listen(PORT, () => {

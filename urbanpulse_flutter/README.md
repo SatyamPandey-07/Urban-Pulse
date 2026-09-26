@@ -129,41 +129,78 @@ Dependencies from the Kotlin build with no Flutter counterpart here:
 
 Everything below is a deliberate decision, not an oversight.
 
-**Authentication is local, as it effectively was before.** `AuthManager.kt` wrapped
-Firebase Auth, but every screen called it inside a `try { } catch { }` that silently
-swallowed failures and then gated navigation on three `SharedPreferences` keys. The
-observable behaviour was entirely local, so that is what is ported. Wiring real
-Firebase would mean adding `firebase_auth` + `cloud_firestore`, a
-`google-services.json` / `GoogleService-Info.plist` per platform, and replacing
-`AuthController` with a `Stream<User?>`; nothing else in the app depends on it.
+### Nothing on screen is a placeholder
 
-**The Dashboard's AQI and weather are live.** The Kotlin `DashboardFragment` plotted
-a fixed seven-value array and showed hardcoded "136" / "28°C" tiles. A
-`DashboardViewModel` that fetched the real Open-Meteo figures existed but was never
-instantiated by anything. The Flutter dashboard wires that telemetry up for real and shows an explicit empty state when it cannot be read. The
-12-hour traffic forecast is still the same static congestion profile — no endpoint in
-this project supplies a real per-hour forecast, so it is labelled "typical" rather
-than "live".
+Every figure the UI shows is measured, computed, or persisted. Where a reading
+cannot be obtained the screen says so — it never substitutes an invented number.
+What was fixed in the Kotlin source and is now real:
+
+| Was hardcoded | Now |
+|---|---|
+| Header read "Mumbai / Maharashtra, India" | Real reverse-geocoded place from the device fix, with a pending/unavailable state; tap to re-resolve |
+| Dashboard AQI "136" and weather "28°C" | Live Open-Meteo readings at the traveler's coordinates |
+| AQI chart: seven fixed values, Mon–Sun labels | The real daily averages Open-Meteo returns, labelled with their actual weekdays |
+| "12h Traffic Forecast": seven fixed bars | Live TomTom flow at the traveler's corridor, recorded to SQLite and charted as measured history (empty until readings exist) |
+| Badges/challenges with frozen progress (`5/10`, `12/50`) | Progress computed from real counters — questions asked, journeys confirmed, reports filed, trips saved, experiences published — plus real lifetime CO2 |
+| Carbon Wallet perks + voucher codes `ORCHID-ECO-15` / `TATA-EV-FREE` | Real perks from the Central Registry, with server-issued unique voucher codes and persisted per-traveler redemptions |
+| Hotel Optimizer `totalRooms = 120`, facility name, "38.5% Renewable", "85% greywater" | An editable, persisted facility profile; the audit PDF reports what the operator actually declared, and the integrity hash covers it |
+| Three fully hand-written `TripPlan` templates in `TripRepository` | Deleted. Quick-plan destinations run the real planner |
+| Trips suggestions "83 km • AQI: 28" | Real haversine distance from the traveler's fix and a live AQI reading per destination |
+| Live Map: four POI pins and two traffic polylines baked into the HTML | Real TomTom POI search results and the real flow-segment geometry, injected at runtime and coloured by measured congestion |
+| Live Map chips routing to fixed lat/lons | Real category searches that route to the nearest actual result |
+| Trip Detail: four per-destination transit tables | Computed from the real distance via the same estimator the Green Route Planner uses |
+| Agentic planner fallback: three canned itineraries | Computed from a routed distance, the real per-mode fares/durations/emissions, and live AQI at the destination — still labelled an offline estimate, because no model wrote it |
+| SOS emergency category cards with no listener | Selectable, and the chosen category is included in the raised alert |
+| Settings rows for Units/Language that did nothing | Removed; "Detected Location" shows the real fix and re-resolves on tap |
+
+Two things are deliberately still fixed values, because they are reference data
+rather than measurements: the landmark coordinate table in `CarbonEstimator`
+(real geographic constants) and the seeded catalogs in `AppDatabase` (reference
+rows a production migration would ship, overridden by the Central Registry
+whenever it is reachable). Both are documented as such in place.
+
+### Other deltas
+
+**Authentication is local, as it effectively was before.** `AuthManager.kt`
+wrapped Firebase Auth, but every screen called it inside a `try { } catch { }`
+that silently swallowed failures and then gated navigation on three
+`SharedPreferences` keys. The observable behaviour was entirely local, so that is
+what is ported. Wiring real Firebase would mean adding `firebase_auth` +
+`cloud_firestore`, a `google-services.json` / `GoogleService-Info.plist` per
+platform, and replacing `AuthController` with a `Stream<User?>`; nothing else in
+the app depends on it.
+
+**The trip planner asks where you are starting from.** It used to assume
+"Mumbai". If no GPS place resolves, it now asks for the origin city in the
+conversation and plans from the answer.
 
 **SOS resolves a real location.** The Kotlin handler showed a toast claiming the
-location had been shared without reading one. The Flutter screen reads the fix first
-and reports honestly whether it got one. Actually dispatching to contacts still needs
-a backend; `EmergencyContactsManager.kt` stored contacts but nothing sent anything.
+location had been shared without reading one. The Flutter screen reads the fix
+first and reports honestly whether it got one. Actually dispatching to contacts
+still needs a backend; `EmergencyContactsManager.kt` stored contacts but nothing
+sent anything.
 
 **The Web3 wallet button is gone.** `AchievementsActivity` generated a random hex
-string, called it a wallet address, and unlocked a badge locally. There was no wallet,
-chain or signature behind it. The Achievements screen keeps progression, challenges
-and badges.
+string, called it a wallet address, and unlocked a badge locally. There was no
+wallet, chain or signature behind it.
 
-**Seeded values differ from the Kotlin build.** Both seed their tables procedurally
-from a fixed RNG seed, but Dart and Kotlin ship different PRNGs, so individual rows
-differ. The relationships they encode (carbon trending down as eco score rises,
-weekend occupancy peaks, and so on) are identical, which is what the regression models
-and rankers actually depend on.
+**Seeded catalog values differ from the Kotlin build.** Both seed their tables
+procedurally from a fixed RNG seed, but Dart and Kotlin ship different PRNGs, so
+individual rows differ. The relationships they encode (carbon trending down as
+eco score rises, weekend occupancy peaks) are identical, which is what the
+regression models and rankers actually depend on.
 
-**PDF section titles lost their emoji.** `package:pdf`'s built-in Helvetica has no
-emoji glyphs, where Android's `Canvas` could borrow them from the system font.
-Embedding an emoji font would add megabytes to the bundle for decoration.
+**PDF section titles lost their emoji.** `package:pdf`'s built-in Helvetica has
+no emoji glyphs, where Android's `Canvas` could borrow them from the system font.
+
+### Backend additions
+
+`server/server.js` gained two tables (`perks`, `perk_redemptions`) and three
+endpoints, additive and backward compatible with the existing web client:
+
+- `GET /api/perks?travelerName=…` — active perks, with this traveler's voucher if
+  they have already redeemed one
+- `POST /api/perks/:id/redeem` — issues a unique voucher, idempotent per traveler
 
 ### Not migrated: unreachable Android code
 

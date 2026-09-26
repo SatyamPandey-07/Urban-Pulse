@@ -8,6 +8,7 @@ import '../domain/mobility_optimizer.dart';
 import '../models/mobility.dart';
 import '../services/tomtom_service.dart';
 import '../services/trip_intent_parser.dart';
+import '../state/activity_tracker.dart';
 import '../state/app_scope.dart';
 import '../state/trip_plan_manager.dart';
 import '../widgets/common.dart';
@@ -103,19 +104,24 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
   }
 
   Future<void> _useGps() async {
-    final services = AppScope.of(context);
-    final position = await services.location.currentPosition();
+    final location = AppScope.of(context).location;
+    await location.resolve(force: true);
     if (!mounted) return;
-    if (position == null) {
+    if (!location.hasFix) {
       showToast(
         context,
         'GPS location unavailable — enable location services and try again.',
       );
       return;
     }
-    _origin.text =
-        'My GPS Location '
-        '(${fixed(position.latitude, 4)}° N, ${fixed(position.longitude, 4)}° E)';
+    // Prefer the resolved place name; fall back to the raw fix, which
+    // CarbonEstimator can also parse.
+    final place = location.city;
+    _origin.text = place != null
+        ? '$place (${fixed(location.latitude!, 4)}° N, '
+              '${fixed(location.longitude!, 4)}° E)'
+        : 'My GPS Location (${fixed(location.latitude!, 4)}° N, '
+              '${fixed(location.longitude!, 4)}° E)';
     showToast(context, 'Origin set to real-time GPS coordinates.');
   }
 
@@ -211,6 +217,7 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
     await services.gamification.addPulse(credits);
     await services.gamification.addCo2Saved(avoidedGrams);
     await services.gamification.addXp(credits * 2);
+    await services.activity.increment(TrackedAction.greenJourneysConfirmed);
     await services.tripPlan.setSelectedMobility(
       SelectedMobility(
         modeLabel: option.mode.label,

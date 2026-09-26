@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
+import '../../domain/carbon_estimator.dart';
 import '../../models/trip_models.dart';
-import '../../repositories/trip_repository.dart';
+import '../../services/open_meteo_service.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
 import '../home_screen.dart';
@@ -16,13 +17,76 @@ class TripsTab extends StatefulWidget {
   State<TripsTab> createState() => _TripsTabState();
 }
 
+/// A nearby destination the app can plan for, with its measured distance and a
+/// live air-quality reading.
+class _Suggestion {
+  const _Suggestion({
+    required this.emoji,
+    required this.name,
+    required this.blurb,
+    this.distanceKm,
+    this.usAqi,
+  });
+
+  final String emoji;
+  final String name;
+  final String blurb;
+  final double? distanceKm;
+  final int? usAqi;
+}
+
 class _TripsTabState extends State<TripsTab> {
+  /// The destinations the quick-plan row offers. Only the identity and the
+  /// one-line description are fixed here — distance and air quality are measured
+  /// at runtime, and tapping one runs the real planner.
+  static const _destinations = [
+    ('🌲', 'Lonavala', 'Waterfalls & ridge trails'),
+    ('🏖️', 'Alibaug', 'Coastal forts & mangroves'),
+    ('🌿', 'Matheran', 'Zero-vehicle hill station'),
+  ];
+
   List<TripPlan> _trips = const [];
+  List<_Suggestion> _suggestions = const [];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadTrips());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTrips();
+      _loadSuggestions();
+    });
+  }
+
+  /// Measures the real distance from the traveler's position to each
+  /// destination and reads the live AQI there.
+  Future<void> _loadSuggestions() async {
+    final services = AppScope.of(context);
+    await services.location.resolve();
+
+    final resolved = <_Suggestion>[];
+    for (final (emoji, name, blurb) in _destinations) {
+      final (lat, lon) = CarbonEstimator.resolveCoordinates(name);
+      final weather = await OpenMeteoService.getLiveWeatherAndAqi(lat, lon);
+      resolved.add(
+        _Suggestion(
+          emoji: emoji,
+          name: name,
+          blurb: blurb,
+          distanceKm: services.location.hasFix
+              ? CarbonEstimator.haversineKm(
+                  services.location.latitude!,
+                  services.location.longitude!,
+                  lat,
+                  lon,
+                )
+              : null,
+          usAqi: weather?.usAqi,
+        ),
+      );
+    }
+
+    if (!mounted) return;
+    setState(() => _suggestions = resolved);
   }
 
   void _loadTrips() {
@@ -36,20 +100,11 @@ class _TripsTabState extends State<TripsTab> {
         .then((_) => _loadTrips());
   }
 
-  /// The quick-plan shortcuts open a matching starter template when one exists,
-  /// and otherwise hand the traveler to Yatri AI to plan it for real.
+  /// Hands the destination to Yatri AI, which runs the real planner. The Kotlin
+  /// version opened one of three fully hand-written trips instead.
   void _quickPlan(String destination) {
-    final template = TripRepository.getSampleTrips()
-        .where(
-          (t) =>
-              t.destination.toLowerCase().contains(destination.toLowerCase()),
-        )
-        .firstOrNull;
-    if (template != null) {
-      _openTripDetail(template);
-    } else {
-      HomeTabController.maybeOf(context)?.switchToTab(3);
-    }
+    HomeTabController.maybeOf(context)?.switchToTab(3);
+    showToast(context, 'Ask Yatri AI: "Plan a trip to $destination"');
   }
 
   @override
@@ -132,24 +187,14 @@ class _TripsTabState extends State<TripsTab> {
             for (final trip in upcoming) _tripCard(context, trip),
           const SizedBox(height: 24),
           _sectionLabel(context, 'Suggested Eco Destinations (1-Tap Plan)'),
-          _suggestionCard(
-            context,
-            title: '🌲 Lonavala',
-            subtitle: 'Waterfalls & Ridge • 83 km\nElectric Rail • AQI: 28',
-            onPressed: () => _quickPlan('Lonavala'),
-          ),
-          _suggestionCard(
-            context,
-            title: '🏖️ Alibaug',
-            subtitle: 'Coastal & Forts • 48 km\nHybrid Ferry • AQI: 34',
-            onPressed: () => _quickPlan('Alibaug'),
-          ),
-          _suggestionCard(
-            context,
-            title: '🌿 Matheran',
-            subtitle: 'Zero-Vehicle Hill Station • 80 km\nToy Train & E-Cart • AQI: 19',
-            onPressed: () => HomeTabController.maybeOf(context)?.switchToTab(3),
-          ),
+          if (_suggestions.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else
+            for (final suggestion in _suggestions)
+              _suggestionCard(context, suggestion),
           const SizedBox(height: 24),
           _sectionLabel(context, 'Past Completed Trips (Carbon Certified)'),
           if (past.isEmpty)
@@ -232,17 +277,23 @@ class _TripsTabState extends State<TripsTab> {
     );
   }
 
-  Widget _suggestionCard(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required VoidCallback onPressed,
-  }) {
+  Widget _suggestionCard(BuildContext context, _Suggestion suggestion) {
     final theme = Theme.of(context);
+    final facts = [
+      if (suggestion.distanceKm != null)
+        '${fixed(suggestion.distanceKm!, 0)} km away'
+      else
+        'Distance needs location access',
+      if (suggestion.usAqi != null)
+        'AQI ${suggestion.usAqi} now'
+      else
+        'AQI unavailable',
+    ].join(' • ');
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SectionCard(
-        onTap: onPressed,
+        onTap: () => _quickPlan(suggestion.name),
         child: Row(
           children: [
             Expanded(
@@ -250,16 +301,22 @@ class _TripsTabState extends State<TripsTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    '${suggestion.emoji} ${suggestion.name}',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    subtitle,
+                    suggestion.blurb,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    facts,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ],
@@ -267,7 +324,7 @@ class _TripsTabState extends State<TripsTab> {
             ),
             const SizedBox(width: 12),
             FilledButton.tonal(
-              onPressed: onPressed,
+              onPressed: () => _quickPlan(suggestion.name),
               child: const Text('Plan Itinerary'),
             ),
           ],

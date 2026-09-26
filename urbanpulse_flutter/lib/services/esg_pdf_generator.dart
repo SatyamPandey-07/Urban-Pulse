@@ -30,10 +30,6 @@ class EsgAuditResult {
 /// "PASSED"), and the footer carries a genuine SHA-256 digest of the report's
 /// own data fields.
 abstract final class EsgPdfGenerator {
-  // BEE 5-Star energy benchmark and the facility's water target.
-  static const _energyTargetKwhPerRoom = 20.0;
-  static const _waterTargetLitersPerRoom = 220.0;
-
   static Future<EsgAuditResult> generate({
     required String facilityName,
     required int occupancyPct,
@@ -45,6 +41,12 @@ abstract final class EsgPdfGenerator {
     required int mealsCount,
     required double energyRSquared,
     required double wasteRSquared,
+    // Operator-declared figures and benchmarks, read from the editable facility
+    // profile rather than compiled in.
+    required double solarMixPercent,
+    required double greywaterRatePercent,
+    required double energyTargetKwhPerRoom,
+    required double waterTargetLitersPerRoom,
   }) async {
     final dateStr = _formatTimestamp(DateTime.now());
 
@@ -54,17 +56,19 @@ abstract final class EsgPdfGenerator {
         double.tryParse(waterTotalLiters.replaceAll(',', '')) ?? 0.0;
     final powerPerRoom = totalRooms > 0 ? energyTotalNum / totalRooms : 0.0;
     final waterPerRoom = totalRooms > 0 ? waterTotalNum / totalRooms : 0.0;
-    final passPower = powerPerRoom <= _energyTargetKwhPerRoom;
-    final passWater = waterPerRoom <= _waterTargetLitersPerRoom;
+    final passPower = powerPerRoom <= energyTargetKwhPerRoom;
+    final passWater = waterPerRoom <= waterTargetLitersPerRoom;
     final complianceStatus = passPower && passWater
         ? 'PASSED'
         : 'NEEDS IMPROVEMENT';
-    final greywaterRecycled = (waterTotalNum * 0.85).toInt();
+    final greywaterRecycled = (waterTotalNum * (greywaterRatePercent / 100))
+        .toInt();
 
     final reportBody =
         'Facility=$facilityName;Occupancy=$occupancyPct%;Rooms=$totalRooms;'
         'Date=$dateStr;Energy=$energyTotalKwh;Water=$waterTotalLiters;Food=$foodSurplusKg;'
         'PowerPerRoom=${fixed(powerPerRoom, 2)};WaterPerRoom=${fixed(waterPerRoom, 2)};'
+        'SolarMix=${fixed(solarMixPercent, 2)};Greywater=${fixed(greywaterRatePercent, 2)};'
         'Compliance=$complianceStatus';
     final contentHash = sha256.convert(utf8.encode(reportBody)).toString();
 
@@ -97,9 +101,8 @@ abstract final class EsgPdfGenerator {
                       _metricRow(
                         'Daily Power Consumption (${fixed(powerPerRoom)} kWh/room)',
                         '$energyTotalKwh kWh',
-                        passPower
-                            ? 'PASS — Target <= 20 kWh/room'
-                            : 'FAIL — Target <= 20 kWh/room',
+                        '${passPower ? "PASS" : "FAIL"} — Target <= '
+                            '${fixed(energyTargetKwhPerRoom, 0)} kWh/room',
                         highlight: passPower,
                       ),
                       _metricRow(
@@ -110,21 +113,21 @@ abstract final class EsgPdfGenerator {
                       ),
                       _metricRow(
                         'Onsite Solar Generation Mix (facility-declared, not metered)',
-                        '38.5% Renewable',
-                        'Target: >= 30.0%',
+                        '${fixed(solarMixPercent)}% Renewable',
+                        'Operator declaration',
                       ),
                       pw.SizedBox(height: 10),
                       _sectionTitle('Water Stewardship & Recycling'),
                       _metricRow(
                         'Daily Potable Water Consumption (${fixed(waterPerRoom, 0)} L/room)',
                         '$waterTotalLiters Liters',
-                        passWater
-                            ? 'PASS — Target <= 220 L/room'
-                            : 'FAIL — Target <= 220 L/room',
+                        '${passWater ? "PASS" : "FAIL"} — Target <= '
+                            '${fixed(waterTargetLitersPerRoom, 0)} L/room',
                         highlight: passWater,
                       ),
                       _metricRow(
-                        'Greywater Recycled & Reused (declared 85% rate)',
+                        'Greywater Recycled & Reused (declared '
+                            '${fixed(greywaterRatePercent, 0)}% rate)',
                         '${grouped(greywaterRecycled)} Liters',
                         'Zero Liquid Discharge (ZLD)',
                       ),

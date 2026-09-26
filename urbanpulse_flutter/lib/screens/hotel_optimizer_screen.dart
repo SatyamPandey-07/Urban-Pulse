@@ -3,6 +3,7 @@ import 'package:printing/printing.dart';
 
 import '../core/formatting.dart';
 import '../domain/linear_regression.dart';
+import '../repositories/facility_repository.dart';
 import '../services/esg_pdf_generator.dart';
 import '../state/app_scope.dart';
 import '../widgets/common.dart';
@@ -19,9 +20,8 @@ class HotelOptimizerScreen extends StatefulWidget {
 }
 
 class _HotelOptimizerScreenState extends State<HotelOptimizerScreen> {
-  static const _totalRooms = 120;
-  static const _facilityName =
-      'The Orchid Eco-Heritage Resort & Conference Center';
+  /// Read from the editable facility profile, not compiled in.
+  FacilityProfile? _facility;
 
   double _occupancyPercent = 75;
   bool _isEcoHvacActive = false;
@@ -35,7 +35,16 @@ class _HotelOptimizerScreenState extends State<HotelOptimizerScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _trainModels());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadFacility();
+      _trainModels();
+    });
+  }
+
+  Future<void> _loadFacility() async {
+    final profile = await AppScope.of(context).facility.getProfile();
+    if (!mounted) return;
+    setState(() => _facility = profile);
   }
 
   Future<void> _trainModels() async {
@@ -53,6 +62,8 @@ class _HotelOptimizerScreenState extends State<HotelOptimizerScreen> {
       ]);
     });
   }
+
+  int get _totalRooms => _facility?.totalRooms ?? 0;
 
   int get _occupiedRooms => (_totalRooms * (_occupancyPercent / 100)).toInt();
 
@@ -85,14 +96,16 @@ class _HotelOptimizerScreenState extends State<HotelOptimizerScreen> {
   }
 
   Future<void> _generateEsgReport() async {
+    final facility = _facility;
+    if (facility == null) return;
     setState(() => _isGeneratingReport = true);
     final mealsCount = (_covers * 0.076 * 2.5).toInt();
 
     try {
       final result = await EsgPdfGenerator.generate(
-        facilityName: _facilityName,
+        facilityName: facility.name,
         occupancyPct: _occupancyPercent.toInt(),
-        totalRooms: _totalRooms,
+        totalRooms: facility.totalRooms,
         energyTotalKwh: _energyTotal,
         energySavedKwh: '${_hvacSavings.toInt()} kWh',
         waterTotalLiters: _waterTotal,
@@ -100,6 +113,10 @@ class _HotelOptimizerScreenState extends State<HotelOptimizerScreen> {
         mealsCount: mealsCount,
         energyRSquared: _energyModel?.rSquared ?? 0.0,
         wasteRSquared: _wasteModel?.rSquared ?? 0.0,
+        solarMixPercent: facility.solarMixPercent,
+        greywaterRatePercent: facility.greywaterRatePercent,
+        energyTargetKwhPerRoom: facility.energyTargetKwhPerRoom,
+        waterTargetLitersPerRoom: facility.waterTargetLitersPerRoom,
       );
       if (!mounted) return;
       setState(() => _isGeneratingReport = false);
@@ -149,16 +166,138 @@ class _HotelOptimizerScreenState extends State<HotelOptimizerScreen> {
     }
   }
 
+  /// Lets the operator edit the declared facility parameters the model and the
+  /// audit sheet are built from.
+  Future<void> _editFacility() async {
+    final current = _facility;
+    if (current == null) return;
+
+    final name = TextEditingController(text: current.name);
+    final rooms = TextEditingController(text: '${current.totalRooms}');
+    final solar = TextEditingController(text: '${current.solarMixPercent}');
+    final greywater = TextEditingController(
+      text: '${current.greywaterRatePercent}',
+    );
+    final energyTarget = TextEditingController(
+      text: '${current.energyTargetKwhPerRoom}',
+    );
+    final waterTarget = TextEditingController(
+      text: '${current.waterTargetLitersPerRoom}',
+    );
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        scrollable: true,
+        title: const Text('Facility Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: name,
+              decoration: const InputDecoration(labelText: 'Facility name'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: rooms,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Total rooms'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: solar,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Declared onsite renewable mix (%)',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: greywater,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Declared greywater recycling rate (%)',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: energyTarget,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Energy benchmark (kWh per room)',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: waterTarget,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Water benchmark (litres per room)',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (saved != true || !mounted) return;
+    final updated = current.copyWith(
+      name: name.text.trim().isEmpty ? current.name : name.text.trim(),
+      totalRooms: int.tryParse(rooms.text) ?? current.totalRooms,
+      solarMixPercent: double.tryParse(solar.text) ?? current.solarMixPercent,
+      greywaterRatePercent:
+          double.tryParse(greywater.text) ?? current.greywaterRatePercent,
+      energyTargetKwhPerRoom:
+          double.tryParse(energyTarget.text) ?? current.energyTargetKwhPerRoom,
+      waterTargetLitersPerRoom:
+          double.tryParse(waterTarget.text) ?? current.waterTargetLitersPerRoom,
+    );
+    await AppScope.of(context).facility.saveProfile(updated);
+    if (!mounted) return;
+    setState(() => _facility = updated);
+    showToast(context, 'Facility profile updated.');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final facility = _facility;
     final isTraining =
-        _energyModel == null || _waterModel == null || _wasteModel == null;
+        facility == null ||
+        _energyModel == null ||
+        _waterModel == null ||
+        _wasteModel == null;
 
     return Scaffold(
-      appBar: const ScreenHeader(
+      appBar: ScreenHeader(
         title: 'Hotel Resource Optimizer',
-        subtitle: 'Real-Time Energy, Water & ESG Compliance Hub',
+        subtitle:
+            facility?.name ?? 'Real-Time Energy, Water & ESG Compliance Hub',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.tune),
+            tooltip: 'Edit facility profile',
+            onPressed: facility == null ? null : _editFacility,
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),

@@ -43,10 +43,16 @@ class SectionCard extends StatelessWidget {
 /// Title + subtitle heading with a back button, used by every pushed screen
 /// (`btnBack` + the two `TextView`s at the top of each `activity_*.xml`).
 class ScreenHeader extends StatelessWidget implements PreferredSizeWidget {
-  const ScreenHeader({required this.title, required this.subtitle, super.key});
+  const ScreenHeader({
+    required this.title,
+    required this.subtitle,
+    this.actions,
+    super.key,
+  });
 
   final String title;
   final String subtitle;
+  final List<Widget>? actions;
 
   @override
   Size get preferredSize => const Size.fromHeight(72);
@@ -62,6 +68,7 @@ class ScreenHeader extends StatelessWidget implements PreferredSizeWidget {
         onPressed: () => Navigator.of(context).maybePop(),
       ),
       titleSpacing: 0,
+      actions: actions,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -74,6 +81,8 @@ class ScreenHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
           Text(
             subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

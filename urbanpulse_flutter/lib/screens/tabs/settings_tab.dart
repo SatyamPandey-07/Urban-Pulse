@@ -25,6 +25,7 @@ class _SettingsTabState extends State<SettingsTab> {
         services.accessibility,
         services.gamification,
         services.theme,
+        services.location,
       ]),
       builder: (context, _) {
         final wheelchairStatus = services.accessibility.isWheelchairModeEnabled
@@ -88,25 +89,14 @@ class _SettingsTabState extends State<SettingsTab> {
             onTap: _showAccentDialog,
           ),
           _SettingItem(
-            title: 'Default City Hub',
-            subtitle: 'Mumbai, Maharashtra, India',
+            title: 'Detected Location',
+            subtitle: services.location.hasFix
+                ? '${services.location.displayTitle} • '
+                      '${services.location.displaySubtitle}'
+                : 'Not available — tap to retry',
             icon: Icons.location_on_outlined,
             iconBg: const Color(0xFFD3E3FD),
-            onTap: null,
-          ),
-          _SettingItem(
-            title: 'Measurement Units',
-            subtitle: 'Metric (°C, km/h, kg CO2e)',
-            icon: Icons.straighten,
-            iconBg: const Color(0xFFF8D7DA),
-            onTap: null,
-          ),
-          _SettingItem(
-            title: 'Language',
-            subtitle: 'English',
-            icon: Icons.translate,
-            iconBg: const Color(0xFFE9D5FF),
-            onTap: null,
+            onTap: () => services.location.resolve(force: true),
           ),
           _SettingItem(
             title: 'Sign Out',

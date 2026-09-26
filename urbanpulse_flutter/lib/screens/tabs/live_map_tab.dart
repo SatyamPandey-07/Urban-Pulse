@@ -6,6 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../models/live_city_data.dart';
+import '../../services/location_service.dart';
 import '../../services/open_meteo_service.dart';
 import '../../services/tomtom_service.dart';
 import '../../state/app_scope.dart';
@@ -29,9 +30,9 @@ class _LiveMapTabState extends State<LiveMapTab> {
   late final WebViewController _webView;
   final _searchController = TextEditingController();
 
-  // Mulund / Thane corridor, the fragment's starting viewport.
-  double _currentLat = 19.1775;
-  double _currentLon = 72.9544;
+  // Initial viewport, replaced by the real fix as soon as one resolves.
+  double _currentLat = LocationService.defaultLat;
+  double _currentLon = LocationService.defaultLon;
   bool _isTrafficEnabled = true;
   bool _isRouting = false;
 
@@ -41,6 +42,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
       'Comparing Green Electric Corridor vs Standard Petrol Cab';
 
   List<LivePoiResult> _searchResults = const [];
+  LivePoiResult? _nearestHospital;
 
   @override
   void initState() {
@@ -52,12 +54,10 @@ class _LiveMapTabState extends State<LiveMapTab> {
         NavigationDelegate(
           onPageFinished: (_) {
             _centerMap(_currentLat, _currentLon, 13);
-            // Draw initial dual routes to demonstrate the comparison immediately.
-            _calculateAndDrawDualRoutes(
-              19.0760,
-              72.8777,
-              'Mumbai Central Corridor',
-            );
+            // Draw the real nearby POIs and the live flow segment for wherever
+            // the traveler actually is. Routes are drawn once they pick a
+            // destination, rather than to a fixed demo coordinate.
+            _loadNearbyPois();
           },
         ),
       )
@@ -73,14 +73,104 @@ class _LiveMapTabState extends State<LiveMapTab> {
     super.dispose();
   }
 
-  Future<void> _locateUser({int zoom = 14}) async {
-    final position = await AppScope.of(context).location.currentPosition();
-    if (position == null || !mounted) return;
+  Future<void> _locateUser({int zoom = 14, bool force = false}) async {
+    final location = AppScope.of(context).location;
+    await location.resolve(force: force);
+    if (!location.hasFix || !mounted) return;
     setState(() {
-      _currentLat = position.latitude;
-      _currentLon = position.longitude;
+      _currentLat = location.latitude!;
+      _currentLon = location.longitude!;
     });
     await _centerMap(_currentLat, _currentLon, zoom);
+    await _loadNearbyPois();
+  }
+
+  /// Pulls real nearby hospitals and EV charging points from the TomTom POI
+  /// search and draws them, plus the live flow segment for the corridor the user
+  /// is on. The Kotlin page had four pins and two polylines written into the
+  /// HTML at fixed coordinates.
+  Future<void> _loadNearbyPois() async {
+    final hospitals = await TomTomService.searchNearbyPoi(
+      'hospital',
+      _currentLat,
+      _currentLon,
+      limit: 4,
+    );
+    final chargers = await TomTomService.searchNearbyPoi(
+      'electric vehicle station',
+      _currentLat,
+      _currentLon,
+      limit: 4,
+    );
+
+    final pins = [
+      for (final poi in hospitals)
+        {
+          'lat': poi.lat,
+          'lon': poi.lon,
+          'code': 'MED',
+          'title': poi.name,
+          'desc': poi.address,
+          'bg': '#EF4444',
+        },
+      for (final poi in chargers)
+        {
+          'lat': poi.lat,
+          'lon': poi.lon,
+          'code': 'EV',
+          'title': poi.name,
+          'desc': poi.address,
+          'bg': '#38BDF8',
+        },
+    ];
+
+    if (!mounted) return;
+    setState(() => _nearestHospital = hospitals.firstOrNull);
+    await _webView.runJavaScript('window.setPois(${jsonEncode(pins)});');
+    await _drawLiveTrafficSegment();
+  }
+
+  /// Draws the real TomTom flow segment for the user's current corridor.
+  Future<void> _drawLiveTrafficSegment() async {
+    final traffic = await TomTomService.getLiveTrafficSegment(
+      _currentLat,
+      _currentLon,
+    );
+    if (traffic == null || traffic.geometry.length < 2) return;
+    final flow = traffic.data;
+    final congestion = flow.freeFlowSpeedKmh <= 0
+        ? 0.0
+        : (((flow.freeFlowSpeedKmh - flow.currentSpeedKmh) /
+                      flow.freeFlowSpeedKmh) *
+                  100)
+              .clamp(0.0, 100.0);
+    final label =
+        '${flow.roadName}: ${flow.currentSpeedKmh} km/h '
+        '(free flow ${flow.freeFlowSpeedKmh} km/h)';
+    await _webView.runJavaScript(
+      'window.setTrafficSegment('
+      '${jsonEncode(traffic.geometry)}, '
+      '${jsonEncode(label)}, '
+      '${congestion.toStringAsFixed(1)});',
+    );
+  }
+
+  /// Routes to the nearest real result for a category, instead of a coordinate
+  /// pair written into the chip handler.
+  Future<void> _routeToNearest(String query, String emptyMessage) async {
+    final results = await TomTomService.searchNearbyPoi(
+      query,
+      _currentLat,
+      _currentLon,
+      limit: 1,
+    );
+    if (!mounted) return;
+    final nearest = results.firstOrNull;
+    if (nearest == null) {
+      showToast(context, emptyMessage);
+      return;
+    }
+    await _calculateAndDrawDualRoutes(nearest.lat, nearest.lon, nearest.name);
   }
 
   Future<void> _centerMap(double lat, double lon, int zoom) =>
@@ -350,51 +440,59 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   Widget _filterChips(BuildContext context) {
     // Each chip routes to the same landmark the Kotlin chip listeners used.
+    // Each chip acts on real data: a live route between the user's position and
+    // a real searched destination, or the live traffic overlay.
     final chips = <(String, IconData, VoidCallback)>[
       (
         'Compare Dual Routes',
         Icons.alt_route,
-        () => _calculateAndDrawDualRoutes(
-          19.0760,
-          72.8777,
-          'BKC to CSMT Transit Corridor',
-        ),
+        () {
+          final destination = _searchResults.firstOrNull ?? _nearestHospital;
+          if (destination == null) {
+            showToast(
+              context,
+              'Search for a destination first, then compare the two routes to it.',
+            );
+            return;
+          }
+          _calculateAndDrawDualRoutes(
+            destination.lat,
+            destination.lon,
+            destination.name,
+          );
+        },
       ),
       (
         'Hospitals',
         Icons.local_hospital_outlined,
-        () => _calculateAndDrawDualRoutes(
-          19.1728,
-          72.9564,
-          'Fortis Hospital Mulund (Trauma Center)',
+        () => _routeToNearest(
+          'hospital',
+          'No hospitals found near your location.',
         ),
       ),
       ('Traffic Flow', Icons.traffic_outlined, _toggleTraffic),
       (
-        'Hazards',
-        Icons.local_fire_department_outlined,
-        () => _calculateAndDrawDualRoutes(
-          19.1820,
-          72.9600,
-          'LBS Marg Hazard Detour',
+        'Pharmacies',
+        Icons.medication_outlined,
+        () => _routeToNearest(
+          'pharmacy',
+          'No pharmacies found near your location.',
         ),
       ),
       (
-        'Eco Routes',
-        Icons.eco_outlined,
-        () => _calculateAndDrawDualRoutes(
-          19.1200,
-          72.9050,
-          'Powai Green Mobility Corridor',
+        'Parks & Trails',
+        Icons.park_outlined,
+        () => _routeToNearest(
+          'park',
+          'No parks or trails found near your location.',
         ),
       ),
       (
         'EV Stations',
         Icons.ev_station_outlined,
-        () => _calculateAndDrawDualRoutes(
-          19.2050,
-          72.9734,
-          'Thane Supercharging Station (60kW)',
+        () => _routeToNearest(
+          'electric vehicle station',
+          'No EV charging points found near your location.',
         ),
       ),
     ];
@@ -421,14 +519,15 @@ class _LiveMapTabState extends State<LiveMapTab> {
     );
   }
 
-  Future<void> _plotHazardDetour() async {
-    await _calculateAndDrawDualRoutes(19.1820, 72.9600, 'Active Hazard Detour');
+  /// Re-reads the live flow segment so the overlay reflects current conditions.
+  Future<void> _refreshTraffic() async {
+    await _drawLiveTrafficSegment();
     if (!mounted) return;
-    showToast(context, 'Emergency Green Hazard Detour Plotted!');
+    showToast(context, 'Live traffic overlay refreshed.');
   }
 
   Future<void> _centreOnUser() async {
-    await _locateUser(zoom: 15);
+    await _locateUser(zoom: 15, force: true);
     if (!mounted) return;
     showToast(context, 'Centered at GPS location');
   }
@@ -446,10 +545,10 @@ class _LiveMapTabState extends State<LiveMapTab> {
         ),
         const SizedBox(height: 12),
         FloatingActionButton.small(
-          heroTag: 'map-hazard',
-          tooltip: 'Report Hazard',
-          onPressed: _plotHazardDetour,
-          child: const Icon(Icons.local_fire_department_outlined),
+          heroTag: 'map-refresh-traffic',
+          tooltip: 'Refresh live traffic',
+          onPressed: _refreshTraffic,
+          child: const Icon(Icons.refresh),
         ),
         const SizedBox(height: 12),
         FloatingActionButton(

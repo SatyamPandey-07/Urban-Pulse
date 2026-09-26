@@ -6,6 +6,7 @@ import '../domain/experience_optimizer.dart';
 import '../domain/multi_objective_ranker.dart';
 import '../models/evidence.dart';
 import '../services/trip_intent_parser.dart';
+import '../state/activity_tracker.dart';
 import '../state/app_scope.dart';
 import '../state/trip_plan_manager.dart';
 import '../widgets/common.dart';
@@ -212,6 +213,7 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
     await services.gamification.addPulse(credits);
     await services.gamification.addCo2Saved(avoidedKg * 1000.0);
     await services.gamification.addXp(credits * 2);
+    await services.activity.increment(TrackedAction.itinerariesSaved);
 
     if (!mounted) return;
     showToast(

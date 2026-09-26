@@ -75,3 +75,13 @@ class RouteResult {
   final double distanceKm;
   final int durationMin;
 }
+
+/// A live flow reading together with the real road geometry it describes.
+class LiveTrafficSegment {
+  const LiveTrafficSegment({required this.data, required this.geometry});
+
+  final LiveTrafficData data;
+
+  /// Ordered `[lat, lon]` pairs tracing the segment.
+  final List<List<double>> geometry;
+}

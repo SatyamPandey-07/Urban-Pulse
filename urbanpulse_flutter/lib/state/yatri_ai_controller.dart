@@ -12,7 +12,7 @@ import '../screens/dialogs/add_experience_dialog.dart';
 import '../services/groq_agentic_engine.dart';
 import '../services/groq_api_client.dart';
 import '../services/live_city_intelligence_service.dart';
-import '../services/location_service.dart';
+import 'activity_tracker.dart';
 import 'app_scope.dart';
 
 /// The Yatri AI conversation: message list, the multi-turn trip-planning state
@@ -37,18 +37,28 @@ class YatriAiController extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  double _userLatitude = LocationService.defaultLat;
-  double _userLongitude = LocationService.defaultLon;
-  String _userCityName = 'Mumbai';
   bool _hasAutoCheckedRainAdaptation = false;
 
   // Multi-turn trip-planning state machine.
   String? _pendingTripDestination;
   int _pendingTripDays = 2;
+  bool _pendingTripAccessible = false;
+
+  /// Set when the traveler types their origin city because no GPS fix resolved.
+  String? _manualOriginCity;
+  bool _awaitingOriginCity = false;
 
   /// Id of the experience last shown in a detail card — lets the Book / Confirm
   /// / Report chip taps act on the right listing without re-parsing the chat.
   String? _lastViewedExperienceId;
+
+  double get _userLatitude => _services.location.coordinatesOrDefault.$1;
+
+  double get _userLongitude => _services.location.coordinatesOrDefault.$2;
+
+  /// The real reverse-geocoded origin city, or null until one resolves — the
+  /// planner asks rather than assuming a city the traveler may not be in.
+  String? get _originCity => _services.location.originCity ?? _manualOriginCity;
 
   void _greet() {
     _messages.add(
@@ -79,15 +89,8 @@ class YatriAiController extends ChangeNotifier {
   // ---- Location ----
 
   Future<void> _initLocation() async {
-    final position = await _services.location.currentPosition();
-    if (position == null) return;
-    _userLatitude = position.latitude;
-    _userLongitude = position.longitude;
-    final city = await _services.location.resolveCityName(
-      _userLatitude,
-      _userLongitude,
-    );
-    if (city != null) _userCityName = city;
+    await _services.location.resolve();
+    if (!_services.location.hasFix) return;
     await _maybeAutoTriggerRainAdaptation();
   }
 
@@ -173,11 +176,13 @@ class YatriAiController extends ChangeNotifier {
       'Your experience is now live in the local registry and automatically recommended '
       'to travelers with matching time & interest profiles!',
     );
+    unawaited(_services.activity.increment(TrackedAction.experiencesPublished));
   }
 
   Future<void> send(String text) async {
     _messages.add(ChatMessage(text, isUser: true));
     notifyListeners();
+    unawaited(_services.activity.increment(TrackedAction.aiQuestionsAsked));
     await _generateResponse(text);
   }
 
@@ -187,6 +192,15 @@ class YatriAiController extends ChangeNotifier {
     unawaited(_refreshLocation());
 
     final lowerPrompt = prompt.toLowerCase();
+
+    // 0. The traveler is answering "which city are you travelling from?".
+    if (_awaitingOriginCity) {
+      _awaitingOriginCity = false;
+      _manualOriginCity = prompt.trim();
+      _removeTyping();
+      await _generateTripPlan();
+      return;
+    }
 
     // 0a. Real booking / accessibility-report actions on the last-viewed experience.
     if (await _handleListingAction(prompt)) return;
@@ -237,12 +251,7 @@ class YatriAiController extends ChangeNotifier {
     await _handleGeneralQuery(prompt);
   }
 
-  Future<void> _refreshLocation() async {
-    final position = await _services.location.currentPosition();
-    if (position == null) return;
-    _userLatitude = position.latitude;
-    _userLongitude = position.longitude;
-  }
+  Future<void> _refreshLocation() => _services.location.resolve();
 
   Future<bool> _handleListingAction(String prompt) async {
     final expId = _lastViewedExperienceId;
@@ -264,6 +273,11 @@ class YatriAiController extends ChangeNotifier {
           partySize: 1,
           bookingDate: bookingDate,
         );
+        if (success) {
+          unawaited(
+            _services.activity.increment(TrackedAction.experiencesBooked),
+          );
+        }
         _addAiMessage(
           success
               ? '✅ **Booked!** Confirmed for $travelerName on $bookingDate. This is a real '
@@ -276,6 +290,13 @@ class YatriAiController extends ChangeNotifier {
           confirmsAccessibility: true,
           note: 'Confirmed via Yatri AI chat',
         );
+        if (success) {
+          unawaited(
+            _services.activity.increment(
+              TrackedAction.accessibilityReportsFiled,
+            ),
+          );
+        }
         _addAiMessage(
           success
               ? '✅ Thanks — your confirmation was recorded and will strengthen this '
@@ -288,6 +309,13 @@ class YatriAiController extends ChangeNotifier {
           confirmsAccessibility: false,
           note: 'Disputed via Yatri AI chat',
         );
+        if (success) {
+          unawaited(
+            _services.activity.increment(
+              TrackedAction.accessibilityReportsFiled,
+            ),
+          );
+        }
         _addAiMessage(
           success
               ? '⚠️ Thanks for flagging this — future travelers will see this as a real '
@@ -408,23 +436,47 @@ class YatriAiController extends ChangeNotifier {
     if (!styleWords.any(lowerPrompt.contains)) return false;
 
     _removeTyping();
-    final dest = _pendingTripDestination ?? 'Kedarnath';
-    final days = _pendingTripDays;
-    final isAccessible =
+    _pendingTripAccessible =
         lowerPrompt.contains('wheelchair') ||
         lowerPrompt.contains('palki') ||
         lowerPrompt.contains('step-free');
+    await _generateTripPlan();
+    return true;
+  }
+
+  /// Builds the itinerary once destination, duration and style are known — and
+  /// once a real origin city exists. If no GPS place resolved, it asks for the
+  /// origin rather than silently assuming one.
+  Future<void> _generateTripPlan() async {
+    final dest = _pendingTripDestination;
+    if (dest == null) return;
+
+    final origin = _originCity;
+    if (origin == null) {
+      _awaitingOriginCity = true;
+      _addAiMessage(
+        "I couldn't read your location, so I don't know where you're starting "
+        'from.\n\nWhich city are you travelling from? (Type its name, or enable '
+        'location access and ask again.)',
+      );
+      return;
+    }
+
+    _showTyping();
+    final days = _pendingTripDays;
+    final isAccessible = _pendingTripAccessible;
     final style = isAccessible
         ? 'Wheelchair / Step-Free Accessible'
         : 'Eco Nature Explorer';
 
     final trip = await GroqAgenticEngine.generateAutonomousTripPlan(
       destination: dest,
-      originCity: _userCityName,
+      originCity: origin,
       days: days,
       isAccessible: isAccessible,
       travelStyle: style,
     );
+    _removeTyping();
 
     final header = trip.isAiGenerated
         ? '🌿 **Your $days-Day Sustainable & Accessible Itinerary for $dest is Ready!** '
@@ -448,7 +500,7 @@ class YatriAiController extends ChangeNotifier {
       trip: trip,
     );
     _pendingTripDestination = null;
-    return true;
+    unawaited(_services.activity.increment(TrackedAction.tripsPlanned));
   }
 
   bool _handleTripRequest(String prompt, String lowerPrompt) {

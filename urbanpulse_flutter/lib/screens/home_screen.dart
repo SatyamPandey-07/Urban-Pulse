@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
 import '../core/routes.dart';
+import '../state/app_scope.dart';
 import 'tabs/dashboard_tab.dart';
 import 'tabs/live_map_tab.dart';
 import 'tabs/settings_tab.dart';
@@ -90,50 +91,91 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _LocationAppBar extends StatelessWidget implements PreferredSizeWidget {
+/// Shows where the traveler actually is. The Kotlin `MainActivity` wrote
+/// "Mumbai" / "Maharashtra, India" into the header unconditionally; this reads
+/// the resolved GPS place and shows an honest status while it is pending or
+/// unavailable. Tapping it re-resolves.
+class _LocationAppBar extends StatefulWidget implements PreferredSizeWidget {
   const _LocationAppBar();
 
   @override
   Size get preferredSize => const Size.fromHeight(72);
 
   @override
+  State<_LocationAppBar> createState() => _LocationAppBarState();
+}
+
+class _LocationAppBarState extends State<_LocationAppBar> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => AppScope.of(context).location.resolve(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final location = AppScope.of(context).location;
     return AppBar(
       toolbarHeight: 72,
       titleSpacing: 16,
-      title: Row(
-        children: [
-          Icon(Icons.navigation, size: 20, color: theme.colorScheme.onSurface),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
+      title: AnimatedBuilder(
+        animation: location,
+        builder: (context, _) => InkWell(
+          onTap: () => location.resolve(force: true),
+          child: Row(
+            children: [
+              Icon(
+                Icons.navigation,
+                size: 20,
+                color: theme.colorScheme.onSurface,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            location.displayTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (location.isResolving)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 8),
+                            child: SizedBox.square(
+                              dimension: 12,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        else
+                          const Icon(Icons.refresh, size: 18),
+                      ],
+                    ),
                     Text(
-                      'Mumbai',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      location.displaySubtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const Icon(Icons.keyboard_arrow_down, size: 24),
                   ],
                 ),
-                Text(
-                  'Maharashtra, India',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       actions: [
         IconButton(

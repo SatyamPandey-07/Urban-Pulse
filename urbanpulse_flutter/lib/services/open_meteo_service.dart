@@ -46,7 +46,7 @@ abstract final class OpenMeteoService {
             ),
       usAqi: (currentAqi?['us_aqi'] as num?)?.toInt(),
       pm25: (currentAqi?['pm2_5'] as num?)?.toDouble(),
-      dailyAqiAverages: _dailyAverages(
+      dailyAqi: _dailyAverages(
         (hourly?['time'] as List<dynamic>?)?.cast<String>(),
         (hourly?['us_aqi'] as List<dynamic>?),
       ),
@@ -112,8 +112,10 @@ abstract final class OpenMeteoService {
   };
 
   /// Collapses hourly AQI readings into one average per calendar day, which is
-  /// what the "Air Quality Trend (7 Days)" chart plots.
-  static List<double> _dailyAverages(
+  /// what the "Air Quality Trend (7 Days)" chart plots. Each point keeps its real
+  /// date so the chart can label the actual weekdays rather than assuming
+  /// Monday-Sunday.
+  static List<DailyAqi> _dailyAverages(
     List<String>? times,
     List<dynamic>? values,
   ) {
@@ -132,7 +134,13 @@ abstract final class OpenMeteoService {
     }
 
     final days = sums.keys.toList()..sort();
-    return days.map((d) => sums[d]! / counts[d]!).toList();
+    final points = [
+      for (final day in days)
+        if (DateTime.tryParse(day) case final date?)
+          DailyAqi(date: date, usAqi: sums[day]! / counts[day]!),
+    ];
+    // The request asks for seven past days plus today; keep the last seven.
+    return points.length > 7 ? points.sublist(points.length - 7) : points;
   }
 
   static Future<Map<String, dynamic>?> _getJson(Uri uri) async {
@@ -154,12 +162,20 @@ class DashboardTelemetry {
     required this.condition,
     required this.usAqi,
     required this.pm25,
-    required this.dailyAqiAverages,
+    required this.dailyAqi,
   });
 
   final double? temperatureC;
   final String? condition;
   final int? usAqi;
   final double? pm25;
-  final List<double> dailyAqiAverages;
+  final List<DailyAqi> dailyAqi;
+}
+
+/// One day's averaged US AQI, with the date it was measured on.
+class DailyAqi {
+  const DailyAqi({required this.date, required this.usAqi});
+
+  final DateTime date;
+  final double usAqi;
 }
