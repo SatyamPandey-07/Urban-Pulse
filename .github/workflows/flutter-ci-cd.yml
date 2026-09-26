@@ -36,12 +36,17 @@ jobs:
           cache: true
 
       - name: Generate config.json from repository secrets
+        env:
+          GROQ_KEY: ${{ secrets.GROQ_API_KEY }}
+          TOMTOM_KEY: ${{ secrets.TOMTOM_API_KEY }}
+          REGISTRY_URL: ${{ secrets.CENTRAL_REGISTRY_BASE_URL }}
         run: |
+          mkdir -p urbanpulse_flutter
           cat > urbanpulse_flutter/config.json <<EOF
           {
-            "GROQ_API_KEY": "${{ secrets.GROQ_API_KEY }}",
-            "TOMTOM_API_KEY": "${{ secrets.TOMTOM_API_KEY }}",
-            "CENTRAL_REGISTRY_BASE_URL": "${{ secrets.CENTRAL_REGISTRY_BASE_URL || 'http://10.0.2.2:3001' }}"
+            "GROQ_API_KEY": "${GROQ_KEY}",
+            "TOMTOM_API_KEY": "${TOMTOM_KEY}",
+            "CENTRAL_REGISTRY_BASE_URL": "${REGISTRY_URL:-http://10.0.2.2:3001}"
           }
           EOF
 
@@ -49,6 +54,11 @@ jobs:
         run: |
           cd urbanpulse_flutter
           flutter pub get
+
+      - name: Analyze Flutter Code
+        run: |
+          cd urbanpulse_flutter
+          flutter analyze
 
       - name: Build Release APK
         run: |

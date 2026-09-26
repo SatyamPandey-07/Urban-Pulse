@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-
 import '../core/config.dart';
 import '../models/trip_intent.dart';
 import 'groq_api_client.dart';
