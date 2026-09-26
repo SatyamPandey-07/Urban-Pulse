@@ -123,6 +123,15 @@ models/itinerary/ what the planner produces
 widgets/taskgraph/ the live task graph, agent feed and "?" explainers
 ```
 
+Robustness (stage 2.6): destinations are sanitised (control characters, length)
+before they reach any search or prompt; web links from pages or models open only
+if they are plain http(s); an unreachable network is reported as "offline" (with an
+offline estimate) rather than as an unknown place; restarting the chat cancels a
+running plan so it can never write into the new conversation; time pressure stops
+extra re-planning but never skips a question the traveller should answer. Chaos
+tests run the whole pipeline against hostile destinations, random service
+outages, garbage model replies and random answers.
+
 Design rules: real data first, the model fills gaps and is always labelled
 "AI-estimated"; every worker can time out, fail or return partial data without
 breaking the plan; Groq calls are spread across the configured keys. The Yatri

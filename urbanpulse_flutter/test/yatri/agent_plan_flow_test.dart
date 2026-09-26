@@ -113,6 +113,23 @@ void main() {
     expect(c.entries.whereType<ItineraryEntry>(), hasLength(1));
   });
 
+  test('restarting the conversation mid-plan stops the old plan and never touches the new chat', () async {
+    final (c, _) = await build();
+    c.start();
+    final done = c.confirmBrief(completeBrief());
+    final q = await waitForQuestion(c, 'plan.');
+    expect(q.id, startsWith('plan.'));
+
+    c.start(); // the traveller starts over while a question is open
+    final fresh = c.entries.length;
+    await done;
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    expect(c.entries.length, fresh, reason: 'nothing from the old run was added');
+    expect(c.entries.single, isA<WelcomeEntry>());
+    expect(c.entries.whereType<ItineraryEntry>(), isEmpty);
+    expect(c.entries.whereType<TaskGraphEntry>(), isEmpty);
+  });
+
   test('a destination that is not on the map is handed back to the conversation', () async {
     final (c, _) = await build(places: {});
     c.start();

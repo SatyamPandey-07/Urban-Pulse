@@ -179,7 +179,7 @@ class PlannerOrchestrator {
   // --- Yatri's plan ---------------------------------------------------------
 
   Future<PlanOutcome> _plan(TaskContext ctx, TripBrief brief) async {
-    final destination = brief.destination?.trim() ?? '';
+    final destination = cleanPlace(brief.destination);
     if (destination.isEmpty || brief.start == null || brief.end == null) {
       return PlanOutcome.failed('The brief is missing a destination or dates');
     }
@@ -193,6 +193,14 @@ class PlannerOrchestrator {
     final origin = brief.originCity?.trim() ?? '';
     final located = await Future.wait([_geocode(destination), if (!hotelsOnly && origin.isNotEmpty) _locateOrigin(origin)]);
     final center = located.first;
+    if (center == null && !await _isOnline()) {
+      ctx.say(
+        'cannot reach the internet, so nothing can be looked up',
+        why: 'Every search needs a connection. Yatri falls back to an offline estimate rather than blaming the destination.',
+        kind: FeedKind.warn,
+      );
+      return PlanOutcome.failed('offline');
+    }
     if (center == null) {
       ctx.say(
         'could not find “$destination” on the map',
@@ -382,7 +390,7 @@ class PlannerOrchestrator {
       if (issues.isEmpty) break;
 
       // Running out of time or searches: settle for what there is.
-      if (round == maxSearches || ctx.degraded) {
+      if (round == maxSearches || clock.expired) {
         ctx.say(
           'is going with the best hotels found, as time is short',
           why: 'Yatri stops asking once the plan is running long, so you always get a result.',
@@ -418,7 +426,7 @@ class PlannerOrchestrator {
   /// or a single candidate) takes the best-ranked one.
   Future<HotelOption> _chooseHotel(TaskContext ctx, HotelSearchResult found) async {
     final options = found.options.take(maxChoices).toList();
-    if (options.length == 1 || ctx.degraded) {
+    if (options.length == 1 || clock.expired) {
       ctx.say(
         'picked ${options.first.name}',
         why: options.length == 1 ? 'It was the only stay that fit.' : 'Time was short, so Yatri took the best-ranked stay.',
@@ -493,7 +501,7 @@ class PlannerOrchestrator {
       st.notes.addAll(result.warnings);
 
       final issues = report.issues.where((i) => !_asked.contains(i.id)).toList();
-      if (issues.isEmpty || ctx.degraded) return;
+      if (issues.isEmpty || clock.expired) return;
       final issue = issues.first;
       _asked.add(issue.id);
       ctx.say('needs your taste on the places', why: issue.why, kind: FeedKind.ask);
@@ -569,7 +577,7 @@ class PlannerOrchestrator {
     st.chosen = plan.recommended;
 
     final issues = report.issues.where((i) => !_asked.contains(i.id)).toList();
-    if (issues.isEmpty || ctx.degraded) return;
+    if (issues.isEmpty || clock.expired) return;
     final issue = issues.first;
     _asked.add(issue.id);
     ctx.say('needs your choice of transport', why: issue.why, kind: FeedKind.ask);
@@ -674,7 +682,7 @@ class PlannerOrchestrator {
         if (reports[2].payload is GreenResult) green = (reports[2].payload as GreenResult).report;
         greenIssues = reports[2].issues;
       }
-      if (pass >= maxPasses || ctx.degraded) break;
+      if (pass >= maxPasses || clock.expired) break;
 
       final fixes = audit == null
           ? const AccessFixes()
@@ -1103,10 +1111,30 @@ class PlannerOrchestrator {
     return null;
   }
 
+  /// Whether the geocoding service answers at all, to tell "no such place"
+  /// from "no connection".
+  Future<bool> _isOnline() async {
+    try {
+      final r = await toolkit.client
+          .get(Uri.https('geocoding-api.open-meteo.com', '/v1/search', {'name': 'London', 'count': '1'}))
+          .timeout(const Duration(seconds: 5));
+      return r.statusCode < 500;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// A place name safe to put into searches and prompts: control characters
+  /// and runs of spaces collapsed, and a sane length. Empty if nothing is left.
+  static String cleanPlace(String? raw) {
+    final t = (raw ?? '').replaceAll(RegExp(r'[\u0000-\u001F\u007F]'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+    return t.length <= 80 ? t : t.substring(0, 80).trimRight();
+  }
+
   static String? _notes(TripBrief brief) {
     final parts = [
       if (brief.stayTypes.isNotEmpty) brief.stayTypes.map((s) => s.label.toLowerCase()).join(' or '),
-      if (brief.notes != null && brief.notes!.trim().isNotEmpty) brief.notes!.trim().substring(0, brief.notes!.trim().length.clamp(0, 120)),
+      if (cleanPlace(brief.notes).isNotEmpty) cleanPlace(brief.notes).substring(0, cleanPlace(brief.notes).length.clamp(0, 120)),
     ];
     return parts.isEmpty ? null : parts.join('; ');
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/safe_launch.dart';
 import '../../agents/runtime/agent_kind.dart';
 import '../../core/app_colors.dart';
 import '../../models/itinerary/itinerary_parts.dart';
@@ -26,10 +26,7 @@ IconData verdictIcon(Verdict v) => switch (v) {
   Verdict.unverified => Icons.help_outline_rounded,
 };
 
-Future<void> _open(String url) async {
-  final uri = Uri.tryParse(url);
-  if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
-}
+Future<void> _open(String url) => openWebLink(url);
 
 /// What Khoji found about a place: each claim with its verdict and source, and
 /// the guest reviews (usually the lower-rated ones) with the pages they came
