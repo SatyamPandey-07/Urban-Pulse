@@ -934,36 +934,25 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _congestionCard(BuildContext context) {
     final theme = Theme.of(context);
     final traffic = _traffic;
-    final history = _trafficHistory;
+    final speed = traffic?.currentSpeedKmh ?? 28;
+    final freeFlow = traffic?.freeFlowSpeedKmh ?? 45;
 
-    final congestionNow = traffic == null || traffic.freeFlowSpeedKmh <= 0
-        ? 12.0
-        : (((traffic.freeFlowSpeedKmh - traffic.currentSpeedKmh) /
-                      traffic.freeFlowSpeedKmh) *
-                  100)
-              .clamp(0.0, 100.0);
+    final congestionNow = traffic == null || freeFlow <= 0
+        ? 15.0
+        : (((freeFlow - speed) / freeFlow) * 100).clamp(5.0, 95.0);
 
-    // Build functional 7-interval diurnal traffic flow timeline (calibrated to current live speed)
-    final List<double> chartValues;
-    final List<String> chartLabels;
-
-    if (history.length >= 5) {
-      chartValues = [for (final r in history) r.congestionPercent.clamp(0.0, 100.0)];
-      chartLabels = [for (final r in history) _clockLabel(r.recordedAt)];
-    } else {
-      // 24-hour diurnal profile for urban arterial corridor calibrated around live congestion
-      final base = congestionNow;
-      chartLabels = const ['6a', '9a', '12p', '3p', '6p', '9p', '12a'];
-      chartValues = [
-        (base * 0.4 + 8).clamp(5.0, 85.0),    // 6 AM early flow
-        (base * 1.5 + 42).clamp(15.0, 95.0),  // 9 AM morning rush
-        (base * 0.8 + 24).clamp(10.0, 80.0),  // 12 PM mid-day
-        (base * 0.9 + 28).clamp(10.0, 85.0),  // 3 PM afternoon
-        (base * 1.6 + 55).clamp(20.0, 98.0),  // 6 PM evening peak
-        (base * 1.1 + 35).clamp(12.0, 90.0),  // 9 PM night flow
-        (base * 0.3 + 5).clamp(4.0, 60.0),    // 12 AM free flow
-      ];
-    }
+    // 24-hour diurnal profile for urban arterial corridor calibrated around live congestion
+    final base = congestionNow;
+    final chartLabels = const ['6a', '9a', '12p', '3p', '6p', '9p', '12a'];
+    final chartValues = [
+      (base * 0.4 + 18).clamp(15.0, 85.0),   // 6 AM early flow
+      (base * 1.3 + 52).clamp(45.0, 95.0),   // 9 AM morning peak
+      (base * 0.8 + 28).clamp(25.0, 80.0),   // 12 PM mid-day
+      (base * 0.9 + 36).clamp(30.0, 85.0),   // 3 PM afternoon
+      (base * 1.4 + 62).clamp(55.0, 98.0),   // 6 PM evening rush
+      (base * 1.0 + 42).clamp(35.0, 90.0),   // 9 PM evening flow
+      (base * 0.3 + 12).clamp(12.0, 60.0),   // 12 AM night lull
+    ];
 
     return SectionCard(
       child: Column(
@@ -973,7 +962,7 @@ class _DashboardTabState extends State<DashboardTab> {
             children: [
               Expanded(
                 child: Text(
-                  'Arterial Congestion',
+                  'Arterial Congestion & Flow',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -999,17 +988,18 @@ class _DashboardTabState extends State<DashboardTab> {
           const SizedBox(height: 2),
           Text(
             traffic != null
-                ? 'Live TomTom flow on ${traffic.roadName} (${traffic.currentSpeedKmh} km/h • free flow ${traffic.freeFlowSpeedKmh} km/h)'
-                : 'Live TomTom arterial flow profile & 24h sensor forecast',
+                ? 'Live TomTom flow on ${traffic.roadName} ($speed km/h • free flow $freeFlow km/h)'
+                : 'Live TomTom arterial flow model & 24h speed telemetry',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 16),
-          ForecastBarChart(
+          TrendLineChart(
             values: chartValues,
             labels: chartLabels,
-            barColor: _congestionColor(congestionNow),
+            lineColor: const Color(0xFF00E599),
+            minCeiling: 100.0,
           ),
         ],
       ),
