@@ -12,20 +12,24 @@ import 'package:shared_preferences_android/shared_preferences_android.dart' as s
 import 'package:sqflite_android/sqflite_android.dart' as sqflite_android;
 import 'package:url_launcher_android/url_launcher_android.dart' as url_launcher_android;
 import 'package:webview_flutter_android/webview_flutter_android.dart' as webview_flutter_android;
-import 'package:geocoding_ios/geocoding_ios.dart' as geocoding_ios;
+import 'package:geocoding_darwin/geocoding_darwin.dart' as geocoding_darwin;
 import 'package:geolocator_apple/geolocator_apple.dart' as geolocator_apple;
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart' as shared_preferences_foundation;
 import 'package:sqflite_darwin/sqflite_darwin.dart' as sqflite_darwin;
 import 'package:url_launcher_ios/url_launcher_ios.dart' as url_launcher_ios;
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart' as webview_flutter_wkwebview;
+import 'package:geolocator_linux/geolocator_linux.dart' as geolocator_linux;
+import 'package:package_info_plus/package_info_plus.dart' as package_info_plus;
 import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;
 import 'package:shared_preferences_linux/shared_preferences_linux.dart' as shared_preferences_linux;
 import 'package:url_launcher_linux/url_launcher_linux.dart' as url_launcher_linux;
+import 'package:geocoding_darwin/geocoding_darwin.dart' as geocoding_darwin;
 import 'package:geolocator_apple/geolocator_apple.dart' as geolocator_apple;
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart' as shared_preferences_foundation;
 import 'package:sqflite_darwin/sqflite_darwin.dart' as sqflite_darwin;
 import 'package:url_launcher_macos/url_launcher_macos.dart' as url_launcher_macos;
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart' as webview_flutter_wkwebview;
+import 'package:package_info_plus/package_info_plus.dart' as package_info_plus;
 import 'package:path_provider_windows/path_provider_windows.dart' as path_provider_windows;
 import 'package:shared_preferences_windows/shared_preferences_windows.dart' as shared_preferences_windows;
 import 'package:speech_to_text_windows/speech_to_text_windows.dart' as speech_to_text_windows;
@@ -38,7 +42,7 @@ class _PluginRegistrant {
   static void register() {
     if (Platform.isAndroid) {
       try {
-        geocoding_android.GeocodingAndroid.registerWith();
+        geocoding_android.GeocodingAndroidFactory.registerWith();
       } catch (err) {
         print(
           '`geocoding_android` threw an error: $err. '
@@ -93,10 +97,10 @@ class _PluginRegistrant {
 
     } else if (Platform.isIOS) {
       try {
-        geocoding_ios.GeocodingIOS.registerWith();
+        geocoding_darwin.GeocodingDarwinFactory.registerWith();
       } catch (err) {
         print(
-          '`geocoding_ios` threw an error: $err. '
+          '`geocoding_darwin` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
       }
@@ -148,6 +152,24 @@ class _PluginRegistrant {
 
     } else if (Platform.isLinux) {
       try {
+        geolocator_linux.GeolocatorLinux.registerWith();
+      } catch (err) {
+        print(
+          '`geolocator_linux` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
+        package_info_plus.PackageInfoPlusLinuxPlugin.registerWith();
+      } catch (err) {
+        print(
+          '`package_info_plus` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
         path_provider_linux.PathProviderLinux.registerWith();
       } catch (err) {
         print(
@@ -175,6 +197,15 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isMacOS) {
+      try {
+        geocoding_darwin.GeocodingDarwinFactory.registerWith();
+      } catch (err) {
+        print(
+          '`geocoding_darwin` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
       try {
         geolocator_apple.GeolocatorApple.registerWith();
       } catch (err) {
@@ -221,6 +252,15 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isWindows) {
+      try {
+        package_info_plus.PackageInfoPlusWindowsPlugin.registerWith();
+      } catch (err) {
+        print(
+          '`package_info_plus` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
       try {
         path_provider_windows.PathProviderWindows.registerWith();
       } catch (err) {

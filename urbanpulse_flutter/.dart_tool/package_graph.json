@@ -127,21 +127,22 @@
     },
     {
       "name": "geocoding",
-      "version": "3.0.0",
+      "version": "5.0.0",
       "dependencies": [
         "flutter",
         "geocoding_android",
-        "geocoding_ios",
+        "geocoding_darwin",
         "geocoding_platform_interface"
       ]
     },
     {
       "name": "geolocator",
-      "version": "13.0.4",
+      "version": "14.0.3",
       "dependencies": [
         "flutter",
         "geolocator_android",
         "geolocator_apple",
+        "geolocator_linux",
         "geolocator_platform_interface",
         "geolocator_web",
         "geolocator_windows"
@@ -478,28 +479,42 @@
       ]
     },
     {
-      "name": "geocoding_ios",
-      "version": "3.1.0",
+      "name": "geocoding_darwin",
+      "version": "1.0.3",
       "dependencies": [
         "flutter",
-        "geocoding_platform_interface"
+        "geocoding_platform_interface",
+        "plugin_platform_interface"
       ]
     },
     {
       "name": "geocoding_android",
-      "version": "3.3.1",
+      "version": "5.1.0",
       "dependencies": [
         "flutter",
-        "geocoding_platform_interface"
+        "geocoding_platform_interface",
+        "meta"
       ]
     },
     {
       "name": "geocoding_platform_interface",
-      "version": "3.2.0",
+      "version": "5.0.0",
       "dependencies": [
         "flutter",
         "meta",
         "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "geolocator_linux",
+      "version": "0.2.6",
+      "dependencies": [
+        "dbus",
+        "flutter",
+        "geoclue",
+        "geolocator_platform_interface",
+        "gsettings",
+        "package_info_plus"
       ]
     },
     {
@@ -530,7 +545,7 @@
     },
     {
       "name": "geolocator_android",
-      "version": "4.6.2",
+      "version": "5.0.3",
       "dependencies": [
         "flutter",
         "geolocator_platform_interface",
@@ -758,6 +773,48 @@
       ]
     },
     {
+      "name": "package_info_plus",
+      "version": "10.2.1",
+      "dependencies": [
+        "clock",
+        "ffi",
+        "flutter",
+        "flutter_web_plugins",
+        "http",
+        "meta",
+        "package_info_plus_platform_interface",
+        "path",
+        "web",
+        "win32"
+      ]
+    },
+    {
+      "name": "gsettings",
+      "version": "0.2.8",
+      "dependencies": [
+        "dbus",
+        "xdg_directories"
+      ]
+    },
+    {
+      "name": "geoclue",
+      "version": "0.1.1",
+      "dependencies": [
+        "dbus",
+        "meta"
+      ]
+    },
+    {
+      "name": "dbus",
+      "version": "0.7.15",
+      "dependencies": [
+        "args",
+        "ffi",
+        "meta",
+        "xml"
+      ]
+    },
+    {
       "name": "uuid",
       "version": "4.6.0",
       "dependencies": [
@@ -826,9 +883,22 @@
       "dependencies": []
     },
     {
-      "name": "fixnum",
-      "version": "1.1.1",
-      "dependencies": []
+      "name": "win32",
+      "version": "6.4.0",
+      "dependencies": [
+        "ffi",
+        "ffi_leak_tracker",
+        "meta"
+      ]
+    },
+    {
+      "name": "package_info_plus_platform_interface",
+      "version": "4.1.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
     },
     {
       "name": "xdg_directories",
@@ -836,6 +906,23 @@
       "dependencies": [
         "meta",
         "path"
+      ]
+    },
+    {
+      "name": "args",
+      "version": "2.7.0",
+      "dependencies": []
+    },
+    {
+      "name": "fixnum",
+      "version": "1.1.1",
+      "dependencies": []
+    },
+    {
+      "name": "ffi_leak_tracker",
+      "version": "0.1.2",
+      "dependencies": [
+        "ffi"
       ]
     }
   ],

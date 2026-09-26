@@ -50,7 +50,8 @@ class LocationService {
   /// made-up city.
   Future<ResolvedPlace?> resolvePlace(double lat, double lon) async {
     try {
-      final placemarks = await placemarkFromCoordinates(lat, lon);
+      final placemarks =
+          await Geocoding().placemarkFromCoordinates(lat, lon);
       if (placemarks.isEmpty) return null;
       final place = placemarks.first;
 
@@ -61,10 +62,16 @@ class LocationService {
       ]);
       if (city == null) return null;
 
-      final region = [place.administrativeArea, place.country]
-          .map((v) => v?.trim())
-          .where((v) => v != null && v.isNotEmpty && v != city)
-          .join(', ');
+      final regionList = <String>[];
+      final admin = place.administrativeArea?.trim();
+      if (admin != null && admin.isNotEmpty && admin != city) {
+        regionList.add(admin);
+      }
+      final country = place.country?.trim();
+      if (country != null && country.isNotEmpty && country != city) {
+        regionList.add(country);
+      }
+      final region = regionList.join(', ');
 
       return ResolvedPlace(city: city, region: region.isEmpty ? null : region);
     } catch (_) {

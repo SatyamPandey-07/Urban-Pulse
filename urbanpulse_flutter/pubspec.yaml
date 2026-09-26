@@ -24,11 +24,11 @@ dependencies:
   sqflite: ^2.4.0
 
   # Replaces FusedLocationProviderClient + runtime location permissions.
-  geolocator: ^13.0.1
+  geolocator: ^14.0.0
 
   # Replaces android.location.Geocoder — reverse-geocoding the GPS fix to a city
   # name for the Yatri AI origin city.
-  geocoding: ^3.0.0
+  geocoding: ^5.0.0
 
   # The Live Map is a Leaflet map inside a WebView driven by injected JS in the
   # original; this keeps that implementation (and its behaviour) intact.
