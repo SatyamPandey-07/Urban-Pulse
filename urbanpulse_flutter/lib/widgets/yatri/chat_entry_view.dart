@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/formatting.dart';
+import '../../models/itinerary/itinerary.dart';
 import '../../models/trip_brief.dart';
 import '../../models/trip_models.dart';
 import '../../models/yatri_question.dart';
@@ -23,6 +24,7 @@ class ChatEntryView extends StatelessWidget {
     required this.onReview,
     required this.onExample,
     required this.onViewTrip,
+    this.onOpenItinerary,
     this.mapTileLayer,
     super.key,
   });
@@ -33,6 +35,9 @@ class ChatEntryView extends StatelessWidget {
   final ValueChanged<TripBrief> onReview;
   final ValueChanged<String> onExample;
   final ValueChanged<TripPlan> onViewTrip;
+
+  /// Opens the full itinerary screen for a finished multi-agent plan.
+  final ValueChanged<ItineraryEntry>? onOpenItinerary;
 
   /// Replaces the OpenStreetMap tiles in the route map (tests only).
   final Widget? mapTileLayer;
@@ -100,6 +105,16 @@ class ChatEntryView extends StatelessWidget {
               onShow: (m) => controller.showMode(e, m),
               tileLayer: mapTileLayer,
             ),
+          ),
+        );
+      case ItineraryEntry():
+        return Padding(
+          padding: const EdgeInsets.only(left: 38),
+          child: ItineraryPreviewCard(
+            itinerary: e.itinerary,
+            saved: e.saved,
+            onSave: () => controller.saveItinerary(e),
+            onOpen: () => onOpenItinerary?.call(e),
           ),
         );
       case PlanEntry():
@@ -668,6 +683,96 @@ class TripPreviewCard extends StatelessWidget {
                     child: const Text('View Itinerary'),
                   ),
                 ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+/// The finished itinerary in the chat: the headline facts and two actions.
+class ItineraryPreviewCard extends StatelessWidget {
+  const ItineraryPreviewCard({
+    required this.itinerary,
+    required this.onSave,
+    required this.onOpen,
+    this.saved = false,
+    super.key,
+  });
+
+  final Itinerary itinerary;
+  final bool saved;
+  final VoidCallback onSave;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    final highlights = [
+      for (final d in itinerary.days)
+        for (final s in d.slots)
+          if (s.kind == SlotKind.visit) s.title,
+    ].take(4).toList();
+
+    Widget fact(IconData icon, String text, {bool bold = false}) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: scheme.onSurfaceVariant),
+        const SizedBox(width: 4),
+        Flexible(child: Text(text, style: muted?.copyWith(fontWeight: bold ? FontWeight.w700 : null))),
+      ],
+    );
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 560),
+      child: SectionCard(
+        padding: const EdgeInsets.all(16),
+        borderWidth: 1,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${itinerary.destination} — ${itinerary.dayCount}-day trip',
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(dateRangeLabel(itinerary.start, itinerary.end), style: muted),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 14,
+              runSpacing: 6,
+              children: [
+                fact(Icons.hotel_outlined, itinerary.hotel?.name ?? 'No stay included'),
+                if (itinerary.chosenTransport != null) fact(Icons.directions_subway_outlined, itinerary.chosenTransport!.mode.label),
+                fact(Icons.account_balance_wallet_outlined, rupees(itinerary.budget.totalInr), bold: true),
+                if (itinerary.green != null) fact(Icons.eco_outlined, '${fixed(itinerary.green!.co2Kg, 0)} kg CO₂'),
+              ],
+            ),
+            if (highlights.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text('Highlights: ${highlights.join(' · ')}', style: muted, maxLines: 3, overflow: TextOverflow.ellipsis),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonal(
+                    onPressed: saved ? null : onSave,
+                    child: saved
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [Icon(Icons.check_rounded, size: 16), SizedBox(width: 6), Text('Saved')],
+                          )
+                        : const Text('Save Trip'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: FilledButton(onPressed: onOpen, child: const Text('Open Itinerary'))),
               ],
             ),
           ],

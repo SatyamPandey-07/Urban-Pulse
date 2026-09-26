@@ -75,10 +75,16 @@ class IssueOption {
     required this.label,
     this.effect = const {},
     this.recommended = false,
+    this.subtitle,
+    this.badge,
   });
 
   final String id;
   final String label;
+
+  /// A second line and a short trailing tag (e.g. a CO2 figure) for the card.
+  final String? subtitle;
+  final String? badge;
   final Map<String, Object?> effect;
   final bool recommended;
 }
