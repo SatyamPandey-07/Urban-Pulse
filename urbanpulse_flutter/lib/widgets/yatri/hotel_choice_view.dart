@@ -10,6 +10,8 @@ import '../../models/itinerary/itinerary_parts.dart';
 import '../../models/trip_brief.dart';
 import '../../models/yatri_question.dart';
 import 'choice_answers.dart';
+import 'claims_view.dart';
+import 'khoji_badge.dart';
 import 'option_card.dart';
 
 /// Colour for how well a hotel supports a need. Green means a source says so,
@@ -223,6 +225,10 @@ class _HotelCard extends StatelessWidget {
                   ],
                 ),
               ],
+              if (hotel.claims.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                KhojiBadge(claims: hotel.claims),
+              ],
               const SizedBox(height: 4),
               Align(
                 alignment: Alignment.centerLeft,
@@ -400,6 +406,10 @@ class _Details extends StatelessWidget {
                 ),
             ],
           ),
+        if (hotel.claims.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          ClaimsView(claims: hotel.claims),
+        ],
         if (hotel.priceIsEstimated) ...[
           const SizedBox(height: 6),
           Text(

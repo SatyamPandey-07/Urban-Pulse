@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/formatting.dart';
 import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
+import '../widgets/itinerary/access_audit_view.dart';
 import '../widgets/itinerary/budget_breakdown.dart';
 import '../widgets/itinerary/day_view.dart';
 import '../widgets/itinerary/trip_overview.dart';
@@ -54,6 +55,17 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
     final tabs = <(String, IconData, Widget)>[
       ('Days', Icons.calendar_month_rounded, _DaysTab(itinerary: it, tileLayer: widget.tileLayer)),
       ('Budget', Icons.account_balance_wallet_outlined, _Padded(child: BudgetBreakdown(budget: it.budget))),
+      if (it.audit != null && it.audit!.items.isNotEmpty)
+        (
+          'Access',
+          Icons.accessible_forward_rounded,
+          _Padded(
+            child: AccessAuditView(
+              audit: it.audit!,
+              needs: {for (final n in it.brief?.accessibilityNeeds ?? const <AccessibilityNeed>{}) if (n != AccessibilityNeed.none) n},
+            ),
+          ),
+        ),
       ('Trip', Icons.info_outline_rounded, _Padded(child: TripOverview(itinerary: it))),
     ];
 

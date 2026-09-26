@@ -8,6 +8,7 @@ import '../../core/formatting.dart';
 import '../../models/itinerary/itinerary.dart';
 import '../../models/itinerary/itinerary_parts.dart';
 import '../../models/trip_brief.dart';
+import '../yatri/claims_view.dart';
 import '../yatri/hotel_choice_view.dart' show NeedChip;
 import '../yatri/route_map_card.dart' show transportModeIcon;
 
@@ -209,6 +210,10 @@ class _HotelCard extends StatelessWidget {
           if (hotel.amenities.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(hotel.amenities.join(' · '), style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+          ],
+          if (hotel.claims.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            ClaimsView(claims: hotel.claims),
           ],
         ],
       ),
