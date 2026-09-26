@@ -466,6 +466,7 @@ class TransportLeg {
     this.isEstimated = true,
     this.fromPoint,
     this.toPoint,
+    this.walking = false,
   });
 
   final String id;
@@ -486,6 +487,12 @@ class TransportLeg {
   final LatLng? fromPoint;
   final LatLng? toPoint;
 
+  /// A short walk. [mode] is a placeholder then and must not be shown.
+  final bool walking;
+
+  /// What to call this leg: "Walk", "Train", …
+  String get modeLabel => walking ? 'Walk' : mode.label;
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'from': from,
@@ -500,6 +507,7 @@ class TransportLeg {
     'isEstimated': isEstimated,
     'fromPoint': latLngToJson(fromPoint),
     'toPoint': latLngToJson(toPoint),
+    'walking': walking,
   };
 
   static TransportLeg fromJson(Map<String, dynamic> j) => TransportLeg(
@@ -516,5 +524,6 @@ class TransportLeg {
     isEstimated: j['isEstimated'] as bool? ?? true,
     fromPoint: latLngFromJson(j['fromPoint']),
     toPoint: latLngFromJson(j['toPoint']),
+    walking: j['walking'] as bool? ?? false,
   );
 }

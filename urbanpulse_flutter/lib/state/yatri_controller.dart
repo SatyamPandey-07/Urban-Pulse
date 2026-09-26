@@ -19,6 +19,7 @@ import '../domain/trip_brief/extraction.dart';
 import '../domain/trip_brief/question_catalog.dart';
 import '../domain/route_path.dart';
 import '../domain/trip_brief/question_planner.dart';
+import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
 import '../models/trip_models.dart';
 import '../models/yatri_question.dart';
@@ -124,6 +125,14 @@ class PlanEntry extends ChatEntry {
   PlanEntry(this.plan);
 
   final TripPlan plan;
+  bool saved = false;
+}
+
+/// The finished multi-agent itinerary, with Save and Open actions.
+class ItineraryEntry extends ChatEntry {
+  ItineraryEntry(this.itinerary);
+
+  final Itinerary itinerary;
   bool saved = false;
 }
 
@@ -717,15 +726,13 @@ class YatriController extends ChangeNotifier {
   }
 
   /// The multi-agent plan: Yatri and the workers run as a live task graph in
-  /// the chat while the day-by-day plan is drafted alongside, then the chosen
-  /// stay is put into it.
+  /// the chat, and the result is a full itinerary. If the agents cannot produce
+  /// one, the phase-1 planner drafts a plan instead so there is always a result.
   Future<void> _planWithAgents(AgentToolkit tk, TripBrief confirmed) async {
-    final orchestrator = PlannerOrchestrator(toolkit: tk, ask: askPlanQuestion);
+    final orchestrator = PlannerOrchestrator(toolkit: tk, ask: askPlanQuestion, now: () => now);
     entries.add(TaskGraphEntry(orchestrator.graph, orchestrator.clock));
     _notify();
 
-    // The day-by-day draft does not depend on the hotel, so it runs alongside.
-    final draft = handoff.run(confirmed);
     PlanOutcome outcome;
     try {
       outcome = await orchestrator.run(confirmed);
@@ -736,7 +743,6 @@ class YatriController extends ChangeNotifier {
     if (outcome.status == PlanStatus.unlocatable) {
       // Nothing can be planned around a place that is not on the map: take the
       // destination back and ask again.
-      unawaited(draft);
       brief = confirmed.clearing(BriefField.destination);
       phase = YatriPhase.intake;
       entries.add(
@@ -751,7 +757,27 @@ class YatriController extends ChangeNotifier {
       return;
     }
 
-    final result = await draft;
+    final itinerary = outcome.itinerary;
+    if (itinerary != null) {
+      phase = YatriPhase.done;
+      final hotel = outcome.hotel;
+      entries
+        ..add(
+          AgentText(
+            hotel == null
+                ? 'Here’s your ${itinerary.dayCount}-day plan for ${confirmed.destination}.'
+                : 'Here’s your ${itinerary.dayCount}-day plan for ${confirmed.destination}, staying at ${hotel.name}.',
+          ),
+        )
+        ..add(ItineraryEntry(itinerary));
+      await onTripPlanned?.call();
+      busy = false;
+      _notify();
+      return;
+    }
+
+    // The agents could not build a full itinerary: fall back to the phase-1 plan.
+    final result = await handoff.run(confirmed);
     switch (result) {
       case AgentOk(:final value):
         final hotel = outcome.hotel;
@@ -783,6 +809,14 @@ class YatriController extends ChangeNotifier {
         entries.add(ErrorEntry(kind, () => confirmBrief(confirmed)));
     }
     busy = false;
+    _notify();
+  }
+
+  Future<void> saveItinerary(ItineraryEntry entry) async {
+    if (entry.saved) return;
+    await trips.addTrip(entry.itinerary.toTripPlan());
+    entry.saved = true;
+    await onTripSaved?.call();
     _notify();
   }
 

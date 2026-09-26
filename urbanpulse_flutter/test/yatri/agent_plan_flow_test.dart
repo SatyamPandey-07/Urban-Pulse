@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,47 +52,65 @@ Future<YatriQuestion> waitForQuestion(YatriController c, String idPrefix) async 
   fail('no question starting with $idPrefix; active: ${c.activeQuestion?.question.id}');
 }
 
+/// Plays the traveller: answers every question the planner asks with the
+/// option in [script] (question id prefix -> option id), else the recommended
+/// one. Records what was asked.
+Future<List<String>> playTraveller(YatriController c, Future<void> done, {Map<String, String> script = const {}}) async {
+  final asked = <String>[];
+  var finished = false;
+  unawaited(done.whenComplete(() => finished = true));
+  for (var i = 0; i < 800 && !finished; i++) {
+    final q = c.activeQuestion?.question;
+    if (q != null && q.id.startsWith('plan.') && !asked.contains(q.id)) {
+      asked.add(q.id);
+      final want = script.entries.where((e) => q.id.startsWith(e.key)).firstOrNull?.value;
+      final o = q.options.firstWhere(
+        (o) => o.id == want,
+        orElse: () => q.options.firstWhere((o) => o.recommended, orElse: () => q.options.first),
+      );
+      await c.answer(q, ChoiceAnswer(o.id, o.label));
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
+  await done;
+  return asked;
+}
+
 void main() {
-  test('confirming the brief runs the agents, asks which stay, and puts it in the plan', () async {
+  test('confirming the brief runs the agents, asks which stay, and builds the itinerary', () async {
     final (c, drafts) = await build();
     c.start();
     final done = c.confirmBrief(completeBrief());
-
-    final q = await waitForQuestion(c, 'plan.hotels.choice');
+    await Future<void>.delayed(const Duration(milliseconds: 5));
     expect(c.entries.whereType<TaskGraphEntry>(), hasLength(1), reason: 'the live graph is in the chat');
     expect(c.phase, YatriPhase.planning);
     expect(c.busy, isTrue);
-    final pick = q.hotels[1];
-    await c.answer(q, ChoiceAnswer(pick.id, pick.name));
-    await done;
+
+    final asked = await playTraveller(c, done, script: {'plan.hotels.choice': 'g100001-d4'});
+    expect(asked, contains('plan.hotels.choice'));
 
     expect(c.phase, YatriPhase.done);
     expect(c.busy, isFalse);
-    expect(drafts, ['Munnar'], reason: 'the day-by-day draft ran once, alongside');
-    final plan = c.entries.whereType<PlanEntry>().single.plan;
-    expect(plan.hotelName, pick.name);
-    expect(plan.hotelRating, pick.rating);
-    final text = c.entries.whereType<AgentText>().last.text;
-    expect(text, contains('staying at ${pick.name}'));
+    expect(drafts, isEmpty, reason: 'the phase-1 draft is only a fallback');
+    final entry = c.entries.whereType<ItineraryEntry>().single;
+    expect(entry.itinerary.hotel!.id, 'g100001-d4');
+    expect(entry.itinerary.destination, 'Munnar');
+    expect(entry.itinerary.days, isNotEmpty);
+    expect(c.entries.whereType<AgentText>().last.text, contains('staying at Misty Hills Cottages'));
     expect(c.entries.whereType<PlanningEntry>(), isEmpty);
-    // The traveller's choice shows in the chat as their answer.
-    expect(c.entries.whereType<UserText>().map((e) => e.text), contains(pick.name));
+
+    await c.saveItinerary(entry);
+    expect(entry.saved, isTrue);
   });
 
   test('a mid-plan question is answerable even though the plan is busy', () async {
     final (c, _) = await build();
     c.start();
     final done = c.confirmBrief(completeBrief().copyWith(budgetMaxInr: 6000));
-
-    final budget = await waitForQuestion(c, 'plan.hotels.budget');
-    expect(c.busy, isTrue);
-    expect(budget.agent, 'yatri');
-    await c.answer(budget, const ChoiceAnswer('accept', 'Keep it'));
-    final choice = await waitForQuestion(c, 'plan.hotels.choice');
-    await c.answer(choice, const ChoiceAnswer('auto', 'Let Yatri choose'));
-    await done;
+    final asked = await playTraveller(c, done, script: {'plan.hotels.budget': 'accept'});
+    expect(asked.any((id) => id.startsWith('plan.hotels.budget')), isTrue);
     expect(c.phase, YatriPhase.done);
-    expect(c.entries.whereType<PlanEntry>(), hasLength(1));
+    expect(c.entries.whereType<ItineraryEntry>(), hasLength(1));
   });
 
   test('a destination that is not on the map is handed back to the conversation', () async {

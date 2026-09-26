@@ -74,7 +74,7 @@ class Traveller {
 }
 
 PlannerOrchestrator orchestratorFor(AgentToolkit tk, Traveller who, {PlanClock? clock}) {
-  final o = PlannerOrchestrator(toolkit: tk, ask: who.call, clock: clock);
+  final o = PlannerOrchestrator(toolkit: tk, ask: who.call, clock: clock, hotelsOnly: true);
   who.orchestrator = o;
   return o;
 }
@@ -144,6 +144,7 @@ void main() {
       final o = PlannerOrchestrator(
         toolkit: toolkitFor(HotelWorld()),
         ask: (q) async => const BoolAnswer(true),
+        hotelsOnly: true,
       );
       final out = await o.run(briefWith());
       expect(out.status, PlanStatus.planned);
@@ -151,7 +152,7 @@ void main() {
     });
 
     test('a question that throws never stops the plan', () async {
-      final o = PlannerOrchestrator(toolkit: toolkitFor(HotelWorld()), ask: (q) => throw StateError('ui gone'));
+      final o = PlannerOrchestrator(toolkit: toolkitFor(HotelWorld()), ask: (q) => throw StateError('ui gone'), hotelsOnly: true);
       final out = await o.run(briefWith());
       expect(out.status, PlanStatus.planned);
       expect(out.hotel, isNotNull);
@@ -291,6 +292,7 @@ void main() {
         final asked = <String>[];
         late PlannerOrchestrator o;
         o = PlannerOrchestrator(
+          hotelsOnly: true,
           toolkit: toolkitFor(world),
           clock: PlanClock(degradeAfter: rng.nextInt(5) == 0 ? Duration.zero : const Duration(seconds: 35)),
           ask: (q) async {

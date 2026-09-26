@@ -458,7 +458,7 @@ class Itinerary {
                   time: clock12(s.start),
                   title: s.title,
                   description: s.note ?? '',
-                  transportType: s.leg?.mode.label ?? '',
+                  transportType: s.leg?.modeLabel ?? '',
                   isAccessible: s.access == null || s.access == SupportLevel.yes || s.access == SupportLevel.partial,
                   co2Grams: s.leg?.co2Grams ?? 0,
                   costInr: s.costInr ?? s.leg?.costInr ?? 0,

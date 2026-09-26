@@ -19,6 +19,7 @@ import '../../widgets/yatri/chat_entry_view.dart';
 import '../../widgets/yatri/yatri_composer.dart';
 import '../dialogs/add_experience_dialog.dart';
 import '../dialogs/provider_dashboard_dialog.dart';
+import '../plan_itinerary_screen.dart';
 import '../trip_brief_form_screen.dart';
 
 /// Yatri AI — the receptionist that collects a trip brief by chat, then hands
@@ -188,6 +189,20 @@ class _YatriAiTabState extends State<YatriAiTab> {
   void _viewTrip(TripPlan trip) =>
       Navigator.of(context).pushNamed(Routes.tripDetail, arguments: trip);
 
+  void _openItinerary(ItineraryEntry entry) {
+    final c = _controller;
+    if (c == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PlanItineraryScreen(
+          itinerary: entry.itinerary,
+          saved: entry.saved,
+          onSave: () => c.saveItinerary(entry),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = _controller;
@@ -259,6 +274,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
                       onReview: _openForm,
                       onExample: _send,
                       onViewTrip: _viewTrip,
+                      onOpenItinerary: _openItinerary,
                     ),
                   ),
                 if (c.busy && c.phase != YatriPhase.planning)

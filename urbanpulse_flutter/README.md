@@ -85,22 +85,30 @@ with tools.
 | Safar | transport to and around the destination |
 | Hariyali | carbon and eco scoring |
 
-**Built so far:** Yatri + Atithi + Hisab (hotel budget) — stage 2.1. After you
-confirm the brief, Yatri hands the hotel search to Atithi and the budget check to
-Hisab, and asks you when goals collide ("none of these are wheelchair
-accessible", "the cheapest suitable stay is ₹X — raise the budget?"), then lets
-you pick a stay from a map and cards showing live or estimated prices, ratings and
-per-need access with where each fact came from. Hotels come from Xotelo
+**Built so far:** Yatri, Atithi, Bhatkanti, Safar, Raah and Hisab (stages 2.1 and
+2.2). After you confirm the brief, Yatri runs the hotel search (Atithi), the search
+for places (Bhatkanti), the journey (Safar) and the weather check (Raah) at the
+same time, asking you one question at a time when goals collide ("none of these
+are wheelchair accessible", "the cheapest suitable stay is ₹X — raise the
+budget?", "classics or newly popular places?", "which way to travel?"). Raah then
+groups places into days by geography, opening hours and weather; Hisab prices the
+whole plan line by line and, if it is over budget, offers real savings (a cheaper
+stay, a cheaper way to travel, skipping paid places). The result is a full
+itinerary with a day-by-day map, timeline and budget. Hotels come from Xotelo
 (TripAdvisor data and live per-OTA prices), Geoapify, OpenStreetMap and a
 `web_search` tool loop; the TripAdvisor location key is validated by distance
-so a wrong guess can never put Bengaluru hotels in Munnar. The other agents
+so a wrong guess can never put Bengaluru hotels in Munnar. The remaining agents
 arrive in later stages.
 
 ```
 agents/atithi/    hotel search: merge, rank, live rates, listing pages, AI fill
-agents/hisab/     the budget engine (hotel share so far)
-agents/yatri/     the orchestrator (Yatri's loop) and the hotel gates
+agents/bhatkanti/ places to visit: OSM, Geoapify, Wikipedia, web search, ranking
+agents/safar/     journey options (time, cost, CO₂, access per mode) and local legs
+agents/raah/      day planner: clustering, opening hours, weather, meals, local legs
+agents/hisab/     the budget engine and its levers
+agents/yatri/     the orchestrator (Yatri's loop), the gates and the itinerary assembler
 domain/access/    OSM tags / listing text -> per-need accessibility support
+domain/opening_hours.dart  reads OSM opening_hours text
 agents/runtime/   task board (DAG scheduler), task graph model, plan clock,
                   LLM pool + key ring, lenient JSON, tool kit, demo run
 agents/tools/     shared web_search / fetch_page tools and the bounded tool-use loop

@@ -219,7 +219,7 @@ class _HotelCard extends StatelessWidget {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    for (final n in shownNeeds) _NeedChip(need: n, support: hotel.access[n]),
+                    for (final n in shownNeeds) NeedChip(need: n, support: hotel.access[n]),
                   ],
                 ),
               ],
@@ -312,8 +312,8 @@ class _PriceRow extends StatelessWidget {
   }
 }
 
-class _NeedChip extends StatelessWidget {
-  const _NeedChip({required this.need, required this.support});
+class NeedChip extends StatelessWidget {
+  const NeedChip({required this.need, required this.support, super.key});
 
   final AccessibilityNeed need;
   final NeedSupport? support;
