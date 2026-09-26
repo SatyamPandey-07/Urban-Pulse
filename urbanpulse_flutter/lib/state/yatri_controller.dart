@@ -4,12 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../agents/core/yatri_agent.dart';
+import '../agents/runtime/agent_toolkit.dart';
 import '../agents/runtime/demo_plan.dart';
 import '../agents/runtime/plan_clock.dart';
 import '../agents/runtime/task_board.dart';
 import '../agents/runtime/task_graph.dart';
 import '../agents/planner/trip_plan_handoff_agent.dart';
 import '../agents/receptionist/receptionist_agent.dart';
+import '../agents/yatri/planner_orchestrator.dart';
 import '../domain/trip_brief/answer_applier.dart';
 import '../domain/trip_brief/brief_merger.dart';
 import '../domain/trip_brief/brief_validator.dart';
@@ -151,6 +153,7 @@ class YatriController extends ChangeNotifier {
     this.onTripPlanned,
     this.onTripSaved,
     this.geocode,
+    this.toolkit,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     brief = TripBrief.empty(_clock());
@@ -171,6 +174,9 @@ class YatriController extends ChangeNotifier {
 
   /// Looks up a place's coordinates for the route map. Null disables the map.
   final Future<LatLng?> Function(String place)? geocode;
+
+  /// The multi-agent planner's tools. Null keeps the phase-1 single-call planner.
+  final AgentToolkit? toolkit;
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
@@ -677,12 +683,16 @@ class YatriController extends ChangeNotifier {
     brief = confirmed;
     phase = YatriPhase.planning;
     busy = true;
-    entries
-      ..add(UserText('Confirmed — plan my trip'))
-      ..add(PlanningEntry());
+    entries.add(UserText('Confirmed — plan my trip'));
+    final tk = toolkit;
+    if (tk == null) entries.add(PlanningEntry());
     _notify();
 
     await briefs.save(confirmed);
+    if (tk != null) {
+      await _planWithAgents(tk, confirmed);
+      return;
+    }
     final result = await handoff.run(confirmed);
     entries.removeWhere((e) => e is PlanningEntry);
 
@@ -697,6 +707,76 @@ class YatriController extends ChangeNotifier {
             ),
           )
           ..add(PlanEntry(value));
+        await onTripPlanned?.call();
+      case AgentErr(:final kind):
+        phase = YatriPhase.review;
+        entries.add(ErrorEntry(kind, () => confirmBrief(confirmed)));
+    }
+    busy = false;
+    _notify();
+  }
+
+  /// The multi-agent plan: Yatri and the workers run as a live task graph in
+  /// the chat while the day-by-day plan is drafted alongside, then the chosen
+  /// stay is put into it.
+  Future<void> _planWithAgents(AgentToolkit tk, TripBrief confirmed) async {
+    final orchestrator = PlannerOrchestrator(toolkit: tk, ask: askPlanQuestion);
+    entries.add(TaskGraphEntry(orchestrator.graph, orchestrator.clock));
+    _notify();
+
+    // The day-by-day draft does not depend on the hotel, so it runs alongside.
+    final draft = handoff.run(confirmed);
+    PlanOutcome outcome;
+    try {
+      outcome = await orchestrator.run(confirmed);
+    } catch (_) {
+      outcome = PlanOutcome.failed('Planning stopped unexpectedly');
+    }
+
+    if (outcome.status == PlanStatus.unlocatable) {
+      // Nothing can be planned around a place that is not on the map: take the
+      // destination back and ask again.
+      unawaited(draft);
+      brief = confirmed.clearing(BriefField.destination);
+      phase = YatriPhase.intake;
+      entries.add(
+        AgentText(
+          '${outcome.summary}. Which destination would you like instead? '
+          'A city, town or region works best.',
+        ),
+      );
+      busy = true;
+      _notify();
+      await _advance();
+      return;
+    }
+
+    final result = await draft;
+    switch (result) {
+      case AgentOk(:final value):
+        final hotel = outcome.hotel;
+        final needs = {
+          for (final n in confirmed.accessibilityNeeds)
+            if (n != AccessibilityNeed.none) n,
+        };
+        final plan = hotel == null
+            ? value
+            : value.copyWith(
+                hotelName: hotel.name,
+                hotelRating: hotel.rating,
+                isStepFreeAccessible: needs.isNotEmpty && hotel.meets(needs) ? true : null,
+              );
+        phase = YatriPhase.done;
+        final notes = outcome.notes.isEmpty ? '' : ' Note: ${outcome.notes.join('; ')}.';
+        entries
+          ..add(
+            AgentText(
+              hotel == null
+                  ? 'Here’s a plan for ${confirmed.destination}, without a hotel.$notes'
+                  : 'Here’s a plan for ${confirmed.destination}, staying at ${hotel.name}.$notes',
+            ),
+          )
+          ..add(PlanEntry(plan));
         await onTripPlanned?.call();
       case AgentErr(:final kind):
         phase = YatriPhase.review;

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../agents/runtime/agent_toolkit.dart';
 import '../repositories/experience_repository.dart';
 import '../repositories/facility_repository.dart';
 import '../repositories/hospitality_repository.dart';
@@ -30,6 +31,7 @@ class AppServices {
     final activity = ActivityTracker(prefs);
     final locationService = LocationService();
     return AppServices._(
+      prefs: prefs,
       auth: AuthController(prefs),
       theme: ThemeController(prefs),
       activity: activity,
@@ -49,6 +51,7 @@ class AppServices {
   }
 
   AppServices._({
+    required this.prefs,
     required this.auth,
     required this.theme,
     required this.activity,
@@ -66,6 +69,7 @@ class AppServices {
     required this.locationService,
   });
 
+  final SharedPreferences prefs;
   final AuthController auth;
   final ThemeController theme;
   final GamificationController gamification;
@@ -81,6 +85,9 @@ class AppServices {
   final FacilityRepository facility;
   final TrafficHistoryRepository trafficHistory;
   final LocationService locationService;
+
+  /// The planner's shared models, data clients and caches (built on first use).
+  late final AgentToolkit agentToolkit = AgentToolkit.fromConfig(prefs: prefs);
 
   void dispose() {
     auth.dispose();
