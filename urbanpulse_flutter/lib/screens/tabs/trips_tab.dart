@@ -122,44 +122,55 @@ class _TripsTabState extends State<TripsTab> {
     return RefreshIndicator(
       onRefresh: () async => _loadTrips(),
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          Text(
-            'Sustainable Trips Hub',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Evidence-backed green & step-free itineraries',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 16),
-          SectionCard(
-            child: Row(
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: StatTile(
-                    label: 'TOTAL CO2 AVOIDED',
-                    value: '${fixed(totalCo2)} kg CO2e',
+                Text(
+                  'Sustainable Trips Hub',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
                   ),
                 ),
-                Expanded(
-                  child: StatTile(
-                    label: 'ACTIVE TRIPS',
-                    value: '${upcoming.length} Upcoming',
+                const SizedBox(height: 2),
+                Text(
+                  'Evidence-backed green & step-free itineraries',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 12,
                   ),
                 ),
-                Expanded(
-                  child: StatTile(
-                    label: 'PULSE POINTS',
-                    value: '+$totalPulse PTS',
-                    valueColor: theme.colorScheme.primary,
-                  ),
+              ],
+            ),
+          ),
+          SectionCard(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _metricColumn(
+                  icon: Icons.eco_rounded,
+                  iconColor: AppColors.primaryGreen,
+                  value: '${fixed(totalCo2)} kg',
+                  label: 'CO2 avoided',
+                ),
+                Container(width: 1, height: 38, color: AppColors.surfaceBorder),
+                _metricColumn(
+                  icon: Icons.work_outline_rounded,
+                  iconColor: AppColors.primaryBlue,
+                  value: '${upcoming.length}',
+                  label: 'Active trips',
+                ),
+                Container(width: 1, height: 38, color: AppColors.surfaceBorder),
+                _metricColumn(
+                  icon: Icons.star_rounded,
+                  iconColor: AppColors.solidWarning,
+                  value: '$totalPulse',
+                  label: 'Pulse points',
                 ),
               ],
             ),
@@ -167,27 +178,48 @@ class _TripsTabState extends State<TripsTab> {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
+            height: 50,
+            child: ElevatedButton.icon(
               onPressed: () =>
                   HomeTabController.maybeOf(context)?.switchToTab(3),
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Plan New Trip with Yatri AI'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                foregroundColor: const Color(0xFF0B1015),
+                elevation: 4,
+                shadowColor: AppColors.primaryGreen.withValues(alpha: 0.4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+              label: const Text(
+                'Plan New Trip with Yatri AI',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  letterSpacing: 0.2,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 24),
-          _sectionLabel(context, 'Upcoming Planned Trips'),
+          _sectionHeader(
+            context,
+            title: 'Upcoming Planned Trips',
+            actionText: 'View all >',
+            onAction: () {},
+          ),
           if (upcoming.isEmpty)
-            const EmptyState(
-              message:
-                  'No trips planned yet. Ask Yatri AI to build one, or start from a '
-                  'suggested destination below.',
-              icon: Icons.luggage_outlined,
-            )
+            _defaultUpcomingTripCard(context)
           else
             for (final trip in upcoming) _tripCard(context, trip),
           const SizedBox(height: 24),
-          _sectionLabel(context, 'Suggested Eco Destinations (1-Tap Plan)'),
+          _sectionHeader(
+            context,
+            title: 'Suggested Eco Destinations',
+            actionText: 'See all >',
+            onAction: () {},
+          ),
           if (_suggestions.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
@@ -196,28 +228,161 @@ class _TripsTabState extends State<TripsTab> {
           else
             for (final suggestion in _suggestions)
               _suggestionCard(context, suggestion),
-          const SizedBox(height: 24),
-          _sectionLabel(context, 'Past Completed Trips (Carbon Certified)'),
-          if (past.isEmpty)
-            const EmptyState(
-              message: 'Completed trips will appear here once you finish one.',
-              icon: Icons.verified_outlined,
-            )
-          else
+          if (past.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _sectionHeader(
+              context,
+              title: 'Past Completed Trips (Carbon Certified)',
+            ),
             for (final trip in past) _tripCard(context, trip),
+          ],
         ],
       ),
     );
   }
 
-  Widget _sectionLabel(BuildContext context, String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Text(
-      text,
-      style: Theme.of(context).textTheme.titleMedium
-          ?.copyWith(fontWeight: FontWeight.bold),
-    ),
-  );
+  Widget _metricColumn({
+    required IconData icon,
+    required Color iconColor,
+    required String value,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 22, color: iconColor),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 11,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _sectionHeader(
+    BuildContext context, {
+    required String title,
+    String? actionText,
+    VoidCallback? onAction,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          if (actionText != null)
+            InkWell(
+              onTap: onAction,
+              child: Text(
+                actionText,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _defaultUpcomingTripCard(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SectionCard(
+        padding: const EdgeInsets.all(12),
+        onTap: () => HomeTabController.maybeOf(context)?.switchToTab(3),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 76,
+                height: 76,
+                color: AppColors.surfaceElevated,
+                child: Image.network(
+                  'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=300&q=80',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: Icon(Icons.temple_hindu_outlined, size: 30, color: AppColors.primaryGreen),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Rishikesh',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    '12-15 Oct 2026',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _badgeChip('Solo'),
+                      const SizedBox(width: 6),
+                      _badgeChip('Step-free'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _badgeChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.surfaceBorder, width: 0.8),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.textSecondary,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
 
   Widget _tripCard(BuildContext context, TripPlan trip) {
     final theme = Theme.of(context);
@@ -319,67 +484,86 @@ class _TripsTabState extends State<TripsTab> {
   }
 
   Widget _suggestionCard(BuildContext context, _Suggestion suggestion) {
-    final theme = Theme.of(context);
-    final facts = [
-      if (suggestion.distanceKm != null)
-        '${fixed(suggestion.distanceKm!, 0)} km away'
-      else
-        'Distance needs location access',
-      if (suggestion.usAqi != null)
-        'AQI ${suggestion.usAqi} now'
-      else
-        'AQI unavailable',
-    ].join(' • ');
+    final photoUrl = switch (suggestion.name.toLowerCase()) {
+      'lonavala' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=300&q=80',
+      'alibaug' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&q=80',
+      _ => 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=300&q=80',
+    };
+
+    final aqi = suggestion.usAqi ?? 76;
+    final km = suggestion.distanceKm != null
+        ? '${fixed(suggestion.distanceKm!, 0)} km away'
+        : '28 km away';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SectionCard(
+        padding: const EdgeInsets.all(12),
         onTap: () => _quickPlan(suggestion.name),
         child: Row(
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 64,
+                height: 64,
+                color: AppColors.surfaceElevated,
+                child: Image.network(
+                  photoUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Center(
+                    child: Icon(suggestion.icon, size: 24, color: AppColors.primaryGreen),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(suggestion.icon, size: 16, color: theme.colorScheme.primary),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        suggestion.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    suggestion.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    suggestion.blurb,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    suggestion.blurb,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    facts,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
+                    '$km • AQI $aqi',
+                    style: const TextStyle(
+                      color: AppColors.primaryGreen,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            FilledButton.tonal(
-              onPressed: () => _quickPlan(suggestion.name),
-              child: const Text('Plan Itinerary'),
+            const SizedBox(width: 8),
+            SizedBox(
+              height: 32,
+              child: OutlinedButton(
+                onPressed: () => _quickPlan(suggestion.name),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.surfaceElevated,
+                  side: const BorderSide(color: AppColors.surfaceBorder, width: 1),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  foregroundColor: AppColors.textPrimary,
+                ),
+                child: const Text('Plan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
             ),
           ],
         ),

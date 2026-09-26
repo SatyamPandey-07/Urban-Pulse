@@ -118,7 +118,7 @@ class UserBubble extends StatelessWidget {
           text,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onPrimary,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),

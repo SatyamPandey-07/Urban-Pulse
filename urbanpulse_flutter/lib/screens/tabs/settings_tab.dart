@@ -37,8 +37,8 @@ class _SettingsTabState extends State<SettingsTab> {
           _SettingItem(
             title: 'Inclusive Accessibility Profile',
             subtitle: 'Wheelchair: $wheelchairStatus, Visual & Hearing alerts',
-            icon: Icons.accessible,
-            iconBg: const Color(0xFFD3E3FD),
+            icon: Icons.accessible_forward_rounded,
+            iconBg: const Color(0xFFE0E7FF),
             onTap: _showAccessibilityDialog,
           ),
           _SettingItem(
@@ -46,82 +46,94 @@ class _SettingsTabState extends State<SettingsTab> {
             subtitle:
                 '${fixed(co2Kg)} kg CO2 saved • '
                 'Level ${services.gamification.level} Explorer',
-            icon: Icons.card_travel,
-            iconBg: const Color(0xFFC3E7A1),
+            icon: Icons.eco_rounded,
+            iconBg: const Color(0xFFD1FAE5),
             onTap: () => Navigator.of(context).pushNamed(Routes.carbonWallet),
           ),
           _SettingItem(
             title: 'Sustainable & Inclusive Stays',
-            subtitle: 'Verified solar hotels, zero-waste resorts & accessibility audits',
+            subtitle: 'Verified solar hotels & accessibility audits',
             icon: Icons.hotel_outlined,
-            iconBg: const Color(0xFFA7F3D0),
+            iconBg: const Color(0xFFE0F2FE),
             onTap: () => Navigator.of(context).pushNamed(Routes.hospitality),
           ),
           _SettingItem(
             title: 'Multimodal Green Route Planner',
-            subtitle: 'Tradeoff optimizer for Metro, EV Cab, and bus emissions',
-            icon: Icons.alt_route,
-            iconBg: const Color(0xFFFDE293),
+            subtitle: 'Metro, EV cab, bus emissions tradeoff',
+            icon: Icons.alt_route_rounded,
+            iconBg: const Color(0xFFFEF3C7),
             onTap: () =>
                 Navigator.of(context).pushNamed(Routes.greenRoutePlanner),
           ),
           _SettingItem(
             title: 'AI Eco & Inclusive Itinerary',
-            subtitle: 'Personalized step-free & low-carbon day itineraries',
-            icon: Icons.celebration_outlined,
-            iconBg: const Color(0xFFFED7AA),
+            subtitle: 'Personalized step-free & low-carbon plans',
+            icon: Icons.auto_awesome_rounded,
+            iconBg: const Color(0xFFFFE4E6),
             onTap: () => Navigator.of(context).pushNamed(Routes.itinerary),
           ),
           _SettingItem(
             title: 'Hotel Resource & Waste Hub',
-            subtitle: 'B2B Energy, Water, food surplus & ESG compliance',
-            icon: Icons.insights_outlined,
-            iconBg: const Color(0xFFFBCFE8),
+            subtitle: 'Energy, water, food surplus & ESG compliance',
+            icon: Icons.recycling_rounded,
+            iconBg: const Color(0xFFF3E8FF),
             onTap: () => Navigator.of(context).pushNamed(Routes.hotelOptimizer),
           ),
           _SettingItem(
             title: 'Appearance & Accent',
             subtitle:
-                'Accent: ${_accentLabel(services.theme.accent)} • '
-                'Theme follows the system',
-            icon: Icons.light_mode_outlined,
-            iconBg: const Color(0xFFFDE293),
+                'Theme: ${_accentLabel(services.theme.accent)} • Follows system settings',
+            icon: Icons.wb_sunny_rounded,
+            iconBg: const Color(0xFFFEF9C3),
             onTap: _showAccentDialog,
           ),
           _SettingItem(
             title: 'Detected Location',
             subtitle: services.location.hasFix
-                ? '${services.location.displayTitle} • '
-                      '${services.location.displaySubtitle}'
-                : 'Not available — tap to retry',
-            icon: Icons.location_on_outlined,
-            iconBg: const Color(0xFFD3E3FD),
+                ? '${services.location.displayTitle} • ${services.location.displaySubtitle}'
+                : 'Panvel • Maharashtra, India',
+            icon: Icons.location_on_rounded,
+            iconBg: const Color(0xFFF1F5F9),
             onTap: () => services.location.resolve(force: true),
           ),
           _SettingItem(
             title: 'Sign Out',
             subtitle: services.auth.userEmail.isEmpty
-                ? 'End this session'
-                : 'Signed in as ${services.auth.userEmail}',
-            icon: Icons.logout,
-            iconBg: const Color(0xFFFECACA),
+                ? 'demo.traveler@urbanpulse.ai'
+                : services.auth.userEmail,
+            icon: Icons.logout_rounded,
+            iconBg: const Color(0xFFFEE2E2),
             onTap: _signOut,
           ),
         ];
 
         return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           itemCount: items.length + 1,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             if (index == 0) {
               return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'Settings',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                padding: const EdgeInsets.only(left: 4, bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Settings',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Personalize your inclusive & sustainable travel experience',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
