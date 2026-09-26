@@ -259,7 +259,7 @@ void main() {
       final o = orchestratorFor(
         toolkitFor(HotelWorld()),
         who,
-        clock: PlanClock(degradeAfter: Duration.zero),
+        clock: PlanClock(degradeAfter: Duration.zero, deadline: Duration.zero),
       );
       final out = await o.run(briefWith(budget: 6000));
       expect(who.asked, isEmpty, reason: 'degraded mode never waits on the traveller');

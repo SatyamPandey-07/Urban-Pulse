@@ -23,6 +23,7 @@ import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
 import '../models/trip_models.dart';
 import '../models/yatri_question.dart';
+import '../repositories/itinerary_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
 import '../services/groq_api_client.dart';
@@ -163,6 +164,7 @@ class YatriController extends ChangeNotifier {
     this.onTripSaved,
     this.geocode,
     this.toolkit,
+    this.itineraries,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     brief = TripBrief.empty(_clock());
@@ -186,10 +188,18 @@ class YatriController extends ChangeNotifier {
 
   /// The multi-agent planner's tools. Null keeps the phase-1 single-call planner.
   final AgentToolkit? toolkit;
+
+  /// Where finished itineraries are kept so My Trips can reopen them.
+  final ItineraryRepository? itineraries;
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
   final Map<String, Completer<YatriAnswer>> _planWaiters = {};
+
+  /// The running multi-agent plan, and a counter that tells a stale run (after
+  /// the conversation restarted) to stop touching the chat.
+  PlannerOrchestrator? _orchestrator;
+  int _planToken = 0;
   final PlannerState _state = PlannerState();
   final List<GroqMessage> _history = [];
 
@@ -216,7 +226,22 @@ class YatriController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _cancelPlan();
     super.dispose();
+  }
+
+  /// Stops a running plan: no new work starts, questions waiting on the
+  /// traveller are released with their default, and the run will not touch the
+  /// chat any more.
+  void _cancelPlan() {
+    _planToken++;
+    _orchestrator?.board.cancel();
+    _orchestrator = null;
+    final waiting = _planWaiters.values.toList();
+    _planWaiters.clear();
+    for (final w in waiting) {
+      if (!w.isCompleted) w.complete(const ChoiceAnswer('', ''));
+    }
   }
 
   void _notify() {
@@ -226,6 +251,7 @@ class YatriController extends ChangeNotifier {
   // --- lifecycle -----------------------------------------------------------
 
   void start() {
+    _cancelPlan();
     entries.clear();
     _history.clear();
     _state.reset();
@@ -599,6 +625,12 @@ class YatriController extends ChangeNotifier {
   /// and confirmed), and keeps it in step with later changes to the places or
   /// the selected transport modes.
   void _syncMap() {
+    // The destination is fixed: start warming the data the planner will need.
+    final dest = brief.destination?.trim();
+    if (dest != null && dest.isNotEmpty && !report.hasIssueFor(BriefField.destination)) {
+      final tk = toolkit;
+      if (tk != null) unawaited(tk.prefetch(dest));
+    }
     final lookup = geocode;
     if (lookup == null) return;
 
@@ -729,7 +761,14 @@ class YatriController extends ChangeNotifier {
   /// the chat, and the result is a full itinerary. If the agents cannot produce
   /// one, the phase-1 planner drafts a plan instead so there is always a result.
   Future<void> _planWithAgents(AgentToolkit tk, TripBrief confirmed) async {
-    final orchestrator = PlannerOrchestrator(toolkit: tk, ask: askPlanQuestion, now: () => now);
+    final token = ++_planToken;
+    final orchestrator = PlannerOrchestrator(
+      toolkit: tk,
+      // A stale run (the chat restarted) gets default answers, never a card.
+      ask: (q) => token == _planToken ? askPlanQuestion(q) : Future.value(const ChoiceAnswer('', '')),
+      now: () => now,
+    );
+    _orchestrator = orchestrator;
     entries.add(TaskGraphEntry(orchestrator.graph, orchestrator.clock));
     _notify();
 
@@ -739,6 +778,9 @@ class YatriController extends ChangeNotifier {
     } catch (_) {
       outcome = PlanOutcome.failed('Planning stopped unexpectedly');
     }
+    // The conversation was restarted (or the screen closed) while planning.
+    if (_disposed || token != _planToken) return;
+    _orchestrator = null;
 
     if (outcome.status == PlanStatus.unlocatable) {
       // Nothing can be planned around a place that is not on the map: take the
@@ -777,7 +819,9 @@ class YatriController extends ChangeNotifier {
     }
 
     // The agents could not build a full itinerary: fall back to the phase-1 plan.
+    final offline = outcome.summary == 'offline';
     final result = await handoff.run(confirmed);
+    if (_disposed || token != _planToken) return;
     switch (result) {
       case AgentOk(:final value):
         final hotel = outcome.hotel;
@@ -797,7 +841,10 @@ class YatriController extends ChangeNotifier {
         entries
           ..add(
             AgentText(
-              hotel == null
+              offline
+                  ? 'You seem to be offline, so this is an offline estimate for ${confirmed.destination}. '
+                        'Connect and plan again for live prices, places, reviews and an access audit.'
+                  : hotel == null
                   ? 'Here’s a plan for ${confirmed.destination}, without a hotel.$notes'
                   : 'Here’s a plan for ${confirmed.destination}, staying at ${hotel.name}.$notes',
             ),
@@ -814,6 +861,7 @@ class YatriController extends ChangeNotifier {
 
   Future<void> saveItinerary(ItineraryEntry entry) async {
     if (entry.saved) return;
+    await itineraries?.save(entry.itinerary);
     await trips.addTrip(entry.itinerary.toTripPlan());
     entry.saved = true;
     await onTripSaved?.call();

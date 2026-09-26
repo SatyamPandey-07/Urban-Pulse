@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 
 import '../core/formatting.dart';
 import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
+import '../services/itinerary_pdf.dart';
+import '../widgets/itinerary/access_audit_view.dart';
 import '../widgets/itinerary/budget_breakdown.dart';
 import '../widgets/itinerary/day_view.dart';
+import '../widgets/itinerary/green_view.dart';
 import '../widgets/itinerary/trip_overview.dart';
 
 /// The finished plan from the multi-agent planner: a map and timeline for each
@@ -34,6 +38,7 @@ class PlanItineraryScreen extends StatefulWidget {
 class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
   late bool _saved = widget.saved;
   bool _saving = false;
+  bool _pdfBusy = false;
 
   Itinerary get it => widget.itinerary;
 
@@ -48,12 +53,40 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
     }
   }
 
+  Future<void> _sharePdf() async {
+    if (_pdfBusy) return;
+    setState(() => _pdfBusy = true);
+    try {
+      final bytes = await ItineraryPdf.build(it);
+      final name = '${it.destination.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_')}_itinerary.pdf';
+      await Printing.sharePdf(bytes: bytes, filename: name);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not create the PDF. Please try again.')));
+      }
+    } finally {
+      if (mounted) setState(() => _pdfBusy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tabs = <(String, IconData, Widget)>[
       ('Days', Icons.calendar_month_rounded, _DaysTab(itinerary: it, tileLayer: widget.tileLayer)),
       ('Budget', Icons.account_balance_wallet_outlined, _Padded(child: BudgetBreakdown(budget: it.budget))),
+      if (it.audit != null && it.audit!.items.isNotEmpty)
+        (
+          'Access',
+          Icons.accessible_forward_rounded,
+          _Padded(
+            child: AccessAuditView(
+              audit: it.audit!,
+              needs: {for (final n in it.brief?.accessibilityNeeds ?? const <AccessibilityNeed>{}) if (n != AccessibilityNeed.none) n},
+            ),
+          ),
+        ),
+      if (it.green != null) ('Green', Icons.eco_outlined, _Padded(child: GreenView(green: it.green!))),
       ('Trip', Icons.info_outline_rounded, _Padded(child: TripOverview(itinerary: it))),
     ];
 
@@ -70,6 +103,13 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
             ],
           ),
           actions: [
+            IconButton(
+              tooltip: 'Share or print as PDF',
+              onPressed: _pdfBusy ? null : _sharePdf,
+              icon: _pdfBusy
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.picture_as_pdf_outlined),
+            ),
             if (widget.onSave != null)
               IconButton(
                 tooltip: _saved ? 'Saved to My Trips' : 'Save to My Trips',
@@ -169,8 +209,8 @@ class _DaysTabState extends State<_DaysTab> with AutomaticKeepAliveClientMixin {
                       onTap: () => setState(() => _day = i),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 160),
-                        width: 78,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        width: 96,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                         decoration: BoxDecoration(
                           color: selected ? scheme.primary : scheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(16),
@@ -179,8 +219,14 @@ class _DaysTabState extends State<_DaysTab> with AutomaticKeepAliveClientMixin {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Day ${d.number}', style: theme.textTheme.labelLarge?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurface, fontWeight: FontWeight.w800)),
-                            Text(shortDate(d.date), style: theme.textTheme.labelSmall?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurfaceVariant)),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Day ${d.number}', style: theme.textTheme.labelLarge?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurface, fontWeight: FontWeight.w800)),
+                            ),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(shortDate(d.date), style: theme.textTheme.labelSmall?.copyWith(color: selected ? scheme.onPrimary : scheme.onSurfaceVariant)),
+                            ),
                           ],
                         ),
                       ),

@@ -111,6 +111,19 @@ class HotelSearchResult {
   final List<String> cheapDates;
 
   bool get isEmpty => options.isEmpty;
+
+  /// The same search with [options] replaced (after verification) and any
+  /// [extraSources] noted.
+  HotelSearchResult copyWith({List<HotelOption>? options, List<String>? extraSources}) => HotelSearchResult(
+    query: query,
+    options: options ?? this.options,
+    considered: considered,
+    sources: [...sources, ...?extraSources?.where((s) => !sources.contains(s))],
+    warnings: warnings,
+    location: location,
+    dateBand: dateBand,
+    cheapDates: cheapDates,
+  );
 }
 
 typedef HotelProgress = void Function(String text, {String? why});

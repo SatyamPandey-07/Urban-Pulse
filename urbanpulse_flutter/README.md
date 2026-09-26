@@ -85,8 +85,11 @@ with tools.
 | Safar | transport to and around the destination |
 | Hariyali | carbon and eco scoring |
 
-**Built so far:** Yatri, Atithi, Bhatkanti, Safar, Raah and Hisab (stages 2.1 and
-2.2). After you confirm the brief, Yatri runs the hotel search (Atithi), the search
+**Built so far:** all nine agents (stages 2.1 to 2.5): Yatri, Atithi, Bhatkanti,
+Safar, Raah, Hisab, Khoji, Saksham and Hariyali. Hariyali scores the carbon
+footprint and suggests greener choices; the finished itinerary can be saved (and
+reopened from My Trips) and shared as a PDF. While you answer questions Yatri
+already warms the caches for your destination. After you confirm the brief, Yatri runs the hotel search (Atithi), the search
 for places (Bhatkanti), the journey (Safar) and the weather check (Raah) at the
 same time, asking you one question at a time when goals collide ("none of these
 are wheelchair accessible", "the cheapest suitable stay is ₹X — raise the
@@ -105,6 +108,9 @@ agents/atithi/    hotel search: merge, rank, live rates, listing pages, AI fill
 agents/bhatkanti/ places to visit: OSM, Geoapify, Wikipedia, web search, ranking
 agents/safar/     journey options (time, cost, CO₂, access per mode) and local legs
 agents/raah/      day planner: clustering, opening hours, weather, meals, local legs
+agents/khoji/     verifier: claims, guest reviews (lower-rated first) and their sources
+agents/saksham/   accessibility audit of every step for every need in the group
+agents/hariyali/  carbon footprint, eco score and greener alternatives
 agents/hisab/     the budget engine and its levers
 agents/yatri/     the orchestrator (Yatri's loop), the gates and the itinerary assembler
 domain/access/    OSM tags / listing text -> per-need accessibility support
@@ -116,6 +122,15 @@ services/data/    Xotelo, Geoapify, Overpass, Wikipedia, Open-Meteo, AI estimato
 models/itinerary/ what the planner produces
 widgets/taskgraph/ the live task graph, agent feed and "?" explainers
 ```
+
+Robustness (stage 2.6): destinations are sanitised (control characters, length)
+before they reach any search or prompt; web links from pages or models open only
+if they are plain http(s); an unreachable network is reported as "offline" (with an
+offline estimate) rather than as an unknown place; restarting the chat cancels a
+running plan so it can never write into the new conversation; time pressure stops
+extra re-planning but never skips a question the traveller should answer. Chaos
+tests run the whole pipeline against hostile destinations, random service
+outages, garbage model replies and random answers.
 
 Design rules: real data first, the model fills gaps and is always labelled
 "AI-estimated"; every worker can time out, fail or return partial data without

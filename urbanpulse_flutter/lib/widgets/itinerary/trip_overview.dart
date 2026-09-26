@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/safe_launch.dart';
 import '../../agents/runtime/agent_kind.dart';
 import '../../agents/safar/transport_planner.dart';
 import '../../core/app_colors.dart';
@@ -8,6 +8,7 @@ import '../../core/formatting.dart';
 import '../../models/itinerary/itinerary.dart';
 import '../../models/itinerary/itinerary_parts.dart';
 import '../../models/trip_brief.dart';
+import '../yatri/claims_view.dart';
 import '../yatri/hotel_choice_view.dart' show NeedChip;
 import '../yatri/route_map_card.dart' show transportModeIcon;
 
@@ -53,6 +54,34 @@ class TripOverview extends StatelessWidget {
         else
           for (final l in itinerary.transportOptions)
             _LegTile(leg: l, chosen: itinerary.chosenTransport?.id == l.id, needs: needs),
+        if (itinerary.timings.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _Heading(icon: Icons.timer_outlined, color: AgentKind.yatri.color, text: 'How this plan was made'),
+          Text(
+            'The agents worked side by side for about ${itinerary.timings['total'] ?? 0} seconds (time spent waiting for your answers is not counted).',
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final e in itinerary.timings.entries)
+                if (e.key != 'total')
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _agentColor(e.key).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${e.key} ${e.value}s',
+                      style: theme.textTheme.labelSmall?.copyWith(color: _agentColor(e.key), fontWeight: FontWeight.w700),
+                    ),
+                  ),
+            ],
+          ),
+        ],
         if (itinerary.assumptions.isNotEmpty) ...[
           const SizedBox(height: 20),
           _Heading(icon: Icons.rule_rounded, color: AppColors.solidWarning, text: 'What this plan assumes'),
@@ -73,10 +102,7 @@ class TripOverview extends StatelessWidget {
           _Heading(icon: Icons.link_rounded, color: AgentKind.khoji.color, text: 'Sources'),
           for (final s in itinerary.sources.take(30))
             InkWell(
-              onTap: () async {
-                final uri = Uri.tryParse(s.url);
-                if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
-              },
+              onTap: () => openWebLink(s.url),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
@@ -101,6 +127,13 @@ class TripOverview extends StatelessWidget {
   }
 }
 
+Color _agentColor(String displayName) {
+  for (final a in AgentKind.values) {
+    if (a.displayName == displayName) return a.color;
+  }
+  return AppColors.textTertiary;
+}
+
 class _Heading extends StatelessWidget {
   const _Heading({required this.icon, required this.color, required this.text});
 
@@ -115,7 +148,7 @@ class _Heading extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(width: 8),
-        Text(text, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: color)),
+        Expanded(child: Text(text, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: color))),
       ],
     ),
   );
@@ -209,6 +242,10 @@ class _HotelCard extends StatelessWidget {
           if (hotel.amenities.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(hotel.amenities.join(' · '), style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+          ],
+          if (hotel.claims.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            ClaimsView(claims: hotel.claims),
           ],
         ],
       ),
