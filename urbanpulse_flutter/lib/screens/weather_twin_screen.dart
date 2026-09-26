@@ -26,10 +26,13 @@ import '../widgets/common.dart';
 /// demand shifts across attractions, cabs, restaurants and hotels. Nothing here
 /// changes the saved trip.
 class WeatherTwinScreen extends StatefulWidget {
-  const WeatherTwinScreen({this.itinerary, this.tileLayer, super.key});
+  const WeatherTwinScreen({this.itinerary, this.tileLayer, this.controller, super.key});
 
   /// The trip to mirror; null opens the newest saved itinerary, or a sample.
   final Itinerary? itinerary;
+
+  /// A ready controller (tests); the screen starts it but does not dispose it.
+  final TwinController? controller;
 
   /// Replaces the OpenStreetMap tiles (tests only).
   final Widget? tileLayer;
@@ -46,6 +49,12 @@ class _WeatherTwinScreenState extends State<WeatherTwinScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_c != null) return;
+    final given = widget.controller;
+    if (given != null) {
+      _c = given..addListener(_changed);
+      unawaited(given.start());
+      return;
+    }
     final services = AppScope.of(context);
     var it = widget.itinerary;
     if (it == null) {
@@ -73,7 +82,7 @@ class _WeatherTwinScreenState extends State<WeatherTwinScreen> {
   @override
   void dispose() {
     _c?.removeListener(_changed);
-    _c?.dispose();
+    if (widget.controller == null) _c?.dispose();
     super.dispose();
   }
 
@@ -111,6 +120,7 @@ class _WeatherTwinScreenState extends State<WeatherTwinScreen> {
       body: SafeArea(
         top: false,
         child: ListView(
+          key: const Key('weather-twin-list'),
           padding: const EdgeInsets.fromLTRB(14, 8, 14, 32),
           children: [
             _Status(c: c),
@@ -470,6 +480,8 @@ class _TwinMap extends StatelessWidget {
       initialCameraFit: points.length == 1 ? null : CameraFit.coordinates(coordinates: points, padding: const EdgeInsets.all(40), maxZoom: 14),
       initialCenter: points.first,
       initialZoom: 12,
+      // Pinch and double-tap only, so a finger on the map still scrolls the page.
+      interactionOptions: const InteractionOptions(flags: InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom),
       onTap: s.hasFlood ? (_, p) => c.setScenario(s.copyWith(floodCenter: p), log: false) : null,
     );
     return Column(
@@ -681,15 +693,18 @@ class _Summary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 2.1,
-            children: tiles,
-          ),
+          // Two tiles per row, each as tall as its text needs.
+          for (var i = 0; i < tiles.length; i += 2) ...[
+            if (i > 0) const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: tiles[i]),
+                const SizedBox(width: 12),
+                Expanded(child: i + 1 < tiles.length ? tiles[i + 1] : const SizedBox.shrink()),
+              ],
+            ),
+          ],
           if (o != null) ...[
             const SizedBox(height: 8),
             Text(
@@ -770,7 +785,7 @@ class _Chain extends StatelessWidget {
                 children: [
                   CircleAvatar(radius: 10, backgroundColor: AppColors.primaryGreen, child: Text('$order', style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w800))),
                   const SizedBox(width: 8),
-                  Text(_titles[order]!, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                  Expanded(child: Text(_titles[order]!, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700))),
                 ],
               ),
               const SizedBox(height: 4),
@@ -814,8 +829,7 @@ class _DayCard extends StatelessWidget {
             children: [
               Text('Day ${day.number}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
               const SizedBox(width: 8),
-              Text(shortDate(day.date), style: theme.textTheme.bodySmall),
-              const Spacer(),
+              Expanded(child: Text(shortDate(day.date), style: theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis)),
               if (day.overflowMinutes > 0) _Badge(icon: Icons.hourglass_bottom_rounded, text: '${day.overflowMinutes} min over', color: const Color(0xFFC62828)),
             ],
           ),
@@ -910,7 +924,7 @@ class _VisitRow extends StatelessWidget {
                 if (v.state == VisitState.atRisk || v.state == VisitState.closed)
                   Row(
                     children: [
-                      Text('Did it happen?', style: theme.textTheme.labelSmall),
+                      Flexible(child: Text('Did it happen?', style: theme.textTheme.labelSmall)),
                       IconButton(
                         visualDensity: VisualDensity.compact,
                         tooltip: 'Yes, it was disrupted',

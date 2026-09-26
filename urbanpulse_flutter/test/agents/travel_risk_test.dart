@@ -180,6 +180,9 @@ void main() {
       expect(b.severity, EventSeverity.moderate);
       expect(b.place, 'Hindmata');
       expect(RuleTravelRisk.readEvent('Lovely weather today, perfect for chai and pakode').isEvent, isFalse);
+      final c = RuleTravelRisk.readEvent('Hawa Mahal closed today due to heavy rain, officials say');
+      expect(c.type, 'attraction_closed');
+      expect(c.place, 'Hawa Mahal');
     });
   });
 
