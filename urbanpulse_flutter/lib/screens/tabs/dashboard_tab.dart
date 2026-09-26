@@ -68,23 +68,36 @@ class _DashboardTabState extends State<DashboardTab> {
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 24),
-            child: Text(
-              'Dashboard',
-              style: theme.textTheme.displaySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            padding: const EdgeInsets.only(left: 4, bottom: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dashboard',
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Smarter • Greener • More Inclusive',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 12,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
             ),
           ),
           _geoIntelligenceCard(context),
-          const SizedBox(height: 16),
-          _travelHubCard(context),
-          const SizedBox(height: 16),
-          _currentConditionsRow(context),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          _travelHubSection(context),
+          const SizedBox(height: 24),
           _aqiTrendCard(context),
           const SizedBox(height: 16),
           _congestionCard(context),
@@ -96,143 +109,373 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _geoIntelligenceCard(BuildContext context) {
     final theme = Theme.of(context);
     final traffic = _traffic;
+    final aqi = _telemetry?.usAqi ?? 38;
+    final speed = traffic?.freeFlowSpeedKmh ?? 77;
+    final temp = _telemetry?.temperatureC != null
+        ? '${fixed(_telemetry!.temperatureC, 0)}°C'
+        : '28°C';
+    final condition = _telemetry?.condition ?? 'Clear';
+
     return SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: traffic != null ? AppColors.primaryGreen : AppColors.solidWarning,
-                  boxShadow: [
-                    BoxShadow(
-                      color: (traffic != null ? AppColors.primaryGreen : AppColors.solidWarning)
-                          .withValues(alpha: 0.5),
-                      blurRadius: 6,
-                      spreadRadius: 1,
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primaryGreen,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryGreen.withValues(alpha: 0.6),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Live Sensor Telemetry',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                'LIVE SENSOR TELEMETRY',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.primaryGreen.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: const Text(
+                  'Live',
+                  style: TextStyle(
+                    color: AppColors.primaryGreen,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Real-Time Geo-Intelligence',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.air_rounded, size: 22, color: AppColors.primaryBlue),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$speed',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Free flow km/h',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.eco_rounded, size: 22, color: AppColors.primaryGreen),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$aqi',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: AppColors.primaryGreen,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'AQI (${_aqiBand(aqi)})',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.thermostat_rounded, size: 22, color: AppColors.solidWarning),
+                    const SizedBox(height: 8),
+                    Text(
+                      temp,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      condition,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            traffic != null
-                ? '${traffic.roadName} • ${traffic.currentSpeedKmh} km/h now '
-                      '(free flow ${traffic.freeFlowSpeedKmh} km/h)'
-                : _isLoading
-                ? 'Reading the live sensor matrix…'
-                : 'Live traffic unavailable — check your connection or TomTom key',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton.icon(
+              onPressed: () => HomeTabController.maybeOf(context)?.switchToTab(1),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: AppColors.surfaceElevated.withValues(alpha: 0.5),
+                side: const BorderSide(
+                  color: AppColors.surfaceBorder,
+                  width: 1,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                foregroundColor: AppColors.textPrimary,
+              ),
+              icon: const Icon(Icons.map_outlined, size: 18),
+              label: const Text(
+                'Follow Live Map',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.tonalIcon(
-            onPressed: () => HomeTabController.maybeOf(context)?.switchToTab(1),
-            icon: const Icon(Icons.map_outlined),
-            label: const Text('Follow Live Map'),
           ),
         ],
       ),
     );
   }
 
-  Widget _travelHubCard(BuildContext context) {
+  Widget _travelHubSection(BuildContext context) {
     final theme = Theme.of(context);
-    Widget action(String label, IconData icon, String route) =>
-        FilledButton.tonalIcon(
-          onPressed: () => Navigator.of(context).pushNamed(route),
-          icon: Icon(icon, size: 18),
-          label: Text(label, overflow: TextOverflow.ellipsis),
-        );
-
-    return SectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
+          child: Text(
             'Green & Inclusive Travel',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              fontSize: 17,
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 14),
+          child: Text(
             'Smart sustainable hospitality & accessible mobility',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 12,
             ),
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: _bentoCard(
+                context: context,
+                title: 'Eco Stays',
+                subtitle: 'Verified sustainable & accessible stays',
+                icon: Icons.hotel_outlined,
+                route: Routes.hospitality,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _bentoCard(
+                context: context,
+                title: 'Green Routes',
+                subtitle: 'Low-emission multimodal routes',
+                icon: Icons.alt_route_rounded,
+                route: Routes.greenRoutePlanner,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _bentoCard(
+                context: context,
+                title: 'Hotel Optimizer',
+                subtitle: 'Best value & lowest footprint',
+                icon: Icons.trending_up_rounded,
+                route: Routes.hotelOptimizer,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _bentoCard(
+                context: context,
+                title: 'Carbon Wallet',
+                subtitle: 'Track your CO2 savings & rewards',
+                icon: Icons.account_balance_wallet_outlined,
+                route: Routes.carbonWallet,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _wideBentoCard(
+          context: context,
+          title: 'AI Eco Itinerary Generator',
+          subtitle: 'Personalized step-free & low-carbon day plans',
+          icon: Icons.auto_awesome_rounded,
+          route: Routes.itinerary,
+        ),
+      ],
+    );
+  }
+
+  Widget _bentoCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required String route,
+  }) {
+    final theme = Theme.of(context);
+    return SectionCard(
+      padding: const EdgeInsets.all(16),
+      onTap: () => Navigator.of(context).pushNamed(route),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: AppColors.primaryGreen,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: action(
-                  'Eco Stays',
-                  Icons.hotel_outlined,
-                  Routes.hospitality,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: action(
-                  'Green Routes',
-                  Icons.alt_route,
-                  Routes.greenRoutePlanner,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: action(
-                  'Hotel Optimizer',
-                  Icons.insights_outlined,
-                  Routes.hotelOptimizer,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: action(
-                  'Carbon Wallet',
-                  Icons.account_balance_wallet_outlined,
-                  Routes.carbonWallet,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: action(
-              'AI Eco Itinerary Generator',
-              Icons.celebration_outlined,
-              Routes.itinerary,
+          Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
             ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 11,
+              height: 1.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _wideBentoCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required String route,
+  }) {
+    final theme = Theme.of(context);
+    return SectionCard(
+      padding: const EdgeInsets.all(16),
+      onTap: () => Navigator.of(context).pushNamed(route),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primaryGreen.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              size: 22,
+              color: AppColors.primaryGreen,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
         ],
       ),

@@ -23,10 +23,11 @@ abstract final class AppTheme {
       // keep the exact backgrounds the XML layouts painted.
       scheme = scheme.copyWith(
         primary: accent.seed,
+        onPrimary: const Color(0xFF0B1015),
         surface: AppColors.bgDark,
         surfaceContainerLowest: AppColors.bgDark,
         surfaceContainerLow: AppColors.surfaceDark,
-        surfaceContainer: AppColors.surfaceDark,
+        surfaceContainer: AppColors.surfaceCard,
         surfaceContainerHigh: AppColors.surfaceElevated,
         surfaceContainerHighest: AppColors.surfaceElevated,
         onSurface: AppColors.textPrimary,
@@ -64,10 +65,30 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: isDark ? AppColors.surfaceDark : scheme.surfaceContainerLow,
-        indicatorColor: scheme.primary.withValues(alpha: 0.16),
+        indicatorColor: scheme.primary.withValues(alpha: 0.20),
         elevation: 0,
         height: 68,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(color: scheme.primary, size: 24);
+          }
+          return const IconThemeData(color: AppColors.textSecondary, size: 22);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(
+              color: scheme.primary,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            );
+          }
+          return const TextStyle(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+            fontSize: 11,
+          );
+        }),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: isDark ? AppColors.surfaceDark : scheme.surfaceContainerLow,
@@ -105,11 +126,13 @@ abstract final class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           elevation: 0,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(

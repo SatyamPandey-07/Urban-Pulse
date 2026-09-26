@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 /// original layouts did.
 abstract final class AppColors {
   // Base solid palette (accent options).
-  static const primaryGreen = Color(0xFF10B981);
-  static const primaryGreenDark = Color(0xFF059669);
+  static const primaryGreen = Color(0xFF00E599); // Electric Cyber Emerald / Mint
+  static const primaryGreenDark = Color(0xFF00B87A);
   static const primaryBlue = Color(0xFF38BDF8);
   static const primaryIndigo = Color(0xFF6366F1);
   static const primaryPurple = Color(0xFF8B5CF6);
@@ -15,17 +15,17 @@ abstract final class AppColors {
   static const primaryPink = Color(0xFFEC4899);
   static const primaryTeal = Color(0xFF14B8A6);
 
-  // Dark surface hierarchy (solid slate palette).
-  static const bgDark = Color(0xFF0F172A);
-  static const surfaceDark = Color(0xFF1E293B);
-  static const surfaceCard = Color(0xFF1E293B);
-  static const surfaceBorder = Color(0xFF334155);
-  static const surfaceElevated = Color(0xFF334155);
+  // Dark surface hierarchy (obsidian slate palette matching world-class reference).
+  static const bgDark = Color(0xFF0B1015);
+  static const surfaceDark = Color(0xFF131A22);
+  static const surfaceCard = Color(0xFF16212B);
+  static const surfaceBorder = Color(0xFF243242);
+  static const surfaceElevated = Color(0xFF1B2836);
 
   // Status & semantic solids.
   static const solidError = Color(0xFFEF4444);
   static const solidWarning = Color(0xFFF59E0B);
-  static const solidSuccess = Color(0xFF10B981);
+  static const solidSuccess = Color(0xFF00E599);
   static const solidInfo = Color(0xFF38BDF8);
 
   // High-legibility typography.
@@ -34,8 +34,8 @@ abstract final class AppColors {
   static const textTertiary = Color(0xFF64748B);
 
   /// SOS button gradient (`bg_sos_gradient.xml`).
-  static const sosRed = Color(0xFFFF5252);
-  static const sosDeepRed = Color(0xFFD32F2F);
+  static const sosRed = Color(0xFFFF4B4B);
+  static const sosDeepRed = Color(0xFFDC2626);
 }
 
 /// The six accent themes from `styles.xml` (`Theme.Urbanpulse.<Accent>`).

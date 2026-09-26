@@ -29,7 +29,7 @@ class SectionCard extends StatelessWidget {
         ? BorderSide(color: borderColor ?? scheme.primary, width: borderWidth)
         : BorderSide(
             color: isDark
-                ? const Color(0xFF334155).withValues(alpha: 0.8)
+                ? const Color(0xFF243242)
                 : scheme.outlineVariant.withValues(alpha: 0.5),
             width: 1,
           );
@@ -39,7 +39,7 @@ class SectionCard extends StatelessWidget {
     );
     return Card(
       elevation: 0,
-      color: isDark ? const Color(0xFF1E293B) : scheme.surfaceContainerLow,
+      color: isDark ? const Color(0xFF16212B) : scheme.surfaceContainerLow,
       shape: shape,
       clipBehavior: Clip.antiAlias,
       child: InkWell(

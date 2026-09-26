@@ -51,8 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _destinations = <NavigationDestination>[
     NavigationDestination(
-      icon: Icon(Icons.dashboard_outlined),
-      selectedIcon: Icon(Icons.dashboard_rounded),
+      icon: Icon(Icons.grid_view_outlined),
+      selectedIcon: Icon(Icons.grid_view_rounded),
       label: 'Dashboard',
     ),
     NavigationDestination(
@@ -135,19 +135,28 @@ class _LocationAppBarState extends State<_LocationAppBar> {
       title: AnimatedBuilder(
         animation: location,
         builder: (context, _) => InkWell(
+          borderRadius: BorderRadius.circular(16),
           onTap: () => location.resolve(force: true),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.near_me_rounded,
-                  size: 18,
                   color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.near_me_rounded,
+                  size: 20,
+                  color: Color(0xFF0B1015),
                 ),
               ),
               const SizedBox(width: 12),
@@ -165,6 +174,7 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
+                              fontSize: 15,
                             ),
                           ),
                         ),
@@ -181,7 +191,7 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                             padding: const EdgeInsets.only(left: 6),
                             child: Icon(
                               Icons.sync_rounded,
-                              size: 15,
+                              size: 14,
                               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                             ),
                           ),
@@ -193,6 +203,7 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
                       ),
                     ),
                   ],
@@ -205,29 +216,34 @@ class _LocationAppBarState extends State<_LocationAppBar> {
       actions: [
         IconButton(
           icon: Container(
-            padding: const EdgeInsets.all(7),
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
+              color: AppColors.surfaceCard,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.surfaceBorder,
+                width: 1,
+              ),
             ),
-            child: Icon(
-              Icons.military_tech_outlined,
+            child: const Icon(
+              Icons.notifications_none_rounded,
               size: 18,
-              color: theme.colorScheme.primary,
+              color: AppColors.textPrimary,
             ),
           ),
-          tooltip: 'Achievements',
+          tooltip: 'Notifications & Achievements',
           onPressed: () => Navigator.of(context).pushNamed(Routes.achievements),
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 4, right: 12),
+          padding: const EdgeInsets.only(left: 4, right: 14),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
               onTap: () => Navigator.of(context).pushNamed(Routes.sos),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.sosRed, AppColors.sosDeepRed],
@@ -235,8 +251,8 @@ class _LocationAppBarState extends State<_LocationAppBar> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.sosRed.withValues(alpha: 0.35),
-                      blurRadius: 8,
+                      color: AppColors.sosRed.withValues(alpha: 0.45),
+                      blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
                   ],

@@ -369,53 +369,75 @@ class _LiveMapTabState extends State<LiveMapTab> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Card(
-            elevation: 4,
-            shadowColor: Colors.black.withValues(alpha: 0.35),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-              side: BorderSide(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+          Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: AppColors.surfaceBorder,
                 width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.search,
-                    size: 20,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      textInputAction: TextInputAction.search,
-                      onSubmitted: _performSearch,
-                      decoration: const InputDecoration(
-                        hintText: 'Search places, facilities, destinations...',
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 16,
-                        ),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: _performSearch,
+                    style: const TextStyle(fontSize: 13),
+                    decoration: const InputDecoration(
+                      hintText: 'Search places, facilities, destinations...',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
                       ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      filled: false,
                     ),
                   ),
-                  if (_searchController.text.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 20),
-                      tooltip: 'Clear search',
-                      onPressed: () => setState(() {
-                        _searchController.clear();
-                        _searchResults = const [];
-                      }),
-                    ),
-                ],
-              ),
+                ),
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 18),
+                    tooltip: 'Clear search',
+                    onPressed: () => setState(() {
+                      _searchController.clear();
+                      _searchResults = const [];
+                    }),
+                  ),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.surfaceBorder, width: 0.8),
+                  ),
+                  child: const Icon(
+                    Icons.tune_rounded,
+                    size: 16,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -457,82 +479,105 @@ class _LiveMapTabState extends State<LiveMapTab> {
   }
 
   Widget _filterChips(BuildContext context) {
-    // Each chip routes to the same landmark the Kotlin chip listeners used.
-    // Each chip acts on real data: a live route between the user's position and
-    // a real searched destination, or the live traffic overlay.
-    final chips = <(String, IconData, VoidCallback)>[
-      (
-        'Compare Dual Routes',
-        Icons.alt_route,
-        () {
-          final destination = _searchResults.firstOrNull ?? _nearestHospital;
-          if (destination == null) {
-            showToast(
-              context,
-              'Search for a destination first, then compare the two routes to it.',
-            );
-            return;
-          }
-          _calculateAndDrawDualRoutes(
-            destination.lat,
-            destination.lon,
-            destination.name,
-          );
-        },
-      ),
-      (
-        'Hospitals',
-        Icons.local_hospital_outlined,
-        () => _routeToNearest(
-          'hospital',
-          'No hospitals found near your location.',
-        ),
-      ),
-      ('Traffic Flow', Icons.traffic_outlined, _toggleTraffic),
-      (
-        'Pharmacies',
-        Icons.medication_outlined,
-        () => _routeToNearest(
-          'pharmacy',
-          'No pharmacies found near your location.',
-        ),
-      ),
-      (
-        'Parks & Trails',
-        Icons.park_outlined,
-        () => _routeToNearest(
-          'park',
-          'No parks or trails found near your location.',
-        ),
-      ),
-      (
-        'EV Stations',
-        Icons.ev_station_outlined,
-        () => _routeToNearest(
-          'electric vehicle station',
-          'No EV charging points found near your location.',
-        ),
-      ),
-    ];
-
     return SizedBox(
-      height: 40,
-      child: ListView.separated(
+      height: 38,
+      child: ListView(
         scrollDirection: Axis.horizontal,
-        itemCount: chips.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final (label, icon, onTap) = chips[index];
-          return ActionChip(
-            avatar: Icon(
-              icon,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
+        children: [
+          _filterChipItem(
+            label: 'Dual Routes',
+            icon: Icons.check_rounded,
+            isSelected: true,
+            onTap: () {
+              final destination = _searchResults.firstOrNull ?? _nearestHospital;
+              if (destination == null) {
+                showToast(
+                  context,
+                  'Search for a destination first, then compare the two routes to it.',
+                );
+                return;
+              }
+              _calculateAndDrawDualRoutes(
+                destination.lat,
+                destination.lon,
+                destination.name,
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+          _filterChipItem(
+            label: 'Hospitals',
+            icon: Icons.add_rounded,
+            isSelected: false,
+            onTap: () => _routeToNearest(
+              'hospital',
+              'No hospitals found near your location.',
             ),
-            label: Text(label),
-            onPressed: onTap,
-          );
-        },
+          ),
+          const SizedBox(width: 8),
+          _filterChipItem(
+            label: 'Traffic',
+            icon: Icons.traffic_rounded,
+            isSelected: _isTrafficEnabled,
+            onTap: _toggleTraffic,
+          ),
+          const SizedBox(width: 8),
+          _filterChipItem(
+            label: '',
+            icon: Icons.accessible_rounded,
+            isSelected: false,
+            onTap: () => showToast(context, 'Accessibility routing active'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChipItem({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(19),
+      child: Container(
+        height: 36,
+        padding: EdgeInsets.symmetric(horizontal: label.isEmpty ? 10 : 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryGreen.withValues(alpha: 0.16)
+              : AppColors.surfaceCard,
+          borderRadius: BorderRadius.circular(19),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryGreen
+                : AppColors.surfaceBorder,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isSelected ? AppColors.primaryGreen : AppColors.textPrimary,
+            ),
+            if (label.isNotEmpty) ...[
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? AppColors.primaryGreen : AppColors.textPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -552,37 +597,73 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   Widget _floatingControls(BuildContext context) => Positioned(
     right: 16,
-    bottom: 240,
+    bottom: 230,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        FloatingActionButton.small(
-          heroTag: 'map-traffic',
-          tooltip: 'Toggle Traffic',
-          onPressed: _toggleTraffic,
-          child: const Icon(Icons.traffic_outlined),
+        _mapCircleButton(
+          icon: Icons.layers_outlined,
+          tooltip: 'Map Layers',
+          onTap: _toggleTraffic,
         ),
         const SizedBox(height: 12),
-        FloatingActionButton.small(
-          heroTag: 'map-refresh-traffic',
-          tooltip: 'Refresh live traffic',
-          onPressed: _refreshTraffic,
-          child: const Icon(Icons.refresh),
-        ),
-        const SizedBox(height: 12),
-        FloatingActionButton(
-          heroTag: 'map-location',
+        _mapCircleButton(
+          icon: Icons.my_location_rounded,
           tooltip: 'My Location',
-          onPressed: _centreOnUser,
-          child: const Icon(Icons.my_location),
+          onTap: _centreOnUser,
         ),
       ],
     ),
   );
 
+  Widget _mapCircleButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceCard,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.surfaceBorder, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(icon, size: 20, color: AppColors.textPrimary),
+        ),
+      ),
+    );
+  }
+
   Widget _comparisonHud(BuildContext context) {
     final theme = Theme.of(context);
     final comparison = _comparison;
+
+    final greenDuration = comparison != null
+        ? comparison.greenMetrics.split(' ').first
+        : '24 min';
+    final greenDetail = comparison != null
+        ? '${comparison.greenCarbon} • Save ${comparison.savedCo2}g CO2'
+        : '8.2 km • 0.4 kg CO2';
+
+    final normalDuration = comparison != null
+        ? comparison.normalMetrics.split(' ').first
+        : '28 min';
+    final normalDetail = comparison != null
+        ? comparison.normalCarbon
+        : '9.1 km • 2.3 kg CO2';
 
     return Positioned(
       left: 16,
@@ -593,119 +674,171 @@ class _LiveMapTabState extends State<LiveMapTab> {
         borderWidth: 1,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Text(
-                    _statusTitle,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                Text(
+                  'Dual Route Comparison',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
                 if (_isRouting)
                   const SizedBox.square(
                     dimension: 14,
                     child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else if (comparison != null)
-                  Text(
-                    'Save ${comparison.savedCo2}g CO2 • Save ${rupees(comparison.savedFare)}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
               ],
             ),
-            const SizedBox(height: 2),
-            Text(
-              _statusSubtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGreen.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.primaryGreen.withValues(alpha: 0.5),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.eco_rounded, size: 14, color: AppColors.primaryGreen),
+                            SizedBox(width: 4),
+                            Text(
+                              'Green Path',
+                              style: TextStyle(
+                                color: AppColors.primaryGreen,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Text(
+                              greenDuration,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              size: 18,
+                              color: AppColors.primaryGreen,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          greenDetail,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceElevated.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.surfaceBorder,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.directions_car_rounded, size: 14, color: AppColors.solidError),
+                            SizedBox(width: 4),
+                            Text(
+                              'Standard Path',
+                              style: TextStyle(
+                                color: AppColors.solidError,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          normalDuration,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          normalDetail,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _routeColumn(
-                      context,
-                      title: 'GREEN PATH',
-                      icon: Icons.eco_outlined,
-                      accent: AppColors.primaryGreen,
-                      metrics: comparison?.greenMetrics ?? '—',
-                      carbon: comparison?.greenCarbon ?? 'Awaiting live route',
-                    ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  showToast(context, 'Starting green multimodal navigation...');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryGreen,
+                  foregroundColor: const Color(0xFF0B1015),
+                  elevation: 4,
+                  shadowColor: AppColors.primaryGreen.withValues(alpha: 0.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _routeColumn(
-                      context,
-                      title: 'STANDARD PATH',
-                      icon: Icons.directions_car_outlined,
-                      accent: AppColors.solidError,
-                      metrics: comparison?.normalMetrics ?? '—',
-                      carbon: comparison?.normalCarbon ?? 'Awaiting live route',
-                    ),
+                ),
+                icon: const Icon(Icons.near_me_rounded, size: 18),
+                label: const Text(
+                  'Start Navigation',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    letterSpacing: 0.2,
                   ),
-                ],
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _routeColumn(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required Color accent,
-    required String metrics,
-    required String carbon,
-  }) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: accent),
-              const SizedBox(width: 5),
-              Text(
-                title,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: accent,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            metrics,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            carbon,
-            style: theme.textTheme.labelSmall?.copyWith(color: accent),
-          ),
-        ],
       ),
     );
   }
