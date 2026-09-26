@@ -54,6 +54,34 @@ class TripOverview extends StatelessWidget {
         else
           for (final l in itinerary.transportOptions)
             _LegTile(leg: l, chosen: itinerary.chosenTransport?.id == l.id, needs: needs),
+        if (itinerary.timings.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _Heading(icon: Icons.timer_outlined, color: AgentKind.yatri.color, text: 'How this plan was made'),
+          Text(
+            'The agents worked side by side for about ${itinerary.timings['total'] ?? 0} seconds (time spent waiting for your answers is not counted).',
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final e in itinerary.timings.entries)
+                if (e.key != 'total')
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _agentColor(e.key).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${e.key} ${e.value}s',
+                      style: theme.textTheme.labelSmall?.copyWith(color: _agentColor(e.key), fontWeight: FontWeight.w700),
+                    ),
+                  ),
+            ],
+          ),
+        ],
         if (itinerary.assumptions.isNotEmpty) ...[
           const SizedBox(height: 20),
           _Heading(icon: Icons.rule_rounded, color: AppColors.solidWarning, text: 'What this plan assumes'),
@@ -100,6 +128,13 @@ class TripOverview extends StatelessWidget {
       ],
     );
   }
+}
+
+Color _agentColor(String displayName) {
+  for (final a in AgentKind.values) {
+    if (a.displayName == displayName) return a.color;
+  }
+  return AppColors.textTertiary;
 }
 
 class _Heading extends StatelessWidget {

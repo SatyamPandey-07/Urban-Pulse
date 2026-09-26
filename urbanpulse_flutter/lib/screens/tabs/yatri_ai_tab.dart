@@ -63,6 +63,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
             onTripSaved: () => services.activity.increment(TrackedAction.tripsSaved),
             geocode: _geocoder.lookup,
             toolkit: services.agentToolkit,
+            itineraries: services.itineraries,
           )
           ..addListener(_onChanged)
           ..start();

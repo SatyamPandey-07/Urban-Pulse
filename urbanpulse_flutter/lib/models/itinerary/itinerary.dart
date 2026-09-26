@@ -257,6 +257,8 @@ class GreenReport {
     this.co2SavedKg = 0,
     this.score = 0,
     this.tips = const [],
+    this.breakdown = const {},
+    this.baselineKg = 0,
   });
 
   /// Estimated emissions of the whole plan.
@@ -269,11 +271,19 @@ class GreenReport {
   final int score;
   final List<String> tips;
 
+  /// Emissions by part of the trip: "Journey", "Local travel", "Stay" (kg).
+  final Map<String, double> breakdown;
+
+  /// What the same trip would emit by the most polluting comparable choices.
+  final double baselineKg;
+
   Map<String, dynamic> toJson() => {
     'co2Kg': co2Kg,
     'co2SavedKg': co2SavedKg,
     'score': score,
     'tips': tips,
+    'breakdown': breakdown,
+    'baselineKg': baselineKg,
   };
 
   static GreenReport fromJson(Map<String, dynamic> j) => GreenReport(
@@ -281,6 +291,12 @@ class GreenReport {
     co2SavedKg: (j['co2SavedKg'] as num?)?.toDouble() ?? 0,
     score: (j['score'] as num?)?.toInt() ?? 0,
     tips: [for (final t in (j['tips'] as List<dynamic>? ?? const [])) '$t'],
+    breakdown: {
+      if (j['breakdown'] is Map<String, dynamic>)
+        for (final e in (j['breakdown'] as Map<String, dynamic>).entries)
+          if (e.value is num) e.key: (e.value as num).toDouble(),
+    },
+    baselineKg: (j['baselineKg'] as num?)?.toDouble() ?? 0,
   );
 }
 
@@ -307,6 +323,7 @@ class Itinerary {
     this.assumptions = const [],
     this.confidence = 0.5,
     this.brief,
+    this.timings = const {},
   });
 
   final String id;
@@ -339,6 +356,9 @@ class Itinerary {
   /// The brief this plan was made from (kept for phase 3).
   final TripBrief? brief;
 
+  /// Seconds each agent spent, by agent name, plus "total": how the plan was made.
+  final Map<String, int> timings;
+
   int get dayCount => days.length;
 
   Itinerary copyWith({
@@ -353,6 +373,7 @@ class Itinerary {
     List<SourceRef>? sources,
     List<String>? assumptions,
     double? confidence,
+    Map<String, int>? timings,
   }) => Itinerary(
     id: id,
     createdAt: createdAt,
@@ -373,6 +394,7 @@ class Itinerary {
     assumptions: assumptions ?? this.assumptions,
     confidence: confidence ?? this.confidence,
     brief: brief,
+    timings: timings ?? this.timings,
   );
 
   Map<String, dynamic> toJson() => {
@@ -395,6 +417,7 @@ class Itinerary {
     'assumptions': assumptions,
     'confidence': confidence,
     'brief': brief?.toJson(),
+    'timings': timings,
   };
 
   static Itinerary fromJson(Map<String, dynamic> j) {
@@ -424,6 +447,11 @@ class Itinerary {
       assumptions: [for (final a in (j['assumptions'] as List<dynamic>? ?? const [])) '$a'],
       confidence: (j['confidence'] as num?)?.toDouble() ?? 0.5,
       brief: obj('brief') == null ? null : TripBrief.fromJson(obj('brief')!),
+      timings: {
+        if (j['timings'] is Map<String, dynamic>)
+          for (final e in (j['timings'] as Map<String, dynamic>).entries)
+            if (e.value is num) e.key: (e.value as num).toInt(),
+      },
     );
   }
 

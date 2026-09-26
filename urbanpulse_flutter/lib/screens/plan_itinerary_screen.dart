@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 
 import '../core/formatting.dart';
 import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
+import '../services/itinerary_pdf.dart';
 import '../widgets/itinerary/access_audit_view.dart';
 import '../widgets/itinerary/budget_breakdown.dart';
 import '../widgets/itinerary/day_view.dart';
+import '../widgets/itinerary/green_view.dart';
 import '../widgets/itinerary/trip_overview.dart';
 
 /// The finished plan from the multi-agent planner: a map and timeline for each
@@ -35,6 +38,7 @@ class PlanItineraryScreen extends StatefulWidget {
 class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
   late bool _saved = widget.saved;
   bool _saving = false;
+  bool _pdfBusy = false;
 
   Itinerary get it => widget.itinerary;
 
@@ -46,6 +50,22 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
       if (mounted) setState(() => _saved = true);
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _sharePdf() async {
+    if (_pdfBusy) return;
+    setState(() => _pdfBusy = true);
+    try {
+      final bytes = await ItineraryPdf.build(it);
+      final name = '${it.destination.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_')}_itinerary.pdf';
+      await Printing.sharePdf(bytes: bytes, filename: name);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not create the PDF. Please try again.')));
+      }
+    } finally {
+      if (mounted) setState(() => _pdfBusy = false);
     }
   }
 
@@ -66,6 +86,7 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
             ),
           ),
         ),
+      if (it.green != null) ('Green', Icons.eco_outlined, _Padded(child: GreenView(green: it.green!))),
       ('Trip', Icons.info_outline_rounded, _Padded(child: TripOverview(itinerary: it))),
     ];
 
@@ -82,6 +103,13 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
             ],
           ),
           actions: [
+            IconButton(
+              tooltip: 'Share or print as PDF',
+              onPressed: _pdfBusy ? null : _sharePdf,
+              icon: _pdfBusy
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.picture_as_pdf_outlined),
+            ),
             if (widget.onSave != null)
               IconButton(
                 tooltip: _saved ? 'Saved to My Trips' : 'Save to My Trips',

@@ -9,6 +9,7 @@ import '../../services/open_meteo_service.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
 import '../home_screen.dart';
+import '../plan_itinerary_screen.dart';
 
 /// Port of `TripsFragment` / `fragment_trips.xml`.
 class TripsTab extends StatefulWidget {
@@ -96,6 +97,14 @@ class _TripsTabState extends State<TripsTab> {
   }
 
   void _openTripDetail(TripPlan trip) {
+    // A trip planned by the multi-agent planner reopens as the full itinerary.
+    final full = AppScope.of(context).itineraries.byId(trip.id);
+    if (full != null) {
+      Navigator.of(context)
+          .push(MaterialPageRoute<void>(builder: (_) => PlanItineraryScreen(itinerary: full)))
+          .then((_) => _loadTrips());
+      return;
+    }
     Navigator.of(context)
         .pushNamed(Routes.tripDetail, arguments: trip)
         .then((_) => _loadTrips());
