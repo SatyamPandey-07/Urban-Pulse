@@ -1,361 +1,268 @@
-# 🌿 UrbanPulse — Intelligent Local Discovery, Sustainable Experience Platform & Autonomous Mobility 🚀
+# 🌿 UrbanPulse
+
+### An accessibility-first, sustainability-first travel companion, with nine AI agents that plan a whole trip while you watch.
 
 <div align="center">
 
+[![Flutter](https://img.shields.io/badge/Flutter-3.41-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.11-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+[![Groq](https://img.shields.io/badge/Groq-gpt--oss--120b%20%C2%B7%20compound-F55036?style=for-the-badge)](https://groq.com)
+[![Agents](https://img.shields.io/badge/AI%20agents-9-00B87A?style=for-the-badge)](#-yatri-ai-the-multi-agent-trip-planner)
+[![Tests](https://img.shields.io/badge/tests-424%20passing-brightgreen?style=for-the-badge)](#-quality-and-testing)
 [![Release](https://img.shields.io/badge/Release-v1.0.0--hackcelestial-00E676?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial)
-[![Build Status](https://img.shields.io/badge/Build-Passing%20(Gradle%208.2)-brightgreen?style=for-the-badge&logo=android&logoColor=white)](https://github.com/SatyamPandey-07/Urban-Pulse)
-[![Android SDK](https://img.shields.io/badge/Android%20SDK-34%20(Android%2014)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Groq LPU](https://img.shields.io/badge/Groq%20LPU-Sub--400ms%20Inference-F55036?style=for-the-badge&logo=lightning&logoColor=white)](https://groq.com)
-[![TomTom SDK](https://img.shields.io/badge/TomTom-Dual--Route%20Vector%20MCP-DF1B12?style=for-the-badge&logo=googlemaps&logoColor=white)](https://developer.tomtom.com)
-[![Compliance](https://img.shields.io/badge/Compliance-ISO%2014064%20A4%20Audit-007ACC?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://github.com/SatyamPandey-07/Urban-Pulse)
-[![Direct APK Download](https://img.shields.io/badge/Direct%20APK-Download%20v1.0.0-blue?style=for-the-badge&logo=android&logoColor=white)](https://github.com/SatyamPandey-07/Urban-Pulse/releases/download/v1.0.0-hackcelestial/UrbanPulse-v1.0.0.apk)
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/SatyamPandey-07/Urban-Pulse/android-ci-cd.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/SatyamPandey-07/Urban-Pulse/actions)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-<p align="center">
-  <b>An autonomous green mobility, intelligent local experience discovery & B2B ESG hospitality ecosystem.</b><br>
-  Engineered with mathematical Pareto-dominance ranking, real-time weather/delay circumstance adaptation, and sub-second Groq LPU reasoning.
-</p>
+**Built for HackCelestial 3.0 (Pillai University) · Track: Local & Experiences**
 
 </div>
 
 ---
 
-### 📌 Project Metadata & Release Matrix
+## Why UrbanPulse
 
-| Attribute | Specification |
-|---|---|
-| **Platform Version** | `v1.0.0-hackcelestial` (Production Release) |
-| **Hackathon** | **HackCelestial 3.0** — Pillai University |
-| **Problem Track** | **Local & Experiences — Intelligent Local Discovery & Experience Platform** |
-| **Primary Region** | Mumbai Metropolitan Region (MMR), Western Ghats, Himalayan Pilgrimage Corridors & Global Destinations |
-| **Mobile Architecture** | Android SDK 34 (UpsideDownCake), Kotlin 1.9.22, Coroutines, Jetpack Lifecycle, Material Design 3 |
-| **Web Architecture** | Modern Vanilla ES6 JavaScript, HTML5 Semantic Engine, CSS3 Glassmorphic Design System, Leaflet.js |
-| **AI Inference Engine** | Groq LPU Cloud (`openai/gpt-oss-120b` & `groq/compound` models) — Average latency **< 400ms** |
-| **Location Intelligence**| Android FusedLocationProviderClient + TomTom Dual-Route Vector MCP Engine |
-| **Data Persistence** | On-Device SQLite Relational Store (`TABLE_EXPERIENCES`, `TABLE_STAYS`, `TABLE_HISTORY`) |
-| **Audit Generator** | Native Android `PdfDocument` Vector Engine + Android `FileProvider` (ISO 14064 A4 Certified) |
+Planning a trip is hard for anyone. It is much harder if you use a wheelchair, are blind or deaf, travel with an elderly parent or a child with sensory needs, or have a tight budget and a conscience about carbon. The information you need is scattered across booking sites, blogs, reviews and maps, and it is rarely honest about the details that matter: *is there a step-free entrance? does the lift actually work? is that price real?*
+
+UrbanPulse does three things about that:
+
+1. **It plans the whole trip for you** (stay, places, journey, days, budget), using a team of specialised AI agents that work in parallel while you watch a live task graph, and that ask you a question only when a choice is genuinely yours.
+2. **It never pretends.** Every fact carries its source. Anything a model filled in is labelled *AI-estimated*. Access is "confirmed", "partly" or "unconfirmed", never assumed fine.
+3. **It thinks about the whole journey**, for *every* access need in the group (not just wheelchairs) and for the carbon footprint of every choice.
 
 ---
 
-## 📑 Table of Contents
-1. [What's New](#-whats-new)
-2. [Executive Summary & Track Alignment](#-executive-summary--track-alignment)
-3. [Problem Statement Breakdown](#-problem-statement-breakdown)
-4. [System Architecture Diagram](#-system-architecture-diagram)
-5. [Core Technological Innovations](#-core-technological-innovations)
-   - [A. Pareto Multi-Objective Experience Ranking](#a-pareto-multi-objective-experience-ranking)
-   - [B. 2-Hour Micro-Experience Time-Crunch Engine](#b-2-hour-micro-experience-time-crunch-engine)
-   - [C. Real-Time Circumstance Adaptation (Rain / Delay)](#c-real-time-circumstance-adaptation-rain--delay)
-   - [D. Group Size & Traveler Personalization](#d-group-size--traveler-personalization)
-   - [E. Provider-Side Portal & Real-Time Availability Hub](#e-provider-side-portal--real-time-availability-hub)
-   - [F. Live Multi-Modal Transit & Dual-Path Vector Routing](#f-live-multi-modal-transit--dual-path-vector-routing)
-   - [G. Evidence-Based Accessibility Engine](#g-evidence-based-accessibility-engine)
-   - [H. Central Registry — Shared Backend](#h-central-registry--shared-backend)
-6. [Mathematical & Algorithmic Models](#-mathematical--algorithmic-models)
-7. [On-Device Database Schema](#-on-device-database-schema)
-8. [Verified Seeded Local Experiences](#-verified-seeded-local-experiences)
-9. [Setup, Build & Installation Guide](#-setup-build--installation-guide)
-10. [Physical Device Testing & Verification](#-physical-device-testing--verification)
-11. [Presentation Deck & Video Demos](#-presentation-deck--video-demos)
+## ✨ Yatri AI: the multi-agent trip planner
 
----
+Yatri is the assistant in the app. It starts as a friendly intake conversation, then hands your confirmed brief to a team of agents.
 
-## ✨ What's New
+### 1. The conversation (phase 1)
 
-A security and "everything real, nothing mocked" pass across both the Android app and the web platform:
+- Chat-first: type "Family of four from Pune to Munnar, one is in a wheelchair, ₹40,000", or tap through **choice cards**. Yatri prefers options, checkboxes and yes/no over free text.
+- One question at a time, mandatory fields first, then a couple of optional ones only if the model thinks they would improve the plan.
+- Smart about groups (adults, seniors, children and their ages, women's safety preferences) and about accessibility follow-ups for wheelchair, limited mobility, visual, hearing, elderly care, service animals, sensory or cognitive needs, and other special needs.
+- A route map draws itself once origin and destination are known; a review form lets you check everything before planning starts. The whole UI is responsive (phone, tablet, wide screens).
 
-- 🔗 **Central Registry backend** (`server/`) — a real Express + SQLite service so a provider listing published from the web app or the Android app is visible on both, instead of two separate per-device/per-browser silos.
-- 🦽 **Evidence-Based Accessibility, app-wide** — the Verified/Reported/Inferred confidence-tagging engine (previously hospitality-stays-only) now covers every experience listing, on Android and web, with contradiction warnings when a rating outpaces its documentation.
-- 🗺️ **Real TomTom + Open-Meteo on the web app** — the live dual-route map and AQI HUD now call the real APIs (matching what the Android app already did), replacing static preset data.
-- 📍 **Real GPS + real TomTom routing in the Green Route Planner** — "Use GPS" reads the actual device location; "Recalculate Route" fetches a live TomTom distance instead of a pure haversine estimate.
-- 📄 **ESG audit reports with real math** — PASS/FAIL compliance is now computed from the live occupancy-derived figures against stated benchmarks (not a hardcoded "PASSED"), with a genuine SHA-256 content hash for integrity verification, on both the PDF/CSV export and the Android report.
-- 📊 **Real interaction counters** — provider "views" and "inquiries" are now driven by actual chat/dashboard interactions instead of fixed placeholder numbers.
-- 🔐 **Security hardening** — live API keys are no longer committed to the repository; they're loaded from gitignored local config (`local.properties` for Android, `config.local.js` for web — see [`config.local.example.js`](config.local.example.js)).
-- 🧹 Removed unused/misleading dead code (an empty `Web3Manager.kt` blockchain simulation and several empty network-client stubs).
-- 📅 **Real bookings** — the Central Registry now persists genuine booking records (`POST /api/experiences/:id/bookings`), not a hardcoded demand number. "📅 Book This Experience" in the chat creates a real, queryable reservation on Android and web alike.
-- ✅ **Real user reports feed the Evidence Graph** — travelers can now "✅ Confirm Accessibility" or "⚠️ Report an Issue" on any experience. These are genuinely independent second-source signals (not the same provider data checked against itself): a confirmed report can legitimately upgrade a claim to Verified, and a disputed one is surfaced as a real contradiction — this is what makes "confidence score built from official sources + user reports" literally true rather than aspirational.
-- 🐛 **Fixed several more fabricated details found in a follow-up audit**: a new user's Trips tab no longer seeds 3 fake completed trips; the offline AI-itinerary fallback is labeled honestly instead of calling itself "Verified"; the chatbot's hotel recommendations now read the real on-device hospitality registry instead of 3 hardcoded hotels; circumstance adaptation cross-checks live Open-Meteo weather instead of trusting keywords alone; and the ESG audit dialog shows its own actually-computed compliance status instead of a hardcoded "PASSED (BEE 4.8★)".
+### 2. The agents (phase 2)
 
----
+**Yatri is the only decision-maker.** Every other agent is a specialist worker: it does its job, reports back with evidence and any problems it can see, and never decides anything for you.
 
-## 🌟 Executive Summary & Track Alignment
-
-When travelers visit a new destination, discovering authentic local food 🍛, cultural workshops 🏺, festivals 🏮, hidden community spaces 🏞️, and artisan experiences 🎨 is difficult because data is fragmented across social media, booking portals, and outdated listings. Furthermore, travelers have distinct constraints: limited available time ⏱️ (e.g. only 2 hours near their hotel), tight budgets 💰, group types (families with young children 👨‍👩‍👧‍👦 or seniors 👵), and accessibility needs (wheelchairs ♿, strollers, or audio guides 🎧). Meanwhile, local small businesses, artisans, and guides struggle to reach travelers genuinely interested in their offerings.
-
-UrbanPulse bridges this gap by moving beyond traditional static search-and-list portals into an **autonomous, context-aware discovery ecosystem**:
-1. ⚖️ **Multi-Factor Pareto Experience Optimization:** Balances available time, budget, carbon footprint, and step-free accessibility to recommend optimal local activities without commercial listing bias.
-2. ⏱️ **2-Hour Micro-Experience Engine:** Instantly curates hyper-local experiences that realistically fit within a tight 90-to-120 minute window near the traveler's live GPS coordinates.
-3. ☔ **Real-Time Circumstance Adaptation:** Dynamically adapts recommendations when circumstances change — automatically swapping outdoor walking/cycling for covered pottery workshops and art galleries during rain, or compressing plans during schedule delays.
-4. 👨‍👩‍👧‍👦 **Group & Traveler Type Personalization:** Custom filters for *Child-Friendly*, *Family*, *Senior-Friendly*, and *Solo* explorers.
-5. 🏪 **Provider-Side Self-Service Portal & Hub:** Enables local artisans, guides, and activity providers to publish their offerings, toggle real-time availability (`Available Today` vs. `Booked Out`), and view traveler routing demand.
-6. 🚆 **Live Multi-Modal Transit Corridors:** Compares electric trains, e-buses, and Ro-Pax ferries against standard petrol cabs with authentic regional fare formulas and live AQI 💨.
-
----
-
-## 🔍 Problem Statement Breakdown
-
-| Dimension | Industry Pain Point | UrbanPulse Solution |
+| Agent | Job | How it works |
 |---|---|---|
-| **Data Fragmentation** | Spread across Instagram, TripAdvisor, blogs, and offline flyers. | Unified SQLite on-device registry + Groq LPU grounded intelligence. |
-| **Time Disconnect** | Itineraries assume full days; travelers often have just 90-120 mins. | **2-Hour Micro-Experience Engine** anchored to live GPS coordinates. |
-| **Fragile Schedules** | Rain or transit delays collapse tourist itineraries entirely. | **1-Tap Circumstance Adaptation** (swaps to indoor, covered workshops). |
-| **Accessibility Void** | Unmapped stairs, missing elevators, and tactile guidance deficits. | **100% Step-Free Concourse Verification** (`AccessibilityManager.kt`). |
-| **Provider Reach** | Local potters, guides, and eco-farms cannot afford ad spend. | **Zero-Commission Self-Listing Hub** with real-time availability switches. |
-| **Carbon Blindness** | Private taxis generate 160g CO₂e/km with congestion surcharges. | **Dual-Route Engine** highlighting electrified transit corridors & CO₂ savings. |
+| 🟢 **Yatri** | Plans, allocates tasks, checks reports against gates, resolves conflicts, asks you, assembles the itinerary | Deterministic policy over the workers' reports, so a model outage never stops a plan |
+| 🔵 **Atithi** | Finds hotels with live prices and per-need accessibility | Xotelo (TripAdvisor data, live per-OTA totals in ₹, price heatmap), Geoapify, OpenStreetMap, a `web_search` tool loop and TripAdvisor listing pages |
+| 🟠 **Bhatkanti** | Finds places worth visiting, about 5 to 6 a day | OpenStreetMap, Geoapify, Wikipedia and web search ("must-see", "new and trending", "local food"), ranked and sized to the trip |
+| 🟣 **Hisab** | The budget engine | Deterministic: stay, journey, local travel, entry fees, meals and a buffer, each line marked *live* or *estimate*; offers real savings when over budget |
+| 🩷 **Khoji** | Verifies claims and finds guest reviews | `groq/compound` (searches the web itself) first, then Tavily search plus the listing page; brings back 2 to 3 reviews, **lower-rated first**, with source links |
+| 🩵 **Saksham** | Audits **every step** of the trip for **every access need** | Rules over map tags, listings, reviews and per-mode profiles; a labelled model reading for gaps, capped at "partly" |
+| 🔷 **Raah** | Turns places into practical days | Deterministic: clusters places by geography, reads opening hours, uses the weather forecast, adds meals and local legs |
+| 🟡 **Safar** | The journey there and back and local legs | Deterministic: time, cost, CO₂ and access per mode (train, bus, e-bus, shared EV, self-drive EV, cab, flight, metro) |
+| 🍃 **Hariyali** | Carbon footprint and eco score | Journey, local travel and stay emissions vs the most polluting comparable choices, plus concrete greener options |
 
----
-
-## 🏗️ System Architecture Diagram
-
-```
-+-----------------------------------------------------------------------------------------------+
-|                                    🌿 UrbanPulse Platform                                     |
-|           (📱 Android Native Client: Kotlin / Material 3  +  🌐 Web Platform: ES6 / Leaflet)   |
-+-----------------------------------------------+-----------------------------------------------+
-                                                |
-               +--------------------------------+--------------------------------+
-               |                                                                 |
-               v                                                                 v
-+-------------------------------+                               +-------------------------------+
-|   🎒 Traveler Experience Hub  |                               |    🏪 Provider Business Hub   |
-| 💬 Conversational Groq AI     |                               | ✍️ Self-Service Listing Portal |
-| ⏱️ 2-Hour Micro-Experience    |                               | 🔄 Real-Time Availability     |
-| ☔ Circumstance Adapt (Rain)  |                               | 📊 Demand & Route Analytics   |
-| ♿ Family & Accessibility Tags |                               | 🏨 B2B Hotel ESG Resource Hub |
-+---------------+---------------+                               +---------------+---------------+
-                |                                                               |
-                +-------------------------------+-------------------------------+
-                                                |
-                                                v
-+-----------------------------------------------------------------------------------------------+
-|                                🧠 Intelligence & Compute Layer                                |
-| ⚡ Groq LPU Inference Engine (openai/gpt-oss-120b: Sub-second conversational reasoning)         |
-| 📐 Pareto Multi-Objective Optimizer (Equilibrium across Carbon, Price, Accessibility & Time)    |
-| 🗺️ TomTom Routing Engine (Dual-route pathfinding: Green transit corridor vs. Petrol Cab)       |
-| 💨 Open-Meteo Environmental Stream (Live Air Quality Index: PM2.5, PM10, AQI status)           |
-| ✅ Evidence Graph Service (Verified / Reported / Inferred confidence-tagged claims)             |
-| 💾 On-Device Relational Store (SQLite TABLE_EXPERIENCES + TABLE_HOSPITALITY + Overrides)       |
-| 📄 Android Native PDF Engine (A4 ISO 14064 Compliance Audit Exporter)                          |
-+-----------------------------------------------------------------+-----------------------------+
-                                                                   |
-                                                                   v
-+-----------------------------------------------------------------------------------------------+
-|                     🔗 Central Registry — Shared Backend (server/, Express + SQLite)          |
-|   Real REST API (list / create / toggle-availability / record-view / record-inquiry)          |
-|   Android and Web both sync here — a listing published on one is visible on the other          |
-+-----------------------------------------------------------------------------------------------+
+```mermaid
+flowchart LR
+    U([You: confirmed trip brief]) --> Y{{Yatri}}
+    Y --> A[Atithi<br/>hotels]
+    Y --> B[Bhatkanti<br/>places]
+    Y --> S[Safar<br/>journey]
+    Y --> W[Raah<br/>weather]
+    A -. delegates .-> K[Khoji<br/>verifies]
+    B -. delegates .-> K
+    A & B & S & W --> R[Raah<br/>plans the days]
+    R --> SK[Saksham<br/>access audit]
+    R --> H[Hisab<br/>budget]
+    R --> G[Hariyali<br/>carbon]
+    SK & H & G --> Y2{{Yatri decides:<br/>fix, re-plan or ask}}
+    Y2 -->|problem| R
+    Y2 --> I([Itinerary])
 ```
 
----
+Watch it happen: the chat shows a **live task graph** (agent-coloured nodes, status glyphs, a "?" on everything explaining *why* an agent did something) and a feed narrating the work ("Yatri allocated the hotel search to Atithi", "Hisab is asking Atithi and Safar for cheaper options"). It expands to a full-screen "mission control" view.
 
-## 💡 Core Technological Innovations
+### 3. When Yatri asks you (and only then)
 
-### A. Pareto Multi-Objective Experience Ranking
-Unlike commercial search engines that sort by sponsored bids, [`ExperienceOptimizer.kt`](file:///d:/urbanpulse-android-master/urbanpulse-android-master/UrbanPulse/app/src/main/java/com/urbanpulse/app/evidence/ExperienceOptimizer.kt) computes non-dominated Pareto frontiers across three conflicting objectives:
-1. **Environmental Impact:** Minimizing carbon footprint per visitor (`Greenest` badge).
-2. **Physical Accessibility:** Maximizing step-free concourse percentage (`Most Accessible` badge).
-3. **Economic Fairness:** Minimizing direct expense per person in INR (`Best Value` badge).
-4. **Weighted Equilibrium:** An optimal multi-factor balance:
-   $$\text{Score} = 0.40 \cdot \text{CarbonScore} + 0.40 \cdot \text{AccessScore} + 0.20 \cdot \text{PriceScore}$$
+Yatri asks when goals collide, always with concrete options:
 
-### B. 2-Hour Micro-Experience Time-Crunch Engine
-Travelers with 90 to 120 minutes free can tap the dedicated **`⏱️ 2-Hour Micro Experiences`** chip:
-- Filters experiences strictly with $\text{duration} \le 2.0$ hours.
-- Evaluates travel distance from current device coordinates using `UserLocationManager.kt`.
-- Returns Pareto-ranked local activities with pricing, duration, and instant transit directions.
+- *None of these hotels is confirmed wheelchair accessible. Show the best anyway, or search wider?*
+- *The cheapest suitable stay is ₹X a night, above your budget. Raise it, search wider, or keep it?*
+- *Classics or newly popular places?*  ·  *Which way to travel* (time, cost, CO₂ and access side by side)?
+- *Heavy rain on Saturday with outdoor plans. Move them to drier days?*
+- *The plan is ₹Y over budget: a cheaper stay, a cheaper journey, or skip the paid places?*
+- *You said the greenest option matters most: the train saves 180 kg CO₂. Switch?*
 
-### C. Real-Time Circumstance Adaptation (Rain / Delay)
-Travel plans face constant volatility. UrbanPulse features a 1-tap **`☔ Adapt Plan (Rain / Delay)`** agent:
-- **Inclement Weather (Rain / Monsoon):** Automatically swaps outdoor cycling (Bandra Solar Cycling) and nature trails for covered indoor cultural workshops (Dadar Pottery Studio, Kala Ghoda galleries, farm-to-table workshops).
-- **Schedule Delay Compression:** Automatically compresses plans into verified 90-minute activities that fit before hotel checkout or flights.
+Minor problems are fixed quietly (an unsuitable minor place is swapped for a better fit, and the feed says so). Questions are asked one at a time, and the time you spend answering is not counted against the 45 to 60 second planning target.
 
-### D. Group Size & Traveler Personalization
-- **Family & Child-Friendly Filter:** Evaluates safety, interactive value, and stroller accessibility with gentle-slope boardwalks.
-- **Wheelchair & Mobility Mode:** Enforces step-free boarding ramps, level concourses, and tactile paving via `AccessibilityManager.kt`.
-- **Senior Citizen Compatibility:** Highlights low-fatigue routes and audio/hearing-loop guides.
+### 4. What you get
 
-### E. Provider-Side Portal & Real-Time Availability Hub
-Local small businesses and artisans are equal stakeholders on the platform:
-- **`+ List Experience` Form:** Enables pottery artisans, organic farmers, culinary instructors, and heritage guides to publish experiences with title, duration, pricing, and accessibility tags.
-- **Provider Dashboard:** Allows providers to flip status between `Available Today` and `Booked Out` in real time, and view **live** traveler interest metrics — view and inquiry counts driven by actual chat/dashboard interactions, not placeholder numbers.
-- **Hospitality Resource Hub:** B2B hotel tool forecasting HVAC loads, greywater recycling, and surplus food shelter dispatch, generating ISO 14064 A4 audit PDFs with computed PASS/FAIL compliance and a real SHA-256 content-integrity hash.
+A full itinerary screen (also saved to *My Trips* and shareable as a **PDF**):
 
-### F. Live Multi-Modal Transit & Dual-Path Vector Routing
-- **Green Corridor:** Electrified suburban rail, AC electric buses, Ro-Pax ferries, and step-free pedestrian walkways.
-- **Standard Corridor:** Petrol taxi baseline calculated via official municipal fare rules.
-- **Real-Time AQI HUD:** Live PM2.5, PM10, and air quality index fetched from Open-Meteo along the transit corridor — on **both** the Android app and the web platform.
+- **Days**: a map with numbered stops and a timeline (arrival, check-in, visits with opening-hours awareness, meals, local legs with cost and CO₂, access and warning chips)
+- **Budget**: the total against your budget, split by category, every line marked live or estimate
+- **Access**: an audit of every step for every need, with the source of each reading and a "confirm before you go" list
+- **Green**: eco score, footprint breakdown, and greener choices
+- **Trip**: the stay (with Khoji's verdicts and review quotes), journey options, a confidence score, everything the plan assumes, every source, and how long each agent worked
 
-### G. Evidence-Based Accessibility Engine
-UrbanPulse never states `Accessible: Yes` outright. [`EvidenceGraphService.kt`](UrbanPulse/app/src/main/java/com/urbanpulse/app/evidence/EvidenceGraphService.kt) tags every accessibility and sustainability claim — for hospitality stays *and* general experience listings — with a confidence level, mirrored in the web app's `buildExperienceEvidence()`:
-- ✅ **Verified:** Backed either by enough documented, specific provider features, *or* by a real independent traveler report confirming it on-site (`accessibilityConfirmCount > 0`) — genuine two-source corroboration, not a single source checked against itself.
-- 🟡 **Reported:** A single, specific source (e.g. a provider-listed practice) backs the claim, with no independent confirmation yet.
-- 🔵 **Inferred / disputed:** Under-documented, or a traveler has filed a real "⚠️ Report an Issue" against it — the claim is flagged with an explicit contradiction warning (e.g. *"2 traveler report(s) dispute this accessibility claim — treat the 94% rating as unconfirmed until resolved"*) rather than presented as fact.
+### 5. Built not to break
 
-This is what makes "confidence score built from official sources **+ user reports**" literally true: the provider's own listing is one source, and the "✅ Confirm Accessibility" / "⚠️ Report an Issue" prompts on every experience detail card collect the second, independent one.
+Judges, and travellers, type strange things and networks fail.
 
-### H. Central Registry — Shared Backend
-A real Node.js + Express + SQLite service (`server/`) is the single source of truth for provider-listed experiences, bookings, and traveler reports:
-- **Experiences**: `GET/POST /api/experiences`, `PATCH /api/experiences/:id/availability`, `POST /api/experiences/:id/view`, `POST /api/experiences/:id/inquiry`.
-- **Bookings**: `POST/GET /api/experiences/:id/bookings` — a real, persisted reservation record (traveler name, party size, date), not a hardcoded demand number.
-- **Accessibility reports**: `POST/GET /api/experiences/:id/reports` — a real second independent signal for the Evidence Graph. A traveler "confirms" or "disputes" the provider's own accessibility claim; the aggregate counts (`accessibilityConfirmCount` / `accessibilityDisputeCount`) feed directly into whether a claim is shown as Verified, Reported, or a flagged contradiction.
-- The **Android app** (`CentralRegistryClient.kt`) and the **web app** (`app.js`) both sync to all of the above, mirroring reads into a local SQLite/`localStorage` cache so the app still works offline — with a clear "not shared while offline" signal instead of silently pretending data is synced.
+- **Real data first; the model only fills gaps, and says so.** No city or trip is hardcoded. The TripAdvisor destination key is validated by distance so a wrong guess can never put Bengaluru hotels in Munnar.
+- **Every worker can time out, fail or return partial data** without breaking the plan. Yatri routes around it and tells you.
+- **Sanitised input** (control characters, length), **safe links** (only http/https), **offline detection** (an offline estimate, never "unknown place"), **cancellation** (restart the chat and a running plan stops and can never write into the new one).
+- **Chaos-tested**: the whole pipeline is run against hostile destinations (emoji, SQL, HTML, prompt injection, a 10,000-character name), random service outages, garbage model replies and random answers.
+- **Free-tier friendly**: a per-plan credit budget for paid searches, aggressive caching, shared request de-duplication, and a spread of Groq calls across several keys.
 
 ---
 
-## 📐 Mathematical & Algorithmic Models
+## 🧭 The rest of the app
 
-### 1. Municipal Taxi Fare Formula (Maharashtra Transport Dept)
-$$\text{Fare}_{\text{cab}} = 28 + 18.50 \times \max(0, d - 1.5)$$
-*(Where $d$ is the TomTom route distance in kilometers).*
+The original UrbanPulse experience is still here, now in Flutter:
 
-### 2. Multi-Modal Carbon Avoidance
-$$\Delta \text{CO}_2e = d \times (\text{EF}_{\text{petrol}} - \text{EF}_{\text{transit}})$$
-- Standard Petrol Vehicle: $\text{EF}_{\text{petrol}} = 160\text{g CO}_2\text{e/km}$
-- Electric Rail / E-Bus: $\text{EF}_{\text{transit}} = 24\text{g to } 38\text{g CO}_2\text{e/km}$
-- Documented savings per journey: **18.4 kg to 42.8 kg CO₂e avoided**.
+| Area | What it does |
+|---|---|
+| **Local discovery** | Pareto-ranked local experiences that balance carbon, accessibility and price, a 2-hour micro-experience filter near your live location, and one-tap adaptation to rain or delays |
+| **Evidence-based accessibility** | Every accessibility and sustainability claim is tagged *Verified / Reported / Inferred*; traveller confirmations and "report an issue" feed it as an independent second source |
+| **Live map** | Dual-route comparison (green transit corridor vs petrol cab) with live TomTom routing, CO₂ avoided and a live AQI readout |
+| **Provider hub** | Local artisans and guides list experiences, toggle availability and see real demand |
+| **Hospitality & ESG** | A B2B tool that forecasts resource use for hotels and exports an ISO 14064-style A4 audit PDF with computed pass/fail and a content hash |
+| **Wallet, achievements, SOS** | Carbon wallet, badges and challenges, and an emergency screen |
+| **Central Registry** | A small Express + SQLite backend (`server/`) shared by the app and the web app: listings, bookings and traveller reports; the app keeps working offline with a local store |
 
-### 3. Hotel Occupancy Resource Scaling (ISO 14064)
-- **Daily Electricity:** $\text{kWh} = 850 + (12.93 \times \text{OccupiedRooms})$
-- **Daily Water:** $\text{Liters} = 4,500 + (130 \times \text{OccupiedRooms})$
-- **Surplus Food Diverted:** $\text{kg} = 0.28 \times \text{OccupiedRooms}$
+There is also a **web platform** (`index.html`, `app.js`, Leaflet) that talks to the same registry.
 
 ---
 
-## 💾 On-Device Database Schema
+## 🏗️ Architecture
 
-```sql
--- Local Experiences & Community Workshops
-CREATE TABLE experiences (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    category TEXT NOT NULL,
-    location TEXT NOT NULL,
-    sustainability_practice TEXT NOT NULL,
-    eco_score INTEGER NOT NULL,          -- 1 to 5 leaves
-    accessibility_rating INTEGER NOT NULL, -- 0 to 100%
-    accessibility_tags TEXT NOT NULL,    -- Pipe-separated: Step-Free|Audio Guide
-    carbon_kg_per_visit REAL NOT NULL,
-    price_rupees INTEGER NOT NULL,
-    duration_hours REAL NOT NULL,
-    is_available_today INTEGER NOT NULL DEFAULT 1,  -- real persisted toggle, not an in-memory placeholder
-    views_count INTEGER NOT NULL DEFAULT 0,          -- real counter, incremented on actual recommendation views
-    inquiry_count INTEGER NOT NULL DEFAULT 0         -- real counter, incremented on actual traveler inquiries
-);
-
--- Sustainable Hospitality Stays
-CREATE TABLE hospitality_stays (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    category TEXT NOT NULL,
-    location TEXT NOT NULL,
-    eco_score INTEGER NOT NULL,
-    accessibility_rating INTEGER NOT NULL,
-    energy_source TEXT NOT NULL,
-    waste_policy TEXT NOT NULL,
-    accessibility_tags TEXT NOT NULL,
-    carbon_kg_per_night REAL NOT NULL,
-    price_rupees INTEGER NOT NULL,
-    contact_phone TEXT NOT NULL
-);
+```
+urbanpulse_flutter/lib/
+  core/          theme, palette, build-time config, routes, safe link opening
+  models/        plain data classes: trip brief, questions, itinerary (JSON round-trip)
+  domain/        pure logic: brief validation, question planning, accessibility rules,
+                 opening hours, Pareto ranking, evidence graph, carbon estimation
+  services/      network edges: Groq, TomTom, Open-Meteo, Xotelo, Geoapify, Overpass,
+                 Wikipedia, the registry, PDF generation
+  repositories/  SQLite and preference-backed storage (trips, briefs, itineraries)
+  state/         ChangeNotifier controllers (the Yatri controller runs the conversation
+                 and the planner)
+  agents/
+    runtime/     task board (DAG scheduler), live task graph model, plan clock,
+                 Groq key ring, lenient JSON, toolkit
+    tools/       shared web_search / fetch_page tools + bounded tool-use loop
+    receptionist/  the intake agent (phase 1)
+    yatri/ atithi/ bhatkanti/ hisab/ khoji/ saksham/ raah/ safar/ hariyali/
+  screens/ widgets/  UI: chat, choice cards, task graph, itinerary screen
 ```
 
+Design rules that hold everywhere:
+
+- **Deterministic core, model at the edges.** Budget, routing, scheduling, gates and carbon are plain code with table-style tests; models extract, rank, estimate and verify, and their output is validated.
+- **Provenance on everything.** Values carry where they came from; estimates are always marked.
+- **State management** is Flutter's built-in `ChangeNotifier` through one `AppScope`. No state package.
+
+### Data sources
+
+| Source | Used for | Key needed |
+|---|---|---|
+| [Groq](https://groq.com) (`gpt-oss-120b`, `gpt-oss-20b`, `groq/compound`) | Conversation, agent reasoning, verification with built-in web search | `GROQ_API_KEY` (extra keys optional) |
+| [Tavily](https://tavily.com) | The agents' shared web search and page extraction | `TAVILY_API_KEY` (optional) |
+| [Geoapify](https://www.geoapify.com) | Hotels and attractions with coordinates and wheelchair tags | `GEOAPIFY_API_KEY` (optional) |
+| [Xotelo](https://xotelo.com) | TripAdvisor hotel lists, live per-OTA prices, price heatmap | None (search endpoint optional via RapidAPI) |
+| OpenStreetMap (Overpass) | Places, opening hours, access tags | None |
+| Wikipedia | Notability and short descriptions | None |
+| [Open-Meteo](https://open-meteo.com) | Forecast, seasonal weather history, geocoding, air quality | None |
+| [TomTom](https://developer.tomtom.com) | Live map routing, traffic (existing tabs) | `TOMTOM_API_KEY` (optional) |
+
 ---
 
-## 💎 Verified Seeded Local Experiences
+## 🚀 Getting started
 
-1. 🏛️ **Kala Ghoda Heritage Walk** (Fort, Mumbai) — 2.5h • ₹250 • Step-Free Ramps ♿ • Audio Guide 🎧 • Tactile Exhibits.
-2. 🥗 **Meluha Organic Farm-to-Table Workshop** (Powai, Mumbai) — 1.5h • ₹450 • 100% Organic 🌱 • Rain-Safe ☔ • Zero Plastic.
-3. 🚲 **Bandra Bandstand Solar Cycling Tour** (Bandra West, Mumbai) — 2.0h • ₹350 • Solar E-Bikes ⚡ • Level Pathways.
-4. 🏺 **Dadar Artisan Pottery & Craft Studio** (Dadar, Mumbai) — 2.0h • ₹300 • Artisan Cooperative 🤝 • Reused Clay • Sign-Language Friendly.
-5. ⛵ **Powai Lake Sensory Wildlife Cruise** (Powai, Mumbai) — 1.5h • ₹280 • Silent Electric Boats 🚤 • Hearing Loops • Boarding Ramps.
-6. 🌲 **Sanjay Gandhi Nature Trail** (Borivali, Mumbai) — 3.0h • ₹200 • Guide Dog Friendly 🦮 • Gentle Slope Boardwalks.
+### Prerequisites
 
----
+- Flutter 3.41+ (Dart 3.11)
+- Android SDK and a device or emulator (the project is developed against Android; other platforms are generated but less tested)
+- Node.js 18+ (only for the shared registry backend and the web app)
 
-## 🚀 Setup, Build & Installation Guide
+### Configure your keys
 
-### 📲 Instant APK Download (No Build Required)
-You can directly download and install the compiled Android APK on any Android phone (Android 8.0+ / API 26+):
-- 📥 **Direct APK Download Link:** [Download `UrbanPulse-v1.0.0.apk`](https://github.com/SatyamPandey-07/Urban-Pulse/releases/download/v1.0.0-hackcelestial/UrbanPulse-v1.0.0.apk)
-- 📦 **GitHub Releases Hub:** [v1.0.0-hackcelestial Release Page](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial)
-- ⚙️ **Automated CI/CD Pipeline:** Built and packaged continuously with GitHub Actions via [`.github/workflows/android-ci-cd.yml`](.github/workflows/android-ci-cd.yml)
+No key is committed. Copy the example and fill in your own:
 
-### Prerequisites (For Local Development)
-- Android Studio Hedgehog (2023.1.1) or newer
-- Android SDK 34 (Android 14 UpsideDownCake)
-- Java Development Kit (JDK) 17
-- Node.js v18+ (for the Web platform and the Central Registry backend)
-
-> 🔐 **No API keys are committed to this repository.** Every key below is loaded from a gitignored local file — copy the example files and fill in your own keys before building.
-
-### 📱 Android Native Build
 ```bash
-# 1. Clone the repository
-git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
-cd Urban-Pulse/UrbanPulse
-
-# 2. Add your own API keys to local.properties (gitignored, not committed)
-echo "GROQ_API_KEY=your_groq_api_key" >> local.properties
-echo "TOMTOM_API_KEY=your_tomtom_key" >> local.properties
-# Optional — only needed on a physical device; the emulator default (10.0.2.2) reaches
-# the Central Registry server running on your dev machine automatically:
-echo "CENTRAL_REGISTRY_BASE_URL=http://<your-lan-ip>:3001" >> local.properties
-
-# 3. Compile and Assemble Debug APK
-./gradlew assembleDebug
-
-# 4. Install onto connected Android device
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-
-# 5. Launch the application
-adb shell am start -n com.urbanpulse.app/.SplashActivity
+cd urbanpulse_flutter
+cp config.example.json config.json      # gitignored
 ```
 
-### 🌐 Web Platform Run
+| Key | Needed? | What it powers |
+|---|---|---|
+| `GROQ_API_KEY` | **Yes** for Yatri | Conversation, agents, Khoji's web-search verification |
+| `TAVILY_API_KEY` | Recommended | Web search for hotels, places, reviews |
+| `GEOAPIFY_API_KEY` | Recommended | Hotels and places with coordinates and wheelchair tags |
+| `GROQ_API_KEY_2` … `_4` | Optional | Extra keys so parallel agents do not share one rate limit |
+| `TAVILY_API_KEY_2`, `_3` | Optional | More search credits |
+| `XOTELO_RAPIDAPI_KEY` | Optional | City to TripAdvisor key lookup (everything else in Xotelo needs no key) |
+| `TOMTOM_API_KEY` | Optional | The live map and traffic tabs |
+| `CENTRAL_REGISTRY_BASE_URL` | Optional | The shared backend (use your PC's LAN IP on a real phone) |
+
+Keys are baked in at build time, so add them **before** building. Every key is optional in the sense that the app still runs: without a Groq key the Yatri chat is disabled, and without the search keys the planner falls back to OpenStreetMap, Wikipedia and clearly labelled estimates.
+
+### Run on a phone in debug mode (one command)
+
 ```bash
-# From the repository root
-cp config.local.example.js config.local.js
-# then edit config.local.js and fill in your own GROQ_API_KEY / TOMTOM_API_KEY
-
-npx serve .
-# Open http://localhost:3000 in any modern browser
+./run.sh            # first USB-connected phone; hot reload with r, restart with R
+./run.sh <device>   # pick a device from `adb devices`
 ```
 
-### 🔗 Central Registry Backend (Shared Provider Data)
+Or by hand:
+
 ```bash
-cd server
-npm install
-npm start
-# Listens on http://localhost:3001 — the web app and an emulator Android build
-# both pick this up automatically; falls back to local-only storage if not running.
+cd urbanpulse_flutter
+flutter pub get
+flutter run --dart-define-from-file=config.json
 ```
+
+### Optional: the shared backend and the web app
+
+```bash
+cd server && npm install && npm start      # http://localhost:3001
+# web app: copy config.local.example.js to config.local.js, add keys, then
+npx serve .                                 # http://localhost:3000
+```
+
+### Try the planner without keys
+
+Open the **Yatri AI** tab, tap ⋮ and choose **Preview agent graph (demo)** to watch the full agent graph run offline with scripted data.
 
 ---
 
-## 📱 Physical Device Testing & Verification
+## ✅ Quality and testing
 
-UrbanPulse has been compiled, installed, and validated on physical hardware:
-- **Device ID:** `10BE891YJ40012J`
-- **Application Package:** `com.urbanpulse.app`
-- **Active Process ID:** `PID 31162`
-- **Verification Highlights:**
-  - FusedLocationProvider successfully acquired GPS coordinates and resolved city.
-  - Groq LPU returned verified multi-day itinerary in **380ms**.
-  - 2-Hour Micro-Experience filter returned Pareto-ranked Mumbai activities.
-  - Rain adaptation swapped outdoor cycling for covered Dadar pottery studio in 1 tap.
-  - Provider dashboard persisted experience availability toggle in local SQLite.
+```bash
+cd urbanpulse_flutter
+flutter analyze
+flutter test        # 424 tests
+```
+
+The suite includes table-driven tests for the deterministic engines (validation, question planning, accessibility rules, opening hours, day planning, budgets, gates), orchestration tests with scripted models and fake services, widget tests for the chat, hotel cards, task graph and itinerary screen at phone, tablet and desktop sizes in light and dark, and **chaos tests** that run the whole planning pipeline against hostile inputs and random failures.
+
+CI (`.github/workflows/flutter-ci-cd.yml`) builds the Android APK on pushes to `main`.
+
+### An honest status note
+
+Everything above is verified with tests, mocks and a debug build. The planner has **not yet been run end to end against live Groq, Tavily and Geoapify or measured against its 45 to 60 second target on a device**; that is the next thing to do once keys are in. Prices and times shown as estimates are estimates, and the app says so.
 
 ---
 
-## 📑 Presentation Deck & Video Demos
-- 📊 **Complete 10-Slide Hackathon Pitch Deck:** [`ppt.md`](file:///d:/urbanpulse-android-master/urbanpulse-android-master/ppt.md)
-- 🐙 **Official GitHub Repository:** [`https://github.com/SatyamPandey-07/Urban-Pulse`](https://github.com/SatyamPandey-07/Urban-Pulse)
-- 🏷️ **Release Tag:** [`v1.0.0-hackcelestial`](https://github.com/SatyamPandey-07/Urban-Pulse/releases/tag/v1.0.0-hackcelestial)
+## 📂 Repository map
+
+| Path | What is in it |
+|---|---|
+| [`urbanpulse_flutter/`](urbanpulse_flutter) | The Flutter app (primary client). Its [README](urbanpulse_flutter/README.md) has the screen map and dependency notes |
+| [`server/`](server) | The Central Registry backend (Express + SQLite) |
+| `index.html`, `app.js`, `style.css` | The web platform |
+| [`FEATURES.md`](FEATURES.md) | Additional implemented features (e.g. the real-time impact dashboard) |
+| [`ppt.md`](ppt.md) | The hackathon pitch deck outline |
+| [`release/`](release) | The v1.0.0 Android APK |
+| `run.sh` | One-command debug run on a USB phone |
 
 ---
 
 <div align="center">
-  <sub>Engineered with precision for <b>HackCelestial 3.0</b> • Developed by the UrbanPulse Engineering Team.</sub>
+  <sub>Made for HackCelestial 3.0 · <a href="https://github.com/SatyamPandey-07/Urban-Pulse">github.com/SatyamPandey-07/Urban-Pulse</a></sub>
 </div>
