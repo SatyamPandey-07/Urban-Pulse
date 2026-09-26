@@ -35,10 +35,24 @@ class _TripsTabState extends State<TripsTab> {
 
   void _openTripDetail(TripPlan trip) {
     // A trip planned by the multi-agent planner reopens as the full itinerary.
-    final full = AppScope.of(context).itineraries.byId(trip.id);
+    final services = AppScope.of(context);
+    final full = services.itineraries.byId(trip.id);
     if (full != null) {
       Navigator.of(context)
-          .push(MaterialPageRoute<void>(builder: (_) => PlanItineraryScreen(itinerary: full)))
+          .push(
+            MaterialPageRoute<void>(
+              builder: (_) => PlanItineraryScreen(
+                itinerary: full,
+                saved: true,
+                toolkit: services.agentToolkit,
+                // An edited trip replaces its saved copy, so My Trips shows one entry.
+                onChanged: (updated) async {
+                  await services.itineraries.save(updated);
+                  await services.trips.upsertTrip(updated.toTripPlan(), itineraryClientId: updated.id);
+                },
+              ),
+            ),
+          )
           .then((_) => _loadTrips());
       return;
     }

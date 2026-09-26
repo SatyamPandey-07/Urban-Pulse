@@ -1,5 +1,8 @@
+import 'package:latlong2/latlong.dart';
+
 import '../../models/itinerary/itinerary.dart';
 import '../../models/itinerary/itinerary_parts.dart';
+import '../../models/itinerary/plan_snapshot.dart';
 import '../../models/trip_brief.dart';
 import '../../services/data/forecast_client.dart';
 import '../atithi/hotel_finder.dart';
@@ -24,6 +27,10 @@ abstract final class ItineraryAssembler {
     GreenReport? green,
     List<SourceRef> extraSources = const [],
     List<String> extraAssumptions = const [],
+    LatLng? center,
+    LatLng? origin,
+    Set<String> bannedOutdoor = const {},
+    Set<String> droppedIds = const {},
   }) {
     final assumptions = <String>[
       ...extraAssumptions,
@@ -80,7 +87,57 @@ abstract final class ItineraryAssembler {
       assumptions: assumptions.toSet().toList(),
       confidence: _confidence(hotel, days, budget, weather),
       brief: brief,
+      // What editing the finished plan needs: every ranked place (not only the
+      // ones on the days), the weather and the choices made so far.
+      snapshot: PlanSnapshot(
+        pool: _pool(spots, days),
+        weather: weather,
+        center: center,
+        origin: origin,
+        bannedOutdoor: bannedOutdoor,
+        droppedIds: droppedIds,
+      ),
     );
+  }
+
+  /// The pages behind a plan: the stay's listing and claims, and each visited
+  /// place's sources. Used when a plan is edited and its sources change.
+  static List<SourceRef> sourcesFor({HotelOption? hotel, Iterable<Hotspot> visited = const []}) {
+    final sources = <SourceRef>[];
+    void add(SourceRef s) {
+      if (s.url.isEmpty || sources.any((x) => x.url == s.url)) return;
+      sources.add(s);
+    }
+
+    if (hotel != null) {
+      final url = hotel.tripAdvisorUrl ?? hotel.bookingUrl;
+      if (url != null) add(SourceRef(title: hotel.name, url: url, source: hotel.provenance.source));
+      for (final c in hotel.claims) {
+        c.sources.forEach(add);
+      }
+    }
+    for (final h in visited) {
+      h.sources.forEach(add);
+      for (final c in h.claims) {
+        c.sources.forEach(add);
+      }
+    }
+    return sources.take(80).toList();
+  }
+
+  /// How much of a plan rests on real data (see [_confidence]).
+  static double confidenceOf(HotelOption? hotel, DayPlanResult days, Budget budget, Map<String, DayForecast> weather) =>
+      _confidence(hotel, days, budget, weather);
+
+  /// The places to remember: those on the days first, then the best of the rest.
+  static List<Hotspot> _pool(HotspotSearchResult? spots, DayPlanResult days) {
+    final out = <Hotspot>[];
+    final seen = <String>{};
+    for (final h in [...days.visited, ...?spots?.selected, ...?spots?.pool]) {
+      if (seen.add(h.id)) out.add(h);
+      if (out.length >= PlanSnapshot.maxPool) break;
+    }
+    return out;
   }
 
   /// How much of the plan rests on real data rather than estimates, 0..1.

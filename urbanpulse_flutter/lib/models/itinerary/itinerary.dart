@@ -4,6 +4,7 @@ import '../../core/formatting.dart';
 import '../trip_brief.dart';
 import '../trip_models.dart';
 import 'itinerary_parts.dart';
+import 'plan_snapshot.dart';
 
 enum SlotKind { stay, visit, meal, transit, rest }
 
@@ -324,6 +325,9 @@ class Itinerary {
     this.confidence = 0.5,
     this.brief,
     this.timings = const {},
+    this.snapshot,
+    this.version = 1,
+    this.edits = const [],
   });
 
   final String id;
@@ -359,6 +363,16 @@ class Itinerary {
   /// Seconds each agent spent, by agent name, plus "total": how the plan was made.
   final Map<String, int> timings;
 
+  /// What re-planning needs (the pool of places, the weather, edit state). Null
+  /// for plans saved before editing existed.
+  final PlanSnapshot? snapshot;
+
+  /// 1 for the plan as first made, +1 for every accepted edit.
+  final int version;
+
+  /// What the traveller has asked to change so far, oldest first.
+  final List<EditRecord> edits;
+
   int get dayCount => days.length;
 
   Itinerary copyWith({
@@ -374,15 +388,23 @@ class Itinerary {
     List<String>? assumptions,
     double? confidence,
     Map<String, int>? timings,
+    PlanSnapshot? snapshot,
+    int? version,
+    List<EditRecord>? edits,
+    DateTime? start,
+    DateTime? end,
+    TripBrief? brief,
+    String? travellerSummary,
+    bool clearHotel = false,
   }) => Itinerary(
     id: id,
     createdAt: createdAt,
     destination: destination,
     origin: origin,
-    start: start,
-    end: end,
-    travellerSummary: travellerSummary,
-    hotel: hotel ?? this.hotel,
+    start: start ?? this.start,
+    end: end ?? this.end,
+    travellerSummary: travellerSummary ?? this.travellerSummary,
+    hotel: clearHotel ? null : (hotel ?? this.hotel),
     hotelAlternatives: hotelAlternatives ?? this.hotelAlternatives,
     transportOptions: transportOptions ?? this.transportOptions,
     chosenTransport: chosenTransport ?? this.chosenTransport,
@@ -393,8 +415,11 @@ class Itinerary {
     sources: sources ?? this.sources,
     assumptions: assumptions ?? this.assumptions,
     confidence: confidence ?? this.confidence,
-    brief: brief,
+    brief: brief ?? this.brief,
     timings: timings ?? this.timings,
+    snapshot: snapshot ?? this.snapshot,
+    version: version ?? this.version,
+    edits: edits ?? this.edits,
   );
 
   Map<String, dynamic> toJson() => {
@@ -418,6 +443,9 @@ class Itinerary {
     'confidence': confidence,
     'brief': brief?.toJson(),
     'timings': timings,
+    'snapshot': snapshot?.toJson(),
+    'version': version,
+    'edits': [for (final e in edits) e.toJson()],
   };
 
   static Itinerary fromJson(Map<String, dynamic> j) {
@@ -452,6 +480,9 @@ class Itinerary {
           for (final e in (j['timings'] as Map<String, dynamic>).entries)
             if (e.value is num) e.key: (e.value as num).toInt(),
       },
+      snapshot: obj('snapshot') == null ? null : PlanSnapshot.fromJson(obj('snapshot')!),
+      version: (j['version'] as num?)?.toInt() ?? 1,
+      edits: list('edits', EditRecord.fromJson),
     );
   }
 
