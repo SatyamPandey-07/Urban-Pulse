@@ -6,6 +6,7 @@ import '../hisab/budget_engine.dart';
 import '../runtime/agent_kind.dart';
 import '../runtime/report.dart';
 import '../safar/transport_planner.dart';
+import 'hotel_gates.dart';
 
 /// Hisab's gate: when the plan costs more than the traveller said they can
 /// spend, it finds real ways to bring it down (a cheaper stay, a cheaper way to
@@ -40,13 +41,14 @@ abstract final class BudgetGates {
       }
     }
 
-    // A cheaper stay that still suits the group.
+    // A cheaper stay that suits the group at least as well: saving money never
+    // swaps a confirmed-accessible stay for a less suitable one.
     final needs = {for (final n in brief.accessibilityNeeds) if (n != AccessibilityNeed.none) n};
     final cur = hotel?.nightlyInr;
     if (hotel != null && cur != null) {
       final cheaper = [
         for (final h in hotelAlternatives)
-          if (h.id != hotel.id && h.nightlyInr != null && h.nightlyInr! < cur && h.meets(needs)) h,
+          if (h.id != hotel.id && h.nightlyInr != null && h.nightlyInr! < cur && h.meets(needs) && HotelGates.fitsAsWell(h, hotel, needs)) h,
       ]..sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
       final alt = cheaper.firstOrNull;
       if (alt != null) {

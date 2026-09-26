@@ -167,11 +167,11 @@ class HotelFinder {
   Future<HotelSearchResult> find(
     HotelQuery q, {
     HotelProgress? onProgress,
-    bool Function()? isDegraded,
+    bool Function()? isCancelled,
   }) async {
     final warnings = <String>[];
     final used = <String>{};
-    bool degraded() => isDegraded?.call() ?? false;
+    bool degraded() => isCancelled?.call() ?? false;
 
     // 1. Gather candidates from every source at once.
     // (All three start now and run concurrently; awaiting them in turn only

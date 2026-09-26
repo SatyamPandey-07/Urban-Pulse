@@ -39,7 +39,7 @@ class SafarAgent {
     }
 
     final est = estimator;
-    if (est != null && !ctx.degraded) {
+    if (est != null && !ctx.cancelled) {
       final remarks = await _remarks(est, plan);
       if (remarks.isNotEmpty) {
         plan = TransportPlan(

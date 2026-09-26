@@ -7,7 +7,6 @@ import '../../services/data/http_util.dart';
 import '../../services/data/wikipedia_client.dart';
 import '../../services/groq_api_client.dart';
 import '../runtime/agent_kind.dart';
-import '../runtime/lenient_json.dart';
 import '../runtime/llm_pool.dart';
 import '../runtime/report.dart';
 import 'agent_tool.dart';
@@ -176,9 +175,9 @@ class TavilySearchProvider implements SearchProvider {
   }
 }
 
-/// `groq/compound`: a model with built-in web search. It uses the Groq keys we
-/// already have, but is billed per tool use, so [ToolBudget.maxLlmSearches]
-/// keeps it rare.
+/// A Groq model with built-in web search (`browser_search` on gpt-oss). It uses
+/// the Groq keys we already have, but each search costs a model call, so
+/// [ToolBudget.maxLlmSearches] keeps it rare.
 class CompoundSearchProvider implements SearchProvider {
   CompoundSearchProvider({
     required this.llm,
@@ -214,14 +213,15 @@ class CompoundSearchProvider implements SearchProvider {
       ],
       tier: LlmTier.search,
       maxTokens: 1500,
-      timeout: const Duration(seconds: 25),
+      timeout: const Duration(seconds: 45),
     );
     if (r is! GroqSuccess) return null;
     return parse(r, maxResults);
   }
 
-  /// Prefers the search results Groq attaches to the response over the model's
-  /// own JSON, since those URLs were really visited. Public for tests.
+  /// Only the search results Groq attaches to the response count: those pages
+  /// were really visited. A reply with no executed search is the model's memory,
+  /// not a search, so it returns null. Public for tests.
   static List<SearchResult>? parse(GroqSuccess r, int maxResults) {
     final out = <SearchResult>[];
     final choices = r.raw?['choices'];
@@ -235,30 +235,19 @@ class CompoundSearchProvider implements SearchProvider {
           if (results is List) {
             for (final item in results) {
               if (SearchResult.fromJson(item) case final s?) {
-                out.add(
-                  SearchResult(
-                    title: s.title,
-                    url: s.url,
-                    snippet: s.snippet,
-                    score: s.score,
-                    provider: 'Groq search',
-                  ),
-                );
+                // Search listings carry only a title; opened pages carry their
+                // text. Keep one entry per page, with the most text.
+                final text = s.snippet.trim().isEmpty ? s.title : s.snippet.trim();
+                final snippet = text.length > 1200 ? '${text.substring(0, 1200)}…' : text;
+                final i = out.indexWhere((o) => o.url == s.url);
+                final entry = SearchResult(title: s.title, url: s.url, snippet: snippet, score: s.score, provider: 'Groq search');
+                if (i < 0) {
+                  out.add(entry);
+                } else if (out[i].snippet.length < snippet.length) {
+                  out[i] = entry;
+                }
               }
             }
-          }
-        }
-      }
-    }
-    if (out.isEmpty) {
-      final json = parseLenientJson(r.content);
-      final list = json is Map<String, dynamic> ? json['results'] : json;
-      if (list is List) {
-        for (final item in list) {
-          if (SearchResult.fromJson(item) case final s?) {
-            out.add(
-              SearchResult(title: s.title, url: s.url, snippet: s.snippet, provider: 'Groq search'),
-            );
           }
         }
       }
@@ -297,7 +286,7 @@ class WikipediaSearchProvider implements SearchProvider {
 }
 
 /// The shared `web_search` tool: tries each provider in order (Tavily, then
-/// Groq compound, then Wikipedia), caches every query, and counts spend
+/// Groq search, then Wikipedia), caches every query, and counts spend
 /// against the plan's [ToolBudget].
 class WebSearchTool extends AgentTool {
   WebSearchTool({
@@ -315,6 +304,10 @@ class WebSearchTool extends AgentTool {
   /// Which provider answered the most recent uncached search (for the feed).
   String? lastProvider;
 
+  /// Review searches no provider could answer, so the plan can say reviews
+  /// were unavailable instead of quietly showing none.
+  int unansweredReviewSearches = 0;
+
   @override
   String get name => 'web_search';
 
@@ -323,7 +316,7 @@ class WebSearchTool extends AgentTool {
       'Search the web for hotels, places, reviews or facts about an area. Returns titles, URLs and snippets.';
 
   @override
-  String get argsHelp => 'query: string, max_results?: int';
+  String get argsHelp => 'query: string, max_results?: int, purpose?: "reviews"';
 
   @override
   Future<ToolOutput> run(Map<String, Object?> args, {AgentKind? caller}) async {
@@ -331,6 +324,8 @@ class WebSearchTool extends AgentTool {
     if (raw is! String || raw.trim().isEmpty) return ToolOutput.failure('missing "query"');
     final query = sanitizeQuery(raw, maxQueryLength);
     final maxResults = (asInt(args['max_results']) ?? 6).clamp(1, 10);
+    // Encyclopaedia articles never hold guest reviews: a review search skips them.
+    final forReviews = args['purpose'] == 'reviews';
 
     final hit = await _cache.get('websearch.${query.toLowerCase()}.$maxResults');
     if (hit != null) {
@@ -341,6 +336,7 @@ class WebSearchTool extends AgentTool {
     final searchable = budget.trySpendSearch();
     for (final p in providers) {
       if (!p.available) continue;
+      if (forReviews && p is WikipediaSearchProvider) continue;
       // The paid-per-use provider only runs while the plan's budget allows;
       // the free fallbacks always may.
       final isFree = p is WikipediaSearchProvider;
@@ -357,6 +353,7 @@ class WebSearchTool extends AgentTool {
       }
     }
     if (searchable) budget.refundSearch();
+    if (forReviews) unansweredReviewSearches++;
     return ToolOutput.failure('no search provider returned results for "$query"');
   }
 

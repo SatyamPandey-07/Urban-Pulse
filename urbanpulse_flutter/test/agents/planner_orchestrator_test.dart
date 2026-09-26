@@ -28,7 +28,10 @@ class _Geocoder extends PlaceGeocoder {
   final Map<String, LatLng> places;
 
   @override
-  Future<LatLng?> lookup(String name) async => places[name.trim().toLowerCase()];
+  Future<GeoArea?> lookupArea(String name) async {
+    final p = places[name.trim().toLowerCase()];
+    return p == null ? null : GeoArea(p);
+  }
 }
 
 AgentToolkit toolkitFor(HotelWorld world, {Map<String, LatLng>? places, ScriptedLlm? llm}) {
@@ -254,17 +257,16 @@ void main() {
       expect(out.status, PlanStatus.failed);
     });
 
-    test('a slow plan stops asking and takes the best stay', () async {
+    test('however long the plan has run, the traveller is still asked, never overruled', () async {
+      var now = DateTime(2026, 1, 1, 12);
       final who = Traveller();
-      final o = orchestratorFor(
-        toolkitFor(HotelWorld()),
-        who,
-        clock: PlanClock(degradeAfter: Duration.zero, deadline: Duration.zero),
-      );
+      final o = orchestratorFor(toolkitFor(HotelWorld()), who, clock: PlanClock(now: () => now));
+      o.clock.start();
+      now = now.add(const Duration(hours: 2));
       final out = await o.run(briefWith(budget: 6000));
-      expect(who.asked, isEmpty, reason: 'degraded mode never waits on the traveller');
+      expect(who.asked, isNotEmpty, reason: 'a long plan still puts the choices to the traveller');
       expect(out.hotel, isNotNull);
-      expect(o.graph.events.map((e) => e.text).join('|'), contains('time is short'));
+      expect(o.graph.events.map((e) => e.text).join('|'), isNot(contains('time is short')));
     });
 
     test('with every data source down it still ends, with a clear outcome', () async {
@@ -294,7 +296,6 @@ void main() {
         o = PlannerOrchestrator(
           hotelsOnly: true,
           toolkit: toolkitFor(world),
-          clock: PlanClock(degradeAfter: rng.nextInt(5) == 0 ? Duration.zero : const Duration(seconds: 35)),
           ask: (q) async {
             asked.add(q.id);
             switch (rng.nextInt(6)) {

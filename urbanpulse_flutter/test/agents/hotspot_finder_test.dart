@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:urbanpulse/agents/bhatkanti/hotspot_finder.dart';
 import 'package:urbanpulse/agents/raah/day_planner.dart';
 import 'package:urbanpulse/agents/runtime/report.dart';

@@ -27,7 +27,7 @@ class AtithiAgent {
       result = await finder.find(
         query,
         onProgress: (text, {why}) => ctx.say(text, why: why),
-        isDegraded: () => ctx.degraded || ctx.cancelled,
+        isCancelled: () => ctx.cancelled,
       );
     } catch (e) {
       return AgentReport.failed(ctx.agent, 'Atithi could not search for hotels');
@@ -35,7 +35,7 @@ class AtithiAgent {
 
     // Khoji verifies the top few: claims, guest reviews, access evidence.
     final k = khoji;
-    if (k != null && result.options.isNotEmpty && !ctx.degraded && !ctx.cancelled) {
+    if (k != null && result.options.isNotEmpty && !ctx.cancelled) {
       try {
         final checked = await k.verifyHotels(ctx, result.options, query);
         final needs = {for (final n in query.needs) if (n != AccessibilityNeed.none) n};

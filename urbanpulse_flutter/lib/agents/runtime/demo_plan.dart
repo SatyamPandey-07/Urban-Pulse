@@ -67,7 +67,6 @@ Future<AgentReport> runDemoPlan(
           agent: AgentKind.khoji,
           title: 'Verify hotel claims',
           why: 'Listings often overstate accessibility, so Khoji checks reviews and other sources.',
-          optional: true,
         ),
         (c) async {
           await work(1400);

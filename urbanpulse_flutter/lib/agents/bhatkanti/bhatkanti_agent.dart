@@ -24,14 +24,14 @@ class BhatkantiAgent {
       result = await finder.find(
         query,
         onProgress: (text, {why}) => ctx.say(text, why: why),
-        isDegraded: () => ctx.degraded || ctx.cancelled,
+        isCancelled: () => ctx.cancelled,
       );
     } catch (e) {
       return AgentReport.failed(ctx.agent, 'Bhatkanti could not search for places');
     }
 
     final k = khoji;
-    if (k != null && result.selected.isNotEmpty && !ctx.degraded && !ctx.cancelled) {
+    if (k != null && result.selected.isNotEmpty && !ctx.cancelled) {
       try {
         final v = await k.verifyHotspots(ctx, result);
         if (v.replacements.isNotEmpty || v.closedIds.isNotEmpty) {

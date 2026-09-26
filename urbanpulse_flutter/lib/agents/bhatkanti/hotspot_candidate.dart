@@ -114,8 +114,32 @@ abstract final class HotspotCandidates {
     if (na.isEmpty || nb.isEmpty) return false;
     final km = haversineKm(a.location.latitude, a.location.longitude, b.location.latitude, b.location.longitude);
     if (na == nb) return km <= 3;
+    if (sameName(a.name, b.name) && km <= 1.5) return true;
     final sim = HotelCandidates.similarity(a.name, b.name);
     return (sim >= 0.75 && km <= 0.6) || (sim >= 0.9 && km <= 2);
+  }
+
+  static const _minor = {'the', 'of', 'and', 'a', 'an', 'at', 'in', 'on', 'to'};
+
+  /// The distinctive words of a place's name, without qualifiers such as
+  /// "(exterior view)", "[closed]" or ", Jaipur".
+  static Set<String> coreWords(String name) {
+    final core = name.replaceAll(RegExp(r'\([^)]*\)|\[[^\]]*\]'), ' ').split(RegExp(r',| - | – | \| ')).first;
+    return {
+      for (final t in core.toLowerCase().split(RegExp(r'[^a-z0-9]+')))
+        if (t.length > 1 && !_minor.contains(t)) t,
+    };
+  }
+
+  /// Two names for the same place: "Hawa Mahal" and "Hawa Mahal (exterior
+  /// view)", "City Palace" and "City Palace of Jaipur". The shorter name must
+  /// have at least two distinctive words, so "Palace" alone matches nothing.
+  static bool sameName(String a, String b) {
+    final ca = coreWords(a);
+    final cb = coreWords(b);
+    if (ca.isEmpty || cb.isEmpty) return false;
+    final (small, big) = ca.length <= cb.length ? (ca, cb) : (cb, ca);
+    return small.length >= 2 && big.containsAll(small);
   }
 
   static List<HotspotCandidate> merge(Iterable<HotspotCandidate> all) {

@@ -31,8 +31,13 @@ class DayForecast {
   final bool isForecast;
 
   /// Heavy enough rain that outdoor plans should be reconsidered.
+  /// Rain heavy enough to spoil an outdoor visit: 8 mm or more, a 70% chance,
+  /// or a WMO code for moderate-to-heavy rain, heavy showers or thunder.
+  /// Drizzle, slight rain and slight showers (51-61, 80) do not count.
   bool get isRainy =>
-      (rainMm ?? 0) >= 8 || (rainProbability ?? 0) >= 70 || (weatherCode != null && weatherCode! >= 61 && weatherCode! <= 99);
+      (rainMm ?? 0) >= 8 || (rainProbability ?? 0) >= 70 || (weatherCode != null && _heavyRainCodes.contains(weatherCode));
+
+  static const _heavyRainCodes = {63, 65, 66, 67, 81, 82, 95, 96, 99};
 
   bool get isHot => (tempMaxC ?? 0) >= 37;
 

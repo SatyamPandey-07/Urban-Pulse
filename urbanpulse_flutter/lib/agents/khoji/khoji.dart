@@ -81,10 +81,12 @@ class KhojiFinding {
 /// problems), with the pages they came from.
 ///
 /// Order of attack, cheapest honest option that works:
-/// 1. `groq/compound`: a model that searches the web itself and returns the
-///    pages it actually visited;
-/// 2. the `web_search` chain (Tavily first) plus, for hotels, the listing page,
-///    read by a light model, or by simple rules when no model is available.
+/// 1. the `web_search` chain (Tavily first) plus, for hotels, the listing page,
+///    read by a light model;
+/// 2. only when that finds nothing: a model that searches the web itself and
+///    returns the pages it actually visited (heavy on the model's rate limit,
+///    since every page it reads counts);
+/// 3. simple rules over the snippets when no model can read them.
 /// Nothing is ever taken on trust: a verdict or a quote only counts when it
 /// points at a page that really came back from a search.
 class Khoji {
@@ -105,31 +107,35 @@ class Khoji {
   static const maxReviews = 3;
   static const _quoteMax = 220;
 
-  Future<KhojiFinding> verify(KhojiRequest r, {bool Function()? isDegraded}) async {
-    bool degraded() => isDegraded?.call() ?? false;
+  Future<KhojiFinding> verify(KhojiRequest r, {bool Function()? isCancelled}) async {
+    bool degraded() => isCancelled?.call() ?? false;
     final methods = <String>[];
     _Extraction? ex;
     var pool = <_Snippet>[];
 
-    // 1. The model that searches for itself.
-    if (llm.isConfigured && !degraded() && budget.trySpendLlmSearch()) {
-      ex = await _viaCompound(r);
-      if (ex != null && !ex.isEmpty) methods.add('Groq search');
+    // 1. The search chain plus the listing page, read by a light model.
+    pool = await _gather(r, degraded);
+    if (pool.isNotEmpty && llm.isConfigured && !degraded()) {
+      final viaModel = await _viaSnippets(r, pool);
+      if (viaModel != null && !viaModel.isEmpty) {
+        ex = viaModel;
+        methods.add(search?.lastProvider ?? 'Web search');
+      }
     }
 
-    // 2. The search chain plus the listing page.
-    if (ex == null || ex.isEmpty) {
-      pool = await _gather(r, degraded);
-      if (pool.isNotEmpty) {
-        final viaModel = llm.isConfigured && !degraded() ? await _viaSnippets(r, pool) : null;
-        if (viaModel != null && !viaModel.isEmpty) {
-          ex = viaModel;
-          methods.add(search?.lastProvider ?? 'Web search');
-        } else {
-          ex = _heuristic(r, pool);
-          if (!ex.isEmpty) methods.add('Web search (unrated snippets)');
-        }
+    // 2. Nothing yet: the model that searches for itself.
+    if ((ex == null || ex.isEmpty) && llm.isConfigured && !degraded() && budget.trySpendReviewSearch()) {
+      final viaSearch = await _viaCompound(r);
+      if (viaSearch != null && !viaSearch.isEmpty) {
+        ex = viaSearch;
+        methods.add('Groq search');
       }
+    }
+
+    // 3. Still nothing a model could read: the snippets that read like reviews.
+    if ((ex == null || ex.isEmpty) && pool.isNotEmpty) {
+      ex = _heuristic(r, pool);
+      if (!ex.isEmpty) methods.add('Web search (unrated snippets)');
     }
 
     return _finding(r, ex ?? _Extraction(), methods);
@@ -145,8 +151,9 @@ class Khoji {
         GroqMessage('user', _userPrompt(r)),
       ],
       tier: LlmTier.search,
-      maxTokens: 1800,
-      timeout: const Duration(seconds: 14),
+      maxTokens: 2400,
+      // A searching model opens pages before it answers.
+      timeout: const Duration(seconds: 45),
     );
     if (res is! GroqSuccess) return null;
     final visited = _visitedUrls(res);
@@ -191,12 +198,17 @@ class Khoji {
     final out = <_Snippet>[];
     final tool = search;
     if (tool != null) {
+      final access = [for (final n in r.needs) if (n != AccessibilityNeed.none) n];
       final queries = [
-        '${r.name} ${r.destination} reviews',
-        if (r.subject == KhojiSubject.hotel || r.needs.isNotEmpty) '${r.name} ${r.destination} problems complaints accessibility reddit',
+        '"${r.name}" ${r.destination} reviews tripadvisor reddit',
+        if (access.isNotEmpty)
+          '"${r.name}" ${r.destination} ${access.contains(AccessibilityNeed.wheelchair) ? 'wheelchair' : 'elderly'} accessible review'
+        else if (r.subject == KhojiSubject.hotel)
+          '"${r.name}" ${r.destination} complaints problems review',
       ];
       final results = await Future.wait([
-        for (final q in queries.take(degraded() ? 1 : 2)) tool.run({'query': q, 'max_results': 5}, caller: AgentKind.khoji).catchError((_) => ToolOutput.failure('search failed')),
+        for (final q in queries)
+          tool.run({'query': q, 'max_results': 6, 'purpose': 'reviews'}, caller: AgentKind.khoji).catchError((_) => ToolOutput.failure('search failed')),
       ]);
       for (final o in results) {
         final data = o.data;
@@ -289,7 +301,7 @@ class Khoji {
   String _system(KhojiRequest r, {required bool viaSnippets}) =>
       'You are Khoji, the verifier of a trip planner. You check claims about a ${r.subject == KhojiSubject.hotel ? 'hotel' : 'place'} '
       'against what real web pages say, and you report guest reviews honestly.\n'
-      '${viaSnippets ? 'Use ONLY the numbered SOURCES given; cite them by "sourceIndex".' : 'Use web search. Cite only pages you actually found, by their exact "url".'}\n'
+      '${viaSnippets ? 'Use ONLY the numbered SOURCES given; cite them by "sourceIndex".' : 'Search the web: look for guest reviews on TripAdvisor, Google reviews pages, booking sites and travel forums such as Reddit, and open the pages you cite. Cite only pages you actually opened or found, by their exact "url".'}\n'
       'Reply with ONE JSON object:\n'
       '{"claims":[{"text":"<the claim, unchanged>","verdict":"confirmed|mixed|contradicted|unverified",'
       '"evidence":"one short sentence","${viaSnippets ? 'sourceIndex' : 'url'}":${viaSnippets ? '1' : '"https://..."'}}],'
@@ -299,6 +311,7 @@ class Khoji {
       '"level":"yes|partial|no","quote":"what a source says","${viaSnippets ? 'sourceIndex' : 'url'}":${viaSnippets ? '1' : '"https://..."'}}],'
       '"permanentlyClosed":false}\n'
       'Rules: prefer the LOWER-rated reviews (1 to 3 stars) and complaints, since they show the problems; give at most $maxReviews. '
+      'When a review or page mentions steps, ramps, lifts, toilets or walking, report it under "access" with a short quote. '
       'Never invent a quote, a rating or a page. A verdict without a page is "unverified". '
       'Use empty arrays and permanentlyClosed null when you found nothing.';
 

@@ -29,6 +29,10 @@ class DayPlanInput {
     this.pace,
     this.bannedOutdoorDates = const {},
     this.excludedIds = const {},
+    this.walkLimitKm,
+    this.slowPace = false,
+    this.restStops = false,
+    this.dietary = const {},
   });
 
   final DateTime start;
@@ -59,6 +63,19 @@ class DayPlanInput {
 
   /// Places the plan must not use (replaced after an audit).
   final Set<String> excludedIds;
+
+  /// The farthest anyone in the group can comfortably walk between stops, from
+  /// their own answer ("under 100 m"). Null uses the default for their needs.
+  final double? walkLimitKm;
+
+  /// Fewer places a day and longer at each (elderly travellers, "slower pace").
+  final bool slowPace;
+
+  /// A short sit-down after each visit ("frequent rest stops").
+  final bool restStops;
+
+  /// Food needs, noted on every meal.
+  final Set<Dietary> dietary;
 }
 
 /// Outdoor places that landed on a day with heavy rain in the forecast.
@@ -78,6 +95,7 @@ class DayPlanResult {
     this.rainConflicts = const [],
     this.notes = const [],
     this.visited = const [],
+    this.freeMinutes = const [],
   });
 
   final List<ItineraryDay> days;
@@ -89,6 +107,10 @@ class DayPlanResult {
 
   /// The places actually placed on a day, in order.
   final List<Hotspot> visited;
+
+  /// Minutes each day (by index) the traveller is at the destination and free
+  /// to sightsee; 0 for a day taken up by the journey.
+  final List<int> freeMinutes;
 }
 
 /// Raah: turns a set of places into practical days. Deterministic. It groups
@@ -103,30 +125,30 @@ class DayPlanner {
 
   static DayPlanResult plan(DayPlanInput input) {
     final notes = <String>[];
+    // A date-only end (midnight) means the evening of that day, not its start.
+    final end = input.end.hour == 0 && input.end.minute == 0 ? input.end.add(const Duration(hours: 18)) : input.end;
     final firstDate = _dateOnly(input.start);
-    final lastDate = _dateOnly(input.end);
+    final lastDate = _dateOnly(end);
     final n = (lastDate.difference(firstDate).inDays + 1).clamp(1, 30);
     final dates = [for (var i = 0; i < n; i++) firstDate.add(Duration(days: i))];
 
-    final (dayStartMin, dayEndMin, perDay) = switch (input.pace) {
+    var (dayStartMin, dayEndMin, perDay) = switch (input.pace) {
       TripPace.relaxed => (9 * 60 + 30, 19 * 60 + 30, 4),
       TripPace.packed => (8 * 60 + 30, 21 * 60 + 30, 6),
       _ => (9 * 60, 20 * 60 + 30, 5),
     };
+    if (input.slowPace) perDay = math.max(2, perDay - 1);
 
     // When the traveller is actually at the destination.
     final arrivalMin = input.arrival?.durationMin ?? 0;
     final returnMin = input.departure?.durationMin ?? 0;
     final presenceStart = input.start.add(Duration(minutes: arrivalMin));
-    final presenceEnd = input.end.subtract(Duration(minutes: returnMin));
+    final presenceEnd = end.subtract(Duration(minutes: returnMin));
     if (presenceEnd.isBefore(presenceStart.add(const Duration(minutes: 120)))) {
-      notes.add(
-        'The journey there and back leaves almost no time at the destination. '
-        'Consider adding a day.',
-      );
+      notes.add('The journey there and back leaves almost no time at the destination.');
     }
 
-    // Each day's usable window.
+    // Each day's usable window: only while the traveller is there.
     final windows = <_Window?>[];
     for (final d in dates) {
       var ws = d.add(Duration(minutes: dayStartMin));
@@ -137,20 +159,25 @@ class DayPlanner {
       if (latest.isBefore(we)) we = latest;
       windows.add(we.difference(ws).inMinutes >= 90 ? _Window(ws, we) : null);
     }
+    final freeMinutes = [for (final w in windows) w?.minutes ?? 0];
 
     final excluded = input.excludedIds;
     var pool = [for (final h in input.places) if (!excluded.contains(h.id)) h];
     final alternates = [for (final h in input.alternates) if (!excluded.contains(h.id) && !pool.any((p) => p.id == h.id)) h];
 
+    // Nothing chosen (every pick was dropped): plan from the spares instead.
+    if (pool.isEmpty && alternates.isNotEmpty) pool = [...alternates];
+
     final usable = [for (var i = 0; i < n; i++) if (windows[i] != null) i];
     if (usable.isEmpty || pool.isEmpty) {
       return DayPlanResult(
-        days: _buildDays(input, dates, {for (final i in usable) i: const <ItinerarySlot>[]}, windows, notes),
+        days: _buildDays(input, dates, {for (final i in usable) i: const <ItinerarySlot>[]}, windows, notes, end: end),
         unscheduled: pool,
         notes: [
           ...notes,
           if (pool.isEmpty) 'There were no places to schedule.' else 'There is no usable time at the destination.',
         ],
+        freeMinutes: freeMinutes,
       );
     }
 
@@ -178,6 +205,7 @@ class DayPlanner {
 
     // 3. Sequence each day; whatever does not fit carries to a later day.
     final slotsByDay = <int, List<ItinerarySlot>>{};
+    var cappedDays = 0;
     final visited = <Hotspot>[];
     var carry = <Hotspot>[];
     final rainConflicts = <RainConflict>[];
@@ -197,6 +225,7 @@ class DayPlanner {
       );
       slotsByDay[dayIdx] = res.slots;
       visited.addAll(res.placed);
+      if (res.capped) cappedDays++;
       final placedIds = res.placed.map((h) => h.id).toSet();
       carry = [for (final h in candidates) if (!placedIds.contains(h.id)) h];
       // Outdoor places on a banned day cannot be carried back into it; they go on.
@@ -254,7 +283,12 @@ class DayPlanner {
     // (Food places are only ever used for meals, so an unused one is not "left out".)
     final unscheduled = [for (final h in pool) if (!placedIds.contains(h.id) && h.kind != HotspotKind.food) h];
     if (unscheduled.isNotEmpty) {
-      notes.add('${unscheduled.length} place(s) did not fit the time available: ${unscheduled.take(3).map((h) => h.name).join(', ')}${unscheduled.length > 3 ? '…' : ''}.');
+      final names = '${unscheduled.take(3).map((h) => h.name).join(', ')}${unscheduled.length > 3 ? '…' : ''}';
+      notes.add(
+        cappedDays > 0
+            ? '${unscheduled.length} more place(s) were left out to keep to about ${maxStops - 1} places a day, the pace you chose: $names.'
+            : '${unscheduled.length} place(s) did not fit the time available: $names.',
+      );
     }
     // A conflict only stays if the place is still on that day.
     final finalConflicts = [
@@ -263,11 +297,12 @@ class DayPlanner {
     ];
 
     return DayPlanResult(
-      days: _buildDays(input, dates, slotsByDay, windows, notes, visited: visited),
+      days: _buildDays(input, dates, slotsByDay, windows, notes, visited: visited, end: end),
       unscheduled: unscheduled,
       rainConflicts: finalConflicts,
       notes: notes,
       visited: visited,
+      freeMinutes: freeMinutes,
     );
   }
 
@@ -435,6 +470,9 @@ class DayPlanner {
     DateTime at(DateTime day, int minutes) => DateTime(day.year, day.month, day.day).add(Duration(minutes: minutes));
     final day = DateTime(window.start.year, window.start.month, window.start.day);
 
+    final diets = [for (final d in input.dietary) if (d != Dietary.noPreference) d.label.toLowerCase()];
+    final dietNote = diets.isEmpty ? null : 'Needs ${diets.join(' and ')} food: check the menu.';
+
     TransportLeg leg(LatLng from, String fromName, LatLng to, String toName) => TransportPlanner.local(
       id: 'local.$dayNumber.${hop++}',
       fromName: fromName,
@@ -444,6 +482,7 @@ class DayPlanner {
       travellers: input.travellers,
       preferred: input.localModes,
       needs: input.needs,
+      walkLimitKm: input.walkLimitKm,
     );
 
     void addTransit(TransportLeg l, String toName) {
@@ -473,7 +512,7 @@ class DayPlanner {
           title: place == null ? title : '$title at ${place.name}',
           location: place?.location ?? here,
           refId: place?.id,
-          note: place?.why,
+          note: [?place?.why, ?dietNote].join(' ').trim().isEmpty ? null : [?place?.why, ?dietNote].join(' '),
         ),
       );
       if (place != null) {
@@ -484,10 +523,33 @@ class DayPlanner {
       t = end;
     }
 
+    int visitMinutes(Hotspot h) => input.slowPace ? (h.visitMinutes * 1.25).round() : h.visitMinutes;
+
     bool lunchDue() => !lunchDone && mins(t) >= _lunchAt;
     bool dinnerDue() => !dinnerDone && mins(t) >= _dinnerAt;
 
     var stops = 0;
+    var capped = false;
+
+    // Back at the stay with time before dinner: say so, rather than leave a gap.
+    void restUntil(DateTime until) {
+      if (until.difference(t).inMinutes >= 30) {
+        slots.add(
+          ItinerarySlot(
+            kind: SlotKind.rest,
+            start: t,
+            end: until,
+            title: input.slowPace || input.restStops ? 'Rest at ${input.baseName}' : 'Free time near ${input.baseName}',
+            location: input.base,
+            note: capped
+                ? 'The day already has as many places as the pace you chose allows; this time is kept free on purpose.'
+                : 'Nothing else nearby is open or fits before dinner; this time is free.',
+          ),
+        );
+      }
+      if (t.isBefore(until)) t = until;
+    }
+
     for (var guard = 0; guard < 40; guard++) {
       // Meals come first when their time has arrived.
       if (lunchDue()) {
@@ -517,11 +579,16 @@ class DayPlanner {
         }
         break;
       }
-      if (stops >= maxStops - 1 && remaining.every((h) => h.kind != HotspotKind.food)) break;
+      // The day has as many places as the pace allows: only meals are left.
+      final full = stops >= maxStops - 1;
+      if (full) {
+        capped = capped || remaining.any((h) => h.kind != HotspotKind.food);
+        if (remaining.every((h) => h.kind != HotspotKind.food)) break;
+      }
 
       // Choose the next place: the earliest one that is open and fits the day.
       _Pick? best;
-      for (final h in remaining) {
+      for (final h in full ? const <Hotspot>[] : remaining) {
         if (h.kind == HotspotKind.food) continue; // food places are for meals, not sightseeing
         final l = TransportPlanner.local(
           id: 'probe',
@@ -532,14 +599,16 @@ class DayPlanner {
           travellers: input.travellers,
           preferred: input.localModes,
           needs: input.needs,
+          walkLimitKm: input.walkLimitKm,
         );
         final arrive = t.add(Duration(minutes: l.durationMin));
+        final stay = visitMinutes(h);
         final hours = OpeningHours.parse(h.openingHours);
-        final startMin = hours.nextSlot(weekday, mins(arrive), h.visitMinutes);
+        final startMin = hours.nextSlot(weekday, mins(arrive), stay);
         if (startMin == null) continue;
         final startAt = at(day, startMin);
         final wait = startAt.difference(arrive).inMinutes;
-        final end = startAt.add(Duration(minutes: h.visitMinutes));
+        final end = startAt.add(Duration(minutes: stay));
         if (end.isAfter(window.end)) continue;
         if (wait > 120) continue;
         final cost = l.durationMin + wait * 1.2 - h.score * 12;
@@ -558,7 +627,7 @@ class DayPlanner {
             here = input.base;
             hereName = input.baseName;
           }
-          if (mins(t) < _dinnerAt) t = at(day, _dinnerAt);
+          if (mins(t) < _dinnerAt) restUntil(at(day, _dinnerAt));
           continue;
         }
         break;
@@ -603,15 +672,25 @@ class DayPlanner {
       remaining.removeWhere((x) => x.id == h.id);
       placed.add(h);
       stops++;
+      if (input.restStops && window.end.difference(t).inMinutes >= 60) {
+        final rested = t.add(const Duration(minutes: 20));
+        slots.add(ItinerarySlot(kind: SlotKind.rest, start: t, end: rested, title: 'Rest stop', location: here, note: 'A seated break before moving on.'));
+        t = rested;
+      }
     }
 
     // Home for the evening when nothing brought us to dinner.
     if (!dinnerDone && placed.isNotEmpty && window.end.difference(t).inMinutes >= 90 && mins(window.end) >= _dinnerAt) {
-      if (mins(t) < _dinnerAt) t = at(day, _dinnerAt);
-      if (_km(here, input.base) > 0.15) addTransit(leg(here, hereName, input.base, input.baseName), input.baseName);
+      // Straight back to the stay after the last place, a rest, then dinner.
+      if (_km(here, input.base) > 0.15) {
+        addTransit(leg(here, hereName, input.base, input.baseName), input.baseName);
+        here = input.base;
+        hereName = input.baseName;
+      }
+      if (mins(t) < _dinnerAt) restUntil(at(day, _dinnerAt));
       meal('Dinner near ${input.baseName}');
     }
-    return _DayResult(slots, placed);
+    return _DayResult(slots, placed, capped: capped);
   }
 
   static Hotspot? _nearestFood(List<Hotspot> remaining, LatLng from, double maxKm) {
@@ -657,12 +736,13 @@ class DayPlanner {
     List<_Window?> windows,
     List<String> notes, {
     List<Hotspot> visited = const [],
+    required DateTime end,
   }) {
     final out = <ItineraryDay>[];
     final arrival = input.arrival;
     final departure = input.departure;
     final arrivalEnd = arrival == null ? null : input.start.add(Duration(minutes: arrival.durationMin));
-    final departStart = departure == null ? null : input.end.subtract(Duration(minutes: departure.durationMin));
+    final departStart = departure == null ? null : end.subtract(Duration(minutes: departure.durationMin));
 
     for (var i = 0; i < dates.length; i++) {
       final d = dates[i];
@@ -708,7 +788,7 @@ class DayPlanner {
       }
       slots.addAll(slotsByDay[i] ?? const []);
 
-      if (departure != null && departStart != null && _sameDay(input.end, d)) {
+      if (departure != null && departStart != null && _sameDay(end, d)) {
         slots.add(
           ItinerarySlot(
             kind: SlotKind.stay,
@@ -722,7 +802,7 @@ class DayPlanner {
           ItinerarySlot(
             kind: SlotKind.transit,
             start: departStart,
-            end: input.end,
+            end: end,
             title: '${departure.mode.label} home to ${departure.to}',
             location: departure.toPoint,
             costInr: departure.costInr,
@@ -789,8 +869,11 @@ class _Pick {
 }
 
 class _DayResult {
-  const _DayResult(this.slots, this.placed);
+  const _DayResult(this.slots, this.placed, {this.capped = false});
 
   final List<ItinerarySlot> slots;
   final List<Hotspot> placed;
+
+  /// The day stopped at its place limit with places still waiting.
+  final bool capped;
 }

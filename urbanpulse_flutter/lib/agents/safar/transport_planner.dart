@@ -353,14 +353,15 @@ abstract final class TransportPlanner {
     required int travellers,
     Set<TripTransportMode> preferred = const {},
     Set<AccessibilityNeed> needs = const {},
+    double? walkLimitKm,
   }) {
     final straight = haversineKm(from.latitude, from.longitude, to.latitude, to.longitude);
     final road = math.max(0.05, straight * 1.3);
     final limited = needs.any(
       (n) => n == AccessibilityNeed.wheelchair || n == AccessibilityNeed.limitedMobility || n == AccessibilityNeed.elderlyCare,
     );
-    final walkLimitKm = limited ? 0.25 : 0.7;
-    if (road <= walkLimitKm) {
+    final walkKm = walkLimitKm ?? (limited ? 0.25 : 0.7);
+    if (road <= walkKm) {
       return TransportLeg(
         id: id,
         from: fromName,

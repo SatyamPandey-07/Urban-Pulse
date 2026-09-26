@@ -34,7 +34,7 @@ class KhojiAgent {
   // --- hotels -----------------------------------------------------------------
 
   Future<List<HotelOption>> verifyHotels(TaskContext parent, List<HotelOption> hotels, HotelQuery q) async {
-    if (hotels.isEmpty || parent.degraded || parent.cancelled) return hotels;
+    if (hotels.isEmpty || parent.cancelled) return hotels;
     final targets = hotels.take(maxHotels).toList();
     final needs = AccessRules.relevant(q.needs);
 
@@ -46,8 +46,6 @@ class KhojiAgent {
             agent: AgentKind.khoji,
             title: 'Check ${_short(h.name)}',
             why: 'A listing can say anything. Khoji looks for guest reviews (especially the lower-rated ones) and checks the claims that matter to you.',
-            optional: true,
-            timeout: const Duration(seconds: 20),
           ),
           (c) async {
             final claimNeeds = [for (final n in needs) if (_needsCheck(h, n)) n].take(2).toList();
@@ -64,7 +62,7 @@ class KhojiAgent {
                 needs: needs,
                 pageUrl: h.tripAdvisorUrl,
               ),
-              isDegraded: () => c.degraded || c.cancelled,
+              isCancelled: () => c.cancelled,
             );
             return AgentReport(
               agent: c.agent,
@@ -170,7 +168,7 @@ class KhojiAgent {
   /// Checks the places most in need of it: new and trending ones (which may not
   /// exist any more) and the best ones whose access nobody has confirmed.
   Future<HotspotVerification> verifyHotspots(TaskContext parent, HotspotSearchResult r) async {
-    if (r.selected.isEmpty || parent.degraded || parent.cancelled) return const HotspotVerification();
+    if (r.selected.isEmpty || parent.cancelled) return const HotspotVerification();
     final needs = AccessRules.relevant(r.query.needs);
     final byNeed = [
       for (final h in r.selected)
@@ -194,8 +192,6 @@ class KhojiAgent {
             why: h.isTrending
                 ? 'New places can close or be less good than the buzz. Khoji checks that ${h.name} is real and what visitors say.'
                 : 'Nobody has confirmed whether ${h.name} works for your access needs, so Khoji looks for evidence.',
-            optional: true,
-            timeout: const Duration(seconds: 20),
           ),
           (c) async {
             final claimNeeds = [for (final n in needs) if ((h.access[n]?.level ?? SupportLevel.unknown) == SupportLevel.unknown) n].take(2).toList();
@@ -210,7 +206,7 @@ class KhojiAgent {
                 wikiTitle: h.sources.where((s) => s.source == 'Wikipedia').firstOrNull?.title,
                 checkClosed: true,
               ),
-              isDegraded: () => c.degraded || c.cancelled,
+              isCancelled: () => c.cancelled,
             );
             return AgentReport(
               agent: c.agent,

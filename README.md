@@ -99,6 +99,497 @@ A full itinerary screen (also saved to *My Trips* and shareable as a **PDF**):
 - **Green**: eco score, footprint breakdown, and greener choices
 - **Trip**: the stay (with Khoji's verdicts and review quotes), journey options, a confidence score, everything the plan assumes, every source, and how long each agent worked
 
+---
+
+## 📦 Object (JSON) Contracts & Data Schemas
+
+UrbanPulse is built around typed, validated JSON contracts that govern the hand-off between conversational intake, autonomous specialist swarms, and final itinerary rendering.
+
+### 1. Initial Trip Detail Object (`TripBrief` JSON Schema)
+
+The `TripBrief` is the structured hand-off contract produced by the **Receptionist Agent (Phase 1)** once the traveler has stated and reviewed their trip requirements. Every downstream specialist agent reads from this immutable contract.
+
+#### TypeScript / JSON Interface Definition
+
+```typescript
+interface TripBrief {
+  id: string;                                 // Unique brief identifier (e.g. "brief_1727391456000")
+  createdAt: string;                          // ISO 8601 creation timestamp
+  destination: string | null;                 // Destination city or region
+  originCity: string | null;                  // Departure / starting city
+  start: string | null;                       // ISO 8601 trip start date-time
+  end: string | null;                         // ISO 8601 trip end date-time
+  
+  // Group Composition
+  travellerCount: number | null;              // Total number of travellers
+  adults: number | null;                      // Adults (ages 18-59)
+  seniors: number | null;                     // Seniors (ages 60+)
+  children: number | null;                    // Children (under 18)
+  women: number | null;                       // Women travellers count
+  childAges: number[];                        // Specific child ages (e.g. [5, 11])
+  
+  // Budget (Whole-trip for entire group in INR)
+  budgetMinInr: number | null;                // Lower budget bound in ₹
+  budgetMaxInr: number | null;                // Upper budget bound in ₹
+  
+  // Modes & Preferences (Enums)
+  transportModes: TripTransportMode[];        // Acceptable transit options
+  accessibilityNeeds: AccessibilityNeed[];    // Specific physical / sensory requirements
+  accessibilityConfirmed: boolean;            // Whether traveler explicitly confirmed needs
+  accessibilityDetails: Record<string, string[]>; // Sub-option answers (e.g. {"a11y.stairs": ["avoid_steep_climbs"]})
+  womenSafety: WomenSafetyPref[];             // Dedicated safety requirements
+  style: TripStyle | null;                    // Thematic style of trip
+  pace: TripPace | null;                      // Schedule density & touring speed
+  stayTypes: StayType[];                      // Preferred accommodation types
+  dietary: Dietary[];                         // Food restrictions and preferences
+  sustainability: SustainabilityPriority;     // Carbon vs Convenience weighting
+  
+  notes: string | null;                       // Freeform special instructions
+  uncertain: BriefField[];                    // Fields requiring follow-up user clarification
+}
+
+// Canonical Enumerations
+type TripTransportMode = "train" | "metroLocal" | "eBus" | "bus" | "sharedEv" | "selfDriveEv" | "carTaxi" | "flight";
+type AccessibilityNeed = "wheelchair" | "limitedMobility" | "visual" | "hearing" | "elderlyCare" | "serviceAnimal" | "cognitiveSensory" | "otherSpecial" | "none";
+type WomenSafetyPref = "womenOnlyTransport" | "verifiedStays" | "avoidLateNightTransit" | "sharedLiveLocation" | "none";
+type TripStyle = "leisure" | "family" | "pilgrimage" | "adventure" | "heritage" | "nature" | "workation";
+type TripPace = "relaxed" | "balanced" | "packed";
+type StayType = "ecoStay" | "homestay" | "hotel" | "hostel" | "resort";
+type Dietary = "veg" | "vegan" | "jain" | "halal" | "noPreference";
+type SustainabilityPriority = "greenest" | "balanced" | "convenience";
+type BriefField = "destination" | "origin" | "dates" | "travellers" | "group" | "womenSafety" | "accessibility" | "transport" | "budget" | "style" | "pace" | "stay" | "dietary" | "sustainability" | "notes";
+```
+
+#### Annotated Real-World `TripBrief` JSON Example
+
+```json
+{
+  "id": "brief_1727391456000",
+  "createdAt": "2026-09-27T09:00:00.000Z",
+  "destination": "Rishikesh",
+  "originCity": "Panvel",
+  "start": "2026-10-15T09:00:00.000Z",
+  "end": "2026-10-18T18:00:00.000Z",
+  "travellerCount": 2,
+  "adults": 1,
+  "seniors": 1,
+  "children": 0,
+  "women": 1,
+  "childAges": [],
+  "budgetMinInr": 25000,
+  "budgetMaxInr": 50000,
+  "transportModes": [
+    "train",
+    "eBus",
+    "sharedEv"
+  ],
+  "accessibilityNeeds": [
+    "elderlyCare",
+    "limitedMobility"
+  ],
+  "accessibilityConfirmed": true,
+  "accessibilityDetails": {
+    "a11y.stairs": ["avoid_steep_climbs"],
+    "a11y.vehicle": ["low_floor"]
+  },
+  "womenSafety": [
+    "verifiedStays",
+    "womenOnlyTransport",
+    "avoidLateNightTransit"
+  ],
+  "style": "nature",
+  "pace": "relaxed",
+  "stayTypes": [
+    "ecoStay",
+    "resort"
+  ],
+  "dietary": [
+    "veg"
+  ],
+  "sustainability": "greenest",
+  "notes": "Looking for peaceful ghats, meditation sights, and serene viewpoints without steep climbs.",
+  "uncertain": []
+}
+```
+
+---
+
+### 2. Final Trip Plan Object (`Itinerary` JSON Schema)
+
+The `Itinerary` is the comprehensive multi-agent synthesis object containing timeline days, slot breakdowns, itemized budget ledgers, carbon benchmarks, source provenance, and universal accessibility audits.
+
+#### TypeScript / JSON Interface Definition
+
+```typescript
+interface Itinerary {
+  id: string;                                 // Itinerary identifier (e.g. "itin_rishikesh_98241")
+  createdAt: string;                          // ISO 8601 generation timestamp
+  destination: string;                        // Destination name
+  origin: string;                             // Origin city / departure point
+  start: string;                              // ISO 8601 trip start date-time
+  end: string;                                // ISO 8601 trip end date-time
+  travellerSummary: string;                   // E.g., "2 travellers · 1 adult, 1 senior"
+  
+  // Stays & Transport
+  hotel: HotelOption | null;                  // Chosen accommodation
+  hotelAlternatives: HotelOption[];           // Evaluated alternatives
+  transportOptions: TransportLeg[];           // Intercity transit options evaluated
+  chosenTransport: TransportLeg | null;       // Selected journey option
+  
+  // Day-by-Day Timeline
+  days: ItineraryDay[];                       // Structured timeline days
+  
+  // Multi-Agent Audits
+  budget: Budget;                             // Itemized financial ledger
+  audit: AccessibilityAudit | null;           // Saksham accessibility audit
+  green: GreenReport | null;                  // Hariyali emissions & eco score report
+  sources: SourceRef[];                       // Citations and provenance of real data consulted
+  assumptions: string[];                      // Disclosures of any estimations made
+  confidence: number;                         // 0.0 to 1.0 confidence score
+  brief: TripBrief | null;                    // Original brief
+}
+
+interface ItineraryDay {
+  number: number;                             // Day 1, 2, 3...
+  date: string;                               // ISO 8601 date (YYYY-MM-DD)
+  title: string;                              // Day headline
+  weather: string | null;                     // E.g. "25°C · Sunny & Crisp"
+  slots: ItinerarySlot[];                     // Chronological slots
+}
+
+interface ItinerarySlot {
+  kind: "stay" | "visit" | "meal" | "transit" | "rest";
+  start: string;                              // ISO 8601 slot start time
+  end: string;                                // ISO 8601 slot end time
+  title: string;                              // Activity / attraction / step title
+  location: { latitude: number; longitude: number } | null;
+  refId: string | null;                       // ID of hotel or hotspot
+  note: string | null;                        // Practical context / tips
+  costInr: number | null;                     // Admission or service fee
+  leg: TransportLeg | null;                   // If transit, leg metrics
+  access: "yes" | "partial" | "no" | "unknown" | null; // Saksham accessibility rating
+  flags: string[];                            // Short badges (e.g. "Ramp access confirmed")
+}
+
+interface Budget {
+  lines: BudgetLine[];                        // Itemized expenditure lines
+  budgetMinInr: number | null;
+  budgetMaxInr: number | null;
+  totalInr: number;                           // Total computed spend in ₹
+  remainingInr: number | null;                // Remaining budget headroom
+  isWithinBudget: boolean;
+  hasEstimates: boolean;
+}
+
+interface BudgetLine {
+  label: string;                              // E.g., "3 nights at Ganga Kinare Eco Hotel"
+  amountInr: number;                          // Cost in ₹
+  category: "stay" | "transport" | "activities" | "food" | "buffer";
+  isEstimated: boolean;                       // True if estimated by model, false if live quote
+}
+
+interface GreenReport {
+  co2Kg: number;                              // Total trip emissions in kg CO₂
+  co2SavedKg: number;                         // kg CO₂ saved vs high-carbon baseline
+  score: number;                              // Eco score (0 to 100)
+  tips: string[];                             // Tailored sustainability suggestions
+}
+```
+
+#### Annotated Real-World `Itinerary` JSON Example
+
+```json
+{
+  "id": "itin_rishikesh_98241",
+  "createdAt": "2026-09-27T09:05:30.000Z",
+  "destination": "Rishikesh",
+  "origin": "Panvel",
+  "start": "2026-10-15T09:00:00.000Z",
+  "end": "2026-10-18T18:00:00.000Z",
+  "travellerSummary": "2 travellers · 1 adult, 1 senior (Elderly care, step-free preference)",
+  "hotel": {
+    "id": "stay_ganga_kinare_01",
+    "name": "Ganga Kinare — A Riverside Boutique Eco Hotel",
+    "location": { "latitude": 30.1084, "longitude": 78.2917 },
+    "pricePerNightInr": 6200,
+    "rating": 4.6,
+    "sustainabilityScore": 92,
+    "amenities": ["Elevator", "Ramp Access", "Organic Dining", "Solar Water Heating"],
+    "access": {
+      "elderlyCare": { "level": "yes", "reason": "Ground-floor suites, elevator to all levels, wheelchair on site" },
+      "limitedMobility": { "level": "yes", "reason": "Direct riverfront deck without steep stairwells" }
+    }
+  },
+  "hotelAlternatives": [
+    {
+      "id": "stay_ananda_resort_02",
+      "name": "Aloha On The Ganges",
+      "location": { "latitude": 30.1345, "longitude": 78.3241 },
+      "pricePerNightInr": 7800,
+      "rating": 4.5,
+      "sustainabilityScore": 88
+    }
+  ],
+  "chosenTransport": {
+    "mode": "train",
+    "from": "Panvel Junction (PNVL)",
+    "to": "Yog Nagari Rishikesh (YNRK)",
+    "durationMin": 1420,
+    "distanceKm": 1640,
+    "costInr": 3540,
+    "co2Grams": 45920,
+    "walking": false,
+    "note": "Express AC 2-Tier with step-free station assistance and confirmed lower berths."
+  },
+  "days": [
+    {
+      "number": 1,
+      "date": "2026-10-15T00:00:00.000Z",
+      "title": "Arrive in Rishikesh · Riverside Check-in & Evening Aarti",
+      "weather": "25°C · Pleasant & Clear",
+      "slots": [
+        {
+          "kind": "transit",
+          "start": "2026-10-15T09:00:00.000Z",
+          "end": "2026-10-15T13:40:00.000Z",
+          "title": "Arrive at Yog Nagari Rishikesh via Eco Express Rail",
+          "location": { "latitude": 30.0891, "longitude": 78.2882 },
+          "costInr": 3540,
+          "access": "yes",
+          "note": "Station porter and low-floor EV cab transfer to hotel.",
+          "flags": ["Step-free assistance booked"]
+        },
+        {
+          "kind": "stay",
+          "start": "2026-10-15T14:00:00.000Z",
+          "end": "2026-10-15T15:30:00.000Z",
+          "title": "Check in at Ganga Kinare Boutique Hotel",
+          "location": { "latitude": 30.1084, "longitude": 78.2917 },
+          "note": "Settle into accessible ground-floor river view suite and rest.",
+          "access": "yes",
+          "flags": []
+        },
+        {
+          "kind": "visit",
+          "start": "2026-10-15T17:15:00.000Z",
+          "end": "2026-10-15T19:00:00.000Z",
+          "title": "Triveni Ghat & Evening Ganga Aarti",
+          "location": { "latitude": 30.1058, "longitude": 78.2971 },
+          "refId": "spot_triveni_ghat",
+          "note": "Reserved seating near the ramp platform for elderly comfort; watch the sacred floating diyas.",
+          "costInr": 0,
+          "access": "yes",
+          "flags": ["Ramp access confirmed"]
+        },
+        {
+          "kind": "meal",
+          "start": "2026-10-15T19:30:00.000Z",
+          "end": "2026-10-15T20:45:00.000Z",
+          "title": "Dinner at Chotiwala Heritage Restaurant",
+          "location": { "latitude": 30.1245, "longitude": 78.3150 },
+          "note": "Wholesome satvik Garhwali thali with mild spices.",
+          "costInr": 750,
+          "access": "yes",
+          "flags": []
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "date": "2026-10-16T00:00:00.000Z",
+      "title": "Heritage & Serenity · The Beatles Ashram & River Overlooks",
+      "weather": "26°C · Sunny & Crisp",
+      "slots": [
+        {
+          "kind": "visit",
+          "start": "2026-10-16T09:30:00.000Z",
+          "end": "2026-10-16T12:00:00.000Z",
+          "title": "The Beatles Ashram (Chaurasi Kutia)",
+          "location": { "latitude": 30.1132, "longitude": 78.3125 },
+          "refId": "spot_beatles_ashram",
+          "note": "Gentle nature paths through forested heritage ruins and colorful meditation dome art.",
+          "costInr": 300,
+          "access": "yes",
+          "flags": ["Shaded paths"]
+        },
+        {
+          "kind": "meal",
+          "start": "2026-10-16T12:30:00.000Z",
+          "end": "2026-10-16T14:00:00.000Z",
+          "title": "Lunch at Little Buddha Cafe & River Overlook",
+          "location": { "latitude": 30.1278, "longitude": 78.3204 },
+          "note": "Wood-fired meals, herbal teas, and soothing views of the Ganges.",
+          "costInr": 850,
+          "access": "partial",
+          "flags": []
+        },
+        {
+          "kind": "visit",
+          "start": "2026-10-16T15:30:00.000Z",
+          "end": "2026-10-16T17:30:00.000Z",
+          "title": "Parmarth Niketan Ashram & Gardens",
+          "location": { "latitude": 30.1190, "longitude": 78.3160 },
+          "refId": "spot_parmarth_niketan",
+          "note": "Step-free floral courtyards, sacred banyan trees, and tranquil evening music.",
+          "costInr": 0,
+          "access": "yes",
+          "flags": ["Step-free verified"]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "date": "2026-10-17T00:00:00.000Z",
+      "title": "Spiritual Vistas · Ram Jhula & Local Craft Trail",
+      "weather": "24°C · Clear Sky",
+      "slots": [
+        {
+          "kind": "visit",
+          "start": "2026-10-17T10:00:00.000Z",
+          "end": "2026-10-17T12:00:00.000Z",
+          "title": "Ram Jhula & Swarg Ashram Trail",
+          "location": { "latitude": 30.1221, "longitude": 78.3175 },
+          "refId": "spot_ram_jhula",
+          "note": "Pedestrian suspension bridge with panoramic river vistas and authentic Ayurvedic shops.",
+          "costInr": 0,
+          "access": "yes",
+          "flags": ["Flat pedestrian zone"]
+        },
+        {
+          "kind": "visit",
+          "start": "2026-10-17T14:30:00.000Z",
+          "end": "2026-10-17T16:00:00.000Z",
+          "title": "Tera Manzil Temple (Trimbakeshwar)",
+          "location": { "latitude": 30.1305, "longitude": 78.3280 },
+          "refId": "spot_tera_manzil",
+          "note": "Riverside sacred complex overlooking Lakshman Jhula area.",
+          "costInr": 0,
+          "access": "partial",
+          "flags": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "date": "2026-10-18T00:00:00.000Z",
+      "title": "Departure · Scenic Farewell & Return Transit",
+      "weather": "25°C · Clear Sky",
+      "slots": [
+        {
+          "kind": "stay",
+          "start": "2026-10-18T10:00:00.000Z",
+          "end": "2026-10-18T10:45:00.000Z",
+          "title": "Check out of Ganga Kinare Hotel",
+          "location": { "latitude": 30.1084, "longitude": 78.2917 },
+          "note": "Baggage assistance to departure cab.",
+          "access": "yes",
+          "flags": []
+        },
+        {
+          "kind": "transit",
+          "start": "2026-10-18T11:30:00.000Z",
+          "end": "2026-10-18T18:00:00.000Z",
+          "title": "Return Journey to Panvel via Train",
+          "location": { "latitude": 18.9894, "longitude": 73.1175 },
+          "costInr": 3540,
+          "access": "yes",
+          "flags": []
+        }
+      ]
+    }
+  ],
+  "budget": {
+    "lines": [
+      { "label": "3 nights at Ganga Kinare Eco Hotel", "amountInr": 18600, "category": "stay", "isEstimated": false },
+      { "label": "Round-trip Train (Panvel ⇄ Rishikesh AC 2-Tier)", "amountInr": 7080, "category": "transport", "isEstimated": false },
+      { "label": "Local transfers & EV cab services", "amountInr": 2400, "category": "transport", "isEstimated": true },
+      { "label": "Attractions admission & heritage entry", "amountInr": 600, "category": "activities", "isEstimated": false },
+      { "label": "Dining & traditional meals", "amountInr": 5200, "category": "food", "isEstimated": true },
+      { "label": "Contingency & accessibility assistance buffer", "amountInr": 2500, "category": "buffer", "isEstimated": false }
+    ],
+    "budgetMinInr": 25000,
+    "budgetMaxInr": 50000,
+    "totalInr": 36380,
+    "remainingInr": 13620,
+    "isWithinBudget": true,
+    "hasEstimates": true
+  },
+  "audit": {
+    "items": [
+      {
+        "name": "Ganga Kinare — A Riverside Boutique Eco Hotel",
+        "kind": "stay",
+        "checks": [
+          { "need": "elderlyCare", "level": "yes", "reason": "Ground floor suites, elevators, and step-free access." },
+          { "need": "limitedMobility", "level": "yes", "reason": "Ramped riverside veranda." }
+        ],
+        "action": "keep"
+      },
+      {
+        "name": "Triveni Ghat Evening Aarti",
+        "kind": "visit",
+        "checks": [
+          { "need": "elderlyCare", "level": "yes", "reason": "Wheelchair accessible ramp to dedicated viewing platform." }
+        ],
+        "action": "keep"
+      }
+    ],
+    "actionsRequired": []
+  },
+  "green": {
+    "co2Kg": 91.8,
+    "co2SavedKg": 420.4,
+    "score": 89,
+    "tips": [
+      "Choosing electric rail over flights or petrol cars cut your group's footprint by over 420 kg CO₂.",
+      "Staying at an eco-certified hotel saved an estimated 18 kWh of grid electricity each day."
+    ]
+  },
+  "sources": [
+    { "title": "The Beatles Ashram", "url": "https://en.wikipedia.org/wiki/Beatles_Ashram", "source": "Curated Guide" },
+    { "title": "Triveni Ghat", "url": "https://en.wikipedia.org/wiki/Triveni_Ghat", "source": "Curated Guide" },
+    { "title": "Open-Meteo Weather Model", "url": "https://open-meteo.com", "source": "Raah Weather" }
+  ],
+  "assumptions": [
+    "Local meal costs are budgeted at approximately ₹650 per person per day.",
+    "Indian Railways AC 2-Tier ticket costs assume standard dynamic Tatkal / General quota pricing."
+  ],
+  "confidence": 0.94
+}
+```
+
+---
+
+### 3. Trips Dashboard Flat Object (`TripPlan` Schema)
+
+For instant rendering on the mobile **Trips Tab** and local SQLite persistence, `Itinerary.toTripPlan()` projects the rich multi-agent structure into the lightweight `TripPlan` model:
+
+```typescript
+interface TripPlan {
+  id: string;
+  destination: string;
+  title: string;                               // E.g., "Rishikesh — 4-day trip"
+  durationDays: number;
+  travelDates: string;                         // E.g., "15 Oct – 18 Oct 2026"
+  travelMode: string;                          // E.g., "Train"
+  co2SavedKg: number;                          // 420.4
+  pulsePointsEarned: number;                   // CO2 savings converted to gamified rewards
+  isCompleted: boolean;
+  hotelName: string;                           // "Ganga Kinare — A Riverside Boutique Eco Hotel"
+  hotelRating: number;                         // 4.6
+  isStepFreeAccessible: boolean;               // Verified by Saksham audit
+  totalBudgetInr: number;                      // 36380
+  aqiStatus: string;                           // Telemetry readout
+  transitCostInr: number;                      // 7080
+  dailyItinerary: TripDaySchedule[];
+  transitOpt1Name?: string;
+  transitOpt1Metrics?: string;
+  source: "multi_agent";
+}
+```
+
+---
+
 ### 5. Built not to break
 
 Judges, and travellers, type strange things and networks fail.
@@ -108,6 +599,7 @@ Judges, and travellers, type strange things and networks fail.
 - **Sanitised input** (control characters, length), **safe links** (only http/https), **offline detection** (an offline estimate, never "unknown place"), **cancellation** (restart the chat and a running plan stops and can never write into the new one).
 - **Chaos-tested**: the whole pipeline is run against hostile destinations (emoji, SQL, HTML, prompt injection, a 10,000-character name), random service outages, garbage model replies and random answers.
 - **Free-tier friendly**: a per-plan credit budget for paid searches, aggressive caching, shared request de-duplication, and a spread of Groq calls across several keys.
+- **Persistent In-App API Key Overrides**: Switch or test Groq, Tavily, Geoapify, Xotelo RapidAPI, or TomTom keys at runtime directly inside **Settings → API Key & Provider Overrides** without recompiling.
 
 ---
 

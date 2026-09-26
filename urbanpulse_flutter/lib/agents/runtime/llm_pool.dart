@@ -14,7 +14,9 @@ enum LlmTier {
   /// Worker tasks: extraction, ranking, estimates. Fast and cheap.
   light,
 
-  /// `groq/compound`: the model with built-in web search.
+  /// A model that searches the web itself (Groq's `browser_search` tool on
+  /// gpt-oss). Only models that can really search are in this tier, so a
+  /// "search" never silently becomes the model's memory.
   search,
 }
 
@@ -140,9 +142,9 @@ class KeyRing {
 
   /// The slots to try for [a], best first: its own slot, then the others that
   /// are not cooling down, then cooling ones by soonest recovery.
-  List<int> tryOrder(AgentKind a) {
+  List<int> tryOrder(AgentKind a, {int? prefer}) {
     if (isEmpty) return const [];
-    final own = preferredSlot(a);
+    final own = prefer ?? preferredSlot(a);
     final all = [for (var i = 0; i < _keys.length; i++) i]..removeWhere(_dead.contains);
     all.sort((x, y) {
       int rank(int s) => s == own ? 0 : 1;
@@ -225,12 +227,28 @@ class LlmPool implements AgentLlm {
   final Future<void> Function(Duration) _delay;
 
   final Map<int, _Semaphore> _gates = {};
+
+  /// Web searches are heavy (every page read counts as input): one at a time
+  /// across the pool, each starting on the next key in turn, so several
+  /// agents checking reviews together never pile onto one key's rate limit.
+  final _Semaphore _searchGate = _Semaphore(1);
+  int _searchTurn = 0;
   final List<LlmCallRecord> _calls = [];
+
+  /// Turns on Groq's built-in web search for the [LlmTier.search] models.
+  static const browserSearch = <String, Object?>{
+    'tools': [
+      {'type': 'browser_search'},
+    ],
+    'tool_choice': 'required',
+  };
 
   static const models = <LlmTier, List<String>>{
     LlmTier.heavy: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'],
     LlmTier.light: ['openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b'],
-    LlmTier.search: ['groq/compound', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'],
+    // 20b first: web pages count against the tokens-per-minute limit, which is
+    // far higher for the smaller model, and it searches just as well.
+    LlmTier.search: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
   };
 
   List<LlmCallRecord> get calls => List.unmodifiable(_calls);
@@ -275,27 +293,36 @@ class LlmPool implements AgentLlm {
       return const GroqFailure(GroqErrorKind.noKey);
     }
 
-    GroqFailure last = const GroqFailure(GroqErrorKind.network);
-    for (final model in models[tier]!) {
-      final r = await _tryModel(
-        agent,
-        model,
-        messages,
-        tier: tier,
-        json: json,
-        temperature: temperature,
-        maxTokens: maxTokens,
-        timeout: timeout,
-        extraBody: extraBody,
-      );
-      if (r is GroqSuccess) return r;
-      last = r as GroqFailure;
-      // Nothing more to try if every key was rejected.
-      if (last.kind == GroqErrorKind.noKey || last.kind == GroqErrorKind.unauthorized) {
-        if (ring.usable == 0) return last;
+    final search = tier == LlmTier.search;
+    if (search) await _searchGate.acquire();
+    try {
+      GroqFailure last = const GroqFailure(GroqErrorKind.network);
+      final body = search ? {...browserSearch, ...?extraBody} : extraBody;
+      final prefer = search ? _searchTurn++ % ring.length : null;
+      for (final model in models[tier]!) {
+        final r = await _tryModel(
+          agent,
+          model,
+          messages,
+          tier: tier,
+          json: json,
+          temperature: temperature,
+          maxTokens: maxTokens,
+          timeout: timeout,
+          extraBody: body,
+          prefer: prefer,
+        );
+        if (r is GroqSuccess) return r;
+        last = r as GroqFailure;
+        // Nothing more to try if every key was rejected.
+        if (last.kind == GroqErrorKind.noKey || last.kind == GroqErrorKind.unauthorized) {
+          if (ring.usable == 0) return last;
+        }
       }
+      return last;
+    } finally {
+      if (search) _searchGate.release();
     }
-    return last;
   }
 
   Future<GroqResult> _tryModel(
@@ -308,6 +335,7 @@ class LlmPool implements AgentLlm {
     required int maxTokens,
     Duration? timeout,
     Map<String, Object?>? extraBody,
+    int? prefer,
   }) async {
     GroqFailure last = const GroqFailure(GroqErrorKind.network);
     var useJson = json;
@@ -315,7 +343,7 @@ class LlmPool implements AgentLlm {
 
     // Bounded: each pass tries every usable key once.
     for (var pass = 0; pass < 3; pass++) {
-      final order = ring.tryOrder(agent);
+      final order = ring.tryOrder(agent, prefer: prefer);
       if (order.isEmpty) return const GroqFailure(GroqErrorKind.noKey);
 
       var sawRateLimit = false;
@@ -367,7 +395,7 @@ class LlmPool implements AgentLlm {
       }
       // Every key was rate limited: wait for the soonest to recover, once.
       final soonest = [
-        for (final s in ring.tryOrder(agent)) ring.cooldownLeft(s),
+        for (final s in ring.tryOrder(agent, prefer: prefer)) ring.cooldownLeft(s),
       ].fold<Duration?>(null, (a, b) => a == null || b < a ? b : a);
       final wait = soonest ?? const Duration(seconds: 1);
       if (waited + wait > maxRateLimitWait) return last;

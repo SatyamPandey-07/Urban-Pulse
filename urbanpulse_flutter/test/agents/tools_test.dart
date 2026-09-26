@@ -189,20 +189,58 @@ void main() {
       expect(out.single.provider, 'Groq search');
     });
 
-    test('falls back to the model’s JSON, leniently parsed', () {
+    test('a reply with no executed search is the model’s memory, not a search: nothing is returned', () {
       final r = GroqSuccess(
-        'Here:\n```json\n{"results":[{"title":"A","url":"https://a.example","snippet":"s"},{"title":"B","url":"https://b.example",}]}\n```',
-        'groq/compound',
+        'Here:\n```json\n{"results":[{"title":"A","url":"https://a.example","snippet":"s"}]}\n```',
+        'openai/gpt-oss-20b',
       );
-      expect(CompoundSearchProvider.parse(r, 5)!.map((e) => e.title), ['A', 'B']);
-      expect(CompoundSearchProvider.parse(const GroqSuccess('no idea', 'groq/compound'), 5), isNull);
+      expect(CompoundSearchProvider.parse(r, 5), isNull, reason: 'URLs the model wrote itself may be invented');
+      expect(CompoundSearchProvider.parse(const GroqSuccess('no idea', 'openai/gpt-oss-20b'), 5), isNull);
+    });
+
+    test('browser_search listings carry titles and opened pages carry text: one entry per page, with the text', () {
+      final r = GroqSuccess(
+        'answer',
+        'openai/gpt-oss-120b',
+        raw: {
+          'choices': [
+            {
+              'message': {
+                'executed_tools': [
+                  {
+                    'type': 'browser_search',
+                    'search_results': {
+                      'results': [
+                        {'title': 'Is Hawa Mahal wheelchair accessible?', 'url': 'https://forum.example/t/1', 'content': '', 'score': 0.9},
+                        {'title': 'Hawa Mahal guide', 'url': 'https://guide.example', 'content': '', 'score': 0.7},
+                      ],
+                    },
+                  },
+                  {
+                    'type': 'browser.open',
+                    'search_results': {
+                      'results': [
+                        {'title': 'forum.example', 'url': 'https://forum.example/t/1', 'content': 'Ramp at the side entrance, but the upper floors are stairs only.', 'score': 1},
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      );
+      final out = CompoundSearchProvider.parse(r, 5)!;
+      expect(out.map((e) => e.url), ['https://forum.example/t/1', 'https://guide.example']);
+      expect(out.first.snippet, contains('stairs only'));
+      expect(out.last.snippet, 'Hawa Mahal guide', reason: 'a listing without text keeps its title, so it is not thrown away');
     });
 
     test('respects the shared spend cap and asks the search tier', () async {
       final llm = ScriptedLlm(['{"results":[{"title":"A","url":"https://a.example","snippet":"s"}]}']);
       var allowed = true;
       final p = CompoundSearchProvider(llm: llm, canSpend: () => allowed);
-      expect(await p.search('q'), hasLength(1));
+      expect(await p.search('q'), isNull, reason: 'no search was executed, so there are no results');
       expect(llm.asked.single.tier.name, 'search');
       allowed = false;
       expect(await p.search('q'), isNull);

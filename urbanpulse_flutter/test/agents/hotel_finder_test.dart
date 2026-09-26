@@ -284,10 +284,10 @@ void main() {
       expect(r.options.first.priceBand, 'high');
     });
 
-    test('degraded mode skips the optional work: no web loop, no page reads, no AI', () async {
+    test('once the traveller stops the plan, the extra work is skipped: no web loop, no page reads, no AI', () async {
       final llm = ScriptedLlm()..fallback = '{"final":{"hotels":[]}}';
       final rig = FinderRig(HotelWorld(), llm: llm, webLoop: true);
-      final r = await rig.finder.find(munnarQuery(needs: {AccessibilityNeed.wheelchair}), isDegraded: () => true);
+      final r = await rig.finder.find(munnarQuery(needs: {AccessibilityNeed.wheelchair}), isCancelled: () => true);
       expect(r.options, isNotEmpty);
       expect(llm.asked, isEmpty, reason: 'no model call at all');
       expect(rig.world.hitsFor('tripadvisor.com/Hotel_Review'), 0);
