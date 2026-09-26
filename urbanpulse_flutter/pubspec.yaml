@@ -1,0 +1,59 @@
+name: urbanpulse
+description: "UrbanPulse — sustainable mobility, inclusive local experience discovery and B2B ESG hospitality platform."
+publish_to: "none"
+version: 1.3.0+4
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # REST calls to Groq, TomTom, Open-Meteo and the Central Registry backend.
+  # Replaces Retrofit + OkHttp; one HTTP client for the whole app.
+  http: ^1.2.2
+
+  # Replaces android.content.SharedPreferences, which every persisted preference
+  # in the original app uses (auth session, gamification wallet, trip plan,
+  # saved trips, accessibility flags, accent colour).
+  shared_preferences: ^2.3.2
+
+  # Replaces SQLiteOpenHelper / AppDatabaseHelper — the on-device relational
+  # store (stays, experiences, bookings, reports, hotel metrics history).
+  sqflite: ^2.4.0
+
+  # Replaces FusedLocationProviderClient + runtime location permissions.
+  geolocator: ^13.0.1
+
+  # Replaces android.location.Geocoder — reverse-geocoding the GPS fix to a city
+  # name for the Yatri AI origin city.
+  geocoding: ^3.0.0
+
+  # The Live Map is a Leaflet map inside a WebView driven by injected JS in the
+  # original; this keeps that implementation (and its behaviour) intact.
+  webview_flutter: ^4.10.0
+
+  # Replaces Intent.ACTION_DIAL for the "Call Venue" action on a stay.
+  url_launcher: ^6.3.1
+
+  # Replaces android.graphics.pdf.PdfDocument for the ISO 14064 ESG audit sheet.
+  pdf: ^3.11.1
+
+  # Replaces FileProvider + ACTION_VIEW/ACTION_SEND for opening and sharing the
+  # generated audit PDF (one package instead of path_provider + open + share).
+  printing: ^5.13.3
+
+  # SHA-256 for the ESG report's content-integrity hash (no digest in dart:*).
+  crypto: ^3.0.5
+
+  # Replaces RecognizerIntent speech input on the Yatri AI composer.
+  speech_to_text: ^7.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

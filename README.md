@@ -30,7 +30,7 @@
 | **Hackathon** | **HackCelestial 3.0** — Pillai University |
 | **Problem Track** | **Local & Experiences — Intelligent Local Discovery & Experience Platform** |
 | **Primary Region** | Mumbai Metropolitan Region (MMR), Western Ghats, Himalayan Pilgrimage Corridors & Global Destinations |
-| **Mobile Architecture** | Android SDK 34 (UpsideDownCake), Kotlin 1.9.22, Coroutines, Jetpack Lifecycle, Material Design 3 |
+| **Mobile Architecture** | **Flutter 3 / Dart 3, Material 3** (`urbanpulse_flutter/`) — the primary client. The original Android SDK 34 / Kotlin 1.9.22 app is kept in `UrbanPulse/` for reference. |
 | **Web Architecture** | Modern Vanilla ES6 JavaScript, HTML5 Semantic Engine, CSS3 Glassmorphic Design System, Leaflet.js |
 | **AI Inference Engine** | Groq LPU Cloud (`openai/gpt-oss-120b` & `groq/compound` models) — Average latency **< 400ms** |
 | **Location Intelligence**| Android FusedLocationProviderClient + TomTom Dual-Route Vector MCP Engine |
@@ -290,7 +290,24 @@ You can directly download and install the compiled Android APK on any Android ph
 
 > 🔐 **No API keys are committed to this repository.** Every key below is loaded from a gitignored local file — copy the example files and fill in your own keys before building.
 
-### 📱 Android Native Build
+### 📱 Flutter Build (Primary Mobile Client)
+```bash
+# 1. Clone the repository
+git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
+cd Urban-Pulse/urbanpulse_flutter
+
+# 2. Add your own API keys to config.json (gitignored, not committed)
+cp config.example.json config.json
+#    …then edit config.json and fill in GROQ_API_KEY / TOMTOM_API_KEY / GEMINI_API_KEY
+
+# 3. Fetch packages and run on a connected device or emulator
+flutter pub get
+flutter run --dart-define-from-file=config.json
+```
+See [`urbanpulse_flutter/README.md`](urbanpulse_flutter/README.md) for the architecture,
+the dependency rationale, and the full list of behaviour that changed in the migration.
+
+### 📱 Android Native Build (Legacy — kept for reference)
 ```bash
 # 1. Clone the repository
 git clone https://github.com/SatyamPandey-07/Urban-Pulse.git
