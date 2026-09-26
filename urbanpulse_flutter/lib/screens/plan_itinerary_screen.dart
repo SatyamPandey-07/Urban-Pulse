@@ -14,6 +14,7 @@ import '../widgets/itinerary/edit_chat_panel.dart';
 import '../widgets/itinerary/slot_actions_sheet.dart';
 import '../widgets/itinerary/green_view.dart';
 import '../widgets/itinerary/trip_overview.dart';
+import 'weather_twin_screen.dart';
 
 /// The finished plan from the multi-agent planner: a map and timeline for each
 /// day, the budget line by line, and the trip overview with its sources.
@@ -181,6 +182,11 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
               IconButton(tooltip: 'Undo the last change', onPressed: _edit!.canUndo ? _edit!.undo : null, icon: const Icon(Icons.undo_rounded)),
               if (_edit!.canRedo) IconButton(tooltip: 'Redo', onPressed: _edit!.redo, icon: const Icon(Icons.redo_rounded)),
             ],
+            IconButton(
+              tooltip: 'Weather what-if (digital twin)',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WeatherTwinScreen(itinerary: it))),
+              icon: const Icon(Icons.thunderstorm_outlined),
+            ),
             IconButton(
               tooltip: 'Share or print as PDF',
               onPressed: _pdfBusy ? null : _sharePdf,

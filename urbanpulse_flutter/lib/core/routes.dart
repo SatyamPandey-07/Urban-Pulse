@@ -14,6 +14,7 @@ import '../screens/sos_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/sustainable_trips_hub_screen.dart';
 import '../screens/trip_detail_screen.dart';
+import '../screens/weather_twin_screen.dart';
 import '../screens/welcome_screen.dart';
 
 /// Named routes, one per Activity in the original `AndroidManifest.xml`. The
@@ -34,6 +35,7 @@ abstract final class Routes {
   static const itinerary = '/itinerary';
   static const tripDetail = '/trip-detail';
   static const sustainableTripsHub = '/sustainable-trips-hub';
+  static const weatherTwin = '/weather-twin';
 
   static Map<String, WidgetBuilder> get table => {
     splash: (_) => const SplashScreen(),
@@ -49,6 +51,7 @@ abstract final class Routes {
     carbonWallet: (_) => const CarbonWalletScreen(),
     itinerary: (_) => const ItineraryScreen(),
     sustainableTripsHub: (_) => const SustainableTripsHubScreen(),
+    weatherTwin: (_) => const WeatherTwinScreen(),
   };
 
   /// [tripDetail] is the one route that carries an argument.

@@ -12,10 +12,14 @@ import '../../services/data/geoapify_client.dart';
 import '../../services/data/overpass_client.dart';
 import '../../services/data/wikipedia_client.dart';
 import '../../services/data/xotelo_client.dart';
+import '../../services/nugen/nugen_client.dart';
 import '../../services/place_geocoder.dart';
 import '../tools/agent_tool.dart';
 import '../tools/fetch_page_tool.dart';
 import '../tools/web_search_tool.dart';
+import '../travel_risk/nugen_travel_risk.dart';
+import '../travel_risk/travel_risk.dart';
+import '../travel_risk/travel_risk_rules.dart';
 import 'agent_kind.dart';
 import 'llm_pool.dart';
 
@@ -47,6 +51,7 @@ class AgentToolkit {
     required this.estimator,
     required this.tavily,
     this.geoapify,
+    this.travelRisk = const RuleTravelRisk(),
   });
 
   final AgentLlm llm;
@@ -62,6 +67,10 @@ class AgentToolkit {
 
   /// Null when no Tavily key is configured.
   final TavilySearchProvider? tavily;
+
+  /// The Nugen-aligned Travel-Risk model (review access facts, weather impact,
+  /// weather events), or the offline rules when it is not configured.
+  final TravelRiskModel travelRisk;
 
   /// Wires everything from the build-time configuration.
   factory AgentToolkit.fromConfig({SharedPreferences? prefs, http.Client? client, AgentLlm? llm}) {
@@ -87,6 +96,9 @@ class AgentToolkit {
       geocoder: PlaceGeocoder(client: http_),
       estimator: AiEstimator(pool),
       tavily: tavilyKeys.isEmpty ? null : TavilySearchProvider(keys: tavilyKeys, client: http_),
+      travelRisk: AppConfig.hasNugen
+          ? NugenTravelRisk(client: NugenClient(apiKey: AppConfig.nugenApiKey, client: http_), modelId: AppConfig.nugenModelId)
+          : const RuleTravelRisk(),
     );
   }
 
@@ -99,6 +111,7 @@ class AgentToolkit {
     'xotelo': true,
     'overpass': true,
     'wikipedia': true,
+    'nugen': travelRisk.isAligned,
   };
 
   final Set<String> _prefetched = {};

@@ -1,0 +1,238 @@
+[
+ {
+  "instruction": "TASK: access_claims\nPlace: Kerala Backwater Houseboat (sight), Kochi\nSnippet: \"Amazing architecture and history. Lift was not working when we visited, so we had to use the stairs. The staff were very polite and helpful.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "no",
+   "lift": "no",
+   "ramp": "unknown",
+   "accessible_toilet": "unknown",
+   "stairs": null,
+   "evidence": [
+    "Lift was not working when we visited, so we had to use the stairs"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: access_claims\nPlace: Tungabhadra Coracle Boat (sight), Hampi\nSnippet: \"It gets very crowded on weekends. No ramp anywhere, only stairs. Amazing architecture and history. The staff were very polite and helpful.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "no",
+   "lift": "unknown",
+   "ramp": "no",
+   "accessible_toilet": "unknown",
+   "stairs": null,
+   "evidence": [
+    "No ramp anywhere, only stairs"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: access_claims\nPlace: Coorg Cliff Resort (hotel), Kolkata\nSnippet: \"Good for elderly people. The staff were very polite and helpful.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "unknown",
+   "lift": "unknown",
+   "ramp": "unknown",
+   "accessible_toilet": "unknown",
+   "stairs": null,
+   "evidence": []
+  }
+ },
+ {
+  "instruction": "TASK: access_claims\nPlace: Raas Jodhpur (hotel), Kochi\nSnippet: \"Amazing architecture and history.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "unknown",
+   "lift": "unknown",
+   "ramp": "unknown",
+   "accessible_toilet": "unknown",
+   "stairs": null,
+   "evidence": []
+  }
+ },
+ {
+  "instruction": "TASK: access_claims\nPlace: Mattancherry Palace (sight), Kochi\nSnippet: \"No ramp anywhere, only stairs. Monsoon mein aur bhi khoobsurat lagta hai. Ramps are apparently being planned for next year.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "no",
+   "lift": "unknown",
+   "ramp": "no",
+   "accessible_toilet": "unknown",
+   "stairs": null,
+   "evidence": [
+    "No ramp anywhere, only stairs"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: access_claims\nPlace: Victoria Memorial (sight), Kolkata\nSnippet: \"Bahut sundar jagah hai. Parking is limited so take an auto. Clean rooms and a good breakfast.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "unknown",
+   "lift": "unknown",
+   "ramp": "unknown",
+   "accessible_toilet": "unknown",
+   "stairs": null,
+   "evidence": []
+  }
+ },
+ {
+  "instruction": "TASK: access_claims\nPlace: Matanga Hill Trek (sight), Hampi\nSnippet: \"Perfect for families. Food was average but the lassi was great. Bahut saari seedhiyan, buzurgon ke liye mushkil. Amazing architecture and history. A lift takes you up to the upper floors.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "no",
+   "lift": "yes",
+   "ramp": "unknown",
+   "accessible_toilet": "unknown",
+   "stairs": null,
+   "evidence": [
+    "Bahut saari seedhiyan, buzurgon ke liye mushkil",
+    "A lift takes you up to the upper floors"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: access_claims\nPlace: Mandore Garden (sight), Jodhpur\nSnippet: \"Bahut saari seedhiyan, buzurgon ke liye mushkil. Perfect for families. The only washrooms are down a flight of stairs. Stunning sunset views over the city.\"\nAnswer with JSON only: {\"step_free\": \"yes|no|unknown\", \"lift\": \"yes|no|unknown\", \"ramp\": \"yes|no|unknown\", \"accessible_toilet\": \"yes|no|unknown\", \"stairs\": \"number of steps or unknown\", \"evidence\": \"exact quotes from the snippet joined by | or none\"}",
+  "expected": {
+   "step_free": "no",
+   "lift": "unknown",
+   "ramp": "unknown",
+   "accessible_toilet": "no",
+   "stairs": null,
+   "evidence": [
+    "Bahut saari seedhiyan, buzurgon ke liye mushkil",
+    "The only washrooms are down a flight of stairs"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: weather_impact\nPlace: Jew Town Market (category: market), Kochi\nDate: 2026-07-26\nWeather: max 41°C, rain 0 mm (0% chance), wind 10 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}",
+  "expected": {
+   "impact": "moderate",
+   "sensitive_to": [
+    "heat"
+   ],
+   "best_time": "evening",
+   "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+  }
+ },
+ {
+  "instruction": "TASK: weather_impact\nPlace: Howrah Bridge (category: monument), Kolkata\nDate: 2026-10-16\nWeather: max 31°C, rain 0 mm (15% chance), wind 19 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}",
+  "expected": {
+   "impact": "none",
+   "sensitive_to": [],
+   "best_time": "any",
+   "reason": "The weather should not affect this visit."
+  }
+ },
+ {
+  "instruction": "TASK: weather_impact\nPlace: Howrah Bridge (category: monument), Kolkata\nDate: 2026-01-14\nWeather: max 23°C, rain 89.3 mm (80% chance), wind 37 km/h, alert: orange for heavy rain\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}",
+  "expected": {
+   "impact": "high",
+   "sensitive_to": [
+    "rain"
+   ],
+   "best_time": "avoid",
+   "reason": "Heavy rain makes this outdoor visit slippery and unpleasant; move it to a drier day."
+  }
+ },
+ {
+  "instruction": "TASK: weather_impact\nPlace: Tadiandamol Peak Trek (category: trek), Coorg\nDate: 2026-10-04\nWeather: max 25°C, rain 14.9 mm (44% chance), wind 20 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}",
+  "expected": {
+   "impact": "moderate",
+   "sensitive_to": [
+    "rain"
+   ],
+   "best_time": "morning",
+   "reason": "Showers are likely; go early and carry rain gear."
+  }
+ },
+ {
+  "instruction": "TASK: weather_impact\nPlace: Hampi Bazaar (category: unknown), Hampi\nDate: 2026-06-20\nWeather: max 37°C, rain 0 mm (20% chance), wind 11 km/h, alert: none\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}",
+  "expected": {
+   "impact": "low",
+   "sensitive_to": [
+    "heat"
+   ],
+   "best_time": "evening",
+   "reason": "Little shade and high heat; avoid 11 am to 4 pm."
+  }
+ },
+ {
+  "instruction": "TASK: weather_impact\nPlace: Matanga Hill Trek (category: trek), Hampi\nDate: 2026-08-18\nWeather: max 24°C, rain 134.4 mm (99% chance), wind 49 km/h, alert: red for heavy rain\nAnswer with JSON only: {\"impact\": \"none|low|moderate|high|closed\", \"sensitive_to\": \"heat, rain, wind, flood or none\", \"best_time\": \"morning|afternoon|evening|any|avoid\", \"reason\": \"one short sentence\"}",
+  "expected": {
+   "impact": "closed",
+   "sensitive_to": [
+    "rain",
+    "wind",
+    "flood"
+   ],
+   "best_time": "avoid",
+   "reason": "Hill trails and falls are closed or unsafe in heavy rain: landslides and flash floods."
+  }
+ },
+ {
+  "instruction": "TASK: weather_event\nCity: Chennai\nPost: \"Marina Beach closed today due to heavy rain, officials say\"\nAnswer with JSON only: {\"is_weather_event\": \"yes|no\", \"event\": \"waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none\", \"place\": \"name or none\", \"severity\": \"none|low|moderate|high\", \"affects\": \"roads, transport, attraction, hotel, power or none\"}",
+  "expected": {
+   "is_weather_event": true,
+   "event": "attraction_closed",
+   "place": "Marina Beach",
+   "severity": "moderate",
+   "affects": [
+    "attraction"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: weather_event\nCity: Kolkata\nPost: \"Ankle-deep water at EM Bypass since morning, traffic crawling #rains\"\nAnswer with JSON only: {\"is_weather_event\": \"yes|no\", \"event\": \"waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none\", \"place\": \"name or none\", \"severity\": \"none|low|moderate|high\", \"affects\": \"roads, transport, attraction, hotel, power or none\"}",
+  "expected": {
+   "is_weather_event": true,
+   "event": "waterlogging",
+   "place": "EM Bypass",
+   "severity": "low",
+   "affects": [
+    "roads"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: weather_event\nCity: Kochi\nPost: \"Bijli gayi hai 4 ghante se MG Road Kochi mein, storm ke baad\"\nAnswer with JSON only: {\"is_weather_event\": \"yes|no\", \"event\": \"waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none\", \"place\": \"name or none\", \"severity\": \"none|low|moderate|high\", \"affects\": \"roads, transport, attraction, hotel, power or none\"}",
+  "expected": {
+   "is_weather_event": true,
+   "event": "power_cut",
+   "place": "MG Road Kochi",
+   "severity": "moderate",
+   "affects": [
+    "power"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: weather_event\nCity: Chennai\nPost: \"Bijli gayi hai 4 ghante se T Nagar mein, storm ke baad\"\nAnswer with JSON only: {\"is_weather_event\": \"yes|no\", \"event\": \"waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none\", \"place\": \"name or none\", \"severity\": \"none|low|moderate|high\", \"affects\": \"roads, transport, attraction, hotel, power or none\"}",
+  "expected": {
+   "is_weather_event": true,
+   "event": "power_cut",
+   "place": "T Nagar",
+   "severity": "moderate",
+   "affects": [
+    "power"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: weather_event\nCity: Kochi\nPost: \"Thunderstorm with strong winds hit Edappally, hoardings down\"\nAnswer with JSON only: {\"is_weather_event\": \"yes|no\", \"event\": \"waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none\", \"place\": \"name or none\", \"severity\": \"none|low|moderate|high\", \"affects\": \"roads, transport, attraction, hotel, power or none\"}",
+  "expected": {
+   "is_weather_event": true,
+   "event": "storm",
+   "place": "Edappally",
+   "severity": "high",
+   "affects": [
+    "roads"
+   ]
+  }
+ },
+ {
+  "instruction": "TASK: weather_event\nCity: Chennai\nPost: \"Anyone know a good hotel near the station? Travelling next week\"\nAnswer with JSON only: {\"is_weather_event\": \"yes|no\", \"event\": \"waterlogging|flooding|heat|storm|landslide|road_closed|attraction_closed|power_cut|none\", \"place\": \"name or none\", \"severity\": \"none|low|moderate|high\", \"affects\": \"roads, transport, attraction, hotel, power or none\"}",
+  "expected": {
+   "is_weather_event": false,
+   "event": "none",
+   "place": null,
+   "severity": "none",
+   "affects": []
+  }
+ }
+]

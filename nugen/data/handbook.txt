@@ -1,0 +1,49 @@
+UrbanPulse Travel-Risk handbook
+
+UrbanPulse plans trips in India for travellers with and without access needs (wheelchair users, elderly people, people who cannot walk far). This handbook defines three tasks and the rules for answering them. Answers are always a single JSON object and nothing else, and every value in it is a string in double quotes: numbers are written as digits in quotes ("40"), several items are joined in one string ("heat, rain"), and a missing value is "none" or "unknown".
+
+1. access_claims: wheelchair-access facts from one review snippet
+
+Read the snippet and report only what it states. Never guess from the type of place, its fame or its star rating.
+- step_free: "yes" when the snippet says you can get in and around without steps (level entry, a ramp to the entrance, paved level paths, someone used a wheelchair without trouble). "no" when it mentions steps, stairs, a climb, cobbles, sand or anything that stops a wheelchair. Otherwise "unknown".
+- lift: "yes" when a working lift or elevator is mentioned. "no" when it says there is no lift, the lift was broken or out of order, or floors are reached only by stairs. Otherwise "unknown".
+- ramp: "yes" when a ramp (fixed, portable or a boardwalk) is mentioned as available now. "no" when it says there is no ramp. Planned or future ramps are "unknown".
+- accessible_toilet: "yes" for an accessible, disabled or wheelchair-friendly toilet, washroom or bathroom (roll-in shower, grab bars). "no" when the only toilets are up or down stairs, tiny, or have a high step. Otherwise "unknown".
+- stairs: the number of steps as a string when the snippet gives one ("about 40 steps" gives "40"), otherwise "unknown".
+- evidence: the exact sentences from the snippet that support each non-unknown answer, copied word for word and joined with " | ". "none" when everything is unknown.
+Politeness, "helpful staff", "good for families" and "good for elderly people" are not access facts. A snippet with no access facts gets "unknown" for every field and evidence "none". Hinglish counts: "seedhiyan" means stairs, "koi seedhi nahi" means no steps, "lift hai" means there is a lift.
+
+Why this matters: an itinerary for a wheelchair user must never treat a guess as confirmed access. A fort with 40 steps described as "wheelchair friendly" by a guess sends a traveller to a place they cannot enter.
+
+Accessibility references used in India: the Harmonised Guidelines and Standards for Universal Accessibility in India (2021) and the Rights of Persons with Disabilities Act, 2016. Ramps should be no steeper than 1:12 and have handrails; doors need a clear width of about 900 mm; an accessible toilet has space to turn a wheelchair, grab bars and a level entry.
+
+2. weather_impact: how one day's weather affects visiting one place
+
+Rainfall classes (India Meteorological Department, 24-hour rainfall): light 2.5 to 15.5 mm, moderate 15.6 to 64.4 mm, heavy 64.5 to 115.5 mm, very heavy 115.6 to 204.4 mm, extremely heavy 204.5 mm or more.
+Heat: 36 to 39 °C is hot; 40 to 44 °C is a heat wave in the plains; 45 °C or more is severe heat.
+Wind: 40 to 59 km/h is gusty; 60 km/h or more is a storm.
+IMD colour warnings: yellow means be aware, orange means be prepared (disruption likely), red means take action (dangerous; closures and evacuations happen).
+
+Place categories and what they are sensitive to:
+- Indoors (museum, mall, restaurant, hotel): not affected by heat or rain inside; only very heavy rain affects getting there. On heat-wave days they are the best places for the afternoon.
+- Partly outdoor (palace, temple, market): courtyards and open lanes. Temples are especially heat-sensitive because floors are walked barefoot and stone gets very hot by midday.
+- Outdoor (fort, monument, stepwell, garden, zoo): exposed to sun and rain. Forts are exposed climbs with little shade.
+- Hill places (trek, viewpoint, tea estate, fort on a hill, waterfall): rain makes slopes slippery, brings fog and landslides.
+- Water places (beach, lake, boat ride, waterfall): closed in heavy rain, storms and cyclone warnings; boats stop in strong wind.
+When the category is "unknown", infer it from the name: Fort, Garh, Qila mean fort; Mahal, Palace, Haveli mean palace; Mandir, Temple, Masjid, Church, Dargah mean a place of worship; Baori, Baoli, Vav mean a stepwell; Bagh, Garden, Park mean a garden; Bazaar, Market, Chowk mean a market; Ghat, Lake, Sagar, Talab mean a lakeside or riverside; Falls mean a waterfall; Trek, Trail, Peak mean a trek; Point, Top Station, Viewpoint mean a viewpoint.
+
+Answer fields:
+- impact: none, low, moderate, high, or closed (when the place is shut or unsafe that day).
+- sensitive_to: the hazards that matter that day, from heat, rain, wind, flood, joined with commas ("heat, rain"), or "none".
+- best_time: morning, afternoon, evening, any, or avoid. Outdoor places in heat: morning (markets, lakes, beaches and viewpoints: evening). Indoor places on hot days: afternoon. Rainy days: morning, before afternoon storms; avoid in heavy rain.
+- reason: one short sentence a traveller understands.
+
+3. weather_event: the travel disruption one social post reports
+
+Decide whether the post reports a weather disruption that affects travel: is_weather_event is "yes" or "no". Weather chat, forecasts, adverts and nice-weather posts are not events ("no", event "none", place "none", severity "none", affects "none").
+Event types: waterlogging (standing water on roads), flooding (water entering buildings, tracks, or waist-deep water), heat (dangerous heat at a place), storm (wind or thunderstorm damage), landslide, road_closed, attraction_closed, power_cut, none.
+Severity: ankle-deep water or slow traffic is low; knee-deep water, stuck cars, a closed attraction or one lane closed is moderate; waist-deep water, suspended trains, blocked roads, landslides and red alerts are high.
+place: the road, area or attraction named in the post, or "none".
+affects: which parts of a trip it touches, joined with commas: roads, transport, attraction, hotel, power; or "none".
+
+These signals feed the UrbanPulse weather digital twin: a closed attraction removes a visit, a waterlogged road slows the legs that use it, and a flooded hotel area puts the stay at risk.

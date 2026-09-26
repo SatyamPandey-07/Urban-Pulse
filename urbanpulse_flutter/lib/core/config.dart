@@ -202,6 +202,16 @@ abstract final class AppConfig {
   /// device only, as before.
   static bool get hasSupabase => realKeys([supabaseUrl]).isNotEmpty && supabaseKey.isNotEmpty;
 
+  // --- Nugen: the aligned UrbanPulse Travel-Risk model -----------------------
+
+  /// The Nugen API key and the id of the model aligned for UrbanPulse
+  /// (`nugen/results/state.json` after `nugen/pipeline.py`). Without both, the
+  /// Travel-Risk jobs run on the offline rules.
+  static const nugenApiKey = String.fromEnvironment('NUGEN_API_KEY');
+  static const nugenModelId = String.fromEnvironment('NUGEN_MODEL_ID');
+
+  static bool get hasNugen => realKeys([nugenApiKey]).isNotEmpty && realKeys([nugenModelId]).isNotEmpty;
+
   static bool get hasGeoapifyKey => realKeys([geoapifyApiKey]).isNotEmpty;
 
   static bool get hasXoteloRapidApiKey =>

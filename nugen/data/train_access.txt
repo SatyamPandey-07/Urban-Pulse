@@ -1,0 +1,2098 @@
+UrbanPulse Travel-Risk: access_claims worked examples
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Mumbai
+Snippet: "They gave us a ground floor room with a roll-in shower and grab bars. Monsoon mein aur bhi khoobsurat lagta hai. Clean rooms and a good breakfast. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "They gave us a ground floor room with a roll-in shower and grab bars"}
+
+### Instruction:
+TASK: access_claims
+Place: Banaras Hindu University Museum (sight), Varanasi
+Snippet: "Perfect for families. A lift takes you up to the upper floors. No ramp anywhere, only stairs. Ghat ki seedhiyan steep hain, around 40 steps till the water. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "no", "accessible_toilet": "unknown", "stairs": "40", "evidence": "A lift takes you up to the upper floors | No ramp anywhere, only stairs | Ghat ki seedhiyan steep hain, around 40 steps till the water"}
+
+### Instruction:
+TASK: access_claims
+Place: Itmad-ud-Daulah Tomb (sight), Agra
+Snippet: "It gets very crowded on weekends. Monsoon mein aur bhi khoobsurat lagta hai. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Radisson Blu (hotel), Shimla
+Snippet: "Step-free entrance with a gentle ramp from the drop-off. The hotel has a lift to all floors. Wide doors and an accessible bathroom in the room. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "yes", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Step-free entrance with a gentle ramp from the drop-off | The hotel has a lift to all floors | Wide doors and an accessible bathroom in the room"}
+
+### Instruction:
+TASK: access_claims
+Place: Se Cathedral (sight), Goa
+Snippet: "Lift was not working when we visited, so we had to use the stairs. Good for elderly people. Accessible toilet near the entrance. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Lift was not working when we visited, so we had to use the stairs | Accessible toilet near the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Lodhi Garden (sight), Delhi
+Snippet: "Perfect for families. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Clarks Shiraz (hotel), Jaipur
+Snippet: "The light and sound show in the evening is worth it. It gets very crowded on weekends. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Zostel Jaipur (hotel), Agra
+Snippet: "Parking is limited so take an auto. Perfect for families. No lift, and our room was on the second floor. Stunning sunset views over the city. The bathroom has a high step into the shower, not good for wheelchair users."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "No lift, and our room was on the second floor | The bathroom has a high step into the shower, not good for wheelchair users"}
+
+### Instruction:
+TASK: access_claims
+Place: Treebo Trend Aamod (hotel), Mumbai
+Snippet: "Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Kashi Vishwanath Temple (sight), Varanasi
+Snippet: "Go early to avoid the queues. Parking is limited so take an auto. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Rishikesh
+Snippet: "Parking is limited so take an auto. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ramnagar Fort (sight), Varanasi
+Snippet: "Perfect for families. Clean rooms and a good breakfast. There are about 100 steep steps up to the main palace. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "100", "evidence": "There are about 100 steep steps up to the main palace"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganges View Homestay (hotel), Shimla
+Snippet: "Clean rooms and a good breakfast. Heritage building, rooms are reached by a spiral staircase only. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Heritage building, rooms are reached by a spiral staircase only"}
+
+### Instruction:
+TASK: access_claims
+Place: Chitale Bandhu (restaurant), Goa
+Snippet: "Good for elderly people. Rooftop only, reached by stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Rooftop only, reached by stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Mumbai
+Snippet: "Ramps are apparently being planned for next year. Parking is limited so take an auto. Lift hai, but the entrance has 150 steps and no ramp."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "no", "accessible_toilet": "unknown", "stairs": "150", "evidence": "Lift hai, but the entrance has 150 steps and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Casa Anjuna (hotel), Delhi
+Snippet: "The lift was out of order for two days. Bahut sundar jagah hai. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Udaipur
+Snippet: "Great value for money. It gets very crowded on weekends. Wide doors and an accessible bathroom in the room. Reception is up a flight of stairs from the street."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room | Reception is up a flight of stairs from the street"}
+
+### Instruction:
+TASK: access_claims
+Place: Casa Anjuna (hotel), Varanasi
+Snippet: "Great value for money. Paneer tikka was the best we had. The hotel has a lift to all floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Moustache Hostel (hotel), Shimla
+Snippet: "Parking is limited so take an auto. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Anjuna Flea Market (sight), Goa
+Snippet: "Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Britto's (restaurant), Munnar
+Snippet: "The light and sound show in the evening is worth it. Seating is on the first floor and there is no lift. Good for elderly people. Washroom is tiny and up some stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Seating is on the first floor and there is no lift | Washroom is tiny and up some stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: City Palace Udaipur (sight), Udaipur
+Snippet: "Guides at the gate charge too much, negotiate. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Beatles Ashram (sight), Rishikesh
+Snippet: "Photography is allowed inside. A lift takes you up to the upper floors. The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 150 steps."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "150", "evidence": "A lift takes you up to the upper floors | The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 150 steps"}
+
+### Instruction:
+TASK: access_claims
+Place: Casa Anjuna (hotel), Agra
+Snippet: "Guides at the gate charge too much, negotiate. There is a ramp next to the steps at the entrance. Photography is allowed inside."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp next to the steps at the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Laxmi Mishthan Bhandar (restaurant), Udaipur
+Snippet: "Guides at the gate charge too much, negotiate. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: The Ridge Viewpoint (sight), Shimla
+Snippet: "Ramps are apparently being planned for next year. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Sajjangarh Monsoon Palace (sight), Udaipur
+Snippet: "Bahut sundar jagah hai. Wheelchairs are available free at the ticket counter and the whole route is ramped. Parking is limited so take an auto. Entry level hai, koi seedhi nahi."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchairs are available free at the ticket counter and the whole route is ramped | Entry level hai, koi seedhi nahi"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Museum Munnar (sight), Munnar
+Snippet: "Good for elderly people. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganga River Rafting Boat (sight), Rishikesh
+Snippet: "Go early to avoid the queues. Wheelchairs are available free at the ticket counter and the whole route is ramped."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchairs are available free at the ticket counter and the whole route is ramped"}
+
+### Instruction:
+TASK: access_claims
+Place: Blue Lassi Shop (restaurant), Udaipur
+Snippet: "Washroom is tiny and up some stairs. Paneer tikka was the best we had. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Washroom is tiny and up some stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Taj Rambagh Palace (hotel), Delhi
+Snippet: "The hotel has a lift to all floors. The staff were very polite and helpful. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Rishikesh
+Snippet: "Wide doors and an accessible bathroom in the room. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room"}
+
+### Instruction:
+TASK: access_claims
+Place: Neer Garh Waterfall (sight), Rishikesh
+Snippet: "Parking is limited so take an auto. Photography is allowed inside. The only washrooms are down a flight of stairs. My father went round in his wheelchair without any trouble, the paths are paved and level. There is a ramp at the main gate and the ground floor galleries are flat."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "no", "stairs": "unknown", "evidence": "The only washrooms are down a flight of stairs | My father went round in his wheelchair without any trouble, the paths are paved and level | There is a ramp at the main gate and the ground floor galleries are flat"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Varanasi
+Snippet: "The hotel has a lift to all floors. Bahut sundar jagah hai. Wide doors and an accessible bathroom in the room. Stunning sunset views over the city. Lift hai, but the entrance has 25 steps and no ramp."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "no", "accessible_toilet": "yes", "stairs": "25", "evidence": "The hotel has a lift to all floors | Wide doors and an accessible bathroom in the room | Lift hai, but the entrance has 25 steps and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Ambrai Restaurant (restaurant), Goa
+Snippet: "It gets very crowded on weekends. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Echo Point (sight), Munnar
+Snippet: "A lift takes you up to the upper floors. Perfect for families. Ghat ki seedhiyan steep hain, around 45 steps till the water. Go early to avoid the queues. Sand everywhere, no boardwalk, so a wheelchair will get stuck."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "45", "evidence": "A lift takes you up to the upper floors | Ghat ki seedhiyan steep hain, around 45 steps till the water | Sand everywhere, no boardwalk, so a wheelchair will get stuck"}
+
+### Instruction:
+TASK: access_claims
+Place: Anamudi Peak Trek (sight), Munnar
+Snippet: "Wheelchair users can enter through the side gate which has a ramp. Clean rooms and a good breakfast. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Kundala Lake (sight), Munnar
+Snippet: "A lift takes you up to the upper floors. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "A lift takes you up to the upper floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Lake View Udaipur (hotel), Agra
+Snippet: "Clean rooms and a good breakfast. Very accommodating staff, they helped us a lot. Wide doors and an accessible bathroom in the room."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room"}
+
+### Instruction:
+TASK: access_claims
+Place: Chitale Bandhu (restaurant), Rishikesh
+Snippet: "Clean rooms and a good breakfast. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Laxmi Mishthan Bhandar (restaurant), Munnar
+Snippet: "Parking is limited so take an auto. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Sea Breeze (hotel), Agra
+Snippet: "It gets very crowded on weekends. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Echo Point (sight), Munnar
+Snippet: "There is a ramp at the main gate and the ground floor galleries are flat. My father went round in his wheelchair without any trouble, the paths are paved and level. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp at the main gate and the ground floor galleries are flat | My father went round in his wheelchair without any trouble, the paths are paved and level"}
+
+### Instruction:
+TASK: access_claims
+Place: Birla Mandir (sight), Jaipur
+Snippet: "There is a ramp at the main gate and the ground floor galleries are flat. Clean rooms and a good breakfast. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp at the main gate and the ground floor galleries are flat"}
+
+### Instruction:
+TASK: access_claims
+Place: Kufri Viewpoint (sight), Shimla
+Snippet: "The light and sound show in the evening is worth it. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Udaipur
+Snippet: "Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganga River Rafting Boat (sight), Rishikesh
+Snippet: "Clean rooms and a good breakfast. Sand everywhere, no boardwalk, so a wheelchair will get stuck. No ramp anywhere, only stairs. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Sand everywhere, no boardwalk, so a wheelchair will get stuck | No ramp anywhere, only stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Bademiya (restaurant), Rishikesh
+Snippet: "Good for elderly people. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Karim's (restaurant), Jaipur
+Snippet: "Parking is limited so take an auto. Perfect for families. Ground floor seating, easy to get in with a wheelchair."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Ground floor seating, easy to get in with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Saravana Bhavan (restaurant), Jaipur
+Snippet: "Guides at the gate charge too much, negotiate. Washroom is tiny and up some stairs. Rooftop only, reached by stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Washroom is tiny and up some stairs | Rooftop only, reached by stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Goa
+Snippet: "The bathroom has a high step into the shower, not good for wheelchair users. Monsoon mein aur bhi khoobsurat lagta hai. Lift hai, but the entrance has 25 steps and no ramp."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "no", "accessible_toilet": "no", "stairs": "25", "evidence": "The bathroom has a high step into the shower, not good for wheelchair users | Lift hai, but the entrance has 25 steps and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Sarnath Stupa (sight), Varanasi
+Snippet: "There is a ramp at the main gate and the ground floor galleries are flat. Food was average but the lassi was great. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp at the main gate and the ground floor galleries are flat"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Museum Munnar (sight), Munnar
+Snippet: "Great value for money. Paneer tikka was the best we had. Bahut sundar jagah hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Pinch of Spice (restaurant), Udaipur
+Snippet: "Food was average but the lassi was great. 150 steps at the entrance and no ramp. Monsoon mein aur bhi khoobsurat lagta hai. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "unknown", "stairs": "150", "evidence": "150 steps at the entrance and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: City Palace Udaipur (sight), Udaipur
+Snippet: "Accessible toilet near the entrance. Stunning sunset views over the city. Photography is allowed inside."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Accessible toilet near the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Vishwanath Gali Market (sight), Varanasi
+Snippet: "Perfect for families. Seedhiyan bahut hain, wheelchair le jaana mushkil hai. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Seedhiyan bahut hain, wheelchair le jaana mushkil hai"}
+
+### Instruction:
+TASK: access_claims
+Place: Blue Lassi Shop (restaurant), Rishikesh
+Snippet: "Good for elderly people. The staff put down a portable ramp for my mother's wheelchair. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The staff put down a portable ramp for my mother's wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Red Fort (sight), Delhi
+Snippet: "Food was average but the lassi was great."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganges View Homestay (hotel), Agra
+Snippet: "Parking is limited so take an auto. Monsoon mein aur bhi khoobsurat lagta hai. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Anjuna Flea Market (sight), Goa
+Snippet: "The staff were very polite and helpful. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Fatehpur Sikri Ruins (sight), Agra
+Snippet: "Ramps are apparently being planned for next year. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Udaipur
+Snippet: "Step-free entrance with a gentle ramp from the drop-off. Guides at the gate charge too much, negotiate. The lift was out of order for two days. Parking is limited so take an auto. Go early to avoid the queues."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "no", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Step-free entrance with a gentle ramp from the drop-off | The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Udaipur
+Snippet: "The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Neer Garh Waterfall (sight), Rishikesh
+Snippet: "Great value for money. Accessible toilet near the entrance."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Accessible toilet near the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Lake View Udaipur (hotel), Rishikesh
+Snippet: "Ramps are apparently being planned for next year. The staff were very polite and helpful. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Qutub Minar (sight), Delhi
+Snippet: "The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Panna Meena ka Kund (sight), Jaipur
+Snippet: "Good for elderly people. Sand everywhere, no boardwalk, so a wheelchair will get stuck."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Sand everywhere, no boardwalk, so a wheelchair will get stuck"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganges View Homestay (hotel), Rishikesh
+Snippet: "Food was average but the lassi was great. Perfect for families. Wide doors and an accessible bathroom in the room. Go early to avoid the queues. The hotel has a lift to all floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room | The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Goa
+Snippet: "Lift hai, but the entrance has 30 steps and no ramp. Good for elderly people. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "no", "accessible_toilet": "unknown", "stairs": "30", "evidence": "Lift hai, but the entrance has 30 steps and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Anamudi Peak Trek (sight), Munnar
+Snippet: "There are about 60 steep steps up to the main palace. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "60", "evidence": "There are about 60 steep steps up to the main palace"}
+
+### Instruction:
+TASK: access_claims
+Place: Blue Lassi Shop (restaurant), Shimla
+Snippet: "Go early to avoid the queues. Washroom is tiny and up some stairs. Seating is on the first floor and there is no lift. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Washroom is tiny and up some stairs | Seating is on the first floor and there is no lift"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Lake View Udaipur (hotel), Shimla
+Snippet: "They gave us a ground floor room with a roll-in shower and grab bars. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "They gave us a ground floor room with a roll-in shower and grab bars"}
+
+### Instruction:
+TASK: access_claims
+Place: Pinch of Spice (restaurant), Munnar
+Snippet: "Ramps are apparently being planned for next year. Monsoon mein aur bhi khoobsurat lagta hai. Rooftop only, reached by stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Rooftop only, reached by stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Panna Meena ka Kund (sight), Jaipur
+Snippet: "Stunning sunset views over the city. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: City Palace Udaipur (sight), Udaipur
+Snippet: "The path up is cobbled and very steep, impossible with a wheelchair. Food was average but the lassi was great. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The path up is cobbled and very steep, impossible with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Agra
+Snippet: "Great value for money. No lift, and our room was on the second floor."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "No lift, and our room was on the second floor"}
+
+### Instruction:
+TASK: access_claims
+Place: Ambrai Restaurant (restaurant), Delhi
+Snippet: "It gets very crowded on weekends. Bahut sundar jagah hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganges View Homestay (hotel), Munnar
+Snippet: "Paneer tikka was the best we had. The light and sound show in the evening is worth it. The lift was out of order for two days. Wide doors and an accessible bathroom in the room. Perfect for families. Step-free entrance with a gentle ramp from the drop-off."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "no", "ramp": "yes", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "The lift was out of order for two days | Wide doors and an accessible bathroom in the room | Step-free entrance with a gentle ramp from the drop-off"}
+
+### Instruction:
+TASK: access_claims
+Place: Kolukkumalai Tea Estate (sight), Munnar
+Snippet: "The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 60 steps. The staff were very polite and helpful. Good for elderly people. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "60", "evidence": "The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 60 steps"}
+
+### Instruction:
+TASK: access_claims
+Place: Moustache Hostel (hotel), Mumbai
+Snippet: "Wide doors and an accessible bathroom in the room. There is a ramp next to the steps at the entrance. They gave us a ground floor room with a roll-in shower and grab bars. Stunning sunset views over the city. Go early to avoid the queues. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room | There is a ramp next to the steps at the entrance | They gave us a ground floor room with a roll-in shower and grab bars"}
+
+### Instruction:
+TASK: access_claims
+Place: Beatles Ashram (sight), Rishikesh
+Snippet: "The path up is cobbled and very steep, impossible with a wheelchair. Bahut sundar jagah hai. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The path up is cobbled and very steep, impossible with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Casa Anjuna (hotel), Munnar
+Snippet: "Great value for money. The hotel has a lift to all floors. Wide doors and an accessible bathroom in the room."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "The hotel has a lift to all floors | Wide doors and an accessible bathroom in the room"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Sea Breeze (hotel), Shimla
+Snippet: "Guides at the gate charge too much, negotiate. Stunning sunset views over the city. The lift was out of order for two days."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: Anamudi Peak Trek (sight), Munnar
+Snippet: "Bahut sundar jagah hai. It gets very crowded on weekends. Clean rooms and a good breakfast. The path up is cobbled and very steep, impossible with a wheelchair."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The path up is cobbled and very steep, impossible with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Itmad-ud-Daulah Tomb (sight), Agra
+Snippet: "Food was average but the lassi was great. Lift was not working when we visited, so we had to use the stairs. Parking is limited so take an auto. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Lift was not working when we visited, so we had to use the stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Anjuna Flea Market (sight), Goa
+Snippet: "Ghat ki seedhiyan steep hain, around 250 steps till the water. Clean rooms and a good breakfast. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "250", "evidence": "Ghat ki seedhiyan steep hain, around 250 steps till the water"}
+
+### Instruction:
+TASK: access_claims
+Place: Christ Church Shimla (sight), Shimla
+Snippet: "The light and sound show in the evening is worth it. The staff were very polite and helpful. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Fateh Sagar Lake (sight), Udaipur
+Snippet: "Bahut sundar jagah hai. Guides at the gate charge too much, negotiate. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Jakhu Temple Trek (sight), Shimla
+Snippet: "Good for elderly people. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganges View Homestay (hotel), Agra
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. The light and sound show in the evening is worth it. The hotel has a lift to all floors. Paneer tikka was the best we had. The bathroom has a high step into the shower, not good for wheelchair users."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "The hotel has a lift to all floors | The bathroom has a high step into the shower, not good for wheelchair users"}
+
+### Instruction:
+TASK: access_claims
+Place: The Ridge Viewpoint (sight), Shimla
+Snippet: "Lift was not working when we visited, so we had to use the stairs. Clean rooms and a good breakfast. Ghat ki seedhiyan steep hain, around 12 steps till the water."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "12", "evidence": "Lift was not working when we visited, so we had to use the stairs | Ghat ki seedhiyan steep hain, around 12 steps till the water"}
+
+### Instruction:
+TASK: access_claims
+Place: Radisson Blu (hotel), Delhi
+Snippet: "Step-free entrance with a gentle ramp from the drop-off. Go early to avoid the queues. The hotel has a lift to all floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Step-free entrance with a gentle ramp from the drop-off | The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Chitale Bandhu (restaurant), Varanasi
+Snippet: "Rooftop only, reached by stairs. Seating is on the first floor and there is no lift. It gets very crowded on weekends. Go early to avoid the queues. Food was average but the lassi was great. Washroom is tiny and up some stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Rooftop only, reached by stairs | Seating is on the first floor and there is no lift | Washroom is tiny and up some stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Moustache Hostel (hotel), Rishikesh
+Snippet: "Very accommodating staff, they helped us a lot. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Delhi Zoo (sight), Delhi
+Snippet: "Perfect for families. Wheelchair users can enter through the side gate which has a ramp. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Kashi Vishwanath Temple (sight), Varanasi
+Snippet: "Food was average but the lassi was great. Paneer tikka was the best we had. The path up is cobbled and very steep, impossible with a wheelchair. Photography is allowed inside. There are about 30 steep steps up to the main palace."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "30", "evidence": "The path up is cobbled and very steep, impossible with a wheelchair | There are about 30 steep steps up to the main palace"}
+
+### Instruction:
+TASK: access_claims
+Place: Triveni Ghat (sight), Rishikesh
+Snippet: "Guides at the gate charge too much, negotiate. Food was average but the lassi was great."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Moustache Hostel (hotel), Goa
+Snippet: "Bahut sundar jagah hai. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Neer Garh Waterfall (sight), Rishikesh
+Snippet: "Sand everywhere, no boardwalk, so a wheelchair will get stuck. Bahut sundar jagah hai. Accessible toilet near the entrance. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Sand everywhere, no boardwalk, so a wheelchair will get stuck | Accessible toilet near the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Radisson Blu (hotel), Jaipur
+Snippet: "Great value for money. Reception is up a flight of stairs from the street. The lift was out of order for two days."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Reception is up a flight of stairs from the street | The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: Lake Pichola (sight), Udaipur
+Snippet: "Guides at the gate charge too much, negotiate. The only washrooms are down a flight of stairs. Seedhiyan bahut hain, wheelchair le jaana mushkil hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "The only washrooms are down a flight of stairs | Seedhiyan bahut hain, wheelchair le jaana mushkil hai"}
+
+### Instruction:
+TASK: access_claims
+Place: Sanjay Gandhi National Park (sight), Mumbai
+Snippet: "Great value for money. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Clarks Shiraz (hotel), Rishikesh
+Snippet: "The lift was out of order for two days. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: Itmad-ud-Daulah Tomb (sight), Agra
+Snippet: "The light and sound show in the evening is worth it. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Agra
+Snippet: "The bathroom has a high step into the shower, not good for wheelchair users. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "The bathroom has a high step into the shower, not good for wheelchair users"}
+
+### Instruction:
+TASK: access_claims
+Place: Chapora Fort (sight), Goa
+Snippet: "Guides at the gate charge too much, negotiate. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Moustache Hostel (hotel), Varanasi
+Snippet: "Food was average but the lassi was great. There is a ramp next to the steps at the entrance. Very accommodating staff, they helped us a lot. Wide doors and an accessible bathroom in the room."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "There is a ramp next to the steps at the entrance | Wide doors and an accessible bathroom in the room"}
+
+### Instruction:
+TASK: access_claims
+Place: Hawa Mahal (sight), Jaipur
+Snippet: "Clean rooms and a good breakfast. Go early to avoid the queues."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Delhi
+Snippet: "Heritage building, rooms are reached by a spiral staircase only. Perfect for families. Food was average but the lassi was great. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Heritage building, rooms are reached by a spiral staircase only"}
+
+### Instruction:
+TASK: access_claims
+Place: Taj Rambagh Palace (hotel), Jaipur
+Snippet: "Good for elderly people. Stunning sunset views over the city. Ramps are apparently being planned for next year. Heritage building, rooms are reached by a spiral staircase only."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Heritage building, rooms are reached by a spiral staircase only"}
+
+### Instruction:
+TASK: access_claims
+Place: Blue Lassi Shop (restaurant), Jaipur
+Snippet: "Stunning sunset views over the city. Seating is on the first floor and there is no lift."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Seating is on the first floor and there is no lift"}
+
+### Instruction:
+TASK: access_claims
+Place: Treebo Trend Aamod (hotel), Jaipur
+Snippet: "Perfect for families. It gets very crowded on weekends. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Fort Aguada (sight), Goa
+Snippet: "Ghat ki seedhiyan steep hain, around 25 steps till the water. No ramp anywhere, only stairs. Go early to avoid the queues."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "unknown", "stairs": "25", "evidence": "Ghat ki seedhiyan steep hain, around 25 steps till the water | No ramp anywhere, only stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Panna Meena ka Kund (sight), Jaipur
+Snippet: "Stunning sunset views over the city. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Saheliyon ki Bari (sight), Udaipur
+Snippet: "Wheelchair users can enter through the side gate which has a ramp. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Jakhu Temple Trek (sight), Shimla
+Snippet: "Seedhiyan bahut hain, wheelchair le jaana mushkil hai. Food was average but the lassi was great. Ramps are apparently being planned for next year. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Seedhiyan bahut hain, wheelchair le jaana mushkil hai"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Residency Fort (hotel), Goa
+Snippet: "Guides at the gate charge too much, negotiate. Wide doors and an accessible bathroom in the room. No lift, and our room was on the second floor."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room | No lift, and our room was on the second floor"}
+
+### Instruction:
+TASK: access_claims
+Place: Pinch of Spice (restaurant), Udaipur
+Snippet: "Clean rooms and a good breakfast. Photography is allowed inside. Washroom is tiny and up some stairs. Go early to avoid the queues. 45 steps at the entrance and no ramp."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "no", "stairs": "45", "evidence": "Washroom is tiny and up some stairs | 45 steps at the entrance and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Qutub Minar (sight), Delhi
+Snippet: "Very accommodating staff, they helped us a lot. Photography is allowed inside. Entry level hai, koi seedhi nahi."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Entry level hai, koi seedhi nahi"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Lake View Udaipur (hotel), Jaipur
+Snippet: "Guides at the gate charge too much, negotiate. The hotel has a lift to all floors. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Varanasi
+Snippet: "It gets very crowded on weekends. Stunning sunset views over the city. Wide doors and an accessible bathroom in the room. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Clarks Shiraz (hotel), Jaipur
+Snippet: "Clean rooms and a good breakfast. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Sanjay Gandhi National Park (sight), Mumbai
+Snippet: "You have to climb 12 steps to reach the temple. The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 12 steps. Parking is limited so take an auto. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "12", "evidence": "You have to climb 12 steps to reach the temple | The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 12 steps"}
+
+### Instruction:
+TASK: access_claims
+Place: Treebo Trend Aamod (hotel), Varanasi
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Dashashwamedh Ghat (sight), Varanasi
+Snippet: "The staff were very polite and helpful. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Radisson Blu (hotel), Mumbai
+Snippet: "Bahut sundar jagah hai. No lift, and our room was on the second floor. Reception is up a flight of stairs from the street."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "No lift, and our room was on the second floor | Reception is up a flight of stairs from the street"}
+
+### Instruction:
+TASK: access_claims
+Place: Sarnath Stupa (sight), Varanasi
+Snippet: "The staff were very polite and helpful. Food was average but the lassi was great. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Echo Point (sight), Munnar
+Snippet: "Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Galtaji Temple (sight), Jaipur
+Snippet: "The light and sound show in the evening is worth it. No ramp anywhere, only stairs. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "No ramp anywhere, only stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Goa State Museum (sight), Goa
+Snippet: "Great value for money. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Bademiya (restaurant), Goa
+Snippet: "Good for elderly people. Bahut sundar jagah hai. Rooftop only, reached by stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Rooftop only, reached by stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Kinari Bazaar (sight), Agra
+Snippet: "You have to climb 200 steps to reach the temple. Bahut sundar jagah hai. The only washrooms are down a flight of stairs. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "200", "evidence": "You have to climb 200 steps to reach the temple | The only washrooms are down a flight of stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Attukal Waterfalls (sight), Munnar
+Snippet: "The light and sound show in the evening is worth it. Very accommodating staff, they helped us a lot. Food was average but the lassi was great."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Agra
+Snippet: "Photography is allowed inside. The staff were very polite and helpful. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Phoenix Palladium Mall (sight), Mumbai
+Snippet: "Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Panna Meena ka Kund (sight), Jaipur
+Snippet: "The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 120 steps. Clean rooms and a good breakfast. There are about 60 steep steps up to the main palace."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "60", "evidence": "The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 120 steps | There are about 60 steep steps up to the main palace"}
+
+### Instruction:
+TASK: access_claims
+Place: Bademiya (restaurant), Mumbai
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. Bahut sundar jagah hai. Photography is allowed inside."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Christ Church Shimla (sight), Shimla
+Snippet: "Go early to avoid the queues. The only washrooms are down a flight of stairs. Entry level hai, koi seedhi nahi."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "The only washrooms are down a flight of stairs | Entry level hai, koi seedhi nahi"}
+
+### Instruction:
+TASK: access_claims
+Place: Banaras Hindu University Museum (sight), Varanasi
+Snippet: "Wheelchair users can enter through the side gate which has a ramp. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganges View Homestay (hotel), Rishikesh
+Snippet: "The lift was out of order for two days. No lift, and our room was on the second floor. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days | No lift, and our room was on the second floor"}
+
+### Instruction:
+TASK: access_claims
+Place: Phoenix Palladium Mall (sight), Mumbai
+Snippet: "Very accommodating staff, they helped us a lot. Clean rooms and a good breakfast. You have to climb 120 steps to reach the temple. Go early to avoid the queues."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "120", "evidence": "You have to climb 120 steps to reach the temple"}
+
+### Instruction:
+TASK: access_claims
+Place: World Trade Park (sight), Jaipur
+Snippet: "Stunning sunset views over the city. There are about 25 steep steps up to the main palace. Bahut sundar jagah hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "25", "evidence": "There are about 25 steep steps up to the main palace"}
+
+### Instruction:
+TASK: access_claims
+Place: Sajjangarh Monsoon Palace (sight), Udaipur
+Snippet: "Great value for money. Food was average but the lassi was great."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Casa Anjuna (hotel), Delhi
+Snippet: "They gave us a ground floor room with a roll-in shower and grab bars. It gets very crowded on weekends. Step-free entrance with a gentle ramp from the drop-off. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "They gave us a ground floor room with a roll-in shower and grab bars | Step-free entrance with a gentle ramp from the drop-off"}
+
+### Instruction:
+TASK: access_claims
+Place: Zostel Jaipur (hotel), Munnar
+Snippet: "Great value for money. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Lake View Udaipur (hotel), Shimla
+Snippet: "Food was average but the lassi was great. The staff were very polite and helpful. There is a ramp next to the steps at the entrance."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp next to the steps at the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Palolem Beach (sight), Goa
+Snippet: "Food was average but the lassi was great. There is a boardwalk ramp down to the beach. Perfect for families. Wheelchair users can enter through the side gate which has a ramp."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a boardwalk ramp down to the beach | Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Attukal Waterfalls (sight), Munnar
+Snippet: "Paneer tikka was the best we had. Parking is limited so take an auto. No ramp anywhere, only stairs. The upper levels can only be reached by narrow stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "no", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "No ramp anywhere, only stairs | The upper levels can only be reached by narrow stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Fatehpur Sikri Ruins (sight), Agra
+Snippet: "A lift takes you up to the upper floors. Seedhiyan bahut hain, wheelchair le jaana mushkil hai. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "A lift takes you up to the upper floors | Seedhiyan bahut hain, wheelchair le jaana mushkil hai"}
+
+### Instruction:
+TASK: access_claims
+Place: Jaigarh Fort (sight), Jaipur
+Snippet: "Very accommodating staff, they helped us a lot. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Neer Garh Waterfall (sight), Rishikesh
+Snippet: "It gets very crowded on weekends. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Chhatrapati Shivaji Maharaj Vastu Sangrahalaya (sight), Mumbai
+Snippet: "Very accommodating staff, they helped us a lot. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Chitale Bandhu (restaurant), Jaipur
+Snippet: "The staff put down a portable ramp for my mother's wheelchair. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The staff put down a portable ramp for my mother's wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Jaigarh Fort (sight), Jaipur
+Snippet: "Guides at the gate charge too much, negotiate. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Sea Breeze (hotel), Goa
+Snippet: "Paneer tikka was the best we had. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Munnar
+Snippet: "Guides at the gate charge too much, negotiate. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Saravana Bhavan (restaurant), Shimla
+Snippet: "Washroom is tiny and up some stairs. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Washroom is tiny and up some stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Colva Beach (sight), Goa
+Snippet: "Go early to avoid the queues. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Pinch of Spice (restaurant), Udaipur
+Snippet: "The staff put down a portable ramp for my mother's wheelchair. Parking is limited so take an auto. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The staff put down a portable ramp for my mother's wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Lotus Temple (sight), Delhi
+Snippet: "Ghat ki seedhiyan steep hain, around 120 steps till the water. Photography is allowed inside. Accessible toilet near the entrance."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "120", "evidence": "Ghat ki seedhiyan steep hain, around 120 steps till the water | Accessible toilet near the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Radisson Blu (hotel), Varanasi
+Snippet: "Very accommodating staff, they helped us a lot. Clean rooms and a good breakfast. The bathroom has a high step into the shower, not good for wheelchair users."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "The bathroom has a high step into the shower, not good for wheelchair users"}
+
+### Instruction:
+TASK: access_claims
+Place: Karim's (restaurant), Mumbai
+Snippet: "Food was average but the lassi was great. Photography is allowed inside."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Mehtab Bagh (sight), Agra
+Snippet: "Bahut sundar jagah hai. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Radisson Blu (hotel), Shimla
+Snippet: "Go early to avoid the queues. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Itmad-ud-Daulah Tomb (sight), Agra
+Snippet: "Guides at the gate charge too much, negotiate. Food was average but the lassi was great. Lift was not working when we visited, so we had to use the stairs. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Lift was not working when we visited, so we had to use the stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Saheliyon ki Bari (sight), Udaipur
+Snippet: "Great value for money. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Eravikulam National Park (sight), Munnar
+Snippet: "Clean rooms and a good breakfast. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Chitale Bandhu (restaurant), Varanasi
+Snippet: "Paneer tikka was the best we had. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Udaipur
+Snippet: "Heritage building, rooms are reached by a spiral staircase only. Monsoon mein aur bhi khoobsurat lagta hai. Reception is up a flight of stairs from the street. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Heritage building, rooms are reached by a spiral staircase only | Reception is up a flight of stairs from the street"}
+
+### Instruction:
+TASK: access_claims
+Place: Ramnagar Fort (sight), Varanasi
+Snippet: "My father went round in his wheelchair without any trouble, the paths are paved and level. The staff were very polite and helpful. There is a boardwalk ramp down to the beach. Monsoon mein aur bhi khoobsurat lagta hai. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "My father went round in his wheelchair without any trouble, the paths are paved and level | There is a boardwalk ramp down to the beach"}
+
+### Instruction:
+TASK: access_claims
+Place: Fateh Sagar Lake (sight), Udaipur
+Snippet: "Stunning sunset views over the city. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Goa
+Snippet: "The staff were very polite and helpful. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Varanasi
+Snippet: "Guides at the gate charge too much, negotiate. Reception is up a flight of stairs from the street. Ramps are apparently being planned for next year. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Reception is up a flight of stairs from the street"}
+
+### Instruction:
+TASK: access_claims
+Place: Salim Ali Bird Sanctuary (sight), Goa
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. There is a ramp at the main gate and the ground floor galleries are flat. My father went round in his wheelchair without any trouble, the paths are paved and level. There is a boardwalk ramp down to the beach."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp at the main gate and the ground floor galleries are flat | My father went round in his wheelchair without any trouble, the paths are paved and level | There is a boardwalk ramp down to the beach"}
+
+### Instruction:
+TASK: access_claims
+Place: Bademiya (restaurant), Delhi
+Snippet: "Ramps are apparently being planned for next year. Seating is on the first floor and there is no lift. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Seating is on the first floor and there is no lift"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Udaipur
+Snippet: "Parking is limited so take an auto. No lift, and our room was on the second floor. Go early to avoid the queues. Reception is up a flight of stairs from the street."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "No lift, and our room was on the second floor | Reception is up a flight of stairs from the street"}
+
+### Instruction:
+TASK: access_claims
+Place: Kundala Lake (sight), Munnar
+Snippet: "Stunning sunset views over the city. Good for elderly people. Sand everywhere, no boardwalk, so a wheelchair will get stuck. The path up is cobbled and very steep, impossible with a wheelchair. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Sand everywhere, no boardwalk, so a wheelchair will get stuck | The path up is cobbled and very steep, impossible with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Kundala Lake (sight), Munnar
+Snippet: "Guides at the gate charge too much, negotiate. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Varanasi
+Snippet: "Food was average but the lassi was great. No lift, and our room was on the second floor. Monsoon mein aur bhi khoobsurat lagta hai. Bahut sundar jagah hai. The bathroom has a high step into the shower, not good for wheelchair users."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "No lift, and our room was on the second floor | The bathroom has a high step into the shower, not good for wheelchair users"}
+
+### Instruction:
+TASK: access_claims
+Place: Select Citywalk Mall (sight), Delhi
+Snippet: "Food was average but the lassi was great. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Galtaji Temple (sight), Jaipur
+Snippet: "Very accommodating staff, they helped us a lot. Guides at the gate charge too much, negotiate. Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Salim Ali Bird Sanctuary (sight), Goa
+Snippet: "Perfect for families. You have to climb 12 steps to reach the temple."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "12", "evidence": "You have to climb 12 steps to reach the temple"}
+
+### Instruction:
+TASK: access_claims
+Place: Agrasen ki Baoli (sight), Delhi
+Snippet: "You have to climb 250 steps to reach the temple. Parking is limited so take an auto. Photography is allowed inside."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "250", "evidence": "You have to climb 250 steps to reach the temple"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Sea Breeze (hotel), Varanasi
+Snippet: "Guides at the gate charge too much, negotiate. Go early to avoid the queues."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Mehtab Bagh (sight), Agra
+Snippet: "Great value for money. Bahut sundar jagah hai. A lift takes you up to the upper floors. No ramp anywhere, only stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "no", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "A lift takes you up to the upper floors | No ramp anywhere, only stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Ambrai Restaurant (restaurant), Mumbai
+Snippet: "Perfect for families. Good for elderly people."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Udaipur
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. Photography is allowed inside. There is a ramp next to the steps at the entrance."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp next to the steps at the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Phoenix Palladium Mall (sight), Mumbai
+Snippet: "Perfect for families. Go early to avoid the queues. A lift takes you up to the upper floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "A lift takes you up to the upper floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Clarks Shiraz (hotel), Delhi
+Snippet: "Guides at the gate charge too much, negotiate. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Rishikesh
+Snippet: "It gets very crowded on weekends. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Pinch of Spice (restaurant), Goa
+Snippet: "The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Saravana Bhavan (restaurant), Munnar
+Snippet: "25 steps at the entrance and no ramp. Photography is allowed inside."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "unknown", "stairs": "25", "evidence": "25 steps at the entrance and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Ganga River Rafting Boat (sight), Rishikesh
+Snippet: "Good for elderly people. There is a boardwalk ramp down to the beach. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a boardwalk ramp down to the beach"}
+
+### Instruction:
+TASK: access_claims
+Place: Christ Church Shimla (sight), Shimla
+Snippet: "Perfect for families. Sand everywhere, no boardwalk, so a wheelchair will get stuck. You have to climb 20 steps to reach the temple. Food was average but the lassi was great."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "20", "evidence": "Sand everywhere, no boardwalk, so a wheelchair will get stuck | You have to climb 20 steps to reach the temple"}
+
+### Instruction:
+TASK: access_claims
+Place: Zostel Jaipur (hotel), Jaipur
+Snippet: "The lift was out of order for two days. Reception is up a flight of stairs from the street. Perfect for families. Go early to avoid the queues. Ramps are apparently being planned for next year."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days | Reception is up a flight of stairs from the street"}
+
+### Instruction:
+TASK: access_claims
+Place: Moustache Hostel (hotel), Agra
+Snippet: "Step-free entrance with a gentle ramp from the drop-off. Photography is allowed inside. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Step-free entrance with a gentle ramp from the drop-off"}
+
+### Instruction:
+TASK: access_claims
+Place: Laxmi Mishthan Bhandar (restaurant), Udaipur
+Snippet: "Perfect for families. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Karim's (restaurant), Agra
+Snippet: "Good for elderly people. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Haji Ali Dargah (sight), Mumbai
+Snippet: "Photography is allowed inside. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Taj Rambagh Palace (hotel), Rishikesh
+Snippet: "Paneer tikka was the best we had. It gets very crowded on weekends. They gave us a ground floor room with a roll-in shower and grab bars. The hotel has a lift to all floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "They gave us a ground floor room with a roll-in shower and grab bars | The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Rishikesh
+Snippet: "Great value for money. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Delhi
+Snippet: "The hotel has a lift to all floors. Bahut sundar jagah hai. There is a ramp next to the steps at the entrance."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors | There is a ramp next to the steps at the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Shimla
+Snippet: "Stunning sunset views over the city. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Agra
+Snippet: "Lift hai, but the entrance has 40 steps and no ramp. The staff were very polite and helpful. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "yes", "ramp": "no", "accessible_toilet": "unknown", "stairs": "40", "evidence": "Lift hai, but the entrance has 40 steps and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Goa State Museum (sight), Goa
+Snippet: "Wheelchairs are available free at the ticket counter and the whole route is ramped. Paneer tikka was the best we had. Great value for money. Wheelchair users can enter through the side gate which has a ramp."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchairs are available free at the ticket counter and the whole route is ramped | Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Varanasi
+Snippet: "Photography is allowed inside. It gets very crowded on weekends. Bahut sundar jagah hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Munnar
+Snippet: "There is a ramp next to the steps at the entrance. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp next to the steps at the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: Sarnath Stupa (sight), Varanasi
+Snippet: "Clean rooms and a good breakfast. Parking is limited so take an auto. Lift was not working when we visited, so we had to use the stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Lift was not working when we visited, so we had to use the stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Laxmi Mishthan Bhandar (restaurant), Varanasi
+Snippet: "The staff were very polite and helpful. 20 steps at the entrance and no ramp. The light and sound show in the evening is worth it. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "unknown", "stairs": "20", "evidence": "20 steps at the entrance and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Goa
+Snippet: "Clean rooms and a good breakfast. The lift was out of order for two days. Photography is allowed inside."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: Saravana Bhavan (restaurant), Udaipur
+Snippet: "The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Goa
+Snippet: "Bahut sundar jagah hai. Guides at the gate charge too much, negotiate."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Sea Breeze (hotel), Agra
+Snippet: "Paneer tikka was the best we had."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Anamudi Peak Trek (sight), Munnar
+Snippet: "The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 100 steps. Food was average but the lassi was great. Good for elderly people. The staff were very polite and helpful. The upper levels can only be reached by narrow stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "100", "evidence": "The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 100 steps | The upper levels can only be reached by narrow stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Museum Munnar (sight), Munnar
+Snippet: "The staff were very polite and helpful. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Itmad-ud-Daulah Tomb (sight), Agra
+Snippet: "Very accommodating staff, they helped us a lot. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Clarks Shiraz (hotel), Agra
+Snippet: "Paneer tikka was the best we had. Go early to avoid the queues. The hotel has a lift to all floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Residency Fort (hotel), Goa
+Snippet: "Food was average but the lassi was great. Stunning sunset views over the city. The staff were very polite and helpful. They gave us a ground floor room with a roll-in shower and grab bars. Step-free entrance with a gentle ramp from the drop-off."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "They gave us a ground floor room with a roll-in shower and grab bars | Step-free entrance with a gentle ramp from the drop-off"}
+
+### Instruction:
+TASK: access_claims
+Place: Ambrai Restaurant (restaurant), Udaipur
+Snippet: "Clean rooms and a good breakfast. Ground floor seating, easy to get in with a wheelchair. Go early to avoid the queues."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Ground floor seating, easy to get in with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Sea Breeze (hotel), Munnar
+Snippet: "Reception is up a flight of stairs from the street. Food was average but the lassi was great."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Reception is up a flight of stairs from the street"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Varanasi
+Snippet: "The light and sound show in the evening is worth it. Food was average but the lassi was great. The lift was out of order for two days."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: Beatles Ashram (sight), Rishikesh
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Bademiya (restaurant), Mumbai
+Snippet: "The staff were very polite and helpful. Washroom is tiny and up some stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Washroom is tiny and up some stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Mall Road Market (sight), Shimla
+Snippet: "It gets very crowded on weekends. The light and sound show in the evening is worth it. The only washrooms are down a flight of stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "The only washrooms are down a flight of stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Vishwanath Gali Market (sight), Varanasi
+Snippet: "The path up is cobbled and very steep, impossible with a wheelchair. Clean rooms and a good breakfast. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The path up is cobbled and very steep, impossible with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Himachal State Museum (sight), Shimla
+Snippet: "It gets very crowded on weekends. Good for elderly people. A lift takes you up to the upper floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "A lift takes you up to the upper floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Hathi Pol Bazaar (sight), Udaipur
+Snippet: "Food was average but the lassi was great. It gets very crowded on weekends. Bahut sundar jagah hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ambrai Restaurant (restaurant), Goa
+Snippet: "Rooftop only, reached by stairs. Food was average but the lassi was great. 100 steps at the entrance and no ramp. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "no", "accessible_toilet": "unknown", "stairs": "100", "evidence": "Rooftop only, reached by stairs | 100 steps at the entrance and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: The Ridge Viewpoint (sight), Shimla
+Snippet: "The staff were very polite and helpful. Accessible toilet near the entrance. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Accessible toilet near the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: The Ridge Viewpoint (sight), Shimla
+Snippet: "Clean rooms and a good breakfast. The staff were very polite and helpful. The upper levels can only be reached by narrow stairs."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The upper levels can only be reached by narrow stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Sea Breeze (hotel), Udaipur
+Snippet: "Go early to avoid the queues."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Ambrai Restaurant (restaurant), Delhi
+Snippet: "Seating is on the first floor and there is no lift. Perfect for families. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Seating is on the first floor and there is no lift"}
+
+### Instruction:
+TASK: access_claims
+Place: Kashi Vishwanath Temple (sight), Varanasi
+Snippet: "Stunning sunset views over the city. Clean rooms and a good breakfast. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Casa Anjuna (hotel), Varanasi
+Snippet: "The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Baga Beach (sight), Goa
+Snippet: "Wheelchairs are available free at the ticket counter and the whole route is ramped. A lift takes you up to the upper floors. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchairs are available free at the ticket counter and the whole route is ramped | A lift takes you up to the upper floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Haji Ali Dargah (sight), Mumbai
+Snippet: "Parking is limited so take an auto. Monsoon mein aur bhi khoobsurat lagta hai. There are about 20 steep steps up to the main palace. It gets very crowded on weekends."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "20", "evidence": "There are about 20 steep steps up to the main palace"}
+
+### Instruction:
+TASK: access_claims
+Place: Sarnath Stupa (sight), Varanasi
+Snippet: "Go early to avoid the queues. Food was average but the lassi was great. Accessible toilet near the entrance."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Accessible toilet near the entrance"}
+
+### Instruction:
+TASK: access_claims
+Place: The Ridge Viewpoint (sight), Shimla
+Snippet: "Very accommodating staff, they helped us a lot. The light and sound show in the evening is worth it."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Laxman Jhula (sight), Rishikesh
+Snippet: "A lift takes you up to the upper floors. Entry level hai, koi seedhi nahi. Great value for money. My father went round in his wheelchair without any trouble, the paths are paved and level."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "A lift takes you up to the upper floors | Entry level hai, koi seedhi nahi | My father went round in his wheelchair without any trouble, the paths are paved and level"}
+
+### Instruction:
+TASK: access_claims
+Place: Ambrai Restaurant (restaurant), Varanasi
+Snippet: "Washroom is tiny and up some stairs. Rooftop only, reached by stairs. Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "no", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Washroom is tiny and up some stairs | Rooftop only, reached by stairs"}
+
+### Instruction:
+TASK: access_claims
+Place: Treebo Trend Aamod (hotel), Delhi
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. The hotel has a lift to all floors. Parking is limited so take an auto. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Jaipur
+Snippet: "There is a ramp next to the steps at the entrance. Step-free entrance with a gentle ramp from the drop-off. The hotel has a lift to all floors. Clean rooms and a good breakfast. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "There is a ramp next to the steps at the entrance | Step-free entrance with a gentle ramp from the drop-off | The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Tea Valley Resort (hotel), Agra
+Snippet: "The light and sound show in the evening is worth it. Stunning sunset views over the city."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Lotus Temple (sight), Delhi
+Snippet: "Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Udaipur
+Snippet: "Monsoon mein aur bhi khoobsurat lagta hai. The hotel has a lift to all floors. The staff were very polite and helpful."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: Sarnath Stupa (sight), Varanasi
+Snippet: "Perfect for families. Parking is limited so take an auto. Wheelchair users can enter through the side gate which has a ramp."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Assi Ghat (sight), Varanasi
+Snippet: "Wheelchair users can enter through the side gate which has a ramp. Stunning sunset views over the city. Good for elderly people. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchair users can enter through the side gate which has a ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Taj Mahal (sight), Agra
+Snippet: "Photography is allowed inside. Paneer tikka was the best we had. Great value for money."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Triveni Ghat (sight), Rishikesh
+Snippet: "Great value for money. Ramps are apparently being planned for next year. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: FabHotel Prime (hotel), Varanasi
+Snippet: "The hotel has a lift to all floors. Great value for money. The staff were very polite and helpful. Step-free entrance with a gentle ramp from the drop-off. Bahut sundar jagah hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "yes", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The hotel has a lift to all floors | Step-free entrance with a gentle ramp from the drop-off"}
+
+### Instruction:
+TASK: access_claims
+Place: Bademiya (restaurant), Goa
+Snippet: "Food was average but the lassi was great. Monsoon mein aur bhi khoobsurat lagta hai."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Saravana Bhavan (restaurant), Munnar
+Snippet: "Washroom is tiny and up some stairs. Ground floor seating, easy to get in with a wheelchair. Bahut sundar jagah hai. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "no", "stairs": "unknown", "evidence": "Washroom is tiny and up some stairs | Ground floor seating, easy to get in with a wheelchair"}
+
+### Instruction:
+TASK: access_claims
+Place: Johari Bazaar (sight), Jaipur
+Snippet: "Perfect for families."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Moustache Hostel (hotel), Jaipur
+Snippet: "Food was average but the lassi was great. Paneer tikka was the best we had. Parking is limited so take an auto."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Lodhi Garden (sight), Delhi
+Snippet: "Wheelchairs are available free at the ticket counter and the whole route is ramped. Photography is allowed inside. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "yes", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Wheelchairs are available free at the ticket counter and the whole route is ramped"}
+
+### Instruction:
+TASK: access_claims
+Place: Saravana Bhavan (restaurant), Udaipur
+Snippet: "45 steps at the entrance and no ramp. Good for elderly people. Clean rooms and a good breakfast."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "no", "accessible_toilet": "unknown", "stairs": "45", "evidence": "45 steps at the entrance and no ramp"}
+
+### Instruction:
+TASK: access_claims
+Place: Top Station (sight), Munnar
+Snippet: "It gets very crowded on weekends. Bahut sundar jagah hai. Very accommodating staff, they helped us a lot."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "none"}
+
+### Instruction:
+TASK: access_claims
+Place: Treebo Trend Aamod (hotel), Udaipur
+Snippet: "Wide doors and an accessible bathroom in the room. Perfect for families. It gets very crowded on weekends. The hotel has a lift to all floors."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "yes", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "Wide doors and an accessible bathroom in the room | The hotel has a lift to all floors"}
+
+### Instruction:
+TASK: access_claims
+Place: ITC Rajputana (hotel), Udaipur
+Snippet: "Ramps are apparently being planned for next year. The lift was out of order for two days."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "unknown", "lift": "no", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "The lift was out of order for two days"}
+
+### Instruction:
+TASK: access_claims
+Place: Central Park Jaipur (sight), Jaipur
+Snippet: "Stunning sunset views over the city. Sand everywhere, no boardwalk, so a wheelchair will get stuck."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "unknown", "evidence": "Sand everywhere, no boardwalk, so a wheelchair will get stuck"}
+
+### Instruction:
+TASK: access_claims
+Place: Attukal Waterfalls (sight), Munnar
+Snippet: "The light and sound show in the evening is worth it. The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 45 steps."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "no", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "unknown", "stairs": "45", "evidence": "The golf cart from the parking to the gate is helpful for elderly visitors, but inside there are 45 steps"}
+
+### Instruction:
+TASK: access_claims
+Place: Hotel Pearl Palace (hotel), Mumbai
+Snippet: "Good for elderly people. They gave us a ground floor room with a roll-in shower and grab bars."
+Answer with JSON only: {"step_free": "yes|no|unknown", "lift": "yes|no|unknown", "ramp": "yes|no|unknown", "accessible_toilet": "yes|no|unknown", "stairs": "number of steps or unknown", "evidence": "exact quotes from the snippet joined by | or none"}
+### Response:
+{"step_free": "yes", "lift": "unknown", "ramp": "unknown", "accessible_toilet": "yes", "stairs": "unknown", "evidence": "They gave us a ground floor room with a roll-in shower and grab bars"}
+

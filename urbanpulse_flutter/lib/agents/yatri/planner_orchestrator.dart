@@ -300,6 +300,7 @@ class PlannerOrchestrator {
         search: toolset.search,
         fetchPage: toolset.fetch,
         wikipedia: toolkit.wikipedia,
+        travelRisk: toolkit.travelRisk,
       ),
     );
     st.atithi = AtithiAgent(finder, khoji: hotelsOnly ? null : khoji);

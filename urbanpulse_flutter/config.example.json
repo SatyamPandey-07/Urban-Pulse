@@ -24,6 +24,10 @@
   "SUPABASE_URL": "https://your-project-ref.supabase.co",
   "SUPABASE_ANON_KEY": "",
 
+  "_NUGEN": "The UrbanPulse Travel-Risk model aligned on Nugen (see nugen/README.md): reads wheelchair-access facts from reviews for Khoji, and weather impact and weather reports for the weather digital twin. NUGEN_MODEL_ID is the aligned model id from nugen/results/state.json. Leave empty to use the offline rules.",
+  "NUGEN_API_KEY": "",
+  "NUGEN_MODEL_ID": "",
+
   "_CENTRAL_REGISTRY_BASE_URL": "Where the Central Registry backend (server/) is reachable. Default http://10.0.2.2:3001 is the Android emulator's alias for your dev machine's localhost. On a physical device use your host's LAN IP, e.g. http://192.168.1.23:3001",
   "CENTRAL_REGISTRY_BASE_URL": "http://10.0.2.2:3001"
 }
