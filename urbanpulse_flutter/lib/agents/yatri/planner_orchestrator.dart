@@ -26,6 +26,9 @@ import '../runtime/task_board.dart';
 import '../runtime/task_graph.dart';
 import '../safar/safar_agent.dart';
 import '../safar/transport_planner.dart';
+import '../saksham/audit_engine.dart';
+import '../saksham/saksham_agent.dart';
+import 'access_gates.dart';
 import 'budget_gates.dart';
 import 'hotel_gates.dart';
 import 'hotspot_gates.dart';
@@ -589,17 +592,27 @@ class PlannerOrchestrator {
         timeout: const Duration(seconds: 12),
       ),
       (c) async {
-        final days = await toolkit.forecast.daily(st.center.latitude, st.center.longitude, brief.start!, brief.end!, today: _now());
+        final days = await toolkit.forecast.outlook(st.center.latitude, st.center.longitude, brief.start!, brief.end!, today: _now());
         final map = {for (final d in days) d.date: d};
         st.weather = map;
         final rainy = days.where((d) => d.isRainy).length;
+        final real = days.where((d) => d.isForecast).length;
+        final typical = days.length - real;
+        if (typical > 0) {
+          st.notes.add(
+            'For $typical day${typical == 1 ? '' : 's'} beyond the 16-day forecast, the weather is what the season was like in past years, not a forecast.',
+          );
+        }
         return AgentReport(
           agent: c.agent,
-          status: map.isEmpty ? ReportStatus.degraded : ReportStatus.done,
+          status: map.isEmpty || typical > 0 ? ReportStatus.degraded : ReportStatus.done,
           summary: map.isEmpty
-              ? 'the forecast does not reach these dates'
-              : 'forecast for ${map.length} day${map.length == 1 ? '' : 's'}${rainy > 0 ? ', $rainy rainy' : ''}',
-          why: 'Open-Meteo gives a forecast up to 16 days ahead; beyond that Raah plans without one.',
+              ? 'no weather data for these dates'
+              : '${real > 0 ? 'forecast for $real day${real == 1 ? '' : 's'}' : ''}'
+                    '${real > 0 && typical > 0 ? ' and ' : ''}'
+                    '${typical > 0 ? 'seasonal norms for $typical' : ''}'
+                    '${rainy > 0 ? ', $rainy rainy' : ''}',
+          why: 'Open-Meteo gives a forecast up to 16 days ahead; for later dates Raah uses how the same dates went in past years and labels it that way.',
         );
       },
       say: 'asked Raah to check the weather',
@@ -608,8 +621,13 @@ class PlannerOrchestrator {
     if (!report.isUsable && st.weather.isEmpty) st.notes.add('The weather forecast was not available.');
   }
 
-  // --- days, budget, assembly ---------------------------------------------------
+  // --- days, audit, budget, assembly ------------------------------------------
 
+  /// Lays out the days, then audits and prices them, and keeps going until
+  /// nothing needs the traveller's decision (or time and rounds run out). Each
+  /// pass is Raah, then Saksham and Hisab side by side; the first open problem
+  /// (access, then weather, then budget) is put to the traveller, or fixed
+  /// quietly when it is a minor place, and the days are laid out again.
   Future<Itinerary?> _settle(TaskContext ctx, _State st) async {
     final brief = st.brief;
     if (st.spots == null && st.hotel == null) {
@@ -621,79 +639,80 @@ class PlannerOrchestrator {
       return null;
     }
 
+    const maxPasses = 5;
     DayPlanResult? days;
     Budget? budget;
-    var round = 0;
-    while (true) {
-      final result = await _dayPlan(ctx, st, round);
-      if (result == null) return null;
-      days = result;
+    AuditResult? audit;
+    var rainIssues = const <Issue>[];
+    var budgetIssues = const <Issue>[];
+    var pass = -1;
+    var dirty = true;
+    final needs = {for (final n in brief.accessibilityNeeds) if (n != AccessibilityNeed.none) n};
 
-      final sub = await ctx.delegate(
-        TaskSpec(
-          id: 'hisab.budget.$round',
-          agent: AgentKind.hisab,
-          title: round == 0 ? 'Price the plan' : 'Re-price the plan',
-          why: 'Hisab adds up the stay, travel, entry fees, meals and a small buffer, and compares the total with your budget.',
-          parents: ['raah.days.$round'],
-          timeout: const Duration(seconds: 10),
-        ),
-        (c) async {
-          final b = BudgetEngine.build(
-            BudgetInput(
-              brief: brief,
-              days: result.days,
+    for (var guard = 0; guard < 24; guard++) {
+      if (dirty) {
+        pass++;
+        dirty = false;
+        final planned = await _dayPlan(ctx, st, pass);
+        if (planned == null) return null;
+        days = planned.$1;
+        rainIssues = planned.$2;
+
+        // Saksham and Hisab work on the same days at the same time.
+        final reports = await Future.wait([
+          _auditNode(ctx, st, planned.$1, pass),
+          _budgetNode(ctx, st, planned.$1, pass),
+        ]);
+        if (reports[0].payload is AuditResult) audit = reports[0].payload as AuditResult;
+        if (reports[1].payload is Budget) budget = reports[1].payload as Budget;
+        budgetIssues = reports[1].issues;
+      }
+      if (pass >= maxPasses || ctx.degraded) break;
+
+      final fixes = audit == null
+          ? const AccessFixes()
+          : AccessGates.check(
+              result: audit,
+              needs: needs,
               hotel: st.hotel,
-              outbound: st.chosen,
-              inbound: _mirror(st.chosen),
-              stayOwnArrangement: st.stayOwn,
-            ),
-          );
-          budget = b;
-          final issues = BudgetGates.check(
-            budget: b,
-            hotel: st.hotel,
-            hotelAlternatives: st.hotels?.options ?? const [],
-            transport: st.transport,
-            chosenTransport: st.chosen,
-            days: result.days,
-            hotspots: {for (final h in st.spots?.pool ?? const <Hotspot>[]) h.id: h},
-            brief: brief,
-            alreadyDropped: st.droppedIds,
-          );
-          if (issues.isNotEmpty) {
-            c.say(
-              'is over budget and is asking Atithi, Safar and Bhatkanti for cheaper options',
-              why: 'Hisab looks for real savings in the stay, the journey and the paid places before it bothers you.',
-              kind: FeedKind.negotiate,
+              hotelAlternatives: st.hotels?.options ?? const [],
+              transport: st.transport,
+              chosenTransport: st.chosen,
             );
-          }
-          return AgentReport(
-            agent: c.agent,
-            status: b.hasEstimates ? ReportStatus.degraded : ReportStatus.done,
-            summary: 'the plan comes to ${rupees(b.totalInr)}'
-                '${b.budgetMaxInr == null ? '' : (b.isWithinBudget ? ', within your budget' : ', ${rupees(-b.remainingInr!)} over budget')}',
-            issues: issues,
-            why: 'Lines marked as estimates use typical prices.',
-          );
-        },
-        say: round == 0 ? 'asked Hisab to price the plan' : 'asked Hisab to price the changed plan',
-      );
 
-      final issues = sub.issues.where((i) => !_asked.contains(i.id)).toList();
-      if (issues.isEmpty || round >= 2 || ctx.degraded) break;
+      // Minor places that do not suit the group are swapped without a question.
+      final auto = [for (final id in fixes.autoReplaceIds) if (!_autoDone.contains(id)) id];
+      if (auto.isNotEmpty) {
+        _autoDone.addAll(auto);
+        _replacePlaces(ctx, st, auto, quiet: true);
+        dirty = true;
+        continue;
+      }
+
+      final issues = [...fixes.issues, ...rainIssues, ...budgetIssues].where((i) => !_asked.contains(i.id)).toList();
+      if (issues.isEmpty) break;
+
       final issue = issues.first;
       _asked.add(issue.id);
-      ctx.say('needs your decision on the budget', why: issue.why, kind: FeedKind.ask);
+      ctx.say(
+        'needs your decision on ${switch (issue.agent) {
+          AgentKind.saksham => 'access',
+          AgentKind.raah => 'the weather',
+          AgentKind.hisab => 'the budget',
+          _ => 'the plan',
+        }}',
+        why: issue.why,
+        kind: FeedKind.ask,
+      );
       final option = await _askIssue(ctx, issue);
-      ctx.say('you chose: ${option.label}', why: 'Yatri applies it and re-plans the days.', kind: FeedKind.decide);
-      if (!_applyBudgetChoice(ctx, st, option)) break;
-      round++;
+      ctx.say('you chose: ${option.label}', why: 'Yatri applies it and re-plans the days if needed.', kind: FeedKind.decide);
+      // An answer that changes nothing just moves on to the next open issue.
+      dirty = _applyChoice(ctx, st, option);
     }
 
+    if (days == null || budget == null) return null;
     final d = days;
     final b = budget;
-    if (b == null) return null;
     final itinerary = ItineraryAssembler.build(
       brief: brief,
       now: _now(),
@@ -705,20 +724,105 @@ class PlannerOrchestrator {
       transport: st.transport,
       chosenTransport: st.chosen,
       weather: st.weather,
+      audit: audit?.audit,
       extraAssumptions: [...st.notes, if (st.stayOwn) 'You chose to arrange your own stay, so no hotel is included.'],
     );
     ctx.say(
       'put the plan together: ${itinerary.dayCount} days, ${rupees(b.totalInr)}',
-      why: 'Yatri combined the stay, places, journey, days and budget into one itinerary.',
+      why: 'Yatri combined the stay, places, journey, days, access audit and budget into one itinerary.',
       kind: FeedKind.decide,
     );
     return itinerary;
   }
 
-  Future<DayPlanResult?> _dayPlan(TaskContext ctx, _State st, int round) async {
+  final Set<String> _autoDone = {};
+
+  Future<AgentReport> _auditNode(TaskContext ctx, _State st, DayPlanResult days, int pass) {
     final brief = st.brief;
-    final parents = [st.hotelTask, st.spotsTask, st.transportTask, st.weatherTask].whereType<String>().toList();
+    return ctx.delegate(
+      TaskSpec(
+        id: 'saksham.audit.$pass',
+        agent: AgentKind.saksham,
+        title: pass == 0 ? 'Audit accessibility' : 'Re-audit accessibility',
+        why: 'Saksham checks every step of the trip (the stay, the journey, each place, each transfer) against every access need in your group.',
+        parents: ['raah.days.$pass'],
+        timeout: const Duration(seconds: 25),
+      ),
+      (c) => SakshamAgent(estimator: toolkit.estimator).run(
+        c,
+        AuditInput(
+          needs: brief.accessibilityNeeds,
+          days: days.days,
+          spots: {for (final h in [...?st.spots?.pool, ...?st.spots?.selected]) h.id: h},
+          hotel: st.hotel,
+          outbound: st.chosen,
+          inbound: _mirror(st.chosen),
+        ),
+      ),
+      say: pass == 0 ? 'asked Saksham to audit the plan for access' : 'asked Saksham to audit the changed plan',
+    );
+  }
+
+  Future<AgentReport> _budgetNode(TaskContext ctx, _State st, DayPlanResult days, int pass) {
+    final brief = st.brief;
+    return ctx.delegate(
+      TaskSpec(
+        id: 'hisab.budget.$pass',
+        agent: AgentKind.hisab,
+        title: pass == 0 ? 'Price the plan' : 'Re-price the plan',
+        why: 'Hisab adds up the stay, travel, entry fees, meals and a small buffer, and compares the total with your budget.',
+        parents: ['raah.days.$pass'],
+        timeout: const Duration(seconds: 10),
+      ),
+      (c) async {
+        final b = BudgetEngine.build(
+          BudgetInput(
+            brief: brief,
+            days: days.days,
+            hotel: st.hotel,
+            outbound: st.chosen,
+            inbound: _mirror(st.chosen),
+            stayOwnArrangement: st.stayOwn,
+          ),
+        );
+        final issues = BudgetGates.check(
+          budget: b,
+          hotel: st.hotel,
+          hotelAlternatives: st.hotels?.options ?? const [],
+          transport: st.transport,
+          chosenTransport: st.chosen,
+          days: days.days,
+          hotspots: {for (final h in st.spots?.pool ?? const <Hotspot>[]) h.id: h},
+          brief: brief,
+          alreadyDropped: st.droppedIds,
+        );
+        if (issues.isNotEmpty) {
+          c.say(
+            'is over budget and is asking Atithi, Safar and Bhatkanti for cheaper options',
+            why: 'Hisab looks for real savings in the stay, the journey and the paid places before it bothers you.',
+            kind: FeedKind.negotiate,
+          );
+        }
+        return AgentReport(
+          agent: c.agent,
+          status: b.hasEstimates ? ReportStatus.degraded : ReportStatus.done,
+          summary: 'the plan comes to ${rupees(b.totalInr)}'
+              '${b.budgetMaxInr == null ? '' : (b.isWithinBudget ? ', within your budget' : ', ${rupees(-b.remainingInr!)} over budget')}',
+          payload: b,
+          issues: issues,
+          why: 'Lines marked as estimates use typical prices.',
+        );
+      },
+      say: pass == 0 ? 'asked Hisab to price the plan' : 'asked Hisab to price the changed plan',
+    );
+  }
+
+  /// Raah's layout for one pass, with any weather question it raises.
+  Future<(DayPlanResult, List<Issue>)?> _dayPlan(TaskContext ctx, _State st, int round) async {
+    final brief = st.brief;
+    final parents = round == 0 ? [st.hotelTask, st.spotsTask, st.transportTask, st.weatherTask].whereType<String>().toList() : <String>[];
     DayPlanResult? out;
+    var rain = const <Issue>[];
     await ctx.delegate(
       TaskSpec(
         id: 'raah.days.$round',
@@ -752,26 +856,46 @@ class PlannerOrchestrator {
         );
         final r = DayPlanner.plan(input);
         out = r;
+        rain = RainGates.check(r, banned: st.bannedOutdoor);
         final visits = r.visited.length;
         return AgentReport(
           agent: c.agent,
           status: r.unscheduled.isEmpty ? ReportStatus.done : ReportStatus.degraded,
           summary: 'planned ${r.days.length} day${r.days.length == 1 ? '' : 's'} with $visits place${visits == 1 ? '' : 's'}'
-              '${r.unscheduled.isEmpty ? '' : ', ${r.unscheduled.length} did not fit'}',
+              '${r.unscheduled.isEmpty ? '' : ', ${r.unscheduled.length} did not fit'}'
+              '${rain.isEmpty ? '' : ', rain on ${r.rainConflicts.length} outdoor day${r.rainConflicts.length == 1 ? '' : 's'}'}',
+          issues: rain,
           why: 'Places close together share a day; wet days go to indoor places where possible.',
         );
       },
       say: round == 0 ? 'asked Raah to lay out the days' : 'asked Raah to re-plan the days',
     );
-    if (out == null) {
+    final r = out;
+    if (r == null) {
       ctx.say('Raah could not lay out the days', why: 'Without days there is no itinerary to show.', kind: FeedKind.warn);
+      return null;
     }
-    return out;
+    return (r, rain);
   }
 
-  /// Applies the traveller's answer to a budget problem. False means "go with
-  /// the plan as it is".
-  bool _applyBudgetChoice(TaskContext ctx, _State st, IssueOption option) {
+  /// Swaps unsuitable places for the next-best ones from the pool.
+  void _replacePlaces(TaskContext ctx, _State st, List<String> ids, {bool quiet = false}) {
+    final spots = st.spots;
+    if (spots == null || ids.isEmpty) return;
+    final names = [for (final h in spots.selected) if (ids.contains(h.id)) h.name];
+    st.spots = HotspotFinder.amended(spots, dropIds: ids.toSet());
+    st.droppedIds.addAll(ids);
+    ctx.say(
+      quiet
+          ? 'swapped ${names.take(2).join(' and ')}${names.length > 2 ? ' and ${names.length - 2} more' : ''} for places that suit the group'
+          : 'is replacing ${names.take(2).join(' and ')} with places that suit the group',
+      why: 'A real source says ${names.length == 1 ? 'it does' : 'they do'} not work for someone in your group, so Yatri chose better fits from what Bhatkanti had found.',
+      kind: FeedKind.decide,
+    );
+  }
+
+  /// Applies the traveller's answer. False means the plan is unchanged.
+  bool _applyChoice(TaskContext ctx, _State st, IssueOption option) {
     final e = option.effect;
     switch (e['action']) {
       case 'swapHotel':
@@ -779,7 +903,7 @@ class PlannerOrchestrator {
         final h = st.hotels?.options.where((o) => o.id == id).firstOrNull;
         if (h == null) return false;
         st.hotel = h;
-        ctx.say('is switching the stay to ${h.name}', why: 'It is cheaper and still suits your group.', kind: FeedKind.negotiate);
+        ctx.say('is switching the stay to ${h.name}', why: 'It suits the group better or costs less.', kind: FeedKind.negotiate);
         return true;
       case 'swapTransport':
         final plan = st.transport;
@@ -787,13 +911,28 @@ class PlannerOrchestrator {
         if (plan == null || i is! int || i < 0 || i >= plan.options.length) return false;
         st.transport = plan.withChoice(i);
         st.chosen = plan.options[i];
-        ctx.say('is switching the journey to ${plan.options[i].mode.label.toLowerCase()}', why: 'It is cheaper and no harder on your access needs.', kind: FeedKind.negotiate);
+        ctx.say('is switching the journey to ${plan.options[i].mode.label.toLowerCase()}', why: 'It suits the group better or costs less.', kind: FeedKind.negotiate);
         return true;
       case 'dropPlaces':
         final ids = e['ids'];
         if (ids is! List || ids.isEmpty) return false;
         st.droppedIds.addAll(ids.whereType<String>());
         ctx.say('is dropping ${ids.length} paid place${ids.length == 1 ? '' : 's'}', why: 'They cost the most for how much they add.', kind: FeedKind.negotiate);
+        return true;
+      case 'replacePlaces':
+        final ids = e['ids'];
+        if (ids is! List || ids.isEmpty) return false;
+        _replacePlaces(ctx, st, ids.whereType<String>().toList());
+        return true;
+      case 'banOutdoor':
+        final dates = e['dates'];
+        if (dates is! List || dates.isEmpty) return false;
+        st.bannedOutdoor.addAll(dates.whereType<String>());
+        ctx.say(
+          'is moving outdoor plans off the rainy day${dates.length == 1 ? '' : 's'}',
+          why: 'Raah keeps outdoor places for drier days and fills the wet ones with indoor places.',
+          kind: FeedKind.decide,
+        );
         return true;
       default:
         return false;
