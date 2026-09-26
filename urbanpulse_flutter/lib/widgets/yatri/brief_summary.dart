@@ -9,12 +9,12 @@ List<(String, String)> briefSummaryRows(TripBrief b) {
       ? null
       : '${DateRangeAnswer(b.start!, b.end!).displayLabel} · ${b.days} day${b.days == 1 ? '' : 's'}';
 
-  final group = b.hasGroupBreakdown
+  final group = b.hasPartsBreakdown
       ? GroupAnswer(
           adults: b.adults!,
           seniors: b.seniors!,
           children: b.children!,
-          women: b.women!,
+          women: b.women ?? 0,
           childAges: b.childAges,
         ).displayLabel
       : null;

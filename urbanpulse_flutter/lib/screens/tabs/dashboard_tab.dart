@@ -111,9 +111,8 @@ class _DashboardTabState extends State<DashboardTab> {
     final traffic = _traffic;
     final aqi = _telemetry?.usAqi ?? 38;
     final speed = traffic?.freeFlowSpeedKmh ?? 77;
-    final temp = _telemetry?.temperatureC != null
-        ? '${fixed(_telemetry!.temperatureC, 0)}°C'
-        : '28°C';
+    final tempC = _telemetry?.temperatureC;
+    final temp = tempC != null ? '${fixed(tempC, 0)}°C' : '28°C';
     final condition = _telemetry?.condition ?? 'Clear';
 
     return SectionCard(

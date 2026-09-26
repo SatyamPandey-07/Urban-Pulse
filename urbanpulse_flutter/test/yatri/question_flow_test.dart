@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:urbanpulse/agents/receptionist/receptionist_agent.dart';
 import 'package:urbanpulse/domain/trip_brief/answer_applier.dart';
 import 'package:urbanpulse/domain/trip_brief/brief_merger.dart';
 import 'package:urbanpulse/domain/trip_brief/brief_validator.dart';
 import 'package:urbanpulse/domain/trip_brief/extraction.dart';
+import 'package:urbanpulse/domain/trip_brief/next_best.dart';
 import 'package:urbanpulse/domain/trip_brief/question_catalog.dart';
 import 'package:urbanpulse/domain/trip_brief/question_planner.dart';
 import 'package:urbanpulse/models/trip_brief.dart';
@@ -108,6 +110,140 @@ Sure! Here you go:
     });
   });
 
+  group('smart group dynamics', () {
+    TripBrief mergeText(String json, [TripBrief? from]) => BriefMerger.apply(
+      from ?? TripBrief.empty(testNow),
+      ExtractionParser.parse(json),
+    ).brief;
+
+    test('“4 men” fills the whole breakdown, so the group form is never asked', () {
+      final b = mergeText(
+        '{"updates": {"destination": "Goa", "travellerCount": 4, "adults": 4, "seniors": 0, "children": 0, "women": 0}}',
+      );
+      expect(b.hasGroupBreakdown, isTrue);
+      expect(BriefValidator.validate(b, testNow).hasIssueFor(BriefField.group), isFalse);
+    });
+
+    test('adults that make up the whole party imply no seniors or children', () {
+      // The model only stated adults; the rest follows from the total.
+      final b = mergeText('{"updates": {"travellerCount": 4, "adults": 4, "women": 0}}');
+      expect((b.adults, b.seniors, b.children), (4, 0, 0));
+      expect(BriefValidator.validate(b, testNow).hasIssueFor(BriefField.group), isFalse);
+    });
+
+    test('“3 friends” asks only how many are women', () {
+      final b = mergeText(
+        '{"updates": {"travellerCount": 3, "adults": 3, "seniors": 0, "children": 0}}',
+      );
+      final issues = BriefValidator.validate(b, testNow).forField(BriefField.group);
+      expect(issues.map((i) => i.questionId), ['women']);
+      final q = QuestionCatalog.build('women', b, now: testNow);
+      expect(q.options.map((o) => o.id), ['0', '1', '2', '3']);
+      expect(q.options.last.label, 'All 3 are women');
+    });
+
+    test('children without ages ask only for the ages', () {
+      final b = mergeText(
+        '{"updates": {"travellerCount": 4, "adults": 2, "seniors": 0, "children": 2, "women": 1}}',
+      );
+      final issues = BriefValidator.validate(b, testNow).forField(BriefField.group);
+      expect(issues.map((i) => i.questionId), ['childAges']);
+
+      final q = QuestionCatalog.build('childAges', b, now: testNow);
+      final res = AnswerApplier.apply(b, q, const AgesAnswer([4, 9]), testNow);
+      expect(res.brief!.childAges, [4, 9]);
+      expect(
+        AnswerApplier.apply(b, q, const AgesAnswer([4]), testNow).isOk,
+        isFalse,
+        reason: 'one age for two children',
+      );
+    });
+
+    test('“family of 4” is still ambiguous and asks the group question', () {
+      final b = mergeText('{"updates": {"travellerCount": 4}}');
+      final issues = BriefValidator.validate(b, testNow).forField(BriefField.group);
+      expect(issues.map((i) => i.questionId), ['group']);
+    });
+
+    test('a partial breakdown that does not fill the party stays ambiguous', () {
+      final b = mergeText('{"updates": {"travellerCount": 4, "adults": 2}}');
+      expect(b.hasPartsBreakdown, isFalse);
+      final q = QuestionCatalog.build('group', b, now: testNow);
+      expect(q.prefill['adults'], 2);
+    });
+
+    test('answering the women question completes the group', () {
+      final b = mergeText(
+        '{"updates": {"travellerCount": 3, "adults": 3, "seniors": 0, "children": 0}}',
+      );
+      final q = QuestionCatalog.build('women', b, now: testNow);
+      final res = AnswerApplier.apply(b, q, const ChoiceAnswer('1', '1 woman'), testNow);
+      expect(BriefValidator.validate(res.brief!, testNow).hasIssueFor(BriefField.group), isFalse);
+      expect(res.brief!.women, 1);
+    });
+  });
+
+  group('next best question', () {
+    test('candidates are the optional topics not yet answered', () {
+      expect(NextBestQuestion.candidates(TripBrief.empty(testNow)),
+          ['style', 'pace', 'stay', 'dietary']);
+      final b = TripBrief.empty(testNow).copyWith(style: TripStyle.family, pace: TripPace.relaxed);
+      expect(NextBestQuestion.candidates(b), ['stay', 'dietary']);
+    });
+
+    test('a rich brief is not worth a model call', () {
+      final rich = TripBrief.empty(testNow).copyWith(
+        style: TripStyle.family,
+        pace: TripPace.relaxed,
+        stayTypes: {StayType.homestay},
+      );
+      expect(NextBestQuestion.worthConsulting(rich), isFalse);
+      expect(NextBestQuestion.worthConsulting(TripBrief.empty(testNow)), isTrue);
+    });
+
+    test('parse keeps valid, unique candidates and caps the count at two', () {
+      const candidates = ['style', 'pace', 'stay', 'dietary'];
+      expect(
+        NextBestQuestion.parse('{"ask": ["pace", "bogus", "pace", "stay", "dietary"]}', candidates),
+        ['pace', 'stay'],
+      );
+      expect(NextBestQuestion.parse('```json\n{"ask": ["style"]}\n```', candidates), ['style']);
+      expect(NextBestQuestion.parse('{"ask": []}', candidates), isEmpty);
+      expect(NextBestQuestion.parse('nonsense', candidates), isEmpty);
+      expect(NextBestQuestion.parse('{"ask": ["style"]}', ['pace']), isEmpty);
+    });
+  });
+
+  group('widget choice allow-list', () {
+    test('only listed flavours are accepted', () {
+      expect(QuestionCatalog.validVariant('dates', 'presets'), 'presets');
+      expect(QuestionCatalog.validVariant('dates', 'holographic'), isNull);
+      expect(QuestionCatalog.validVariant('destination', 'calendar'), isNull);
+      expect(QuestionCatalog.validVariant('budget', null), isNull);
+    });
+
+    test('phrasing keeps the message and a valid widget, drops an invalid one', () {
+      final ok = ReceptionistAgent.parsePhrasing(
+        '{"message": "When are you heading out?", "widget": "presets"}',
+        'dates',
+      )!;
+      expect((ok.message, ok.widget), ('When are you heading out?', 'presets'));
+      final bad = ReceptionistAgent.parsePhrasing(
+        '{"message": "How many?", "widget": "presets"}',
+        'travellers',
+      )!;
+      expect(bad.widget, isNull);
+      expect(ReceptionistAgent.parsePhrasing('{"widget": "list"}', 'travellers'), isNull);
+    });
+
+    test('every question that allows a choice defaults to its first flavour', () {
+      for (final id in ['dates', 'budget', 'travellers']) {
+        final q = QuestionCatalog.build(id, TripBrief.empty(testNow), now: testNow);
+        expect(q.variant, QuestionCatalog.variantsFor(id).first, reason: id);
+      }
+    });
+  });
+
   group('planner', () {
     test('asks mandatory questions one at a time in registry order', () {
       var b = TripBrief.empty(testNow);
@@ -162,19 +298,16 @@ Sure! Here you go:
       expect(nextQuestion(b2, state)!.id, 'a11y.hearing.support');
     });
 
-    test('offers optional preferences exactly once after the mandatory ones', () {
-      final state = PlannerState();
-      expect(nextQuestion(completeBrief(), state)!.id, 'optionalOffer');
-      expect(nextQuestion(completeBrief(), state), isNull);
+    test('a complete brief has nothing left to ask until the model picks optional questions', () {
+      expect(nextQuestion(completeBrief(), PlannerState()), isNull);
     });
 
-    test('a queued optional question is asked after a “yes”', () {
-      final state = PlannerState()
-        ..optionalOffered = true
-        ..optionalQueue.addAll(QuestionCatalog.optionalIds);
+    test('questions the next-best step chose are asked in order', () {
+      final state = PlannerState()..nbaQueue.addAll(['pace', 'stay']);
       final q = nextQuestion(completeBrief(), state)!;
-      expect(q.id, 'style');
+      expect(q.id, 'pace');
       expect(q.skippable, isTrue);
+      expect(q.reason, IssueKind.optional);
     });
 
     test('accessibility is asked even when Settings pre-ticks some needs', () {

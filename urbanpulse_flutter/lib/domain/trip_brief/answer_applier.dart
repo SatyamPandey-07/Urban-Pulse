@@ -103,6 +103,27 @@ abstract final class AnswerApplier {
             ? ApplyResult.ok(next)
             : ApplyResult.error(problem.message);
 
+      case 'childAges':
+        if (a is! AgesAnswer) return const ApplyResult.error('Please pick an age for each child.');
+        final next = brief.copyWith(childAges: a.ages);
+        final problem = BriefValidator.groupIssues(next)
+            .where((i) => i.questionId == 'childAges')
+            .firstOrNull;
+        return problem == null
+            ? ApplyResult.ok(next)
+            : ApplyResult.error(problem.message);
+
+      case 'women':
+        final n = a is ChoiceAnswer ? int.tryParse(a.optionId) : null;
+        if (n == null) return const ApplyResult.error('Please choose how many are women.');
+        final next = brief.copyWith(women: n);
+        final problem = BriefValidator.groupIssues(next)
+            .where((i) => i.questionId == 'women')
+            .firstOrNull;
+        return problem == null
+            ? ApplyResult.ok(next)
+            : ApplyResult.error(problem.message);
+
       case 'womenSafety':
         if (a is! MultiChoiceAnswer || a.optionIds.isEmpty) {
           return const ApplyResult.error('Pick at least one option.');

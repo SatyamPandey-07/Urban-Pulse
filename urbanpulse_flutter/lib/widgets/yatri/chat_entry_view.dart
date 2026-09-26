@@ -10,6 +10,7 @@ import 'answer_view.dart';
 import 'brief_summary.dart';
 import 'chat_bubbles.dart';
 import 'option_card.dart';
+import 'route_map_card.dart';
 
 /// Renders one row of the Yatri conversation.
 class ChatEntryView extends StatelessWidget {
@@ -20,6 +21,7 @@ class ChatEntryView extends StatelessWidget {
     required this.onReview,
     required this.onExample,
     required this.onViewTrip,
+    this.mapTileLayer,
     super.key,
   });
 
@@ -29,6 +31,9 @@ class ChatEntryView extends StatelessWidget {
   final ValueChanged<TripBrief> onReview;
   final ValueChanged<String> onExample;
   final ValueChanged<TripPlan> onViewTrip;
+
+  /// Replaces the OpenStreetMap tiles in the route map (tests only).
+  final Widget? mapTileLayer;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +75,24 @@ class ChatEntryView extends StatelessWidget {
         );
       case PlanningEntry():
         return const _PlanningCard();
+      case RouteMapEntry():
+        if (!e.ready) return const _MapLoadingCard();
+        return Padding(
+          padding: const EdgeInsets.only(left: 38),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: RouteMapCard(
+              origin: e.originPoint!,
+              destination: e.destinationPoint!,
+              originName: e.origin,
+              destinationName: e.destination,
+              modes: e.modes,
+              shown: e.shown,
+              onShow: (m) => controller.showMode(e, m),
+              tileLayer: mapTileLayer,
+            ),
+          ),
+        );
       case PlanEntry():
         return Padding(
           padding: const EdgeInsets.only(left: 38),
@@ -478,6 +501,39 @@ class _PlanningCard extends StatelessWidget {
           children: [
             step('Receptionist · trip brief saved', done: true),
             step('Planner · building your sustainable itinerary…', done: false),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown for the moment it takes to look the two places up.
+class _MapLoadingCard extends StatelessWidget {
+  const _MapLoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(left: 38),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: scheme.outlineVariant),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2.4),
+            ),
+            const SizedBox(width: 12),
+            Text('Plotting your route…', style: theme.textTheme.bodyMedium),
           ],
         ),
       ),

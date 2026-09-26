@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import '../../domain/trip_brief/brief_merger.dart';
 import '../../domain/trip_brief/extraction.dart';
+import '../../domain/trip_brief/next_best.dart';
+import '../../domain/trip_brief/question_catalog.dart';
 import '../../models/trip_brief.dart';
 import '../../models/yatri_question.dart';
 import '../../services/groq_api_client.dart';
@@ -26,6 +28,15 @@ class ReceptionistInput {
 
   /// The last few turns, oldest first.
   final List<GroqMessage> history;
+}
+
+/// The model's wording of a question, plus its widget choice when the question
+/// allows one.
+class PhrasedQuestion {
+  const PhrasedQuestion(this.message, this.widget);
+
+  final String message;
+  final String? widget;
 }
 
 /// The receptionist agent. The model does two narrow jobs — turn free text
@@ -59,14 +70,16 @@ class ReceptionistAgent implements YatriAgent<ReceptionistInput, Extraction> {
     }
   }
 
-  /// The model's warmer wording of a deterministic question, or null when it
-  /// can't be reached — the caller then shows the template text.
-  Future<String?> phrase(
+  /// The model's warmer wording of a deterministic question — and, where the
+  /// question allows it, its choice of answer widget — or null when it can't
+  /// be reached. The caller then shows the template text and default widget.
+  Future<PhrasedQuestion?> phrase(
     YatriQuestion question,
     TripBrief brief, {
     String? ack,
     List<BriefChange> changes = const [],
   }) async {
+    final variants = QuestionCatalog.variantsFor(question.id);
     final result = await _llm.chatJson(
       [
         GroqMessage('system', _phrasingSystem),
@@ -81,6 +94,7 @@ class ReceptionistAgent implements YatriAgent<ReceptionistInput, Extraction> {
               for (final c in changes) 'Updated ${c.label}: ${c.from} → ${c.to}',
             ],
             'answerWidget': question.widget.name,
+            if (variants.isNotEmpty) 'widgetChoices': variants,
             'known': brief.toPromptSummary(),
           }),
         ),
@@ -90,22 +104,70 @@ class ReceptionistAgent implements YatriAgent<ReceptionistInput, Extraction> {
       timeout: const Duration(seconds: 8),
     );
     if (result is! GroqSuccess) return null;
+    return parsePhrasing(result.content, question.id);
+  }
 
-    final sub = ExtractionParser.jsonSubstring(result.content);
+  /// Reads the phrasing reply. The widget is kept only when it is one of the
+  /// allowed choices for [questionId]. Public for tests.
+  static PhrasedQuestion? parsePhrasing(String raw, String questionId) {
+    final sub = ExtractionParser.jsonSubstring(raw);
     if (sub == null) return null;
     try {
       final decoded = jsonDecode(sub);
-      final message = decoded is Map<String, dynamic>
-          ? (decoded['message'] as String?)?.trim()
-          : null;
+      if (decoded is! Map<String, dynamic>) return null;
+      final message = (decoded['message'] as String?)?.trim();
       if (message == null || message.isEmpty || message.length > 320) {
         return null;
       }
-      return message;
+      return PhrasedQuestion(
+        message,
+        QuestionCatalog.validVariant(questionId, decoded['widget'] as String?),
+      );
     } catch (_) {
       return null;
     }
   }
+
+  /// The next-best-question step: with every mandatory field valid, ask the
+  /// model whether up to [NextBestQuestion.maxAsks] optional questions would
+  /// materially improve the plan. Returns their ids; empty means "enough".
+  /// Costs one small call, and none at all when the brief is already rich.
+  Future<List<String>> nextBest(TripBrief brief) async {
+    final candidates = NextBestQuestion.candidates(brief);
+    if (!NextBestQuestion.worthConsulting(brief)) return const [];
+
+    final result = await _llm.chatJson(
+      [
+        GroqMessage('system', _nextBestSystem),
+        GroqMessage(
+          'user',
+          jsonEncode({
+            'brief': brief.toPromptSummary(),
+            'candidates': {
+              'style': 'trip style: leisure, family, pilgrimage, adventure, heritage, nature, workation',
+              'pace': 'relaxed, balanced or packed days',
+              'stay': 'stay type: eco stay, homestay, hotel, hostel, resort',
+              'dietary': 'food preferences',
+            }..removeWhere((k, _) => !candidates.contains(k)),
+          }),
+        ),
+      ],
+      temperature: 0.2,
+      maxTokens: 400,
+      timeout: const Duration(seconds: 8),
+    );
+    if (result is! GroqSuccess) return const [];
+    return NextBestQuestion.parse(result.content, candidates);
+  }
+
+  static const _nextBestSystem =
+      'You help a sustainable, accessibility-first trip planner decide whether '
+      'to ask the traveller anything more before planning. The essentials are '
+      'already collected. Ask about an optional topic ONLY if the answer would '
+      'materially change the plan for THIS trip; otherwise ask nothing. Prefer '
+      'nothing over a low-value question, never ask more than 2, and choose '
+      'only from the given candidate ids. Reply ONLY with JSON: '
+      '{"ask": ["<candidate id>", ...]} (an empty list means enough).';
 
   static const _phrasingSystem =
       'You are Yatri, the professional and helpful receptionist of a sustainable, '
@@ -114,9 +176,15 @@ class ReceptionistAgent implements YatriAgent<ReceptionistInput, Extraction> {
       'If "acknowledge" has items, briefly acknowledge them first. If '
       '"problem" is set, explain it gently in your own words. Never list the '
       'answer options (the app shows them). Never invent trip details. '
+      'If "widgetChoices" is present, also choose the one answer widget that '
+      'suits this traveller best (for dates: "calendar" when they have given no '
+      'timing at all, "presets" when they gave a rough one such as a weekend; '
+      'for budget: "tiers" for a quick pick, "slider" when they mentioned a '
+      'specific amount; for travellers: "list" normally, "stepper" for a large '
+      'or unusual group) and return it as "widget". '
       'CRITICAL REQUIREMENT: Strictly NEVER use any emojis or emoticons in your response. '
       'Keep the text clean and professional. '
-      'Reply ONLY with JSON: {"message": "<text>"}.';
+      'Reply ONLY with JSON: {"message": "<text>", "widget": "<choice, only if widgetChoices was given>"}.';
 
   /// The extraction system prompt. Public for tests.
   static String extractionPrompt(ReceptionistInput input, DateTime now) {
@@ -177,7 +245,16 @@ JSON shape (omit keys you have nothing for; never invent values):
 }
 
 Rules:
-- Only extract what the traveller stated or clearly implied. "Family of 4" means travellerCount 4 ONLY — never guess the adult/child breakdown, ages, women, budget or transport.
+- Only extract what the traveller stated or clearly implied. Never guess budget or transport.
+- GROUP BREAKDOWN: fill adults / seniors / children / women whenever the traveller's words make them unambiguous, so the app does not have to ask. Always give travellerCount as well, and when you can work out the breakdown give ALL of adults, seniors and children (use 0 for a group that is clearly absent). Examples:
+  "4 men" or "four guys" -> travellerCount 4, adults 4, seniors 0, children 0, women 0.
+  "3 women friends" or "3 girls" -> travellerCount 3, adults 3, seniors 0, children 0, women 3.
+  "3 friends" -> travellerCount 3, adults 3, seniors 0, children 0 (leave women out: their gender is not stated).
+  "me and my wife" or "a couple" -> travellerCount 2, adults 2, seniors 0, children 0 (leave women out unless stated).
+  "solo trip" -> travellerCount 1, adults 1, seniors 0, children 0.
+  "me, my parents and 2 kids" -> children 2 (give childAges only if stated), and only give the rest if the count of parents and the total are clear.
+  "family of 4" -> travellerCount 4 ONLY: a family's split is not clear, so do not guess the breakdown, ages or women.
+  Never guess children's ages, and never guess the number of women when gender is not stated.
 - If they give a date without a time, use 09:00 for the start and 18:00 for the end and set "timeAssumed": true.
 - Use ONLY the enum ids listed above. Give every uncertain value a lower confidence (below 0.7 if you are guessing).
 - If the message answers the question currently shown, fill "pendingAnswer" using its option ids (or {"bool": true/false} for yes/no) as well as any updates.

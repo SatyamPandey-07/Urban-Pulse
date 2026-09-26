@@ -49,6 +49,9 @@ dependencies:
 
   # Replaces RecognizerIntent speech input on the Yatri AI composer.
   speech_to_text: ^7.0.0
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  table_calendar: ^3.2.1
 
 dev_dependencies:
   flutter_test:

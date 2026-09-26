@@ -79,6 +79,10 @@ class _BudgetAnswerViewState extends State<BudgetAnswerView> {
         final r = _tierRange(t);
         if (r.$1 == min && r.$2 == max) _selected = t.id;
       }
+    } else if (widget.question.variant == 'slider') {
+      // The agent chose the slider (e.g. the traveller named an amount), so it
+      // opens ready to drag instead of behind the "Custom range" row.
+      _selected = _custom;
     }
   }
 

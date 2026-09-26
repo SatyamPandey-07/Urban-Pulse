@@ -5,6 +5,7 @@ import 'budget_view.dart';
 import 'choice_answers.dart';
 import 'date_time_view.dart';
 import 'group_stepper_view.dart';
+import 'small_answers.dart';
 
 /// Picks the answer widget the question asks for. The same views power the
 /// chat cards and (with [embedded]) the review form.
@@ -18,6 +19,10 @@ Widget buildAnswerView(
   switch (q.widget) {
     case AnswerWidget.mcq:
     case AnswerWidget.cta:
+      // The agent may swap the traveller-count list for a big counter.
+      if (q.id == 'travellers' && q.variant == 'stepper' && !embedded) {
+        return TravellersStepperView(key: key, onSubmit: onSubmit);
+      }
       return McqAnswerView(
         key: key,
         question: q,
@@ -51,6 +56,8 @@ Widget buildAnswerView(
         embedded: embedded,
         onChanged: onChanged,
       );
+    case AnswerWidget.childAges:
+      return ChildAgesView(key: key, question: q, onSubmit: onSubmit);
     case AnswerWidget.budgetRange:
       return BudgetAnswerView(
         key: key,

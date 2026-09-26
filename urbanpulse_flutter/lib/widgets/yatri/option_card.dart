@@ -312,8 +312,9 @@ class OptionPill extends StatelessWidget {
   }
 }
 
-/// Lays option cards out in one column on phones and two on wider layouts,
-/// keeping every card the same width whatever its height.
+/// Options as a vertical list, one full-width row each, on every screen size.
+/// (It used to be a grid of boxes; a single column reads as a list of choices
+/// and keeps labels and subtitles from being squeezed.)
 class OptionGrid extends StatelessWidget {
   const OptionGrid({required this.children, this.spacing = 8, super.key});
 
@@ -321,16 +322,14 @@ class OptionGrid extends StatelessWidget {
   final double spacing;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final cols = constraints.maxWidth >= 520 ? 2 : 1;
-      final width = (constraints.maxWidth - spacing * (cols - 1)) / cols;
-      return Wrap(
-        spacing: spacing,
-        runSpacing: spacing,
-        children: [for (final c in children) SizedBox(width: width, child: c)],
-      );
-    },
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (var i = 0; i < children.length; i++) ...[
+        if (i > 0) SizedBox(height: spacing),
+        children[i],
+      ],
+    ],
   );
 }
 

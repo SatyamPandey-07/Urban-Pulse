@@ -211,8 +211,12 @@ class TripBrief {
   /// that the traveler still has to confirm.
   final Set<BriefField> uncertain;
 
-  bool get hasGroupBreakdown =>
-      adults != null && seniors != null && children != null && women != null;
+  /// The adult / senior / child split is known (possibly worked out from the
+  /// traveller's own words), whether or not the women count is.
+  bool get hasPartsBreakdown =>
+      adults != null && seniors != null && children != null;
+
+  bool get hasGroupBreakdown => hasPartsBreakdown && women != null;
 
   /// Calendar days the trip touches, inclusive of both ends.
   int get days {
@@ -469,10 +473,10 @@ class TripBrief {
       if (start != null && end != null)
         '${_ymd(start!)} to ${_ymd(end!)} ($days days)',
       if (travellerCount != null) '$travellerCount travellers',
-      if (hasGroupBreakdown)
+      if (hasPartsBreakdown)
         'adults $adults, seniors $seniors, children $children'
-            '${childAges.isEmpty ? '' : ' (ages ${childAges.join('/')})'}, '
-            'women $women',
+            '${childAges.isEmpty ? '' : ' (ages ${childAges.join('/')})'}'
+            '${women == null ? '' : ', women $women'}',
       if (budgetMaxInr != null)
         'budget INR ${budgetMinInr ?? 0}-$budgetMaxInr total',
       if (transportModes.isNotEmpty)

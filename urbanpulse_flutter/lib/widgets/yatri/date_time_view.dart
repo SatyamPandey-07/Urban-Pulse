@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 import '../../core/formatting.dart';
 import '../../models/yatri_question.dart';
@@ -130,6 +131,90 @@ class _DateTimeAnswerViewState extends State<DateTimeAnswerView> {
 
   bool _matches(DateTime s, DateTime e) => _start == s && _end == e;
 
+  /// The agent chooses between an inline calendar and quick presets. The
+  /// calendar is the default; an unknown variant behaves like it.
+  bool get _calendarVariant => widget.question.variant != 'presets';
+
+  DateTime? _focused;
+
+  /// An inline range calendar: tap a departure day, then a return day (tap the
+  /// same day twice for a one-day trip). The two time tiles below set the
+  /// clock times.
+  Widget _calendar(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final today = DateTime(_now.year, _now.month, _now.day);
+    DateTime? dayOnly(DateTime? d) => d == null ? null : DateTime(d.year, d.month, d.day);
+    final onSurface = theme.textTheme.bodyMedium!;
+    final lastDay = today.add(const Duration(days: 365));
+    // A brief being re-asked may carry dates already in the past. The calendar
+    // can only show days from today on, so keep those out of its range and
+    // focus.
+    DateTime? inRange(DateTime? d) {
+      final day = dayOnly(d);
+      return day == null || day.isBefore(today) || day.isAfter(lastDay) ? null : day;
+    }
+    final focus = _focused ?? inRange(_start) ?? today;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: TableCalendar<void>(
+        firstDay: today,
+        lastDay: lastDay,
+        focusedDay: focus.isBefore(today) ? today : (focus.isAfter(lastDay) ? lastDay : focus),
+        rangeStartDay: inRange(_start),
+        rangeEndDay: inRange(_end),
+        rangeSelectionMode: RangeSelectionMode.toggledOn,
+        startingDayOfWeek: StartingDayOfWeek.monday,
+        availableGestures: AvailableGestures.horizontalSwipe,
+        rowHeight: 44,
+        onPageChanged: (day) => _focused = day,
+        onRangeSelected: (start, end, focused) {
+          _focused = focused;
+          if (start == null) return;
+          final st = _start == null ? _defaultStart : TimeOfDay.fromDateTime(_start!);
+          final en = _end == null ? _defaultEnd : TimeOfDay.fromDateTime(_end!);
+          _start = _at(start, st);
+          _end = _at(end ?? start, en);
+          _emit();
+        },
+        headerStyle: HeaderStyle(
+          formatButtonVisible: false,
+          titleCentered: true,
+          titleTextStyle: theme.textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w800),
+          leftChevronIcon: Icon(Icons.chevron_left_rounded, color: scheme.primary),
+          rightChevronIcon: Icon(Icons.chevron_right_rounded, color: scheme.primary),
+        ),
+        daysOfWeekStyle: DaysOfWeekStyle(
+          weekdayStyle: theme.textTheme.labelSmall!.copyWith(color: scheme.onSurfaceVariant),
+          weekendStyle: theme.textTheme.labelSmall!.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        calendarStyle: CalendarStyle(
+          outsideDaysVisible: false,
+          defaultTextStyle: onSurface,
+          weekendTextStyle: onSurface,
+          disabledTextStyle: onSurface.copyWith(color: scheme.onSurface.withValues(alpha: 0.28)),
+          todayTextStyle: onSurface.copyWith(fontWeight: FontWeight.w800),
+          todayDecoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: scheme.primary.withValues(alpha: 0.6)),
+          ),
+          rangeHighlightColor: scheme.primary.withValues(alpha: 0.16),
+          rangeStartDecoration: BoxDecoration(color: scheme.primary, shape: BoxShape.circle),
+          rangeEndDecoration: BoxDecoration(color: scheme.primary, shape: BoxShape.circle),
+          rangeStartTextStyle: onSurface.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.w800),
+          rangeEndTextStyle: onSurface.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.w800),
+          withinRangeTextStyle: onSurface.copyWith(color: scheme.primary, fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -161,13 +246,18 @@ class _DateTimeAnswerViewState extends State<DateTimeAnswerView> {
                   _emit();
                 },
               ),
-            OptionPill(
-              option: const QuestionOption(id: 'pick', label: 'Pick dates', icon: Icons.date_range_outlined),
-              selected: false,
-              onTap: _pickRange,
-            ),
+            if (!_calendarVariant)
+              OptionPill(
+                option: const QuestionOption(id: 'pick', label: 'Pick dates', icon: Icons.date_range_outlined),
+                selected: false,
+                onTap: _pickRange,
+              ),
           ],
         ),
+        if (_calendarVariant) ...[
+          const SizedBox(height: 12),
+          _calendar(context),
+        ],
         const SizedBox(height: 12),
         LayoutBuilder(
           builder: (context, c) {
