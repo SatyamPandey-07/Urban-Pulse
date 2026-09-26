@@ -5,6 +5,7 @@ import 'budget_view.dart';
 import 'choice_answers.dart';
 import 'date_time_view.dart';
 import 'group_stepper_view.dart';
+import 'hotel_choice_view.dart';
 import 'small_answers.dart';
 
 /// Picks the answer widget the question asks for. The same views power the
@@ -66,6 +67,8 @@ Widget buildAnswerView(
         embedded: embedded,
         onChanged: onChanged,
       );
+    case AnswerWidget.hotelChoice:
+      return HotelChoiceView(key: key, question: q, onSubmit: onSubmit);
     case AnswerWidget.text:
       return const SizedBox.shrink();
   }

@@ -85,7 +85,22 @@ with tools.
 | Safar | transport to and around the destination |
 | Hariyali | carbon and eco scoring |
 
+**Built so far:** Yatri + Atithi + Hisab (hotel budget) — stage 2.1. After you
+confirm the brief, Yatri hands the hotel search to Atithi and the budget check to
+Hisab, and asks you when goals collide ("none of these are wheelchair
+accessible", "the cheapest suitable stay is ₹X — raise the budget?"), then lets
+you pick a stay from a map and cards showing live or estimated prices, ratings and
+per-need access with where each fact came from. Hotels come from Xotelo
+(TripAdvisor data and live per-OTA prices), Geoapify, OpenStreetMap and a
+`web_search` tool loop; the TripAdvisor location key is validated by distance
+so a wrong guess can never put Bengaluru hotels in Munnar. The other agents
+arrive in later stages.
+
 ```
+agents/atithi/    hotel search: merge, rank, live rates, listing pages, AI fill
+agents/hisab/     the budget engine (hotel share so far)
+agents/yatri/     the orchestrator (Yatri's loop) and the hotel gates
+domain/access/    OSM tags / listing text -> per-need accessibility support
 agents/runtime/   task board (DAG scheduler), task graph model, plan clock,
                   LLM pool + key ring, lenient JSON, tool kit, demo run
 agents/tools/     shared web_search / fetch_page tools and the bounded tool-use loop

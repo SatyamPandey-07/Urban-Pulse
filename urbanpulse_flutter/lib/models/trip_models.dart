@@ -68,7 +68,13 @@ class TripPlan {
 
   /// The planner doesn't know the real dates, so the Yatri hand-off replaces
   /// its placeholder label and title with the traveler's.
-  TripPlan copyWith({String? travelDates, String? title}) => TripPlan(
+  TripPlan copyWith({
+    String? travelDates,
+    String? title,
+    String? hotelName,
+    double? hotelRating,
+    bool? isStepFreeAccessible,
+  }) => TripPlan(
     id: id,
     destination: destination,
     title: title ?? this.title,
@@ -78,9 +84,9 @@ class TripPlan {
     co2SavedKg: co2SavedKg,
     pulsePointsEarned: pulsePointsEarned,
     isCompleted: isCompleted,
-    hotelName: hotelName,
-    hotelRating: hotelRating,
-    isStepFreeAccessible: isStepFreeAccessible,
+    hotelName: hotelName ?? this.hotelName,
+    hotelRating: hotelRating ?? this.hotelRating,
+    isStepFreeAccessible: isStepFreeAccessible ?? this.isStepFreeAccessible,
     totalBudgetInr: totalBudgetInr,
     aqiStatus: aqiStatus,
     transitCostInr: transitCostInr,
