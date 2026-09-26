@@ -61,7 +61,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
           },
         ),
       )
-      ..loadHtmlString(liveMapHtml, baseUrl: 'https://urbanpulse.local');
+      ..loadHtmlString(liveMapHtml, baseUrl: 'https://unpkg.com');
     // Deferred: _locateUser() reads AppScope, and an inherited-widget lookup is
     // not legal until the first frame has been scheduled.
     WidgetsBinding.instance.addPostFrameCallback((_) => _locateUser());

@@ -47,12 +47,20 @@ const String liveMapHtml = r'''
     <script>
         // Placeholder camera for the first paint only; Dart calls setCenter with
         // the real fix as soon as the page finishes loading.
-        var map = L.map('map', { zoomControl: false }).setView([0, 0], 2);
-
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        // Carto voyager tiles with fallback to standard OpenStreetMap
+        var voyagerLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
             subdomains: 'abcd'
-        }).addTo(map);
+        });
+        var osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        });
+        voyagerLayer.on('tileerror', function() {
+            if (!map.hasLayer(osmLayer)) {
+                osmLayer.addTo(map);
+            }
+        });
+        voyagerLayer.addTo(map);
 
         var userMarker = L.marker([0, 0], {
             icon: L.divIcon({ className: 'user-pulse', iconSize: [18, 18], iconAnchor: [9, 9] })
