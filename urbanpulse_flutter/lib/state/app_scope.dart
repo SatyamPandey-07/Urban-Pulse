@@ -6,6 +6,7 @@ import '../repositories/facility_repository.dart';
 import '../repositories/hospitality_repository.dart';
 import '../repositories/hotel_metrics_repository.dart';
 import '../repositories/traffic_history_repository.dart';
+import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
 import '../services/location_service.dart';
 import 'accessibility_controller.dart';
@@ -37,6 +38,7 @@ class AppServices {
       tripPlan: TripPlanManager(prefs),
       location: LocationController(locationService),
       trips: TripRepository(prefs),
+      tripBriefs: TripBriefRepository(prefs),
       experiences: ExperienceRepository(),
       hospitality: HospitalityRepository(),
       hotelMetrics: HotelMetricsRepository(),
@@ -55,6 +57,7 @@ class AppServices {
     required this.tripPlan,
     required this.location,
     required this.trips,
+    required this.tripBriefs,
     required this.experiences,
     required this.hospitality,
     required this.hotelMetrics,
@@ -71,6 +74,7 @@ class AppServices {
   final TripPlanManager tripPlan;
   final LocationController location;
   final TripRepository trips;
+  final TripBriefRepository tripBriefs;
   final ExperienceRepository experiences;
   final HospitalityRepository hospitality;
   final HotelMetricsRepository hotelMetrics;

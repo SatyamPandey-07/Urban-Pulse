@@ -63,6 +63,34 @@ class TripPlan {
 
   bool get isAiGenerated => source == 'groq_ai';
 
+  /// The planner doesn't know the real dates, so the Yatri hand-off replaces
+  /// its placeholder label and title with the traveler's.
+  TripPlan copyWith({String? travelDates, String? title}) => TripPlan(
+    id: id,
+    destination: destination,
+    title: title ?? this.title,
+    durationDays: durationDays,
+    travelDates: travelDates ?? this.travelDates,
+    travelMode: travelMode,
+    co2SavedKg: co2SavedKg,
+    pulsePointsEarned: pulsePointsEarned,
+    isCompleted: isCompleted,
+    hotelName: hotelName,
+    hotelRating: hotelRating,
+    isStepFreeAccessible: isStepFreeAccessible,
+    totalBudgetInr: totalBudgetInr,
+    aqiStatus: aqiStatus,
+    transitCostInr: transitCostInr,
+    dailyItinerary: dailyItinerary,
+    transitOpt1Name: transitOpt1Name,
+    transitOpt1Metrics: transitOpt1Metrics,
+    transitOpt2Name: transitOpt2Name,
+    transitOpt2Metrics: transitOpt2Metrics,
+    transitOpt3Name: transitOpt3Name,
+    transitOpt3Metrics: transitOpt3Metrics,
+    source: source,
+  );
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'destination': destination,
@@ -184,17 +212,4 @@ class TripActivity {
     co2Grams: (json['co2Grams'] as num?)?.toInt() ?? 0,
     costInr: (json['costInr'] as num?)?.toInt() ?? 0,
   );
-}
-
-/// A quick multiple-choice prompt attached to an assistant chat bubble.
-class QuickMcqQuestion {
-  const QuickMcqQuestion({
-    required this.questionId,
-    required this.questionText,
-    required this.options,
-  });
-
-  final String questionId;
-  final String questionText;
-  final List<String> options;
 }

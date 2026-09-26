@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -47,7 +48,8 @@ abstract final class GroqApiClient {
   }
 
   /// Single chat completion against one model. Shared by the conversational
-  /// client, the agentic trip planner and the intent parser.
+  /// client, the agentic trip planner and the intent parser. Returns null on
+  /// any failure; use [chat] when the reason matters.
   static Future<String?> completion({
     required String model,
     required String systemPrompt,
@@ -56,11 +58,40 @@ abstract final class GroqApiClient {
     required int maxTokens,
     String? apiKeyOverride,
   }) async {
-    final apiKey = apiKeyOverride ?? AppConfig.groqApiKey;
-    if (apiKey.isEmpty) return null;
+    final result = await chat(
+      model: model,
+      messages: [
+        GroqMessage('system', systemPrompt),
+        GroqMessage('user', userPrompt),
+      ],
+      temperature: temperature,
+      maxTokens: maxTokens,
+      apiKeyOverride: apiKeyOverride,
+    );
+    return result is GroqSuccess ? result.content : null;
+  }
 
+  /// Multi-turn chat completion with a typed result, so callers can tell a
+  /// rejected key from a timeout. Optional JSON mode and reasoning effort are
+  /// used by the Yatri receptionist agent (gpt-oss reasons before answering,
+  /// so a low `reasoningEffort` keeps `maxTokens` for the actual reply).
+  static Future<GroqResult> chat({
+    required String model,
+    required List<GroqMessage> messages,
+    double temperature = 0.2,
+    int maxTokens = 1024,
+    bool jsonMode = false,
+    String? reasoningEffort,
+    Duration? requestTimeout,
+    String? apiKeyOverride,
+    http.Client? client,
+  }) async {
+    final apiKey = apiKeyOverride ?? AppConfig.groqApiKey;
+    if (apiKey.isEmpty) return const GroqFailure(GroqErrorKind.noKey);
+
+    final http_ = client ?? http.Client();
     try {
-      final response = await http
+      final response = await http_
           .post(
             Uri.parse(endpoint),
             headers: {
@@ -70,27 +101,82 @@ abstract final class GroqApiClient {
             body: jsonEncode({
               'model': model,
               'messages': [
-                {'role': 'system', 'content': systemPrompt},
-                {'role': 'user', 'content': userPrompt},
+                for (final m in messages) {'role': m.role, 'content': m.content},
               ],
               'temperature': temperature,
               'max_tokens': maxTokens,
+              if (jsonMode) 'response_format': {'type': 'json_object'},
+              if (reasoningEffort != null) 'reasoning_effort': reasoningEffort,
             }),
           )
-          .timeout(timeout);
+          .timeout(requestTimeout ?? timeout);
 
-      if (response.statusCode < 200 || response.statusCode >= 300) return null;
+      final status = response.statusCode;
+      if (status < 200 || status >= 300) {
+        return GroqFailure(_kindFor(status), status: status, detail: response.body);
+      }
 
       final json = jsonDecode(response.body) as Map<String, dynamic>;
       final choices = json['choices'] as List<dynamic>?;
-      if (choices == null || choices.isEmpty) return null;
+      if (choices == null || choices.isEmpty) {
+        return const GroqFailure(GroqErrorKind.empty);
+      }
       final message = (choices.first as Map<String, dynamic>)['message'];
       final content = (message as Map<String, dynamic>?)?['content'] as String?;
-      if (content == null || content.trim().isEmpty) return null;
-      return content;
+      if (content == null || content.trim().isEmpty) {
+        return const GroqFailure(GroqErrorKind.empty);
+      }
+      return GroqSuccess(content, model);
+    } on TimeoutException {
+      return const GroqFailure(GroqErrorKind.timeout);
     } catch (_) {
-      // Caller tries the next candidate model, then a non-LLM fallback.
-      return null;
+      return const GroqFailure(GroqErrorKind.network);
+    } finally {
+      if (client == null) http_.close();
     }
   }
+
+  static GroqErrorKind _kindFor(int status) => switch (status) {
+    401 || 403 => GroqErrorKind.unauthorized,
+    429 => GroqErrorKind.rateLimited,
+    >= 400 && < 500 => GroqErrorKind.badRequest,
+    _ => GroqErrorKind.server,
+  };
+}
+
+class GroqMessage {
+  const GroqMessage(this.role, this.content);
+
+  final String role;
+  final String content;
+}
+
+enum GroqErrorKind {
+  noKey,
+  unauthorized,
+  rateLimited,
+  badRequest,
+  server,
+  timeout,
+  network,
+  empty,
+}
+
+sealed class GroqResult {
+  const GroqResult();
+}
+
+final class GroqSuccess extends GroqResult {
+  const GroqSuccess(this.content, this.model);
+
+  final String content;
+  final String model;
+}
+
+final class GroqFailure extends GroqResult {
+  const GroqFailure(this.kind, {this.status, this.detail});
+
+  final GroqErrorKind kind;
+  final int? status;
+  final String? detail;
 }
