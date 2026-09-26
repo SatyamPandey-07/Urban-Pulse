@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:http/http.dart' as http;
 
@@ -12,14 +13,123 @@ import '../models/live_city_data.dart';
 /// `getLiveTraffic`, the two inline `calculateRoute` fetches in
 /// `LiveMapFragment`, and `CarbonEstimator.fetchRealRouteDistanceKm`. Every call
 /// returns null/empty rather than throwing, so the UI always has a fallback.
-///
-/// Note: the Kotlin app additionally linked the native `com.tomtom.sdk.search`
-/// module for map-search autocomplete. That SDK has no Flutter equivalent, so
-/// search now goes through the same TomTom *REST* POI endpoint the rest of the
-/// app already used — identical data, one fewer SDK.
 abstract final class TomTomService {
   static const _timeout = Duration(seconds: 15);
   static const _routeTimeout = Duration(seconds: 6);
+
+  /// Searches for places (POIs, landmarks, localities, addresses, stations)
+  /// bounded to a geographic region centered at [lat], [lon].
+  ///
+  /// Uses an explicit bounding box around ([lat], [lon]) with [radiusKm] (default 60 km).
+  /// Falls back to country-wide search if no results exist locally, and falls
+  /// back to OpenStreetMap Nominatim with viewbox if TomTom key is unavailable
+  /// or fails.
+  static Future<List<LivePoiResult>> searchPlacesBounded(
+    String query, {
+    required double lat,
+    required double lon,
+    double radiusKm = 60.0,
+    int limit = 6,
+  }) async {
+    final cleanQuery = query.trim();
+    if (cleanQuery.isEmpty) return const [];
+
+    // Calculate bounding box:
+    // 1 deg lat ~ 111.0 km; 1 deg lon ~ 111.0 * cos(lat)
+    final deltaLat = (radiusKm / 111.0).clamp(0.05, 5.0);
+    final cosLat = math.cos(lat * math.pi / 180.0).abs();
+    final deltaLon =
+        (radiusKm / (111.0 * (cosLat < 0.01 ? 1.0 : cosLat))).clamp(0.05, 5.0);
+    final topLat = (lat + deltaLat).clamp(-90.0, 90.0);
+    final btmLat = (lat - deltaLat).clamp(-90.0, 90.0);
+    final leftLon = (lon - deltaLon).clamp(-180.0, 180.0);
+    final rightLon = (lon + deltaLon).clamp(-180.0, 180.0);
+
+    if (AppConfig.hasTomTomKey) {
+      final encoded = Uri.encodeComponent(cleanQuery);
+      final radiusMeters = (radiusKm * 1000).toInt();
+
+      // 1. Try TomTom Fuzzy Search with explicit bounding box & geoBias
+      final boundedUri = Uri.parse(
+        'https://api.tomtom.com/search/2/search/$encoded.json'
+        '?lat=$lat&lon=$lon&radius=$radiusMeters'
+        '&topLeft=$topLat,$leftLon&btmRight=$btmLat,$rightLon'
+        '&countrySet=IN&limit=$limit&key=${AppConfig.tomtomApiKey}',
+      );
+      final boundedJson = await _getJson(boundedUri, _timeout);
+      final parsedBounded = _parseTomTomResults(boundedJson, lat, lon);
+      if (parsedBounded.isNotEmpty) {
+        return parsedBounded;
+      }
+
+      // 2. Try TomTom POI search if it was a category
+      final poiUri = Uri.parse(
+        'https://api.tomtom.com/search/2/poiSearch/$encoded.json'
+        '?lat=$lat&lon=$lon&radius=$radiusMeters&limit=$limit&key=${AppConfig.tomtomApiKey}',
+      );
+      final poiJson = await _getJson(poiUri, _timeout);
+      final parsedPoi = _parseTomTomResults(poiJson, lat, lon);
+      if (parsedPoi.isNotEmpty) {
+        return parsedPoi;
+      }
+
+      // 3. If bounded search found 0 results locally, try country-wide fuzzy search
+      final nationwideUri = Uri.parse(
+        'https://api.tomtom.com/search/2/search/$encoded.json'
+        '?lat=$lat&lon=$lon&countrySet=IN&limit=$limit&key=${AppConfig.tomtomApiKey}',
+      );
+      final nationwideJson = await _getJson(nationwideUri, _timeout);
+      final parsedNationwide = _parseTomTomResults(nationwideJson, lat, lon);
+      if (parsedNationwide.isNotEmpty) {
+        return parsedNationwide;
+      }
+    }
+
+    // 4. OpenStreetMap Nominatim fallback with viewbox bounding
+    try {
+      final osmEncoded = Uri.encodeComponent(cleanQuery);
+      final osmUri = Uri.parse(
+        'https://nominatim.openstreetmap.org/search'
+        '?q=$osmEncoded&format=json&limit=$limit&countrycodes=in'
+        '&viewbox=$leftLon,$topLat,$rightLon,$btmLat&bounded=0',
+      );
+      final osmRes = await http.get(
+        osmUri,
+        headers: {'User-Agent': 'UrbanPulseApp/1.0 (contact@urbanpulse.ai)'},
+      ).timeout(const Duration(seconds: 5));
+      if (osmRes.statusCode >= 200 && osmRes.statusCode < 300) {
+        final list = jsonDecode(osmRes.body) as List<dynamic>?;
+        if (list != null && list.isNotEmpty) {
+          final osmResults = <LivePoiResult>[];
+          for (final item in list) {
+            final m = item as Map<String, dynamic>;
+            final rLat = double.tryParse(m['lat']?.toString() ?? '') ?? lat;
+            final rLon = double.tryParse(m['lon']?.toString() ?? '') ?? lon;
+            final distM =
+                CarbonEstimator.haversineKm(lat, lon, rLat, rLon) * 1000.0;
+            final name = (m['name'] as String?)?.isNotEmpty == true
+                ? m['name'] as String
+                : (m['display_name'] as String?)?.split(',').first.trim() ??
+                    cleanQuery;
+            osmResults.add(
+              LivePoiResult(
+                name: name,
+                address: m['display_name'] as String? ?? '',
+                distanceMeters: distM,
+                lat: rLat,
+                lon: rLon,
+                category: m['type'] as String?,
+              ),
+            );
+          }
+          osmResults.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+          return osmResults;
+        }
+      }
+    } catch (_) {}
+
+    return const [];
+  }
 
   static Future<List<LivePoiResult>> searchNearbyPoi(
     String query,
@@ -28,7 +138,15 @@ abstract final class TomTomService {
     int radiusMeters = 12000,
     int limit = 8,
   }) async {
-    if (!AppConfig.hasTomTomKey) return const [];
+    if (!AppConfig.hasTomTomKey) {
+      return searchPlacesBounded(
+        query,
+        lat: lat,
+        lon: lon,
+        radiusKm: radiusMeters / 1000.0,
+        limit: limit,
+      );
+    }
     final encoded = Uri.encodeComponent(query);
     final uri = Uri.parse(
       'https://api.tomtom.com/search/2/poiSearch/$encoded.json'
@@ -36,8 +154,26 @@ abstract final class TomTomService {
     );
 
     final json = await _getJson(uri, _timeout);
+    final list = _parseTomTomResults(json, lat, lon);
+    if (list.isNotEmpty) return list;
+
+    // Fallback to bounded places search if POI category search yielded no matches
+    return searchPlacesBounded(
+      query,
+      lat: lat,
+      lon: lon,
+      radiusKm: radiusMeters / 1000.0,
+      limit: limit,
+    );
+  }
+
+  static List<LivePoiResult> _parseTomTomResults(
+    Map<String, dynamic>? json,
+    double userLat,
+    double userLon,
+  ) {
     final results = json?['results'] as List<dynamic>?;
-    if (results == null) return const [];
+    if (results == null || results.isEmpty) return const [];
 
     final list = <LivePoiResult>[];
     for (final raw in results) {
@@ -47,17 +183,38 @@ abstract final class TomTomService {
       final position = item['position'] as Map<String, dynamic>?;
       final categories = poi?['categories'] as List<dynamic>?;
 
+      final resLat = (position?['lat'] as num?)?.toDouble() ?? userLat;
+      final resLon = (position?['lon'] as num?)?.toDouble() ?? userLon;
+      final rawDist = (item['dist'] as num?)?.toDouble();
+      final distMeters = rawDist ??
+          (CarbonEstimator.haversineKm(userLat, userLon, resLat, resLon) *
+              1000.0);
+
+      String name;
+      if (poi != null && (poi['name'] as String?)?.isNotEmpty == true) {
+        name = poi['name'] as String;
+      } else if ((address?['municipalitySubdivision'] as String?)?.isNotEmpty ==
+          true) {
+        name = address!['municipalitySubdivision'] as String;
+      } else if ((address?['municipality'] as String?)?.isNotEmpty == true) {
+        name = address!['municipality'] as String;
+      } else if ((address?['streetName'] as String?)?.isNotEmpty == true) {
+        name = address!['streetName'] as String;
+      } else {
+        name = address?['freeformAddress'] as String? ?? 'Location';
+      }
+
       list.add(
         LivePoiResult(
-          name: poi?['name'] as String? ?? 'Medical Facility',
+          name: name,
           address: address?['freeformAddress'] as String? ?? '',
-          distanceMeters: (item['dist'] as num?)?.toDouble() ?? 0.0,
+          distanceMeters: distMeters,
           phone: poi?['phone'] as String?,
-          lat: (position?['lat'] as num?)?.toDouble() ?? lat,
-          lon: (position?['lon'] as num?)?.toDouble() ?? lon,
+          lat: resLat,
+          lon: resLon,
           category: categories != null && categories.isNotEmpty
               ? categories.first as String?
-              : null,
+              : item['type'] as String?,
         ),
       );
     }

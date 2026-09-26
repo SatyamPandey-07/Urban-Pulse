@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_colors.dart';
+
 /// Text field with a mic / send button that flips depending on the input,
 /// like the original composer. Disabled while the agent is busy or when chat
 /// isn't available.
@@ -43,20 +45,26 @@ class YatriComposer extends StatelessWidget {
               onSubmitted: enabled ? onSend : null,
               decoration: InputDecoration(
                 hintText: enabled ? hint : 'Chat is unavailable right now',
+                hintStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 filled: true,
-                fillColor: scheme.surfaceContainerHigh,
+                fillColor: AppColors.surfaceCard,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(color: AppColors.surfaceBorder, width: 1),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(color: AppColors.surfaceBorder, width: 1),
                 ),
                 disabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(color: AppColors.surfaceBorder, width: 1),
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.attach_file_rounded, size: 20, color: AppColors.textSecondary),
+                  tooltip: 'Attach document or itinerary',
+                  onPressed: () {},
                 ),
               ),
             ),
