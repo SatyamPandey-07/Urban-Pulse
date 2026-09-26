@@ -22,6 +22,7 @@ class TrendLineChart extends StatelessWidget {
     required this.labels,
     this.lineColor = AppColors.primaryBlue,
     this.height = 180,
+    this.minCeiling,
     super.key,
   });
 
@@ -29,6 +30,7 @@ class TrendLineChart extends StatelessWidget {
   final List<String> labels;
   final Color lineColor;
   final double height;
+  final double? minCeiling;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -40,6 +42,7 @@ class TrendLineChart extends StatelessWidget {
         labels: labels,
         lineColor: lineColor,
         holeColor: Theme.of(context).colorScheme.surface,
+        minCeiling: minCeiling,
       ),
     ),
   );
@@ -77,13 +80,14 @@ class ForecastBarChart extends StatelessWidget {
 /// Shared axis geometry: reserves gutters for the tick labels and maps values
 /// into the remaining plot rectangle.
 class _ChartGeometry {
-  _ChartGeometry(Size size, List<double> values)
+  _ChartGeometry(Size size, List<double> values, {double? minCeiling})
     : plot = Rect.fromLTRB(36, 8, size.width - 4, size.height - 20) {
     final maxValue = values.isEmpty
         ? 1.0
         : values.reduce((a, b) => a > b ? a : b);
+    final ceiling = minCeiling ?? 1.0;
     // Head-room above the tallest point keeps labels off the top edge.
-    top = maxValue <= 0 ? 1.0 : maxValue * 1.15;
+    top = maxValue <= 0 ? ceiling : (maxValue < ceiling ? ceiling : maxValue * 1.15);
   }
 
   final Rect plot;
@@ -168,17 +172,19 @@ class _LineChartPainter extends CustomPainter {
     required this.labels,
     required this.lineColor,
     required this.holeColor,
+    this.minCeiling,
   });
 
   final List<double> values;
   final List<String> labels;
   final Color lineColor;
   final Color holeColor;
+  final double? minCeiling;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
-    final geo = _ChartGeometry(size, values);
+    final geo = _ChartGeometry(size, values, minCeiling: minCeiling);
     _paintAxes(canvas, geo, gridLines: true);
     _paintCategoryLabels(canvas, geo, labels);
 
@@ -193,8 +199,26 @@ class _LineChartPainter extends CustomPainter {
         ),
     ];
 
+    final linePath = _cubicThrough(points);
+
+    // Draw gradient area under the curve
+    final fillPath = Path.from(linePath)
+      ..lineTo(points.last.dx, geo.plot.bottom)
+      ..lineTo(points.first.dx, geo.plot.bottom)
+      ..close();
+    final areaPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          lineColor.withValues(alpha: 0.28),
+          lineColor.withValues(alpha: 0.02),
+        ],
+      ).createShader(geo.plot);
+    canvas.drawPath(fillPath, areaPaint);
+
     canvas.drawPath(
-      _cubicThrough(points),
+      linePath,
       Paint()
         ..color = lineColor
         ..style = PaintingStyle.stroke
@@ -205,8 +229,8 @@ class _LineChartPainter extends CustomPainter {
     final fillPaint = Paint()..color = lineColor;
     final holePaint = Paint()..color = holeColor;
     for (final point in points) {
-      canvas.drawCircle(point, 4, fillPaint);
-      canvas.drawCircle(point, 1.8, holePaint);
+      canvas.drawCircle(point, 4.5, fillPaint);
+      canvas.drawCircle(point, 2.0, holePaint);
     }
   }
 
@@ -257,29 +281,44 @@ class _BarChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
-    final geo = _ChartGeometry(size, values);
+    final geo = _ChartGeometry(size, values, minCeiling: 100.0);
     _paintAxes(canvas, geo, gridLines: true);
     _paintCategoryLabels(canvas, geo, labels, slotCentred: true);
 
     final slot = geo.plot.width / values.length;
-    final barWidth = slot * 0.5; // matches BarData.barWidth = 0.5f
-    final paint = Paint()..color = barColor;
+    final barWidth = slot * 0.55;
 
     for (var i = 0; i < values.length; i++) {
       final center = geo.plot.left + slot * (i + 0.5);
-      final top = geo.yFor(values[i]);
+      final val = values[i].clamp(0.0, 100.0);
+      final rawTop = geo.yFor(val);
+      // Give a minimum 12px pill so low congestion / free flow is cleanly visible as healthy flow
+      const minHeight = 12.0;
+      final top = (geo.plot.bottom - rawTop < minHeight) ? geo.plot.bottom - minHeight : rawTop;
+      final rect = Rect.fromLTRB(
+        center - barWidth / 2,
+        top,
+        center + barWidth / 2,
+        geo.plot.bottom,
+      );
+
+      final barGradient = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            barColor,
+            barColor.withValues(alpha: 0.5),
+          ],
+        ).createShader(rect);
+
       canvas.drawRRect(
         RRect.fromRectAndCorners(
-          Rect.fromLTRB(
-            center - barWidth / 2,
-            top,
-            center + barWidth / 2,
-            geo.plot.bottom,
-          ),
-          topLeft: const Radius.circular(4),
-          topRight: const Radius.circular(4),
+          rect,
+          topLeft: const Radius.circular(5),
+          topRight: const Radius.circular(5),
         ),
-        paint,
+        barGradient,
       );
     }
   }

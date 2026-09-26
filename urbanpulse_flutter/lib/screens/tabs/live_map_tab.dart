@@ -10,7 +10,6 @@ import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../models/live_city_data.dart';
 import '../../services/location_service.dart';
-import '../../services/open_meteo_service.dart';
 import '../../services/tomtom_service.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
@@ -240,11 +239,6 @@ class _LiveMapTabState extends State<LiveMapTab> {
   ) async {
     setState(() => _isRouting = true);
 
-    final currentAqi = await OpenMeteoService.fetchCurrentUsAqi(
-      _currentLat,
-      _currentLon,
-    );
-
     final normal = await TomTomService.calculateRoute(
       fromLat: _currentLat,
       fromLon: _currentLon,
@@ -263,9 +257,6 @@ class _LiveMapTabState extends State<LiveMapTab> {
       traffic: false,
     );
 
-    // With no live geometry, fall back to a straight-line corridor between the
-    // two points so the comparison still renders — and say so in the HUD.
-    final isEstimated = normal == null || green == null;
     final normalPoints = normal?.points.isNotEmpty == true
         ? normal!.points
         : _fallbackGeometry(
@@ -599,7 +590,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   Widget _filterChips(BuildContext context) {
     return SizedBox(
-      height: 36,
+      height: 38,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
@@ -628,10 +619,10 @@ class _LiveMapTabState extends State<LiveMapTab> {
           ),
           const SizedBox(width: 8),
           _filterChipItem(
-            label: '',
-            icon: Icons.more_horiz_rounded,
-            iconColor: const Color(0xFF64748B),
-            isSelected: false,
+            label: 'Traffic',
+            icon: Icons.traffic_rounded,
+            iconColor: _isTrafficEnabled ? const Color(0xFF00A86B) : const Color(0xFF64748B),
+            isSelected: _isTrafficEnabled,
             onTap: () => _toggleTraffic(),
           ),
         ],
@@ -648,22 +639,22 @@ class _LiveMapTabState extends State<LiveMapTab> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(19),
       child: Container(
-        height: 36,
-        padding: EdgeInsets.symmetric(horizontal: label.isEmpty ? 10 : 14),
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          color: isSelected ? const Color(0xFFE8F8F0) : Colors.white,
+          borderRadius: BorderRadius.circular(19),
           border: Border.all(
-            color: AppColors.surfaceLightBorder,
-            width: 1,
+            color: isSelected ? const Color(0xFF00A86B) : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -672,17 +663,17 @@ class _LiveMapTabState extends State<LiveMapTab> {
           children: [
             Icon(
               icon,
-              size: 16,
+              size: 17,
               color: iconColor,
             ),
             if (label.isNotEmpty) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: 7),
               Text(
                 label,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                style: TextStyle(
+                  color: isSelected ? const Color(0xFF00A86B) : const Color(0xFF0F172A),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -692,8 +683,6 @@ class _LiveMapTabState extends State<LiveMapTab> {
     );
   }
 
-
-
   Future<void> _centreOnUser() async {
     await _locateUser(zoom: 15, force: true);
     if (!mounted) return;
@@ -702,7 +691,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   Widget _floatingControls(BuildContext context) => Positioned(
     right: 16,
-    bottom: _comparison != null ? 360 : 185,
+    bottom: _comparison != null ? 360 : 195,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -737,7 +726,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.surfaceLightBorder, width: 1),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
@@ -746,7 +735,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
               ),
             ],
           ),
-          child: Icon(icon, size: 20, color: AppColors.textPrimary),
+          child: Icon(icon, size: 20, color: const Color(0xFF0F172A)),
         ),
       ),
     );
@@ -758,16 +747,16 @@ class _LiveMapTabState extends State<LiveMapTab> {
       right: 16,
       bottom: 16,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.surfaceLightBorder, width: 1),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -778,28 +767,63 @@ class _LiveMapTabState extends State<LiveMapTab> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Nearby Places',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F8F0),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.explore_rounded,
+                        color: Color(0xFF00A86B),
+                        size: 16,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Nearby Places',
+                      style: TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
                 ),
                 InkWell(
-                  onTap: () => showToast(context, 'Showing all nearby places'),
-                  child: const Text(
-                    'See all >',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF00A86B),
+                  onTap: () {
+                    _performSearch('attraction hotel food');
+                    showToast(context, 'Showing all verified spots near you');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F8F0),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'See all',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF00A86B),
+                          ),
+                        ),
+                        SizedBox(width: 2),
+                        Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF00A86B)),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
@@ -807,8 +831,9 @@ class _LiveMapTabState extends State<LiveMapTab> {
                     title: 'Hotels',
                     subtitle: '12 nearby',
                     icon: Icons.hotel_rounded,
-                    color: const Color(0xFF00A86B),
-                    bg: const Color(0xFFE8F8F0),
+                    accentColor: const Color(0xFF00A86B),
+                    bgGradient: const [Color(0xFFE8F8F0), Color(0xFFD1F2E2)],
+                    tagBg: const Color(0xFFE8F8F0),
                     onTap: () => _performSearch('hotel'),
                   ),
                 ),
@@ -818,8 +843,9 @@ class _LiveMapTabState extends State<LiveMapTab> {
                     title: 'Food',
                     subtitle: '18 nearby',
                     icon: Icons.restaurant_rounded,
-                    color: const Color(0xFFEF4444),
-                    bg: const Color(0xFFFEE2E2),
+                    accentColor: const Color(0xFFEF4444),
+                    bgGradient: const [Color(0xFFFEE2E2), Color(0xFFFDD2D2)],
+                    tagBg: const Color(0xFFFEE2E2),
                     onTap: () => _performSearch('restaurant'),
                   ),
                 ),
@@ -829,8 +855,9 @@ class _LiveMapTabState extends State<LiveMapTab> {
                     title: 'Attractions',
                     subtitle: '7 nearby',
                     icon: Icons.star_rounded,
-                    color: const Color(0xFFF59E0B),
-                    bg: const Color(0xFFFEF3C7),
+                    accentColor: const Color(0xFFF59E0B),
+                    bgGradient: const [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+                    tagBg: const Color(0xFFFEF3C7),
                     onTap: () => _performSearch('tourist attraction'),
                   ),
                 ),
@@ -846,52 +873,83 @@ class _LiveMapTabState extends State<LiveMapTab> {
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color color,
-    required Color bg,
+    required Color accentColor,
+    required List<Color> bgGradient,
+    required Color tagBg,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: AppColors.bgLight,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.surfaceLightBorder, width: 0.8),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: bg,
-                shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              maxLines: 1,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 12.5,
-                color: AppColors.textPrimary,
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: bgGradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, color: accentColor, size: 22),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              maxLines: 1,
-              style: const TextStyle(
-                fontSize: 10.5,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 8),
+              Text(
+                title,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  color: Color(0xFF0F172A),
+                  letterSpacing: -0.2,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: tagBg,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  subtitle,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: accentColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
