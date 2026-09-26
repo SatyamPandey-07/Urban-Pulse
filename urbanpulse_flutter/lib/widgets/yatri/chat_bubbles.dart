@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../agents/runtime/agent_kind.dart';
 import '../common.dart';
+import '../taskgraph/task_graph_view.dart';
 
 /// The small round mark next to every assistant message.
 class AgentAvatar extends StatelessWidget {
@@ -35,26 +37,57 @@ class AgentAvatar extends StatelessWidget {
 }
 
 /// A left-aligned assistant message. [child] slots content (e.g. an answer
-/// card) under the bubble, indented to line up with the text.
+/// card) under the bubble, indented to line up with the text. When [agent] is
+/// set (a planner agent speaking) its name is shown in its colour above the
+/// bubble, and a “?” beside the text explains [why] it is being said.
 class AgentBubble extends StatelessWidget {
-  const AgentBubble({required this.text, this.child, this.maxWidth, super.key});
+  const AgentBubble({
+    required this.text,
+    this.child,
+    this.maxWidth,
+    this.agent,
+    this.why,
+    super.key,
+  });
 
   final String text;
   final Widget? child;
   final double? maxWidth;
+  final AgentKind? agent;
+  final String? why;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final a = agent;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const AgentAvatar(),
+        if (a == null)
+          const AgentAvatar()
+        else
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: a.color.withValues(alpha: 0.18)),
+            child: Icon(a.icon, size: 17, color: agentTextColor(context, a)),
+          ),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (a != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 3, left: 4),
+                  child: Text(
+                    '${a.displayName} · ${a.role}',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: agentTextColor(context, a),
+                    ),
+                  ),
+                ),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
@@ -73,7 +106,17 @@ class AgentBubble extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: InlineBoldText(text, style: theme.textTheme.bodyMedium),
+                  child: why == null
+                      ? InlineBoldText(text, style: theme.textTheme.bodyMedium)
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(child: InlineBoldText(text, style: theme.textTheme.bodyMedium)),
+                            const SizedBox(width: 6),
+                            WhyButton(agent: a ?? AgentKind.yatri, title: text, why: why!),
+                          ],
+                        ),
                 ),
               ),
               if (child != null) ...[const SizedBox(height: 10), child!],

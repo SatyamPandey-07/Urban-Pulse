@@ -38,6 +38,10 @@ estimate as live data.
 | `GROQ_API_KEY` | Yatri AI chat, agentic trip planner, intent parsing | Grounded fallback answers; itineraries labelled "offline template estimate" |
 | `TOMTOM_API_KEY` | Live Map dual routing, POI search, traffic, real route distance | Straight-line route estimate, labelled as such |
 | `CENTRAL_REGISTRY_BASE_URL` | Shared experiences/bookings/reports backend | On-device SQLite store only |
+| `GROQ_API_KEY_2` … `_4` | Extra Groq keys for the multi-agent planner (agents are spread 2-3 per key) | Agents share `GROQ_API_KEY` |
+| `TAVILY_API_KEY` (`_2`, `_3`) | The agents' shared `web_search` / `fetch_page` tools (free: 1,000 credits/month per key) | Falls back to Groq compound search, then Wikipedia / OpenStreetMap |
+| `GEOAPIFY_API_KEY` | Hotels and hotspots with coordinates and wheelchair tags (free: ~3,000 credits/day) | OpenStreetMap (Overpass) only, plus AI-estimated details |
+| `XOTELO_RAPIDAPI_KEY` | Optional: Xotelo `/search` (city to TripAdvisor location key) | Location key found by other means and validated by distance |
 
 `CENTRAL_REGISTRY_BASE_URL` defaults to `http://10.0.2.2:3001` — the Android
 emulator's alias for the host machine's localhost. On a physical device, set it to
@@ -59,7 +63,56 @@ lib/
   state/         ChangeNotifier controllers and view models
   screens/       one file per screen, mirroring the original Activities/Fragments
   widgets/       shared UI pieces (cards, charts, chat bubbles, the logo)
+  agents/        the Yatri multi-agent trip planner (see below)
 ```
+
+### Yatri multi-agent planner (`lib/agents/`)
+
+Yatri collects a validated `TripBrief` by chat (phase 1), then a team of agents
+plans the trip in parallel while the user watches a live task graph (phase 2).
+**Yatri is the only decision-maker**; every other agent is a specialist worker
+with tools.
+
+| Agent | Job |
+|---|---|
+| Yatri | plans, allocates tasks, resolves conflicts, asks the user, finalises |
+| Atithi | hotels (live prices, per-need accessibility) |
+| Bhatkanti | hotspots, scaled to trip length |
+| Hisab | budget engine (deterministic) |
+| Khoji | verifies claims, finds reviews and sources |
+| Saksham | audits the whole journey for every access need |
+| Raah | orders places into days (hours, weather) |
+| Safar | transport to and around the destination |
+| Hariyali | carbon and eco scoring |
+
+**Built so far:** Yatri + Atithi + Hisab (hotel budget) — stage 2.1. After you
+confirm the brief, Yatri hands the hotel search to Atithi and the budget check to
+Hisab, and asks you when goals collide ("none of these are wheelchair
+accessible", "the cheapest suitable stay is ₹X — raise the budget?"), then lets
+you pick a stay from a map and cards showing live or estimated prices, ratings and
+per-need access with where each fact came from. Hotels come from Xotelo
+(TripAdvisor data and live per-OTA prices), Geoapify, OpenStreetMap and a
+`web_search` tool loop; the TripAdvisor location key is validated by distance
+so a wrong guess can never put Bengaluru hotels in Munnar. The other agents
+arrive in later stages.
+
+```
+agents/atithi/    hotel search: merge, rank, live rates, listing pages, AI fill
+agents/hisab/     the budget engine (hotel share so far)
+agents/yatri/     the orchestrator (Yatri's loop) and the hotel gates
+domain/access/    OSM tags / listing text -> per-need accessibility support
+agents/runtime/   task board (DAG scheduler), task graph model, plan clock,
+                  LLM pool + key ring, lenient JSON, tool kit, demo run
+agents/tools/     shared web_search / fetch_page tools and the bounded tool-use loop
+services/data/    Xotelo, Geoapify, Overpass, Wikipedia, Open-Meteo, AI estimator, cache
+models/itinerary/ what the planner produces
+widgets/taskgraph/ the live task graph, agent feed and "?" explainers
+```
+
+Design rules: real data first, the model fills gaps and is always labelled
+"AI-estimated"; every worker can time out, fail or return partial data without
+breaking the plan; Groq calls are spread across the configured keys. The Yatri
+tab's ⋮ menu has **Preview agent graph (demo)** to see the graph run offline.
 
 State management is Flutter's built-in `ChangeNotifier` + `AnimatedBuilder`, wired
 through a single `AppScope` `InheritedWidget` that owns every controller and

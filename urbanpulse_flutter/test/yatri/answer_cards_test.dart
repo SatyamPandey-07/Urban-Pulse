@@ -70,14 +70,18 @@ void main() {
       await tester.pump();
       expect(find.text('Confirm (2)'), findsOneWidget);
 
+      // The list is long enough now that later rows are below the fold.
+      await tester.ensureVisible(find.text('No accessibility needs'));
       await tester.tap(find.text('No accessibility needs'));
       await tester.pump();
       expect(find.text('Confirm (1)'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Wheelchair user'));
       await tester.tap(find.text('Wheelchair user'));
       await tester.pump();
       expect(find.text('Confirm (1)'), findsOneWidget, reason: '“None” cleared by another pick');
 
+      await tester.ensureVisible(find.text('Confirm (1)'));
       await tester.tap(find.text('Confirm (1)'));
       expect((submitted! as MultiChoiceAnswer).optionIds, {'wheelchair'});
     });

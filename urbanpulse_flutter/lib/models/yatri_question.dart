@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import 'itinerary/itinerary_parts.dart';
 import 'trip_brief.dart';
 
 /// How the agent wants a question answered — ordered by the spec's preference:
@@ -13,6 +14,9 @@ enum AnswerWidget {
   groupStepper,
   childAges,
   budgetRange,
+
+  /// Pick one of the hotels attached to the question ([YatriQuestion.hotels]).
+  hotelChoice,
   text,
 }
 
@@ -61,6 +65,10 @@ class YatriQuestion {
     this.attempt = 0,
     this.skippable = false,
     this.variant,
+    this.why,
+    this.agent,
+    this.hotels = const [],
+    this.hotelNeeds = const {},
   });
 
   final String id;
@@ -90,6 +98,21 @@ class YatriQuestion {
   /// null means the default.
   final String? variant;
 
+  /// Why the app is asking, shown behind a “?” next to the question. Used by
+  /// the planner's questions to the user.
+  final String? why;
+
+  /// The planner agent asking (its name is coloured), for planner questions.
+  /// Stored by name to keep this model free of UI types.
+  final String? agent;
+
+  /// The hotels to choose from, for [AnswerWidget.hotelChoice]. Each has a
+  /// matching entry in [options] (same id) so the answer is a plain choice.
+  final List<HotelOption> hotels;
+
+  /// The access needs to show support for on each hotel.
+  final Set<AccessibilityNeed> hotelNeeds;
+
   String get displayText => text ?? defaultText;
 
   YatriQuestion copyWith({
@@ -114,6 +137,10 @@ class YatriQuestion {
         attempt: attempt ?? this.attempt,
         skippable: skippable,
         variant: variant ?? this.variant,
+        why: why,
+        agent: agent,
+        hotels: hotels,
+        hotelNeeds: hotelNeeds,
       );
 }
 

@@ -128,6 +128,32 @@ abstract final class AccessibilityFollowUps {
         QuestionOption(id: 'other', label: 'Other', emoji: '🐾'),
       ],
     ),
+    A11yFollowUp(
+      id: 'a11y.cognitive.support',
+      need: AccessibilityNeed.cognitiveSensory,
+      text: 'What helps most with sensory or cognitive needs on a trip?',
+      multi: true,
+      options: [
+        QuestionOption(id: 'quiet_low_crowd', label: 'Quiet, low-crowd places and times', emoji: '🤫'),
+        QuestionOption(id: 'clear_schedule', label: 'A clear, predictable schedule', emoji: '🗓️'),
+        QuestionOption(id: 'sensory_friendly', label: 'Sensory-friendly venues (light, sound)', emoji: '🎧'),
+        QuestionOption(id: 'companion', label: 'A companion or caregiver travels with us', emoji: '🤝'),
+        QuestionOption(id: 'buffer_time', label: 'Extra time between activities', emoji: '⏳'),
+      ],
+    ),
+    A11yFollowUp(
+      id: 'a11y.otherSpecial.support',
+      need: AccessibilityNeed.otherSpecial,
+      text: 'What should I plan around? (Describe anything else in the message box.)',
+      multi: true,
+      options: [
+        QuestionOption(id: 'extra_time', label: 'Extra time for everything', emoji: '⏳'),
+        QuestionOption(id: 'medical_nearby', label: 'Hospital or pharmacy close by', emoji: '🏥'),
+        QuestionOption(id: 'rest_breaks', label: 'Frequent rest breaks', emoji: '🪑'),
+        QuestionOption(id: 'medicine_storage', label: 'Medicine that needs a fridge', emoji: '💊'),
+        QuestionOption(id: 'quiet_room', label: 'A quiet room to rest', emoji: '🛏️'),
+      ],
+    ),
   ];
 
   static A11yFollowUp? byId(String id) {

@@ -4,6 +4,22 @@
   "GROQ_API_KEY": "your-groq-api-key",
   "TOMTOM_API_KEY": "your-tomtom-api-key",
 
+  "_GROQ_API_KEY_2_3_4": "Optional extra Groq keys. The multi-agent planner spreads its agents across the keys you set (2-3 agents per key) so parallel workers do not hit one key's rate limit. Leave them out to share GROQ_API_KEY.",
+  "GROQ_API_KEY_2": "",
+  "GROQ_API_KEY_3": "",
+  "GROQ_API_KEY_4": "",
+
+  "_TAVILY_API_KEY": "Powers the agents' shared web_search / fetch_page tools (hotels and hotspots for any area). Free plan: 1,000 credits a month per key, no card. Extra keys multiply the budget.",
+  "TAVILY_API_KEY": "",
+  "TAVILY_API_KEY_2": "",
+  "TAVILY_API_KEY_3": "",
+
+  "_GEOAPIFY_API_KEY": "Hotels and attractions with coordinates and wheelchair tags. Free plan: ~3,000 credits a day. Requires a 'Powered by Geoapify' credit.",
+  "GEOAPIFY_API_KEY": "",
+
+  "_XOTELO_RAPIDAPI_KEY": "Optional. Only Xotelo's /search endpoint (city -> TripAdvisor location key) needs it, via RapidAPI. Hotel lists, live rates and price heatmaps need no key.",
+  "XOTELO_RAPIDAPI_KEY": "",
+
   "_CENTRAL_REGISTRY_BASE_URL": "Where the Central Registry backend (server/) is reachable. Default http://10.0.2.2:3001 is the Android emulator's alias for your dev machine's localhost. On a physical device use your host's LAN IP, e.g. http://192.168.1.23:3001",
   "CENTRAL_REGISTRY_BASE_URL": "http://10.0.2.2:3001"
 }

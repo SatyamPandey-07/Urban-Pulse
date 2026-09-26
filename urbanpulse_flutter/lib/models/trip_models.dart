@@ -61,11 +61,20 @@ class TripPlan {
   /// actually produced by the AI or fetched live.
   final String source;
 
-  bool get isAiGenerated => source == 'groq_ai';
+  /// True for plans an AI wrote (`groq_ai`) or the multi-agent planner
+  /// assembled (`multi_agent`, whose estimated parts are labelled on the
+  /// itinerary itself).
+  bool get isAiGenerated => source == 'groq_ai' || source == 'multi_agent';
 
   /// The planner doesn't know the real dates, so the Yatri hand-off replaces
   /// its placeholder label and title with the traveler's.
-  TripPlan copyWith({String? travelDates, String? title}) => TripPlan(
+  TripPlan copyWith({
+    String? travelDates,
+    String? title,
+    String? hotelName,
+    double? hotelRating,
+    bool? isStepFreeAccessible,
+  }) => TripPlan(
     id: id,
     destination: destination,
     title: title ?? this.title,
@@ -75,9 +84,9 @@ class TripPlan {
     co2SavedKg: co2SavedKg,
     pulsePointsEarned: pulsePointsEarned,
     isCompleted: isCompleted,
-    hotelName: hotelName,
-    hotelRating: hotelRating,
-    isStepFreeAccessible: isStepFreeAccessible,
+    hotelName: hotelName ?? this.hotelName,
+    hotelRating: hotelRating ?? this.hotelRating,
+    isStepFreeAccessible: isStepFreeAccessible ?? this.isStepFreeAccessible,
     totalBudgetInr: totalBudgetInr,
     aqiStatus: aqiStatus,
     transitCostInr: transitCostInr,
