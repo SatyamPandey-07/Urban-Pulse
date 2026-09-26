@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../agents/planner/trip_plan_handoff_agent.dart';
+import '../../agents/core/llm_gateway.dart';
+import '../../agents/receptionist/receptionist_agent.dart';
+import '../../core/config.dart';
 import '../../core/routes.dart';
+import '../../models/trip_brief.dart';
 import '../../models/trip_models.dart';
 import '../../state/activity_tracker.dart';
 import '../../state/app_scope.dart';
-import '../../state/yatri_ai_controller.dart';
-import '../../widgets/chat_bubble.dart';
+import '../../state/yatri_controller.dart';
 import '../../widgets/common.dart';
+import '../../widgets/yatri/brief_progress.dart';
+import '../../widgets/yatri/chat_bubbles.dart';
+import '../../widgets/yatri/chat_entry_view.dart';
+import '../../widgets/yatri/yatri_composer.dart';
 import '../dialogs/add_experience_dialog.dart';
 import '../dialogs/provider_dashboard_dialog.dart';
+import '../trip_brief_form_screen.dart';
 
-/// Port of `YatriAiFragment` / `fragment_yatri_ai.xml` — the conversation view.
-/// All reasoning lives in [YatriAiController]; this widget is the chat list, the
-/// suggestion-chip rail and the composer (which flips between mic and send just
-/// as the original `FloatingActionButton` did).
+/// Yatri AI — the receptionist that collects a trip brief by chat, then hands
+/// it to the planner. All logic lives in [YatriController]; this widget is the
+/// responsive shell: a single chat column on phones, a centred column on
+/// tablets, and chat plus a live "Trip brief" panel on wide screens.
 class YatriAiTab extends StatefulWidget {
   const YatriAiTab({super.key});
 
@@ -23,64 +32,102 @@ class YatriAiTab extends StatefulWidget {
 }
 
 class _YatriAiTabState extends State<YatriAiTab> {
-  YatriAiController? _controller;
+  static const _wideBreakpoint = 900.0;
+  static const _chatMaxWidth = 720.0;
+
+  YatriController? _controller;
   final _input = TextEditingController();
-  final _scrollController = ScrollController();
+  final _scroll = ScrollController();
   final _speech = SpeechToText();
+  final Map<int, GlobalKey> _entryKeys = {};
   bool _isListening = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _controller ??= YatriAiController(AppScope.of(context))
-      ..addListener(_onMessagesChanged);
+    if (_controller != null) return;
+    final services = AppScope.of(context);
+    _controller =
+        YatriController(
+            receptionist: ReceptionistAgent(const GroqLlmGateway()),
+            handoff: TripPlanHandoffAgent(),
+            briefs: services.tripBriefs,
+            trips: services.trips,
+            hasKey: () => AppConfig.hasGroqKey,
+            detectedCity: () => services.location.originCity,
+            settingsNeeds: () => _settingsNeeds(services),
+            onTripPlanned: () => services.activity.increment(TrackedAction.tripsPlanned),
+            onTripSaved: () => services.activity.increment(TrackedAction.tripsSaved),
+          )
+          ..addListener(_onChanged)
+          ..start();
   }
 
   @override
   void dispose() {
-    _controller?.removeListener(_onMessagesChanged);
+    _controller?.removeListener(_onChanged);
     _controller?.dispose();
     _input.dispose();
-    _scrollController.dispose();
+    _scroll.dispose();
+    _speech.cancel();
     super.dispose();
   }
 
-  void _onMessagesChanged() {
+  static Set<AccessibilityNeed> _settingsNeeds(AppServices s) => {
+    if (s.accessibility.isWheelchairModeEnabled) AccessibilityNeed.wheelchair,
+    if (s.accessibility.isVisualAssistanceEnabled) AccessibilityNeed.visual,
+    if (s.accessibility.isHearingAssistanceEnabled) AccessibilityNeed.hearing,
+    if (s.accessibility.isServiceAnimalFriendlyOnly) AccessibilityNeed.serviceAnimal,
+  };
+
+  void _onChanged() {
     if (!mounted) return;
     setState(() {});
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scrollController.hasClients) return;
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
+  }
+
+  /// A new question is scrolled to its top so the wording and the start of the
+  /// card are both visible; anything else follows the bottom.
+  void _scrollToLatest() {
+    final c = _controller;
+    if (c == null || !mounted || !_scroll.hasClients || c.entries.isEmpty) return;
+    final last = c.entries.last;
+    final ctx = _entryKeys[last.id]?.currentContext;
+    if (last is QuestionEntry && last.isActive && ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 0,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
       );
-    });
+      return;
+    }
+    _scroll.animateTo(
+      _scroll.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOut,
+    );
   }
 
   void _send(String text) {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
     _input.clear();
-    _controller?.send(trimmed);
+    _controller?.sendText(trimmed);
   }
 
-  /// Replaces `RecognizerIntent.ACTION_RECOGNIZE_SPEECH`: tapping the mic starts
-  /// dictation, and the recognised phrase is sent as a message.
-  Future<void> _startVoiceInput() async {
+  Future<void> _toggleVoice() async {
     if (_isListening) {
       await _speech.stop();
       setState(() => _isListening = false);
       return;
     }
-
     final available = await _speech.initialize();
     if (!mounted) return;
     if (!available) {
       showToast(context, 'Voice input not available on device');
       return;
     }
-
     setState(() => _isListening = true);
     await _speech.listen(
       onResult: (result) {
@@ -94,6 +141,21 @@ class _YatriAiTabState extends State<YatriAiTab> {
     );
   }
 
+  Future<void> _openForm([TripBrief? _]) async {
+    final c = _controller;
+    if (c == null || c.busy) return;
+    if (c.phase == YatriPhase.done) c.start();
+    final services = AppScope.of(context);
+    final result = await TripBriefFormScreen.open(
+      context,
+      initial: c.brief,
+      now: c.now,
+      detectedCity: services.location.originCity,
+      settingsNeeds: _settingsNeeds(services),
+    );
+    if (result != null) await c.confirmBrief(result);
+  }
+
   Future<void> _openAddExperienceDialog() async {
     final services = AppScope.of(context);
     final published = await AddExperienceDialog.show(
@@ -102,12 +164,12 @@ class _YatriAiTabState extends State<YatriAiTab> {
       detectedCity: services.location.city,
     );
     if (!mounted) return;
-    if (published == null) {
-      showToast(context, 'Failed to publish experience');
-      return;
-    }
-    showToast(context, 'Experience published successfully!');
-    _controller?.announcePublishedExperience(published);
+    showToast(
+      context,
+      published == null
+          ? 'Failed to publish experience'
+          : 'Experience published successfully!',
+    );
   }
 
   Future<void> _openProviderDashboard() async {
@@ -119,51 +181,115 @@ class _YatriAiTabState extends State<YatriAiTab> {
     );
   }
 
-  Future<void> _saveTrip(TripPlan trip) async {
-    final services = AppScope.of(context);
-    await services.trips.addTrip(trip);
-    await services.activity.increment(TrackedAction.tripsSaved);
-    if (!mounted) return;
-    showToast(context, '✅ Saved "${trip.title}" to My Trips!');
-  }
-
   void _viewTrip(TripPlan trip) =>
       Navigator.of(context).pushNamed(Routes.tripDetail, arguments: trip);
 
   @override
   Widget build(BuildContext context) {
-    final controller = _controller;
-    if (controller == null) return const SizedBox.shrink();
-    final messages = controller.messages;
+    final c = _controller;
+    if (c == null) return const SizedBox.shrink();
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= _wideBreakpoint;
+        final chat = _chatColumn(context, c, showStrip: !wide);
+        final centered = Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _chatMaxWidth),
+            child: chat,
+          ),
+        );
+        if (!wide) return centered;
+
+        final report = c.report;
+        return Row(
+          children: [
+            Expanded(child: centered),
+            SizedBox(
+              width: 340,
+              child: BriefPanel(
+                items: c.progress,
+                done: report.satisfied,
+                total: report.required,
+                onEdit: c.editQuestion,
+                onOpenForm: _openForm,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _chatColumn(
+    BuildContext context,
+    YatriController c, {
+    required bool showStrip,
+  }) {
+    final report = c.report;
     return Column(
       children: [
-        _header(context, controller),
-        _suggestionChips(context),
+        _header(context, c, report.satisfied, report.required),
+        if (showStrip) ...[
+          BriefProgressStrip(items: c.progress, onEdit: c.editQuestion),
+          const SizedBox(height: 8),
+        ],
         const Divider(height: 1),
         Expanded(
-          child: ListView.separated(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(16),
-            itemCount: messages.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) => ChatBubble(
-              message: messages[index],
-              onMcqOptionSelected: _send,
-              onSaveTrip: _saveTrip,
-              onViewTrip: _viewTrip,
+          child: SingleChildScrollView(
+            controller: _scroll,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final entry in c.entries)
+                  Padding(
+                    key: _entryKeys.putIfAbsent(entry.id, GlobalKey.new),
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: ChatEntryView(
+                      entry: entry,
+                      controller: c,
+                      onOpenForm: _openForm,
+                      onReview: _openForm,
+                      onExample: _send,
+                      onViewTrip: _viewTrip,
+                    ),
+                  ),
+                if (c.busy && c.phase != YatriPhase.planning)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 14),
+                    child: TypingIndicator(),
+                  ),
+              ],
             ),
           ),
         ),
-        _composer(context),
+        YatriComposer(
+          controller: _input,
+          enabled: c.canType,
+          hint: c.activeQuestion == null
+              ? 'Tell me about your trip…'
+              : 'Or type your answer…',
+          isListening: _isListening,
+          onSend: _send,
+          onMic: _toggleVoice,
+        ),
       ],
     );
   }
 
-  Widget _header(BuildContext context, YatriAiController controller) {
+  Widget _header(BuildContext context, YatriController c, int done, int total) {
     final theme = Theme.of(context);
+    final status = switch (c.phase) {
+      YatriPhase.intake => 'Receptionist · collecting your trip details',
+      YatriPhase.review => 'Ready for your review',
+      YatriPhase.planning => 'Planner · building your itinerary',
+      YatriPhase.done => 'Trip planned',
+    };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 8, 4),
+      padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
       child: Row(
         children: [
           Expanded(
@@ -172,12 +298,10 @@ class _YatriAiTabState extends State<YatriAiTab> {
               children: [
                 Text(
                   'Yatri AI',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Active • Smart Mobility Assistant',
+                  status,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.primary,
                   ),
@@ -185,120 +309,30 @@ class _YatriAiTabState extends State<YatriAiTab> {
               ],
             ),
           ),
-          TextButton(
-            onPressed: controller.clearChat,
-            child: const Text('Clear'),
+          ProgressRing(done: done, total: total),
+          PopupMenuButton<String>(
+            tooltip: 'More',
+            onSelected: (v) {
+              switch (v) {
+                case 'form':
+                  _openForm();
+                case 'reset':
+                  c.start();
+                case 'list':
+                  _openAddExperienceDialog();
+                case 'provider':
+                  _openProviderDashboard();
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'form', child: Text('Open trip form')),
+              PopupMenuItem(value: 'reset', child: Text('Start over')),
+              PopupMenuDivider(),
+              PopupMenuItem(value: 'list', child: Text('List an experience')),
+              PopupMenuItem(value: 'provider', child: Text('Provider dashboard')),
+            ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _suggestionChips(BuildContext context) {
-    // Same twelve shortcuts as the Kotlin chip group, in the same order.
-    final chips = <(String, VoidCallback)>[
-      (
-        '2-Hour Micro Experiences',
-        () => _send(
-          'Find local micro-experiences within 2 hours near my location',
-        ),
-      ),
-      (
-        'Adapt Plan (Rain / Delay)',
-        () => _send(
-          'Adapt my plan: It started raining and I only have 90 minutes',
-        ),
-      ),
-      (
-        'Family & Child-Friendly',
-        () => _send(
-          'Find family and child-friendly cultural experiences near me',
-        ),
-      ),
-      ('+ List Experience', _openAddExperienceDialog),
-      ('Provider Hub (My Listings)', _openProviderDashboard),
-      ('Plan Trip to Lonavala 🌲', () => _send('Plan a trip to Kedarnath')),
-      ('Nearest Hospitals', () => _send('Suggest some hospital near me')),
-      (
-        'Live Traffic',
-        () => _send('What is the traffic status around my current area?'),
-      ),
-      (
-        'AQI & Weather',
-        () =>
-            _send('What is the air quality index and weather at my location?'),
-      ),
-      (
-        'Eco Routes',
-        () => _send(
-          'Find nearby solar eco-resorts with wheelchair accessibility',
-        ),
-      ),
-      (
-        'Report Hazard',
-        () => _send('Report a road obstruction at my GPS coordinates'),
-      ),
-      ('Emergency SOS', () => _send('Emergency assistance at my location')),
-    ];
-
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: chips.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final (label, onTap) = chips[index];
-          return Center(
-            child: ActionChip(label: Text(label), onPressed: onTap),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _composer(BuildContext context) {
-    final hasText = _input.text.trim().isNotEmpty;
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _input,
-                minLines: 1,
-                maxLines: 4,
-                textInputAction: TextInputAction.send,
-                onChanged: (_) => setState(() {}),
-                onSubmitted: _send,
-                decoration: const InputDecoration(
-                  hintText: 'Ask Yatri AI...',
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            FloatingActionButton(
-              heroTag: 'yatri-send',
-              tooltip: hasText ? 'Send' : 'Speak to Yatri AI',
-              onPressed: hasText ? () => _send(_input.text) : _startVoiceInput,
-              child: Icon(
-                hasText
-                    ? Icons.send
-                    : _isListening
-                    ? Icons.stop
-                    : Icons.mic,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

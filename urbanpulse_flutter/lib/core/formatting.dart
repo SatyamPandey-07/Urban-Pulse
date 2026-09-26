@@ -29,3 +29,28 @@ extension NumClamp on double {
 extension IntClamp on int {
   int coerceAtLeast(int min) => this < min ? min : this;
 }
+
+const _monthNames = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', //
+  'Dec',
+];
+const _weekdayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+/// `"Sat, 12 Oct"`.
+String shortDate(DateTime d) =>
+    '${_weekdayNames[d.weekday - 1]}, ${d.day} ${_monthNames[d.month - 1]}';
+
+/// `"9:30 AM"`.
+String clock12(DateTime d) {
+  final h = d.hour % 12 == 0 ? 12 : d.hour % 12;
+  final m = d.minute.toString().padLeft(2, '0');
+  return '$h:$m ${d.hour < 12 ? 'AM' : 'PM'}';
+}
+
+/// `"12 Oct – 15 Oct 2026"` for trip cards.
+String dateRangeLabel(DateTime a, DateTime b) {
+  String d(DateTime x) => '${x.day} ${_monthNames[x.month - 1]}';
+  return a.year == b.year
+      ? '${d(a)} – ${d(b)} ${b.year}'
+      : '${d(a)} ${a.year} – ${d(b)} ${b.year}';
+}
