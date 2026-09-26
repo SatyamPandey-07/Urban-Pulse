@@ -85,7 +85,7 @@ class ForecastBarChart extends StatelessWidget {
 /// into the remaining plot rectangle.
 class _ChartGeometry {
   _ChartGeometry(Size size, List<double> values, {double? minCeiling})
-    : plot = Rect.fromLTRB(36, 10, size.width - 8, size.height - 24) {
+    : plot = Rect.fromLTRB(36, 8, size.width - 4, size.height - 20) {
     final maxValue = values.isEmpty
         ? 1.0
         : values.reduce((a, b) => a > b ? a : b);
