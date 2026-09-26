@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 import 'trip_brief.dart';
 
 /// How the agent wants a question answered — ordered by the spec's preference:
@@ -21,6 +23,7 @@ class QuestionOption {
     required this.id,
     required this.label,
     this.emoji,
+    this.icon,
     this.subtitle,
     this.badge,
     this.exclusive = false,
@@ -30,6 +33,7 @@ class QuestionOption {
   final String id;
   final String label;
   final String? emoji;
+  final IconData? icon;
   final String? subtitle;
 
   /// Short trailing tag, e.g. a CO2 figure.

@@ -95,7 +95,7 @@ class _GroupStepperViewState extends State<GroupStepperView> {
         OptionGrid(
           children: [
             _CounterRow(
-              emoji: '🧑',
+              icon: Icons.person_outline,
               label: 'Adults',
               subtitle: '18 – 59 years',
               value: _adults,
@@ -105,7 +105,7 @@ class _GroupStepperViewState extends State<GroupStepperView> {
               },
             ),
             _CounterRow(
-              emoji: '🧓',
+              icon: Icons.elderly_outlined,
               label: 'Seniors',
               subtitle: '60 and above',
               value: _seniors,
@@ -115,14 +115,14 @@ class _GroupStepperViewState extends State<GroupStepperView> {
               },
             ),
             _CounterRow(
-              emoji: '🧒',
+              icon: Icons.child_care_outlined,
               label: 'Children',
               subtitle: '0 – 17 years',
               value: _children,
               onChanged: _setChildren,
             ),
             _CounterRow(
-              emoji: '👩',
+              icon: Icons.female_outlined,
               label: 'Women',
               subtitle: 'Any age, within the group',
               value: _women,
@@ -205,14 +205,14 @@ class _GroupStepperViewState extends State<GroupStepperView> {
 
 class _CounterRow extends StatelessWidget {
   const _CounterRow({
-    required this.emoji,
+    required this.icon,
     required this.label,
     required this.subtitle,
     required this.value,
     required this.onChanged,
   });
 
-  final String emoji;
+  final IconData icon;
   final String label;
   final String subtitle;
   final int value;
@@ -231,7 +231,16 @@ class _CounterRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 20, color: scheme.primary),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

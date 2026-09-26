@@ -21,14 +21,14 @@ class TripsTab extends StatefulWidget {
 /// live air-quality reading.
 class _Suggestion {
   const _Suggestion({
-    required this.emoji,
+    required this.icon,
     required this.name,
     required this.blurb,
     this.distanceKm,
     this.usAqi,
   });
 
-  final String emoji;
+  final IconData icon;
   final String name;
   final String blurb;
   final double? distanceKm;
@@ -40,9 +40,9 @@ class _TripsTabState extends State<TripsTab> {
   /// one-line description are fixed here — distance and air quality are measured
   /// at runtime, and tapping one runs the real planner.
   static const _destinations = [
-    ('🌲', 'Lonavala', 'Waterfalls & ridge trails'),
-    ('🏖️', 'Alibaug', 'Coastal forts & mangroves'),
-    ('🌿', 'Matheran', 'Zero-vehicle hill station'),
+    (Icons.forest_outlined, 'Lonavala', 'Waterfalls & ridge trails'),
+    (Icons.beach_access_outlined, 'Alibaug', 'Coastal forts & mangroves'),
+    (Icons.park_outlined, 'Matheran', 'Zero-vehicle hill station'),
   ];
 
   List<TripPlan> _trips = const [];
@@ -64,12 +64,12 @@ class _TripsTabState extends State<TripsTab> {
     await services.location.resolve();
 
     final resolved = <_Suggestion>[];
-    for (final (emoji, name, blurb) in _destinations) {
+    for (final (icon, name, blurb) in _destinations) {
       final (lat, lon) = CarbonEstimator.resolveCoordinates(name);
       final weather = await OpenMeteoService.getLiveWeatherAndAqi(lat, lon);
       resolved.add(
         _Suggestion(
-          emoji: emoji,
+          icon: icon,
           name: name,
           blurb: blurb,
           distanceKm: services.location.hasFix
@@ -254,14 +254,54 @@ class _TripsTabState extends State<TripsTab> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              '🏨 ${trip.hotelName} (★ ${trip.hotelRating}) • '
-              '♿ ${trip.isStepFreeAccessible ? "Step-Free" : "Standard"}',
-              style: theme.textTheme.bodySmall,
-            ),
-            Text(
-              '🚆 ${trip.travelMode} • Budget: ${rupees(trip.totalBudgetInr)}',
-              style: theme.textTheme.bodySmall,
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.hotel_outlined, size: 14, color: theme.colorScheme.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      trip.hotelName,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.star_rounded, size: 13, color: theme.colorScheme.primary),
+                    Text(
+                      '${trip.hotelRating}',
+                      style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      trip.isStepFreeAccessible ? Icons.accessible_outlined : Icons.not_accessible_outlined,
+                      size: 14,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      trip.isStepFreeAccessible ? "Step-Free" : "Standard",
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.train_outlined, size: 14, color: theme.colorScheme.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${trip.travelMode} • ${rupees(trip.totalBudgetInr)}',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             Align(
@@ -300,11 +340,24 @@ class _TripsTabState extends State<TripsTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${suggestion.emoji} ${suggestion.name}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(suggestion.icon, size: 16, color: theme.colorScheme.primary),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        suggestion.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(

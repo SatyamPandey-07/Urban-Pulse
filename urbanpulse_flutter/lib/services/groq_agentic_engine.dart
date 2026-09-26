@@ -76,7 +76,8 @@ Generate a complete, highly realistic multi-day travel itinerary starting explic
 Guidelines:
 1. Day 1 MUST start from $originCity with real electric transit (e.g. electric rail, local suburban, Vande Bharat, AC e-bus, or ferry).
 2. Include real verified eco-stays, real landmarks, accurate timing, and step-free accessibility details (Wheelchair: $isAccessible).
-3. Return ONLY valid, unescaped JSON matching this schema:
+3. Strictly NEVER use any emojis or emoticons anywhere in your response (neither in titles, descriptions, transit names, nor notes). Keep all text clean, concise, and professional.
+4. Return ONLY valid, unescaped JSON matching this schema:
 {
     "title": "...",
     "travelMode": "...",
@@ -86,11 +87,11 @@ Guidelines:
     "totalBudgetInr": 5200,
     "transitCostInr": 280,
     "co2SavedKg": 18.5,
-    "transitOpt1Name": "🚆 Green Transit (e.g. Electric Rail / Local)",
+    "transitOpt1Name": "Green Transit (e.g. Electric Rail / Local)",
     "transitOpt1Metrics": "₹75 • 2h 05m • 28g CO2",
-    "transitOpt2Name": "⚡ AC E-Bus / Shared Shuttle",
+    "transitOpt2Name": "AC E-Bus / Shared Shuttle",
     "transitOpt2Metrics": "₹210 • 2h 20m • 54g CO2",
-    "transitOpt3Name": "🚗 Standard Petrol Taxi",
+    "transitOpt3Name": "Standard Petrol Taxi",
     "transitOpt3Metrics": "₹3,200 • 2h 45m • 2,400g CO2",
     "dailyItinerary": [
         {
@@ -330,11 +331,11 @@ Guidelines:
       aqiStatus: aqiStatus,
       transitCostInr: rail.fareRupees * 2,
       dailyItinerary: itinerary,
-      transitOpt1Name: '\u{1F686} ${rail.mode.label}',
+      transitOpt1Name: rail.mode.label,
       transitOpt1Metrics: _metrics(rail),
-      transitOpt2Name: '\u{26A1} ${bus.mode.label}',
+      transitOpt2Name: bus.mode.label,
       transitOpt2Metrics: _metrics(bus),
-      transitOpt3Name: '\u{1F697} ${taxi.mode.label}',
+      transitOpt3Name: taxi.mode.label,
       transitOpt3Metrics: _metrics(taxi),
     );
   }

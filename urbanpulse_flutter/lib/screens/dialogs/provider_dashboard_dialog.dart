@@ -76,7 +76,7 @@ class _ProviderDashboardDialogState extends State<ProviderDashboardDialog> {
     if (!mounted) return;
 
     final buffer = StringBuffer()
-      ..writeln('📅 ${bookings?.length ?? 0} Real Booking(s)');
+      ..writeln('${bookings?.length ?? 0} Real Booking(s)');
     if (bookings == null || bookings.isEmpty) {
       buffer.writeln('No bookings yet');
     } else {
@@ -88,19 +88,19 @@ class _ProviderDashboardDialogState extends State<ProviderDashboardDialog> {
     }
     buffer
       ..writeln()
-      ..writeln('🦽 ${reports?.length ?? 0} Real Accessibility Report(s)');
+      ..writeln('${reports?.length ?? 0} Real Accessibility Report(s)');
     if (reports == null || reports.isEmpty) {
       buffer.writeln('No reports yet');
     } else {
       for (final r in reports) {
-        final verdict = r.confirmsAccessibility ? '✅ Confirmed' : '⚠️ Disputed';
+        final verdict = r.confirmsAccessibility ? '[Confirmed]' : '[Disputed]';
         buffer.writeln('• $verdict${r.note.isNotEmpty ? ": ${r.note}" : ""}');
       }
     }
     if (bookings == null && reports == null) {
       buffer
         ..writeln()
-        ..writeln('⚠️ Central Registry backend unreachable.');
+        ..writeln('Note: Central Registry backend unreachable.');
     }
 
     if (!mounted) return;
@@ -148,21 +148,21 @@ class _ProviderDashboardDialogState extends State<ProviderDashboardDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '📊 Real Platform Impact (Live)',
+                            'Real Platform Impact (Live)',
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '🏪 ${impact.experienceCount} experiences • '
-                            '📅 ${impact.bookingCount} real bookings • '
-                            '🧑‍🤝‍🧑 ${impact.travelerCount} travelers served',
+                            '${impact.experienceCount} experiences • '
+                            '${impact.bookingCount} real bookings • '
+                            '${impact.travelerCount} travelers served',
                             style: theme.textTheme.bodySmall,
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '🦽 ${impact.accessibilityConfirmCount + impact.accessibilityDisputeCount} '
+                            '${impact.accessibilityConfirmCount + impact.accessibilityDisputeCount} '
                             'accessibility reports collected • '
                             'Avg. eco score: ${impact.averageEcoScore}/5',
                             style: theme.textTheme.bodySmall,
@@ -225,8 +225,8 @@ class _ProviderDashboardDialogState extends State<ProviderDashboardDialog> {
           ),
           const SizedBox(height: 8),
           Text(
-            '👁️ ${exp.viewsCount} Views • ${exp.inquiryCount} Inquiries • '
-            '📅 ${exp.bookingCount} Bookings',
+            '${exp.viewsCount} Views • ${exp.inquiryCount} Inquiries • '
+            '${exp.bookingCount} Bookings',
             style: theme.textTheme.bodySmall,
           ),
           SwitchListTile(

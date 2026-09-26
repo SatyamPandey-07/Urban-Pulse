@@ -59,7 +59,7 @@ abstract final class LiveCityIntelligenceService {
   static Future<String> _medicalAnswer(double lat, double lon) async {
     final results = await TomTomService.searchNearbyPoi('hospital', lat, lon);
     if (results.isEmpty) {
-      return '🏥 No live medical facilities came back from the POI search just now — '
+      return 'No live medical facilities came back from the POI search just now — '
           'check your connection or the TomTom key, then try again.';
     }
     final top = results
@@ -67,10 +67,10 @@ abstract final class LiveCityIntelligenceService {
         .map((r) {
           final km = fixed(r.distanceMeters / 1000.0);
           final contact = r.phone != null
-              ? '📞 ${r.phone}'
-              : '🚨 24/7 Trauma Service';
-          return '🏥 **${r.name}**\n📍 ${r.address} ($km km away)\n$contact\n'
-              '♿ Step-Free Emergency Concourse';
+              ? 'Phone: ${r.phone}'
+              : '24/7 Trauma Service';
+          return '**${r.name}**\nAddress: ${r.address} ($km km away)\n$contact\n'
+              'Step-Free Emergency Concourse';
         })
         .join('\n\n');
     return 'Here are the nearest verified medical facilities to your GPS coordinates '
@@ -80,46 +80,46 @@ abstract final class LiveCityIntelligenceService {
   static Future<String> _trafficAnswer(double lat, double lon) async {
     final traffic = await TomTomService.getLiveTraffic(lat, lon);
     if (traffic == null) {
-      return '🚦 Live traffic telemetry is unavailable right now — the TomTom flow endpoint '
+      return 'Live traffic telemetry is unavailable right now — the TomTom flow endpoint '
           'did not respond.';
     }
     final status = traffic.currentSpeedKmh < 20
-        ? 'Heavy Congestion ⚠️'
+        ? 'Heavy Congestion'
         : traffic.currentSpeedKmh < 40
-        ? 'Moderate Flow 🟡'
-        : 'Smooth Flow 🟢';
-    return '🚦 **Live TomTom Traffic Intelligence**\n\n'
-        '• **Corridor**: ${traffic.roadName}\n'
-        '• **Current Speed**: ${traffic.currentSpeedKmh} km/h '
+        ? 'Moderate Flow'
+        : 'Smooth Flow';
+    return '**Live TomTom Traffic Intelligence**\n\n'
+        '• Corridor: ${traffic.roadName}\n'
+        '• Current Speed: ${traffic.currentSpeedKmh} km/h '
         '(Free Flow: ${traffic.freeFlowSpeedKmh} km/h)\n'
-        '• **Delay**: ${traffic.delaySeconds ~/ 60} mins\n'
-        '• **Status**: $status\n\n'
-        '💡 *Recommendation*: Metro Line 3 Electric Corridor avoids this delay completely.';
+        '• Delay: ${traffic.delaySeconds ~/ 60} mins\n'
+        '• Status: $status\n\n'
+        '*Recommendation*: Metro Line 3 Electric Corridor avoids this delay completely.';
   }
 
   static Future<String> _weatherAnswer(double lat, double lon) async {
     final weather = await OpenMeteoService.getLiveWeatherAndAqi(lat, lon);
     if (weather == null) {
-      return '🌤️ Live environmental telemetry is unavailable right now — Open-Meteo did not '
+      return 'Live environmental telemetry is unavailable right now — Open-Meteo did not '
           'respond.';
     }
     final aqiHealth = weather.usAqi <= 50
-        ? 'Good (Clean Air) 🌿'
+        ? 'Good (Clean Air)'
         : weather.usAqi <= 100
-        ? 'Moderate 🟡'
-        : 'Sensitive 🔴';
-    return '🌤️ **Live Open-Meteo Environmental Telemetry**\n\n'
-        '• **Temperature**: ${weather.temperatureC}°C (${weather.condition})\n'
-        '• **Humidity**: ${weather.humidityPercent}% • Wind: ${weather.windSpeedKmh} km/h\n'
-        '• **Air Quality Index**: US AQI ${weather.usAqi} ($aqiHealth)\n'
-        '• **PM2.5**: ${weather.pm25} µg/m³ • PM10: ${weather.pm10} µg/m³\n\n'
-        '🌿 *Green Impact*: Opting for Electric transit reduces localized PM2.5 exposure '
+        ? 'Moderate'
+        : 'Sensitive';
+    return '**Live Environmental Telemetry (Open-Meteo)**\n\n'
+        '• Temperature: ${weather.temperatureC}°C (${weather.condition})\n'
+        '• Humidity: ${weather.humidityPercent}% • Wind: ${weather.windSpeedKmh} km/h\n'
+        '• Air Quality Index: US AQI ${weather.usAqi} ($aqiHealth)\n'
+        '• PM2.5: ${weather.pm25} µg/m³ • PM10: ${weather.pm10} µg/m³\n\n'
+        '*Green Impact*: Opting for Electric transit reduces localized PM2.5 exposure '
         'by 74%.';
   }
 
   static Future<String> _staysAnswer(HospitalityRepository? repository) async {
     if (repository == null) {
-      return '🏨 I can look up sustainable & accessible stays from the local registry, but '
+      return 'I can look up sustainable & accessible stays from the local registry, but '
           "couldn't read it right now — try the Hospitality tab directly.";
     }
     List<HospitalityStay> stays;
@@ -129,7 +129,7 @@ abstract final class LiveCityIntelligenceService {
       stays = const [];
     }
     if (stays.isEmpty) {
-      return '🏨 I can look up sustainable & accessible stays from the local registry, but '
+      return 'I can look up sustainable & accessible stays from the local registry, but '
           "couldn't read it right now — try the Hospitality tab directly.";
     }
 
@@ -142,15 +142,15 @@ abstract final class LiveCityIntelligenceService {
               .where((c) => c.claim.startsWith('Accessibility'))
               .firstOrNull;
           final evidenceLine = accessClaim != null
-              ? '${accessClaim.confidence.icon} ${accessClaim.confidence.label}: ${accessClaim.claim}'
+              ? '${accessClaim.confidence.label}: ${accessClaim.claim}'
               : '${stay.accessibilityRating}% accessibility match';
-          return '🏨 **${stay.name}** (${stay.location})\n'
-              '   🌿 ${stay.energySource} • ${stay.carbonFootprintPerNight} • ${stay.pricePerNight}\n'
-              '   ♿ $evidenceLine';
+          return '**${stay.name}** (${stay.location})\n'
+              '   ${stay.energySource} • ${stay.carbonFootprintPerNight} • ${stay.pricePerNight}\n'
+              '   $evidenceLine';
         })
         .join('\n\n');
 
-    return '🏨 **Sustainable & Accessible Stays Nearby** (from the on-device Evidence Graph, '
+    return '**Sustainable & Accessible Stays Nearby** (from the on-device Evidence Graph, '
         'ranked by eco score):\n\n$top';
   }
 }

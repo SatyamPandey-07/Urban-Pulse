@@ -34,7 +34,7 @@ List<(String, String)> briefSummaryRows(TripBrief b) {
       'Transport',
       b.transportModes.isEmpty
           ? null
-          : b.transportModes.map((m) => '${m.emoji} ${m.label}').join(', '),
+          : b.transportModes.map((m) => m.label).join(', '),
     ),
     (
       'Accessibility',

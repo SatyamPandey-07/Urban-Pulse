@@ -153,7 +153,7 @@ class _DateTimeAnswerViewState extends State<DateTimeAnswerView> {
           children: [
             for (final (label, ps, pe) in _presets)
               OptionPill(
-                option: QuestionOption(id: label, label: label, emoji: '📅'),
+                option: QuestionOption(id: label, label: label, icon: Icons.calendar_today_outlined),
                 selected: _matches(ps, pe),
                 onTap: () {
                   _start = ps;
@@ -162,7 +162,7 @@ class _DateTimeAnswerViewState extends State<DateTimeAnswerView> {
                 },
               ),
             OptionPill(
-              option: const QuestionOption(id: 'pick', label: 'Pick dates', emoji: '🗓️'),
+              option: const QuestionOption(id: 'pick', label: 'Pick dates', icon: Icons.date_range_outlined),
               selected: false,
               onTap: _pickRange,
             ),

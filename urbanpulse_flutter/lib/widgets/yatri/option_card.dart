@@ -45,7 +45,85 @@ class SelectionMark extends StatelessWidget {
   }
 }
 
-/// A selectable card: emoji, title, optional subtitle / CO2 badge, and a
+IconData _iconForOption(QuestionOption option) {
+  if (option.icon != null) return option.icon!;
+  final id = option.id.toLowerCase();
+  return switch (id) {
+    'train' => Icons.train_outlined,
+    'metrolocal' || 'metro' => Icons.subway_outlined,
+    'ebus' => Icons.electric_bolt_outlined,
+    'bus' => Icons.directions_bus_outlined,
+    'sharedev' => Icons.local_taxi_outlined,
+    'selfdriveev' => Icons.electric_car_outlined,
+    'cartaxi' || 'taxi' || 'cab' => Icons.directions_car_outlined,
+    'flight' => Icons.flight_takeoff_outlined,
+    'wheelchair' => Icons.accessible_outlined,
+    'limitedmobility' => Icons.directions_walk_outlined,
+    'visual' => Icons.visibility_outlined,
+    'hearing' => Icons.hearing_outlined,
+    'elderlycare' => Icons.elderly_outlined,
+    'serviceanimal' => Icons.pets_outlined,
+    'womenonlytransport' => Icons.shield_outlined,
+    'verifiedstays' => Icons.verified_outlined,
+    'avoidlatenighttransit' => Icons.nights_stay_outlined,
+    'sharedlivelocation' => Icons.share_location_outlined,
+    'leisure' => Icons.beach_access_outlined,
+    'family' => Icons.family_restroom_outlined,
+    'pilgrimage' => Icons.temple_hindu_outlined,
+    'adventure' => Icons.hiking_outlined,
+    'heritage' => Icons.museum_outlined,
+    'nature' => Icons.forest_outlined,
+    'workation' => Icons.laptop_mac_outlined,
+    'relaxed' => Icons.hourglass_bottom_outlined,
+    'balanced' => Icons.balance_outlined,
+    'packed' => Icons.bolt_outlined,
+    'ecostay' => Icons.eco_outlined,
+    'homestay' => Icons.home_outlined,
+    'hotel' => Icons.hotel_outlined,
+    'hostel' => Icons.bed_outlined,
+    'resort' => Icons.spa_outlined,
+    'veg' || 'vegan' || 'jain' || 'halal' || 'nopreference' => Icons.restaurant_outlined,
+    'budget' => Icons.savings_outlined,
+    'comfort' => Icons.hotel_outlined,
+    'premium' => Icons.auto_awesome_outlined,
+    'luxury' => Icons.diamond_outlined,
+    'custom' => Icons.tune_outlined,
+    '1' => Icons.person_outline,
+    'manual' => Icons.accessible_outlined,
+    'electric' => Icons.electric_wheelchair_outlined,
+    'walking_aid' => Icons.nordic_walking_outlined,
+    'audio' => Icons.volume_up_outlined,
+    'screen_reader' => Icons.phone_android_outlined,
+    'guide' => Icons.record_voice_over_outlined,
+    'high_contrast' => Icons.contrast_outlined,
+    'tactile' => Icons.touch_app_outlined,
+    'visual_alerts' => Icons.chat_bubble_outline,
+    'sign_language' => Icons.sign_language_outlined,
+    'hearing_loop' => Icons.hearing_outlined,
+    'captions' => Icons.closed_caption_outlined,
+    'ground_floor' => Icons.stairs_outlined,
+    'medical' => Icons.local_hospital_outlined,
+    'slow_pace' => Icons.directions_walk_outlined,
+    'porter' => Icons.luggage_outlined,
+    'guide_dog' || 'hearing_dog' || 'mobility_dog' || 'other' => Icons.pets_outlined,
+    'lt100' || '100_500' || '500_1000' || 'gt1000' => Icons.directions_walk_outlined,
+    'rest_stops' || 'seating' => Icons.chair_outlined,
+    'avoid_stairs' => Icons.elevator_outlined,
+    'step_free' => Icons.door_front_door_outlined,
+    'lift' => Icons.elevator_outlined,
+    'toilet' => Icons.wc_outlined,
+    'roll_in' => Icons.shower_outlined,
+    'ramps' => Icons.accessible_forward_outlined,
+    'greenest' => Icons.eco_outlined,
+    'convenience' => Icons.luggage_outlined,
+    'none' => Icons.check_circle_outline,
+    'pick' => Icons.date_range_outlined,
+    _ when int.tryParse(id) != null => Icons.group_outlined,
+    _ => Icons.place_outlined,
+  };
+}
+
+/// A selectable card: icon, title, optional subtitle / CO2 badge, and a
 /// selection mark. Used for the richer choices (transport, accessibility…).
 class OptionCard extends StatelessWidget {
   const OptionCard({
@@ -87,19 +165,23 @@ class OptionCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
               children: [
-                if (option.emoji != null) ...[
-                  Container(
-                    width: 38,
-                    height: 38,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.primary.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(option.emoji!, style: const TextStyle(fontSize: 18)),
+                Container(
+                  width: 38,
+                  height: 38,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? scheme.primary.withValues(alpha: 0.18)
+                        : scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 12),
-                ],
+                  child: Icon(
+                    _iconForOption(option),
+                    size: 20,
+                    color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,12 +207,19 @@ class OptionCard extends StatelessWidget {
                                 color: scheme.primary.withValues(alpha: 0.16),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(
-                                '🌱 Greener',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: scheme.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.eco_outlined, size: 12, color: scheme.primary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Greener',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: scheme.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                         ],
@@ -199,10 +288,12 @@ class OptionPill extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (option.emoji != null) ...[
-                  Text(option.emoji!),
-                  const SizedBox(width: 6),
-                ],
+                Icon(
+                  _iconForOption(option),
+                  size: 16,
+                  color: selected ? scheme.onPrimary : scheme.primary,
+                ),
+                const SizedBox(width: 8),
                 Flexible(
                   child: Text(
                     option.label,

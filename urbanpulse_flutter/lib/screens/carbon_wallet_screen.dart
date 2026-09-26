@@ -300,29 +300,56 @@ class _CarbonWalletScreenState extends State<CarbonWalletScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          Text(
-            stay != null
-                ? '🏨 Stay: ${stay.name} — ${fixed(stay.carbonKgPerNight)} kg CO2e/night • '
-                      '${rupees(stay.priceRupees)}/night'
-                : '🏨 Stay: not yet chosen — pick one in Sustainable Stays',
-            style: theme.textTheme.bodySmall,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.hotel_outlined, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  stay != null
+                      ? 'Stay: ${stay.name} — ${fixed(stay.carbonKgPerNight)} kg CO2e/night • '
+                            '${rupees(stay.priceRupees)}/night'
+                      : 'Stay: not yet chosen — pick one in Sustainable Stays',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            mobility != null
-                ? '🚌 Transport: ${mobility.modeLabel} — '
-                      '${fixed(mobility.carbonGrams, 0)}g CO2e • ${rupees(mobility.fareRupees)}'
-                : '🚌 Transport: not yet chosen — pick a route in Green Journey Planner',
-            style: theme.textTheme.bodySmall,
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.directions_bus_outlined, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  mobility != null
+                      ? 'Transport: ${mobility.modeLabel} — '
+                            '${fixed(mobility.carbonGrams, 0)}g CO2e • ${rupees(mobility.fareRupees)}'
+                      : 'Transport: not yet chosen — pick a route in Green Journey Planner',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            experiences != null
-                ? '🎟️ Activities: ${experiences.names.join(", ")} — '
-                      '${fixed(experiences.totalCarbonKg)} kg CO2e • '
-                      '${rupees(experiences.totalPriceRupees)}'
-                : '🎟️ Activities: not yet chosen — build one in Eco & Inclusive Itinerary',
-            style: theme.textTheme.bodySmall,
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.local_activity_outlined, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  experiences != null
+                      ? 'Activities: ${experiences.names.join(", ")} — '
+                            '${fixed(experiences.totalCarbonKg)} kg CO2e • '
+                            '${rupees(experiences.totalPriceRupees)}'
+                      : 'Activities: not yet chosen — build one in Eco & Inclusive Itinerary',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            ],
           ),
           const Divider(height: 24),
           Text(

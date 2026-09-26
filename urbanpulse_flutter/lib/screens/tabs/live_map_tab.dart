@@ -311,7 +311,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
       _statusTitle = 'Real Dual Routes: $destName (${fixed(distanceKm)} km)';
       _statusSubtitle = isEstimated
           ? 'Live TomTom routing unavailable — showing a straight-line estimate'
-          : '🟢 Metro/E-Bus${currentAqi != null ? " (AQI $currentAqi)" : ""} vs 🔴 Petrol Cab';
+          : 'Metro/E-Bus${currentAqi != null ? " (AQI $currentAqi)" : ""} vs Petrol Cab';
     });
 
     await _webView.runJavaScript(
@@ -370,8 +370,14 @@ class _LiveMapTabState extends State<LiveMapTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Card(
+            elevation: 4,
+            shadowColor: Colors.black.withValues(alpha: 0.35),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
+              side: BorderSide(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                width: 1,
+              ),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -628,7 +634,8 @@ class _LiveMapTabState extends State<LiveMapTab> {
                   Expanded(
                     child: _routeColumn(
                       context,
-                      title: '🌿 GREEN PATH',
+                      title: 'GREEN PATH',
+                      icon: Icons.eco_outlined,
                       accent: AppColors.primaryGreen,
                       metrics: comparison?.greenMetrics ?? '—',
                       carbon: comparison?.greenCarbon ?? 'Awaiting live route',
@@ -638,7 +645,8 @@ class _LiveMapTabState extends State<LiveMapTab> {
                   Expanded(
                     child: _routeColumn(
                       context,
-                      title: '🚗 STANDARD PATH',
+                      title: 'STANDARD PATH',
+                      icon: Icons.directions_car_outlined,
                       accent: AppColors.solidError,
                       metrics: comparison?.normalMetrics ?? '—',
                       carbon: comparison?.normalCarbon ?? 'Awaiting live route',
@@ -656,28 +664,37 @@ class _LiveMapTabState extends State<LiveMapTab> {
   Widget _routeColumn(
     BuildContext context, {
     required String title,
+    required IconData icon,
     required Color accent,
     required String metrics,
     required String carbon,
   }) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
+        color: accent.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Icon(icon, size: 14, color: accent),
+              const SizedBox(width: 5),
+              Text(
+                title,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: accent,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             metrics,
             style: theme.textTheme.bodyMedium?.copyWith(

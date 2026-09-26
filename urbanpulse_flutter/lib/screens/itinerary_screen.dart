@@ -403,7 +403,7 @@ class _TimelineCard extends StatelessWidget {
     final theme = Theme.of(context);
     final exp = ranked.experience;
     final badgeLine = ranked.badges.isNotEmpty
-        ? ' 🏆 ${ranked.badges.map((b) => b.label).join(" • ")}'
+        ? ' • ${ranked.badges.map((b) => b.label).join(" • ")}'
         : '';
 
     return SectionCard(

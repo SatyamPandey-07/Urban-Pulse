@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'experience_listing.dart';
 import 'hospitality_stay.dart';
 
@@ -10,15 +12,15 @@ import 'hospitality_stay.dart';
 ///   inconsistent
 /// - [unknown]  — no signal available
 enum ConfidenceLevel {
-  verified('Verified', '✅'),
-  reported('Reported', '🟡'),
-  inferred('Inferred', '🔵'),
-  unknown('Unknown', '⚪');
+  verified('Verified', Icons.verified_outlined),
+  reported('Reported', Icons.info_outline),
+  inferred('Inferred', Icons.psychology_outlined),
+  unknown('Unknown', Icons.help_outline);
 
   const ConfidenceLevel(this.label, this.icon);
 
   final String label;
-  final String icon;
+  final IconData icon;
 }
 
 class EvidenceClaim {

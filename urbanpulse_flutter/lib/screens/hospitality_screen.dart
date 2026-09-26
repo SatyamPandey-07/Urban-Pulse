@@ -97,7 +97,18 @@ class _HospitalityScreenState extends State<HospitalityScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (ranked.badges.isNotEmpty) ...[
-                Text('🏆 ${ranked.badges.map((b) => b.label).join(" • ")}'),
+                Row(
+                  children: [
+                    Icon(Icons.workspace_premium_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        ranked.badges.map((b) => b.label).join(' • '),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
               ],
               Text('Classification: ${stay.category}'),
@@ -111,18 +122,36 @@ class _HospitalityScreenState extends State<HospitalityScreen> {
               ),
               const SizedBox(height: 8),
               for (final claim in ranked.evidence) ...[
-                Text(
-                  '${claim.confidence.icon} [${claim.confidence.label}] ${claim.claim}',
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(claim.confidence.icon, size: 16, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '[${claim.confidence.label}] ${claim.claim}',
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
                   'Sources: ${claim.sources.join(", ")}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (claim.contradiction != null)
-                  Text(
-                    '⚠️ ${claim.contradiction}',
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: Theme.of(context).colorScheme.error),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.warning_amber_rounded, size: 14, color: Theme.of(context).colorScheme.error),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          claim.contradiction!,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Theme.of(context).colorScheme.error),
+                        ),
+                      ),
+                    ],
                   ),
                 const SizedBox(height: 12),
               ],
@@ -289,12 +318,20 @@ class _StayCard extends StatelessWidget {
           ),
           if (ranked.badges.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(
-              '🏆 ${ranked.badges.map((b) => b.label).join("  •  ")}',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(Icons.workspace_premium_outlined, size: 16, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    ranked.badges.map((b) => b.label).join('  •  '),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
           const SizedBox(height: 10),

@@ -253,7 +253,7 @@ class _TripBriefFormScreenState extends State<TripBriefFormScreen> {
                               children: [
                                 for (final d in QuestionCatalog.popularDestinations)
                                   OptionPill(
-                                    option: QuestionOption(id: d, label: d, emoji: '📍'),
+                                    option: QuestionOption(id: d, label: d, icon: Icons.place_outlined),
                                     selected: _brief.destination == d,
                                     onTap: () {
                                       _destination.text = d;
@@ -276,7 +276,7 @@ class _TripBriefFormScreenState extends State<TripBriefFormScreen> {
                                   option: QuestionOption(
                                     id: 'loc',
                                     label: 'Use my location: ${widget.detectedCity}',
-                                    emoji: '🎯',
+                                    icon: Icons.my_location_outlined,
                                     recommended: true,
                                   ),
                                   selected: _brief.originCity == widget.detectedCity,

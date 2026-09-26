@@ -108,12 +108,14 @@ class ReceptionistAgent implements YatriAgent<ReceptionistInput, Extraction> {
   }
 
   static const _phrasingSystem =
-      'You are Yatri, the friendly receptionist of a sustainable, '
+      'You are Yatri, the professional and helpful receptionist of a sustainable, '
       'accessibility-first trip planner. Rewrite the given question in one '
       'warm, natural message of at most 45 words. Ask exactly one question. '
       'If "acknowledge" has items, briefly acknowledge them first. If '
       '"problem" is set, explain it gently in your own words. Never list the '
       'answer options (the app shows them). Never invent trip details. '
+      'CRITICAL REQUIREMENT: Strictly NEVER use any emojis or emoticons in your response. '
+      'Keep the text clean and professional. '
       'Reply ONLY with JSON: {"message": "<text>"}.';
 
   /// The extraction system prompt. Public for tests.
@@ -142,7 +144,7 @@ class ReceptionistAgent implements YatriAgent<ReceptionistInput, Extraction> {
           });
 
     return '''
-You extract trip-planning details from a traveller's message for an Indian sustainable-travel app. Reply with ONE JSON object and nothing else.
+You extract trip-planning details from a traveller's message for an Indian sustainable-travel app. Reply with ONE JSON object and nothing else. Never use emojis in any extracted text.
 
 Today is $today, local timezone UTC$sign$hh:$mm. Currency is INR. Resolve relative dates ("next weekend", "the 15th") to local ISO times like 2026-10-10T09:00.
 

@@ -120,7 +120,7 @@ const String liveMapHtml = r'''
                 opacity: 0.85,
                 dashArray: '8, 8',
                 lineCap: 'round'
-            }).bindPopup("<b>🚗 Real Normal Route (Petrol Cab)</b><br>" + normalSummary);
+            }).bindPopup("<b>Standard Route (Petrol Cab)</b><br>" + normalSummary);
 
             // 2. Real green & inclusive path (glowing emerald polyline).
             var greenGlow = L.polyline(greenCoords, {
@@ -135,7 +135,7 @@ const String liveMapHtml = r'''
                 weight: 5,
                 opacity: 1.0,
                 lineCap: 'round'
-            }).bindPopup("<b>🌿 Real Green Path (Electric Transit / Eco)</b><br>" + greenSummary);
+            }).bindPopup("<b>Green Path (Electric Transit / Eco)</b><br>" + greenSummary);
 
             routeLayerGroup.addLayer(normalLine);
             routeLayerGroup.addLayer(greenGlow);

@@ -250,7 +250,7 @@ class _WelcomeCard extends StatelessWidget {
             children: [
               for (final ex in _examples)
                 OptionPill(
-                  option: QuestionOption(id: ex, label: ex, emoji: '💬'),
+                  option: QuestionOption(id: ex, label: ex, icon: Icons.chat_bubble_outline),
                   selected: false,
                   onTap: () => onExample(ex),
                 ),
@@ -537,12 +537,36 @@ class TripPreviewCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              '🚆 ${trip.travelMode} • 🏨 ${trip.hotelName} • 💰 ${rupees(trip.totalBudgetInr)}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.directions_subway_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(trip.travelMode, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.hotel_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(trip.hotelName, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.account_balance_wallet_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(rupees(trip.totalBudgetInr), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
@@ -550,7 +574,16 @@ class TripPreviewCard extends StatelessWidget {
                 Expanded(
                   child: FilledButton.tonal(
                     onPressed: saved ? null : onSave,
-                    child: Text(saved ? 'Saved ✓' : 'Save Trip'),
+                    child: saved
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_rounded, size: 16),
+                              SizedBox(width: 6),
+                              Text('Saved'),
+                            ],
+                          )
+                        : const Text('Save Trip'),
                   ),
                 ),
                 const SizedBox(width: 8),

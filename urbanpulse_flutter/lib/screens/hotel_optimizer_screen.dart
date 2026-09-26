@@ -124,7 +124,7 @@ class _HotelOptimizerScreenState extends State<HotelOptimizerScreen> {
       final action = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('📄 Official ESG Audit PDF Generated'),
+          title: const Text('Official ESG Audit PDF Generated'),
           content: Text(
             'Your ISO 14064 & LEED Platinum-benchmarked audit PDF report is ready.\n\n'
             '• File: ${result.fileName}\n'

@@ -27,21 +27,21 @@ class BudgetAnswerView extends StatefulWidget {
 }
 
 class _Tier {
-  const _Tier(this.id, this.label, this.emoji, this.lowPerDay, this.highPerDay);
+  const _Tier(this.id, this.label, this.icon, this.lowPerDay, this.highPerDay);
 
   final String id;
   final String label;
-  final String emoji;
+  final IconData icon;
   final int lowPerDay;
   final int highPerDay;
 }
 
 class _BudgetAnswerViewState extends State<BudgetAnswerView> {
   static const _tiers = [
-    _Tier('budget', 'Budget-friendly', '🎒', 1500, 3000),
-    _Tier('comfort', 'Comfortable', '🛏️', 3000, 6000),
-    _Tier('premium', 'Premium', '✨', 6000, 12000),
-    _Tier('luxury', 'Luxury', '👑', 12000, 25000),
+    _Tier('budget', 'Budget-friendly', Icons.savings_outlined, 1500, 3000),
+    _Tier('comfort', 'Comfortable', Icons.hotel_outlined, 3000, 6000),
+    _Tier('premium', 'Premium', Icons.auto_awesome_outlined, 6000, 12000),
+    _Tier('luxury', 'Luxury', Icons.diamond_outlined, 12000, 25000),
   ];
   static const _custom = 'custom';
   static const _step = 500.0;
@@ -117,7 +117,7 @@ class _BudgetAnswerViewState extends State<BudgetAnswerView> {
                 option: QuestionOption(
                   id: t.id,
                   label: t.label,
-                  emoji: t.emoji,
+                  icon: t.icon,
                   subtitle:
                       '${rupees(_tierRange(t).$1)} – ${rupees(_tierRange(t).$2)}',
                 ),
@@ -131,7 +131,7 @@ class _BudgetAnswerViewState extends State<BudgetAnswerView> {
               option: const QuestionOption(
                 id: _custom,
                 label: 'Custom range',
-                emoji: '🎚️',
+                icon: Icons.tune_outlined,
                 subtitle: 'Set your own minimum and maximum',
               ),
               selected: _selected == _custom,
