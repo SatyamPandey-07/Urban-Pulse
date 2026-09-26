@@ -1,0 +1,15 @@
+#!/bin/sh
+# This is a generated file; do not edit or check into version control.
+export "FLUTTER_ROOT=/opt/homebrew/share/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/kushagrasaxena/Projects/Urban-Pulse/urbanpulse_flutter"
+export "FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=/Users/kushagrasaxena/Projects/Urban-Pulse/urbanpulse_flutter/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework"
+export "COCOAPODS_PARALLEL_CODE_SIGN=true"
+export "FLUTTER_TARGET=/Users/kushagrasaxena/Projects/Urban-Pulse/urbanpulse_flutter/lib/main.dart"
+export "FLUTTER_BUILD_DIR=build"
+export "FLUTTER_BUILD_NAME=1.3.0"
+export "FLUTTER_BUILD_NUMBER=4"
+export "DART_DEFINES=RkxVVFRFUl9CVUlMRF9OQU1FPTEuMy4w,RkxVVFRFUl9CVUlMRF9OVU1CRVI9NA==,RkxVVFRFUl9WRVJTSU9OPTMuNDcuNA==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049OTU4NGM2NzEzYg==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049MDZhMmUyYTExMA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMy4z"
+export "DART_OBFUSCATION=false"
+export "TRACK_WIDGET_CREATION=true"
+export "TREE_SHAKE_ICONS=false"
+export "PACKAGE_CONFIG=/Users/kushagrasaxena/Projects/Urban-Pulse/urbanpulse_flutter/.dart_tool/package_config.json"
