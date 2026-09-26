@@ -33,7 +33,24 @@ class DayPlanInput {
     this.slowPace = false,
     this.restStops = false,
     this.dietary = const {},
+    this.fixedDays,
+    this.dayWindows = const {},
+    this.dayStopCaps = const {},
   });
+
+  /// Editing a finished plan: which places go on which day (1-based day number
+  /// to place ids, in the order wanted). When set, the planner does not regroup
+  /// places by geography: it only lays each listed day out (times, meals,
+  /// travel), so days the traveller did not touch come out exactly as before.
+  /// Places not listed are left unscheduled, and spares are never added.
+  final Map<int, List<String>>? fixedDays;
+
+  /// A shorter day (1-based day number to start and end, minutes from midnight),
+  /// e.g. a "rest day" that starts late and ends early.
+  final Map<int, (int, int)> dayWindows;
+
+  /// The most places on a given day (1-based day number).
+  final Map<int, int> dayStopCaps;
 
   final DateTime start;
   final DateTime end;
@@ -150,9 +167,11 @@ class DayPlanner {
 
     // Each day's usable window: only while the traveller is there.
     final windows = <_Window?>[];
-    for (final d in dates) {
-      var ws = d.add(Duration(minutes: dayStartMin));
-      var we = d.add(Duration(minutes: dayEndMin));
+    for (var di = 0; di < dates.length; di++) {
+      final d = dates[di];
+      final override = input.dayWindows[di + 1];
+      var ws = d.add(Duration(minutes: override?.$1 ?? dayStartMin));
+      var we = d.add(Duration(minutes: override?.$2 ?? dayEndMin));
       final earliest = presenceStart.add(const Duration(minutes: 60));
       final latest = presenceEnd.subtract(const Duration(minutes: 60));
       if (earliest.isAfter(ws)) ws = earliest;
@@ -163,10 +182,14 @@ class DayPlanner {
 
     final excluded = input.excludedIds;
     var pool = [for (final h in input.places) if (!excluded.contains(h.id)) h];
-    final alternates = [for (final h in input.alternates) if (!excluded.contains(h.id) && !pool.any((p) => p.id == h.id)) h];
+    final fixed = input.fixedDays;
+    // A plan being edited never gains spare places on its own.
+    final alternates = fixed != null
+        ? const <Hotspot>[]
+        : [for (final h in input.alternates) if (!excluded.contains(h.id) && !pool.any((p) => p.id == h.id)) h];
 
     // Nothing chosen (every pick was dropped): plan from the spares instead.
-    if (pool.isEmpty && alternates.isNotEmpty) pool = [...alternates];
+    if (fixed == null && pool.isEmpty && alternates.isNotEmpty) pool = [...alternates];
 
     final usable = [for (var i = 0; i < n; i++) if (windows[i] != null) i];
     if (usable.isEmpty || pool.isEmpty) {
@@ -196,12 +219,24 @@ class DayPlanner {
     // Places that cannot go on a banned day.
     final maxStops = perDay + 1;
 
-    // 1. Cluster by geography into as many groups as usable days.
-    final k = math.min(usable.length, math.max(1, (pool.length / 2).ceil()));
-    final clusters = _kMeans(pool, k);
-
-    // 2. Give clusters to days: big clusters to long days, outdoor ones to dry days.
-    final assignment = _assign(clusters, usable, windows, rain, banned, maxStops);
+    // 1-2. Group by geography and give the groups to days, unless the caller
+    // (the itinerary editor) has already said what goes where.
+    final Map<int, List<Hotspot>> assignment;
+    if (fixed != null) {
+      final byId = {for (final h in pool) h.id: h};
+      // A place can only be on one day: the first mention wins.
+      final taken = <String>{};
+      final days = fixed.entries.where((e) => e.key >= 1 && e.key <= n).toList()..sort((a, b) => a.key.compareTo(b.key));
+      assignment = {
+        for (final e in days) e.key - 1: [for (final id in e.value) if (byId[id] != null && taken.add(id)) byId[id]!],
+      };
+    } else {
+      // Cluster by geography into as many groups as usable days, then give
+      // clusters to days: big clusters to long days, outdoor ones to dry days.
+      final k = math.min(usable.length, math.max(1, (pool.length / 2).ceil()));
+      final clusters = _kMeans(pool, k);
+      assignment = _assign(clusters, usable, windows, rain, banned, maxStops);
+    }
 
     // 3. Sequence each day; whatever does not fit carries to a later day.
     final slotsByDay = <int, List<ItinerarySlot>>{};
@@ -219,7 +254,8 @@ class DayPlanner {
         dayNumber: dayIdx + 1,
         window: w,
         places: banned(dayIdx) ? [for (final h in candidates) if (!h.isOutdoor) h] : candidates,
-        maxStops: maxStops,
+        // (`maxStops` counts the meal stop: visits allowed = maxStops - 1.)
+        maxStops: (input.dayStopCaps[dayIdx + 1] ?? (maxStops - 1)) + 1,
         rainy: rain(dayIdx) >= 1,
         weekday: dates[dayIdx].weekday,
       );

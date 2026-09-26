@@ -200,6 +200,8 @@ class _YatriAiTabState extends State<YatriAiTab> {
           itinerary: entry.itinerary,
           saved: entry.saved,
           onSave: () => c.saveItinerary(entry),
+          toolkit: AppScope.of(context).agentToolkit,
+          onChanged: (updated) => c.updateItinerary(entry, updated),
         ),
       ),
     );

@@ -890,6 +890,10 @@ class PlannerOrchestrator {
       weather: st.weather,
       audit: audit?.audit,
       green: green,
+      center: st.center,
+      origin: st.origin,
+      bannedOutdoor: st.bannedOutdoor,
+      droppedIds: st.droppedIds,
       extraAssumptions: [
         ...st.notes,
         if (st.stayOwn) 'You chose to arrange your own stay, so no hotel is included.',

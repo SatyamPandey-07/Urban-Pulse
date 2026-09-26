@@ -35,6 +35,19 @@ class TripRepository {
     await cloud?.saveTrip(trip, itineraryClientId: itineraryClientId);
   }
 
+  /// Saves [trip], replacing the saved trip with the same id (an edited plan
+  /// stays one entry), or adding it if there is none.
+  Future<void> upsertTrip(TripPlan trip, {String? itineraryClientId}) async {
+    final list = getTrips();
+    final i = list.indexWhere((t) => t.id == trip.id);
+    if (i < 0) {
+      await replaceAll([trip, ...list]);
+    } else {
+      await replaceAll([...list.take(i), trip, ...list.skip(i + 1)]);
+    }
+    await cloud?.saveTrip(trip, itineraryClientId: itineraryClientId);
+  }
+
   /// The device copy becomes [trips] (the account's, after sign-in).
   Future<void> replaceAll(List<TripPlan> trips) => _prefs.setString(
     _keyTrips,
