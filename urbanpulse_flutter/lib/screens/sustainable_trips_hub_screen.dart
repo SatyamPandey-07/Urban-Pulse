@@ -26,7 +26,7 @@ class SustainableTripsHubScreen extends StatelessWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Color(0xFF0F172A)),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         titleSpacing: 0,
@@ -38,14 +38,14 @@ class SustainableTripsHubScreen extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 17,
-                color: AppColors.textPrimary,
+                color: Color(0xFF0F172A),
                 letterSpacing: -0.3,
               ),
             ),
             Text(
               'Travel greener, Leave a better tomorrow.',
-              style: TextStyle(
-                color: AppColors.textSecondary,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -139,7 +139,7 @@ class SustainableTripsHubScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: Color(0xFF0F172A),
               letterSpacing: -0.2,
             ),
           ),
@@ -210,7 +210,7 @@ class SustainableTripsHubScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: Color(0xFF0F172A),
                   letterSpacing: -0.2,
                 ),
               ),
@@ -273,7 +273,7 @@ class SustainableTripsHubScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                          color: Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -281,7 +281,7 @@ class SustainableTripsHubScreen extends StatelessWidget {
                         'Waterfalls & ridge trails',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: Color(0xFF64748B),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -347,14 +347,14 @@ class SustainableTripsHubScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: Color(0xFF0F172A),
           ),
         ),
         Text(
           label,
           style: const TextStyle(
             fontSize: 11,
-            color: AppColors.textSecondary,
+            color: Color(0xFF64748B),
           ),
         ),
       ],
@@ -405,7 +405,7 @@ class SustainableTripsHubScreen extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: Color(0xFF0F172A),
               ),
             ),
             const SizedBox(height: 2),
@@ -413,7 +413,7 @@ class SustainableTripsHubScreen extends StatelessWidget {
               subtitle,
               style: const TextStyle(
                 fontSize: 11,
-                color: AppColors.textSecondary,
+                color: Color(0xFF64748B),
               ),
             ),
           ],

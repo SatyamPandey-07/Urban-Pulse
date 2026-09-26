@@ -335,7 +335,7 @@ class _TripsTabState extends State<TripsTab> {
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
-                        color: AppColors.textPrimary,
+                        color: Color(0xFF0F172A),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -344,13 +344,13 @@ class _TripsTabState extends State<TripsTab> {
                         const Icon(
                           Icons.calendar_today_rounded,
                           size: 12,
-                          color: AppColors.textSecondary,
+                          color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           dateStr,
                           style: const TextStyle(
-                            color: AppColors.textSecondary,
+                            color: Color(0xFF64748B),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
