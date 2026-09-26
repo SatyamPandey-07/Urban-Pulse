@@ -137,7 +137,8 @@ class PlanEntry extends ChatEntry {
 class ItineraryEntry extends ChatEntry {
   ItineraryEntry(this.itinerary);
 
-  final Itinerary itinerary;
+  /// The plan as it is now: it changes when the traveller edits it.
+  Itinerary itinerary;
   bool saved = false;
 }
 
@@ -981,6 +982,20 @@ class YatriController extends ChangeNotifier {
         },
       ),
     );
+  }
+
+  /// The plan was edited: the chat card shows the new version, and it is kept
+  /// in step with wherever it is stored (My Trips if saved, else the account).
+  Future<void> updateItinerary(ItineraryEntry entry, Itinerary updated) async {
+    entry.itinerary = updated;
+    _notify();
+    if (entry.saved) {
+      await itineraries?.save(updated);
+      await trips.upsertTrip(updated.toTripPlan(), itineraryClientId: updated.id);
+    } else {
+      final c = cloud;
+      if (c != null && c.enabled) unawaited(c.saveItinerary(updated, saved: false, briefClientId: updated.brief?.id));
+    }
   }
 
   Future<void> saveItinerary(ItineraryEntry entry) async {

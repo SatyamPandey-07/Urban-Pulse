@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 
+import '../agents/runtime/agent_toolkit.dart';
 import '../core/formatting.dart';
 import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
 import '../services/itinerary_pdf.dart';
+import '../state/itinerary_edit_controller.dart';
 import '../widgets/itinerary/access_audit_view.dart';
 import '../widgets/itinerary/budget_breakdown.dart';
 import '../widgets/itinerary/day_view.dart';
+import '../widgets/itinerary/edit_chat_panel.dart';
+import '../widgets/itinerary/slot_actions_sheet.dart';
 import '../widgets/itinerary/green_view.dart';
 import '../widgets/itinerary/trip_overview.dart';
 
@@ -19,10 +23,20 @@ class PlanItineraryScreen extends StatefulWidget {
     this.onSave,
     this.saved = false,
     this.tileLayer,
+    this.toolkit,
+    this.onChanged,
     super.key,
   });
 
   final Itinerary itinerary;
+
+  /// The agents' tools. When given (and the plan has its trip details) the plan
+  /// can be edited with Yatri; without it the screen is read-only.
+  final AgentToolkit? toolkit;
+
+  /// Called with the new plan after every accepted edit (or undo), to keep the
+  /// saved copy in step.
+  final Future<void> Function(Itinerary)? onChanged;
 
   /// Saves the trip to My Trips. Null hides the button.
   final Future<void> Function()? onSave;
@@ -39,8 +53,59 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
   late bool _saved = widget.saved;
   bool _saving = false;
   bool _pdfBusy = false;
+  bool _panelOpen = false;
+  ItineraryEditController? _edit;
 
-  Itinerary get it => widget.itinerary;
+  /// The plan as it is now (after any edits).
+  Itinerary get it => _edit?.current ?? widget.itinerary;
+
+  @override
+  void initState() {
+    super.initState();
+    final tk = widget.toolkit;
+    if (tk != null && widget.itinerary.brief != null && widget.itinerary.days.isNotEmpty) {
+      _edit = ItineraryEditController(toolkit: tk, itinerary: widget.itinerary, onChanged: widget.onChanged)..addListener(_editChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    _edit?.removeListener(_editChanged);
+    _edit?.dispose();
+    super.dispose();
+  }
+
+  void _editChanged() {
+    if (!mounted) return;
+    setState(() {});
+    // A question from an agent (e.g. which hotel) must reach the traveller even
+    // if the panel was closed after starting a change from a stop.
+    if (_edit!.pending != null && !_panelOpen) _openPanel();
+  }
+
+  Future<void> _openPanel() async {
+    final c = _edit;
+    if (c == null || _panelOpen) return;
+    _panelOpen = true;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      constraints: const BoxConstraints(maxWidth: 720),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: SizedBox(height: MediaQuery.of(ctx).size.height * 0.88, child: EditChatPanel(controller: c, onClose: () => Navigator.of(ctx).pop())),
+      ),
+    );
+    _panelOpen = false;
+  }
+
+  void _slotTapped(ItinerarySlot slot, int day) {
+    final c = _edit;
+    if (c == null || c.busy || slot.refId == null) return;
+    showSlotActions(context, controller: c, slot: slot, day: day, onRunStarted: _openPanel);
+  }
 
   Future<void> _save() async {
     if (_saved || _saving || widget.onSave == null) return;
@@ -73,7 +138,16 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tabs = <(String, IconData, Widget)>[
-      ('Days', Icons.calendar_month_rounded, _DaysTab(itinerary: it, tileLayer: widget.tileLayer)),
+      (
+        'Days',
+        Icons.calendar_month_rounded,
+        _DaysTab(
+          itinerary: it,
+          tileLayer: widget.tileLayer,
+          onSlotTap: _edit == null ? null : _slotTapped,
+          locked: it.snapshot?.pins ?? const {},
+        ),
+      ),
       ('Budget', Icons.account_balance_wallet_outlined, _Padded(child: BudgetBreakdown(budget: it.budget))),
       if (it.audit != null && it.audit!.items.isNotEmpty)
         (
@@ -103,6 +177,10 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
             ],
           ),
           actions: [
+            if (_edit != null && (_edit!.canUndo || _edit!.canRedo)) ...[
+              IconButton(tooltip: 'Undo the last change', onPressed: _edit!.canUndo ? _edit!.undo : null, icon: const Icon(Icons.undo_rounded)),
+              if (_edit!.canRedo) IconButton(tooltip: 'Redo', onPressed: _edit!.redo, icon: const Icon(Icons.redo_rounded)),
+            ],
             IconButton(
               tooltip: 'Share or print as PDF',
               onPressed: _pdfBusy ? null : _sharePdf,
@@ -124,6 +202,13 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
           ),
         ),
         body: TabBarView(children: [for (final t in tabs) t.$3]),
+        floatingActionButton: _edit == null
+            ? null
+            : FloatingActionButton.extended(
+                onPressed: _openPanel,
+                icon: Icon(_edit!.busy ? Icons.hourglass_top_rounded : Icons.auto_fix_high_rounded),
+                label: Text(_edit!.busy ? 'Yatri is working…' : 'Edit with Yatri'),
+              ),
       ),
     );
   }
@@ -145,10 +230,12 @@ class _Padded extends StatelessWidget {
 }
 
 class _DaysTab extends StatefulWidget {
-  const _DaysTab({required this.itinerary, this.tileLayer});
+  const _DaysTab({required this.itinerary, this.tileLayer, this.onSlotTap, this.locked = const {}});
 
   final Itinerary itinerary;
   final Widget? tileLayer;
+  final void Function(ItinerarySlot slot, int day)? onSlotTap;
+  final Set<String> locked;
 
   @override
   State<_DaysTab> createState() => _DaysTabState();
@@ -240,7 +327,14 @@ class _DaysTabState extends State<_DaysTab> with AutomaticKeepAliveClientMixin {
               duration: const Duration(milliseconds: 200),
               child: KeyedSubtree(
                 key: ValueKey(day.number),
-                child: DayView(day: day, hotel: it.hotel, needs: needs, tileLayer: widget.tileLayer),
+                child: DayView(
+                  day: day,
+                  hotel: it.hotel,
+                  needs: needs,
+                  tileLayer: widget.tileLayer,
+                  locked: widget.locked,
+                  onSlotTap: widget.onSlotTap == null ? null : (slot) => widget.onSlotTap!(slot, day.number),
+                ),
               ),
             ),
           ],

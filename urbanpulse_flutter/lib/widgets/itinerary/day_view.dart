@@ -36,12 +36,18 @@ Color levelColor(BuildContext context, SupportLevel l) => switch (l) {
 
 /// One day of the itinerary: a map of where the day goes, then the timeline.
 class DayView extends StatelessWidget {
-  const DayView({required this.day, required this.hotel, required this.needs, this.tileLayer, super.key});
+  const DayView({required this.day, required this.hotel, required this.needs, this.tileLayer, this.onSlotTap, this.locked = const {}, super.key});
 
   final ItineraryDay day;
   final HotelOption? hotel;
   final Set<AccessibilityNeed> needs;
   final Widget? tileLayer;
+
+  /// Tapping a place or meal (to edit it). Null makes the timeline read-only.
+  final void Function(ItinerarySlot slot)? onSlotTap;
+
+  /// Ids of stops the traveller locked in place.
+  final Set<String> locked;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +68,7 @@ class DayView extends StatelessWidget {
         ],
       ),
     );
-    final timeline = _Timeline(day: day, needs: needs);
+    final timeline = _Timeline(day: day, needs: needs, onSlotTap: onSlotTap, locked: locked);
     final map = hasMap ? DayMap(day: day, hotel: hotel, tileLayer: tileLayer) : null;
 
     return LayoutBuilder(
@@ -215,10 +221,12 @@ class _Dot extends StatelessWidget {
 // --- timeline -------------------------------------------------------------------
 
 class _Timeline extends StatelessWidget {
-  const _Timeline({required this.day, required this.needs});
+  const _Timeline({required this.day, required this.needs, this.onSlotTap, this.locked = const {}});
 
   final ItineraryDay day;
   final Set<AccessibilityNeed> needs;
+  final void Function(ItinerarySlot slot)? onSlotTap;
+  final Set<String> locked;
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +245,8 @@ class _Timeline extends StatelessWidget {
             visitNumber: day.slots[i].kind == SlotKind.visit ? ++visitNo : null,
             isLast: i == day.slots.length - 1,
             needs: needs,
+            onTap: onSlotTap != null && day.slots[i].refId != null && (day.slots[i].kind == SlotKind.visit || day.slots[i].kind == SlotKind.meal) ? () => onSlotTap!(day.slots[i]) : null,
+            isLocked: day.slots[i].refId != null && locked.contains(day.slots[i].refId),
           ),
       ],
     );
@@ -244,8 +254,10 @@ class _Timeline extends StatelessWidget {
 }
 
 class _SlotRow extends StatelessWidget {
-  const _SlotRow({required this.slot, required this.visitNumber, required this.isLast, required this.needs});
+  const _SlotRow({required this.slot, required this.visitNumber, required this.isLast, required this.needs, this.onTap, this.isLocked = false});
 
+  final VoidCallback? onTap;
+  final bool isLocked;
   final ItinerarySlot slot;
   final int? visitNumber;
   final bool isLast;
@@ -292,7 +304,15 @@ class _SlotRow extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(bottom: compact ? 8 : 14),
-              child: compact ? _compact(context, minutes) : _card(context, minutes),
+              child: compact
+                  ? _compact(context, minutes)
+                  : (onTap == null
+                        ? _card(context, minutes)
+                        : Semantics(
+                            button: true,
+                            label: 'Edit ${slot.title}',
+                            child: InkWell(borderRadius: BorderRadius.circular(16), onTap: onTap, child: _card(context, minutes)),
+                          )),
             ),
           ),
         ],
@@ -341,6 +361,7 @@ class _SlotRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: Text(slot.title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700))),
+              if (isLocked) Padding(padding: const EdgeInsets.only(right: 6), child: Icon(Icons.lock_rounded, size: 14, color: scheme.primary)),
               Text('${minutes >= 60 ? '${minutes ~/ 60}h ' : ''}${minutes % 60 == 0 && minutes >= 60 ? '' : '${minutes % 60}m'}'.trim(),
                   style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
             ],

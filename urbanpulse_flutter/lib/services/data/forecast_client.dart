@@ -30,6 +30,26 @@ class DayForecast {
   /// False for a climatological guess rather than a real forecast.
   final bool isForecast;
 
+  Map<String, dynamic> toJson() => {
+    'date': date,
+    'tempMaxC': tempMaxC,
+    'tempMinC': tempMinC,
+    'rainMm': rainMm,
+    'rainProbability': rainProbability,
+    'weatherCode': weatherCode,
+    'isForecast': isForecast,
+  };
+
+  static DayForecast fromJson(Map<String, dynamic> j) => DayForecast(
+    date: j['date'] as String? ?? '',
+    tempMaxC: (j['tempMaxC'] as num?)?.toDouble(),
+    tempMinC: (j['tempMinC'] as num?)?.toDouble(),
+    rainMm: (j['rainMm'] as num?)?.toDouble(),
+    rainProbability: (j['rainProbability'] as num?)?.toInt(),
+    weatherCode: (j['weatherCode'] as num?)?.toInt(),
+    isForecast: j['isForecast'] as bool? ?? true,
+  );
+
   /// Heavy enough rain that outdoor plans should be reconsidered.
   /// Rain heavy enough to spoil an outdoor visit: 8 mm or more, a 70% chance,
   /// or a WMO code for moderate-to-heavy rain, heavy showers or thunder.

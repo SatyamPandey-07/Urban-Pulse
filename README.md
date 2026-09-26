@@ -99,6 +99,19 @@ A full itinerary screen (also saved to *My Trips* and shareable as a **PDF**):
 - **Green**: eco score, footprint breakdown, and greener choices
 - **Trip**: the stay (with Khoji's verdicts and review quotes), journey options, a confidence score, everything the plan assumes, every source, and how long each agent worked
 
+### 5. Change your mind: Edit with Yatri (phase 3)
+
+Open any itinerary (from the chat or *My Trips*) and tap **Edit with Yatri**, or tap any stop in the timeline. One agent, still Yatri, turns what you say into a few validated operations; ordinary code then applies them by calling the same engines that made the plan. Nothing is guessed silently: an unclear request gets a question with options.
+
+- **More rest on a day**: "make day 2 relaxed" (a later start, fewer stops; what was displaced moves to a later or emptier day, never dropped quietly) or "day 3 completely free"
+- **Replace, add, remove, move, lock**: "swap the museum for something outdoors", "add Eravikulam Park", "do the fort on day 3", "keep the sunrise point where it is"
+- **A new hotel**: "wheelchair accessible under ₹3,000": Atithi and Khoji search and check again, and you choose
+- **Preferences and logistics**: greener, cheaper, slower pace, another way to travel, one more day (the forecast is fetched again)
+- **After every edit** Saksham (access), Hisab (budget), Hariyali (carbon) and the weather check run again, and you are asked, with options, if a change makes something collide
+- Every change shows a **diff** (what moved, cost, CO₂, access) with **Undo / Redo**; a plan is replaced only when the whole edit succeeds, and the saved trip keeps its version and edit history
+
+Without a model key the common phrases and the quick chips still work (a rule-based reader), and text that tries to instruct the agent is only ever treated as a request.
+
 ---
 
 ## 📦 Object (JSON) Contracts & Data Schemas
@@ -728,10 +741,10 @@ Open the **Yatri AI** tab, tap ⋮ and choose **Preview agent graph (demo)** to 
 ```bash
 cd urbanpulse_flutter
 flutter analyze
-flutter test        # 424 tests
+flutter test        # 485 tests
 ```
 
-The suite includes table-driven tests for the deterministic engines (validation, question planning, accessibility rules, opening hours, day planning, budgets, gates), orchestration tests with scripted models and fake services, widget tests for the chat, hotel cards, task graph and itinerary screen at phone, tablet and desktop sizes in light and dark, and **chaos tests** that run the whole planning pipeline against hostile inputs and random failures.
+The suite includes table-driven tests for the deterministic engines (validation, question planning, accessibility rules, opening hours, day planning, budgets, gates), orchestration tests with scripted models and fake services, widget tests for the chat, hotel cards, task graph and itinerary screen at phone, tablet and desktop sizes in light and dark, and **chaos tests** that run the whole planning pipeline, and 60 random edits in a row, against hostile inputs and random failures. Live runs of the editor against the real services: `flutter test test/live/edit_trace_test.dart --dart-define-from-file=config.json`.
 
 CI (`.github/workflows/flutter-ci-cd.yml`) builds the Android APK on pushes to `main`.
 
