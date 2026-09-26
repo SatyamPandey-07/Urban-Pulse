@@ -12,7 +12,11 @@ import '../core/app_colors.dart';
 const _axisColor = AppColors.surfaceBorder;
 const _labelColor = AppColors.textSecondary;
 const _gridColor = AppColors.surfaceDark;
-const _labelStyle = TextStyle(color: _labelColor, fontSize: 9);
+const _labelStyle = TextStyle(
+  color: _labelColor,
+  fontSize: 10,
+  fontWeight: FontWeight.w600,
+);
 
 /// Cubic-bezier trend line with circular data points — the "Air Quality Trend
 /// (7 Days)" card.
