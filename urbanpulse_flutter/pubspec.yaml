@@ -54,6 +54,7 @@ dependencies:
   table_calendar: ^3.2.1
   supabase_flutter: ^2.17.2
   sqflite_common_ffi_web: ^1.2.0
+  google_fonts: ^6.2.1
   web: 1.1.1
 
 dev_dependencies:

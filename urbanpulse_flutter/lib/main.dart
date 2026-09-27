@@ -53,8 +53,7 @@ class UrbanPulseApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(accent),
             darkTheme: AppTheme.dark(accent),
-            // `Theme.Material3.DayNight` — follow the device setting.
-            themeMode: ThemeMode.system,
+            themeMode: services.theme.themeMode,
             navigatorKey: services.navigatorKey,
             initialRoute: Routes.splash,
             routes: Routes.table,

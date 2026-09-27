@@ -5,35 +5,41 @@ import 'package:flutter/material.dart';
 /// the SOS button) reference these rather than the theme, exactly as the
 /// original layouts did.
 abstract final class AppColors {
-  // Base solid palette (accent options).
-  static const primaryGreen = Color(0xFF00A86B); // Rich Emerald Green matching UI reference
-  static const primaryGreenDark = Color(0xFF00875A);
-  static const primaryGreenLight = Color(0xFFE8F8F0); // Soft mint for category pills
+  // Signature Emerald Palette (Greenish Premium Look).
+  static const primaryGreen = Color(0xFF059669); // Rich emerald green
+  static const primaryGreenAccent = Color(0xFF10B981); // Radiant emerald
+  static const primaryGreenDark = Color(0xFF047857); // Deep forest green
+  static const primaryGreenForest = Color(0xFF064E3B); // Obsidian forest
+  static const primaryGreenMint = Color(0xFF34D399); // Soft mint glow
+  static const primaryGreenLight = Color(0xFFE6F7F0); // Soft mint pill background
+  static const primaryGreenGlow = Color(0x3310B981); // Emerald shadow glow
+
+  // Legacy accents kept for backward compatibility (all anchored to green harmony).
   static const primaryBlue = Color(0xFF2563EB);
   static const primaryIndigo = Color(0xFF6366F1);
   static const primaryPurple = Color(0xFF8B5CF6);
   static const primaryOrange = Color(0xFFF97316);
   static const primaryPink = Color(0xFFEC4899);
-  static const primaryTeal = Color(0xFF14B8A6);
+  static const primaryTeal = Color(0xFF0D9488);
 
-  // Light surface hierarchy (Clean white & slate matching world-class reference).
+  // Light surface hierarchy (Clean pearl & sage).
   static const bgLight = Color(0xFFF8FAFC);
   static const surfaceLight = Color(0xFFFFFFFF);
   static const surfaceLightBorder = Color(0xFFE2E8F0);
   static const textPrimaryLight = Color(0xFF0F172A);
   static const textSecondaryLight = Color(0xFF64748B);
 
-  // Dark surface hierarchy (obsidian slate palette).
-  static const bgDark = Color(0xFF0B1015);
-  static const surfaceDark = Color(0xFF131A22);
-  static const surfaceCard = Color(0xFF16212B);
-  static const surfaceBorder = Color(0xFF243242);
-  static const surfaceElevated = Color(0xFF1B2836);
+  // Dark surface hierarchy (obsidian slate with subtle emerald undertone).
+  static const bgDark = Color(0xFF0A0F14);
+  static const surfaceDark = Color(0xFF111822);
+  static const surfaceCard = Color(0xFF16202C);
+  static const surfaceBorder = Color(0xFF233242);
+  static const surfaceElevated = Color(0xFF1D2A3A);
 
   // Status & semantic solids.
   static const solidError = Color(0xFFEF4444);
   static const solidWarning = Color(0xFFF59E0B);
-  static const solidSuccess = Color(0xFF00E599);
+  static const solidSuccess = Color(0xFF10B981);
   static const solidInfo = Color(0xFF38BDF8);
 
   // High-legibility typography.

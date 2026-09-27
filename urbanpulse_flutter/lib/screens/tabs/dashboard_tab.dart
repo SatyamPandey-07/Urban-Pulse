@@ -345,40 +345,42 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _categoryIconsRow(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final categories = [
       (
         'Hotels',
         Icons.hotel_rounded,
-        const Color(0xFF00A86B),
-        const Color(0xFFE8F8F0),
+        const Color(0xFF10B981),
+        isDark ? const Color(0x2410B981) : const Color(0xFFE8F8F0),
         () => Navigator.of(context).pushNamed(Routes.hospitality),
       ),
       (
         'Flights',
         Icons.flight_rounded,
-        const Color(0xFF1E88E5),
-        const Color(0xFFE8F2FE),
+        const Color(0xFF38BDF8),
+        isDark ? const Color(0x2438BDF8) : const Color(0xFFE0F2FE),
         () => Navigator.of(context).pushNamed(Routes.greenRoutePlanner),
       ),
       (
         'Trains',
         Icons.train_rounded,
-        const Color(0xFF00ACC1),
-        const Color(0xFFE6F7FA),
+        const Color(0xFF34D399),
+        isDark ? const Color(0x2434D399) : const Color(0xFFE6F7FA),
         () => Navigator.of(context).pushNamed(Routes.greenRoutePlanner),
       ),
       (
         'Attractions',
         Icons.star_rounded,
-        const Color(0xFFFB8C00),
-        const Color(0xFFFEF7E6),
+        const Color(0xFFFBBF24),
+        isDark ? const Color(0x24FBBF24) : const Color(0xFFFEF3C7),
         () => Navigator.of(context).pushNamed(Routes.itinerary),
       ),
       (
         'More',
         Icons.more_horiz_rounded,
-        const Color(0xFF64748B),
-        const Color(0xFFF1F5F9),
+        const Color(0xFF94A3B8),
+        isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
         () => Navigator.of(context).pushNamed(Routes.hotelOptimizer),
       ),
     ];
@@ -399,8 +401,8 @@ class _DashboardTabState extends State<DashboardTab> {
                   color: cat.$4,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: cat.$3.withValues(alpha: 0.15),
-                    width: 1,
+                    color: cat.$3.withValues(alpha: 0.25),
+                    width: 1.2,
                   ),
                 ),
                 child: Icon(cat.$2, color: cat.$3, size: 24),
@@ -408,10 +410,10 @@ class _DashboardTabState extends State<DashboardTab> {
               const SizedBox(height: 6),
               Text(
                 cat.$1,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ],
