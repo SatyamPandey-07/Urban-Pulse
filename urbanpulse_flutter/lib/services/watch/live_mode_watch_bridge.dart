@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import '../../agents/live/live_mode_engine.dart';
 import '../../state/live_mode_controller.dart';
 import 'watch_mirror.dart';
+import 'watch_plan_builder.dart';
 import 'watch_protocol.dart';
 
 class LiveModeWatchBridge {
@@ -42,6 +43,11 @@ class LiveModeWatchBridge {
   final Set<String> _sentUpdateIds = {};
 
   bool _wasActive = false;
+
+  /// Which day's plan has been sent, so it goes once per day rather than per
+  /// tick. The mirror also de-duplicates, but not building the steps at all is
+  /// cheaper than building them to throw away.
+  int? _planSentForDay;
 
   /// Which [UpdateKind]s the watch has a buzz for.
   ///
@@ -65,6 +71,7 @@ class LiveModeWatchBridge {
         // no longer heading to.
         _wasActive = false;
         _sentUpdateIds.clear();
+        _planSentForDay = null;
         await mirror.pushState(WatchStateMessage(live: false, ts: _now()));
       }
       return;
@@ -74,6 +81,12 @@ class LiveModeWatchBridge {
     final slot = controller.nextSlot;
     final day = controller.day;
     final metres = controller.metresToNext;
+
+    // The whole day, so the watch can be scrolled through it. Sent once per day.
+    if (day != null && _planSentForDay != day.number) {
+      _planSentForDay = day.number;
+      await mirror.pushPlan(buildWatchPlan(day), day: 'Day ${day.number}');
+    }
 
     await mirror.pushState(WatchStateMessage(
       live: true,

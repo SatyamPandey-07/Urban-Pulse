@@ -44,8 +44,8 @@ module ProtocolTest {
     (:test)
     function typeOfReadsT(logger) {
         Test.assertEqual(Protocol.typeOf({ "t" => "alert", "v" => 1 }), "alert");
-        Test.assertEqual(Protocol.typeOf({ "t" => 7, "v" => 1 }), null);
-        Test.assertEqual(Protocol.typeOf({ "v" => 1 }), null);
+        Test.assert(Protocol.typeOf({ "t" => 7, "v" => 1 }) == null);
+        Test.assert(Protocol.typeOf({ "v" => 1 }) == null);
         return true;
     }
 
@@ -53,8 +53,8 @@ module ProtocolTest {
     function numAcceptsFloatsAndRejectsStrings(logger) {
         Test.assertEqual(Protocol.num({ "d" => 412 }, "d"), 412);
         Test.assertEqual(Protocol.num({ "d" => 412.4 }, "d"), 412);
-        Test.assertEqual(Protocol.num({ "d" => "412" }, "d"), null);
-        Test.assertEqual(Protocol.num({ }, "d"), null);
+        Test.assert(Protocol.num({ "d" => "412" }, "d") == null);
+        Test.assert(Protocol.num({ }, "d") == null);
         return true;
     }
 
@@ -68,9 +68,9 @@ module ProtocolTest {
 
     (:test)
     function strRejectsEmpty(logger) {
-        Test.assertEqual(Protocol.str({ "id" => "" }, "id"), null);
+        Test.assert(Protocol.str({ "id" => "" }, "id") == null);
         Test.assertEqual(Protocol.str({ "id" => "a1" }, "id"), "a1");
-        Test.assertEqual(Protocol.str({ "id" => 5 }, "id"), null);
+        Test.assert(Protocol.str({ "id" => 5 }, "id") == null);
         return true;
     }
 

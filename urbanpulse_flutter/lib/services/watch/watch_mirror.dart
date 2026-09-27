@@ -90,6 +90,9 @@ class WatchMirror {
   Map<String, Object?>? _lastStateWire;
   DateTime? _lastStateAt;
 
+  /// The plan last sent, so an unchanged one is not re-transmitted.
+  String? _lastPlan;
+
   /// Alert ids the watch has confirmed it displayed.
   final Set<String> acknowledged = {};
 
@@ -164,6 +167,33 @@ class WatchMirror {
     }
   }
 
+  /// Sends the day's plan, in as many chunks as it takes.
+  ///
+  /// Skipped when the steps are the same as the ones already on the watch: a
+  /// plan is a dozen messages, and Live Mode ticks far more often than the plan
+  /// changes. Returns the number of messages sent.
+  Future<int> pushPlan(List<WatchStep> steps, {String? day}) async {
+    if (!mirroring || !link.currentStatus.isConnected) return 0;
+    final fingerprint = steps.map((s) => '${s.number}|${s.at}|${s.text}').join('~');
+    if (fingerprint == _lastPlan) return 0;
+
+    final messages = chunkWatchPlan(steps, ts: _now(), day: day);
+    var sent = 0;
+    for (final message in messages) {
+      try {
+        await link.send(message.toWire());
+        sent++;
+      } catch (_) {
+        // A half-sent plan is worse than none: the watch would show a day with
+        // holes in it. Forget the fingerprint so the next tick resends whole.
+        _lastPlan = null;
+        return sent;
+      }
+    }
+    _lastPlan = fingerprint;
+    return sent;
+  }
+
   /// A test buzz from settings.
   Future<bool> pushPing() async {
     if (!link.currentStatus.isConnected) return false;
@@ -186,6 +216,7 @@ class WatchMirror {
     _lastAlertAt = null;
     _lastStateWire = null;
     _lastStateAt = null;
+    _lastPlan = null;
     acknowledged.clear();
   }
 

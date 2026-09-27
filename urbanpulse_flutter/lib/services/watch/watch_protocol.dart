@@ -208,6 +208,143 @@ class SosAckMessage {
 Map<String, Object?> watchPing() => {'t': 'ping', 'v': protocolVersion};
 
 // ---------------------------------------------------------------------------
+// the day's plan
+
+/// How a step is travelled or spent. The watch draws a glyph per mode, so an
+/// unknown value degrades to a neutral one rather than a blank.
+enum WatchStepMode {
+  train('train'),
+  bus('bus'),
+  walk('walk'),
+  cab('cab'),
+  flight('flight'),
+  visit('visit'),
+  meal('meal'),
+  hotel('hotel'),
+  other('other');
+
+  const WatchStepMode(this.wire);
+
+  final String wire;
+
+  static WatchStepMode fromWire(String? wire) {
+    for (final m in values) {
+      if (m.wire == wire) return m;
+    }
+    return WatchStepMode.other;
+  }
+}
+
+/// One numbered step of the day, as the watch shows it.
+class WatchStep {
+  const WatchStep({
+    required this.number,
+    required this.at,
+    required this.text,
+    this.mode = WatchStepMode.other,
+  });
+
+  /// 1-based, and shown as "1)", "2)" on the watch.
+  final int number;
+
+  /// `HH:MM` when the step starts.
+  final String at;
+
+  /// What to do: "Take the train from Panvel to CST".
+  final String text;
+  final WatchStepMode mode;
+
+  /// Step text gets two lines on the watch, so it may be longer than one.
+  static const maxTextChars = 96;
+
+  Map<String, Object?> toWire() => {
+    'n': number,
+    'at': at,
+    'x': sanitiseWatchText(text, max: maxTextChars),
+    'm': mode.wire,
+  };
+}
+
+/// `{t:"plan", ...}` — the day's steps, in order.
+///
+/// A whole day does not fit in one transmit, so the plan is sent in chunks:
+/// [from] is the index of the first step in this message and [total] the number
+/// of steps in the day, which lets the watch show "3/12" before every chunk has
+/// arrived. A chunk with `from == 0` starts a new plan and clears whatever the
+/// watch was holding.
+class WatchPlanMessage {
+  const WatchPlanMessage({
+    required this.steps,
+    required this.from,
+    required this.total,
+    required this.ts,
+    this.day,
+  });
+
+  final List<WatchStep> steps;
+  final int from;
+  final int total;
+  final String? day;
+  final DateTime ts;
+
+  Map<String, Object?> toWire() => {
+    't': 'plan',
+    'v': protocolVersion,
+    'i': from,
+    'tot': total,
+    if (day != null && day!.isNotEmpty) 'day': sanitiseWatchText(day!, max: 16),
+    'steps': steps.map((s) => s.toWire()).toList(),
+    'ts': watchEpoch(ts),
+  };
+}
+
+/// Splits [steps] into messages that each fit one transmit.
+///
+/// The chunk size is found by measurement rather than assumed: steps vary in
+/// length, so this grows a chunk until adding one more would exceed
+/// [maxMessageBytes], then starts another. That way a day of short steps travels
+/// in fewer messages without any risk of a long one overflowing.
+List<WatchPlanMessage> chunkWatchPlan(
+  List<WatchStep> steps, {
+  required DateTime ts,
+  String? day,
+}) {
+  if (steps.isEmpty) {
+    return [WatchPlanMessage(steps: const [], from: 0, total: 0, ts: ts, day: day)];
+  }
+  final out = <WatchPlanMessage>[];
+  var start = 0;
+  while (start < steps.length) {
+    var end = start;
+    var accepted = start;
+    while (end < steps.length) {
+      end++;
+      final candidate = WatchPlanMessage(
+        steps: steps.sublist(start, end),
+        from: start,
+        total: steps.length,
+        ts: ts,
+        day: day,
+      );
+      if (!fitsOneTransmit(candidate.toWire())) break;
+      accepted = end;
+    }
+    // A single step too large to send at all would loop forever; send it alone
+    // and let the watch truncate what it cannot draw.
+    if (accepted == start) accepted = start + 1;
+    out.add(WatchPlanMessage(
+      steps: steps.sublist(start, accepted),
+      from: start,
+      total: steps.length,
+      ts: ts,
+      day: day,
+    ));
+    start = accepted;
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
 // watch -> phone
 
 /// Anything the watch can say. Unknown and future messages decode to null, so

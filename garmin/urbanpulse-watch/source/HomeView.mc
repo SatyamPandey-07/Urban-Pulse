@@ -5,34 +5,33 @@ import Toybox.Graphics;
 
 //! The resting screen: what the phone last said, and how much to trust it.
 //!
-//! Every coordinate is a fraction of `dc.getWidth()` / `dc.getHeight()`, and the
-//! text is centred within an inset that keeps it off a round bezel, so adding a
-//! product to the manifest needs no change here.
+//! Laid out through [Layout], so every line is measured against the *chord* of
+//! the round screen at its own height rather than the full width. That is what
+//! stops a long place name running off the curve, and it is why the title font
+//! is chosen per render instead of fixed: "CST" gets a big one, "Chhatrapati
+//! Shivaji Maharaj Terminus" gets a smaller one and two lines, and neither
+//! overflows.
 class HomeView extends WatchUi.View {
-
-    //! Fraction of the radius kept clear of the curved edge.
-    hidden const INSET = 0.13;
 
     function initialize() {
         View.initialize();
     }
 
     function onShow() {
-        // Coming back from the alert or SOS screen: pick up whatever arrived.
+        // Coming back from the alert, plan or SOS screen: pick up what arrived.
         WatchUi.requestUpdate();
     }
 
     function onUpdate(dc) {
         var w = dc.getWidth();
         var h = dc.getHeight();
-        var cx = w / 2;
 
         dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
         dc.clear();
 
         var state = UrbanPulseApp.state;
         if (state == null || state.isWaiting()) {
-            drawWaiting(dc, cx, h);
+            drawWaiting(dc, h);
             return;
         }
 
@@ -41,61 +40,68 @@ class HomeView extends WatchUi.View {
         var titleColour = stale ? Graphics.COLOR_DK_GRAY : Graphics.COLOR_WHITE;
         var metaColour = stale ? Graphics.COLOR_DK_GRAY : Graphics.COLOR_LT_GRAY;
 
-        // --- top: the trip status line -----------------------------------
-        var status = statusLine(state, stale);
-        dc.setColor(metaColour, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, h * 0.17, Graphics.FONT_XTINY, status, Graphics.TEXT_JUSTIFY_CENTER);
-
-        // --- the phone-connected dot -------------------------------------
         drawLinkDot(dc, w, h, state);
 
-        // --- middle: the next stop ---------------------------------------
+        // --- top: the trip status line ------------------------------------
+        dc.setColor(metaColour, Graphics.COLOR_TRANSPARENT);
+        Layout.drawFitted(dc, h * 0.155, statusLine(state, stale), [Graphics.FONT_XTINY]);
+
+        // --- middle: what is next -----------------------------------------
         if (state.nextTitle == null) {
             dc.setColor(titleColour, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, h * 0.42, Graphics.FONT_SMALL,
-                        state.live ? "No next stop" : "Live Mode off",
-                        Graphics.TEXT_JUSTIFY_CENTER);
+            Layout.drawFitted(dc, h * 0.44,
+                              state.live ? "No next stop" : "Live Mode off",
+                              Layout.BODY_FONTS);
         } else {
             dc.setColor(titleColour, Graphics.COLOR_TRANSPARENT);
-            // FONT_MEDIUM wraps nothing, so the title is drawn over up to two
-            // lines split on a space rather than clipped at the bezel.
-            drawWrapped(dc, cx, h * 0.33, w * (1.0 - 2 * INSET),
-                        Graphics.FONT_MEDIUM, state.nextTitle);
+            // Two lines at the largest size that fits; the font shrinks before
+            // the words are ever cut.
+            var below = Layout.drawWrapped(dc, h * 0.30, state.nextTitle,
+                                           Layout.TITLE_FONTS, 2);
 
-            // --- time, and distance if the phone sent one ----------------
-            var line = (state.nextAt == null) ? "" : state.nextAt;
+            // --- when, and how far, on one line where it fits --------------
+            var when = (state.nextAt == null) ? "" : state.nextAt;
             var dist = LinkState.distanceText(state.nextDistM, statuteUnits());
-            if (dist != null) {
-                line = line.length() > 0 ? line + "  -  " + dist : dist;
-            }
-            if (line.length() > 0) {
-                dc.setColor(stale ? Graphics.COLOR_DK_GRAY : Graphics.COLOR_GREEN,
-                            Graphics.COLOR_TRANSPARENT);
-                dc.drawText(cx, h * 0.60, Graphics.FONT_NUMBER_MILD, line,
-                            Graphics.TEXT_JUSTIFY_CENTER);
+            var y = below + h * 0.03;
+            dc.setColor(stale ? Graphics.COLOR_DK_GRAY : Graphics.COLOR_GREEN,
+                        Graphics.COLOR_TRANSPARENT);
+            if (when.length() > 0 && dist != null) {
+                var joined = when + "   " + dist;
+                // Only join them if the pair fits; otherwise the time leads and
+                // the distance goes underneath rather than being squeezed.
+                if (dc.getTextWidthInPixels(joined, Graphics.FONT_TINY) <= Layout.chordWidth(dc, y)) {
+                    Layout.drawFitted(dc, y, joined, Layout.NUMBER_FONTS);
+                } else {
+                    var after = Layout.drawFitted(dc, y, when, Layout.NUMBER_FONTS);
+                    dc.setColor(metaColour, Graphics.COLOR_TRANSPARENT);
+                    Layout.drawFitted(dc, after, dist, [Graphics.FONT_TINY, Graphics.FONT_XTINY]);
+                }
+            } else if (when.length() > 0) {
+                Layout.drawFitted(dc, y, when, Layout.NUMBER_FONTS);
+            } else if (dist != null) {
+                Layout.drawFitted(dc, y, dist, Layout.NUMBER_FONTS);
             }
         }
 
-        // --- bottom: the SOS state, or the hint ---------------------------
-        drawFooter(dc, cx, h, state);
+        drawFooter(dc, h, state);
     }
 
-    //! "Waiting for phone" - the state before anything has ever arrived. It is
-    //! not an error, and it does not pretend to be a plan.
-    hidden function drawWaiting(dc, cx, h) {
+    //! The state before anything has ever arrived. Not an error, and it does not
+    //! pretend to be a plan.
+    hidden function drawWaiting(dc, h) {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, h * 0.40, Graphics.FONT_SMALL, "Waiting for phone",
-                    Graphics.TEXT_JUSTIFY_CENTER);
+        Layout.drawFitted(dc, h * 0.38, "Waiting for phone", Layout.BODY_FONTS);
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, h * 0.54, Graphics.FONT_XTINY, "Open Urban Pulse",
-                    Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(cx, h * 0.64, Graphics.FONT_XTINY, "and turn on Live Mode",
-                    Graphics.TEXT_JUSTIFY_CENTER);
+        Layout.drawFitted(dc, h * 0.54, "Open Urban Pulse", [Graphics.FONT_XTINY]);
+        Layout.drawFitted(dc, h * 0.63, "and turn on Live Mode", [Graphics.FONT_XTINY]);
     }
 
     hidden function statusLine(state, stale) {
         if (stale) {
             return state.ageText();
+        }
+        if (state.planDay != null) {
+            return state.live ? state.planDay + " - live" : state.planDay;
         }
         if (state.day != null) {
             return state.live ? state.day + " - live" : state.day;
@@ -103,11 +109,11 @@ class HomeView extends WatchUi.View {
         return state.live ? "Live" : "Not live";
     }
 
-    //! A small filled dot, top centre: green when the phone is talking to us,
+    //! A small dot, top centre: filled green when the phone is talking to us,
     //! hollow grey when it is not.
     hidden function drawLinkDot(dc, w, h, state) {
         var r = w * 0.016;
-        var y = h * 0.10;
+        var y = h * 0.095;
         var connected = state.phoneConnected && !state.isStale();
         if (connected) {
             dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
@@ -119,53 +125,23 @@ class HomeView extends WatchUi.View {
         }
     }
 
-    hidden function drawFooter(dc, cx, h, state) {
+    //! The bottom line says whichever is more useful right now: a live SOS, the
+    //! plan when there is one, or the SOS hint.
+    hidden function drawFooter(dc, h, state) {
         if (state.sosStatus != null) {
-            var text = SosView.statusText(state);
             dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(cx, h * 0.80, Graphics.FONT_XTINY, text,
-                        Graphics.TEXT_JUSTIFY_CENTER);
+            Layout.drawFitted(dc, h * 0.80, SosView.statusText(state), [Graphics.FONT_XTINY]);
             return;
         }
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(cx, h * 0.82, Graphics.FONT_XTINY, "Hold START for SOS",
-                    Graphics.TEXT_JUSTIFY_CENTER);
-    }
-
-    //! Draws `text` centred at `y`, over two lines if it does not fit `maxW`.
-    hidden function drawWrapped(dc, cx, y, maxW, font, text) {
-        if (dc.getTextWidthInPixels(text, font) <= maxW) {
-            dc.drawText(cx, y, font, text, Graphics.TEXT_JUSTIFY_CENTER);
-            return;
+        if (state.hasPlan()) {
+            var total = state.planSteps.size();
+            Layout.drawFitted(dc, h * 0.815,
+                              "DOWN: " + total.toString() + " steps",
+                              [Graphics.FONT_XTINY]);
+        } else {
+            Layout.drawFitted(dc, h * 0.825, "Hold START for SOS", [Graphics.FONT_XTINY]);
         }
-        var split = splitPoint(dc, text, font, maxW);
-        if (split <= 0) {
-            dc.drawText(cx, y, font, text, Graphics.TEXT_JUSTIFY_CENTER);
-            return;
-        }
-        var lineH = dc.getFontHeight(font);
-        dc.drawText(cx, y - lineH * 0.15, font, text.substring(0, split),
-                    Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(cx, y - lineH * 0.15 + lineH * 0.92, font,
-                    text.substring(split + 1, text.length()),
-                    Graphics.TEXT_JUSTIFY_CENTER);
-    }
-
-    //! Index of the space to break on: the last one whose prefix still fits.
-    hidden function splitPoint(dc, text, font, maxW) {
-        var chars = text.toCharArray();
-        var best = -1;
-        for (var i = 0; i < chars.size(); i++) {
-            if (chars[i].toNumber() != 0x20) {
-                continue;
-            }
-            if (dc.getTextWidthInPixels(text.substring(0, i), font) <= maxW) {
-                best = i;
-            } else {
-                break;
-            }
-        }
-        return best;
     }
 
     //! The traveller's own unit setting; the phone always sends metres.

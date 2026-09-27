@@ -131,6 +131,14 @@ class UrbanPulseApp extends Application.AppBase {
             }
             return type;
         }
+        if (type.equals("plan")) {
+            // The day arrives in chunks; each one refreshes what is on screen so
+            // the traveller sees it fill rather than waiting for the last.
+            if (state.applyPlan(data)) {
+                WatchUi.requestUpdate();
+            }
+            return type;
+        }
         if (type.equals("ping")) {
             Buzz.forAlert(null);
             return type;

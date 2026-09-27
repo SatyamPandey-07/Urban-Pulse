@@ -92,6 +92,15 @@ module Protocol {
         return fallback;
     }
 
+    //! An array field, or null.
+    function list(data, key) {
+        if (!(data instanceof Lang.Dictionary)) {
+            return null;
+        }
+        var value = data[key];
+        return (value instanceof Lang.Array) ? value : null;
+    }
+
     //! A dictionary field, or null.
     function dict(data, key) {
         if (!(data instanceof Lang.Dictionary)) {

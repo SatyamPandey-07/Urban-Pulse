@@ -19,9 +19,9 @@ module LinkStateTest {
         var s = new LinkState();
         // Nothing received: the view shows "Waiting for phone" and no numbers.
         Test.assert(s.isWaiting());
-        Test.assertEqual(s.ageS(), null);
+        Test.assert(s.ageS() == null);
         Test.assert(!s.isStale());
-        Test.assertEqual(s.nextTitle, null);
+        Test.assert(s.nextTitle == null);
         return true;
     }
 
@@ -77,8 +77,8 @@ module LinkStateTest {
         var s = new LinkState();
         s.applyState(stateMessage("Colaba Causeway", "11:00", null));
         // The watch must not derive a distance the phone did not send.
-        Test.assertEqual(s.nextDistM, null);
-        Test.assertEqual(LinkState.distanceText(null, false), null);
+        Test.assert(s.nextDistM == null);
+        Test.assert(LinkState.distanceText(null, false) == null);
         return true;
     }
 
@@ -86,7 +86,7 @@ module LinkStateTest {
     function negativeDistanceIsDropped(logger) {
         var s = new LinkState();
         s.applyState(stateMessage("Colaba", "11:00", -5));
-        Test.assertEqual(s.nextDistM, null);
+        Test.assert(s.nextDistM == null);
         return true;
     }
 
@@ -95,9 +95,9 @@ module LinkStateTest {
         var s = new LinkState();
         s.applyState(stateMessage("Gateway", "14:20", 900));
         s.applyState({ "t" => "state", "v" => 1, "live" => false, "ts" => 1700000900 });
-        Test.assertEqual(s.nextTitle, null);
-        Test.assertEqual(s.nextAt, null);
-        Test.assertEqual(s.nextDistM, null);
+        Test.assert(s.nextTitle == null);
+        Test.assert(s.nextAt == null);
+        Test.assert(s.nextDistM == null);
         Test.assert(!s.live);
         return true;
     }
@@ -141,7 +141,7 @@ module LinkStateTest {
         var s = new LinkState();
         Test.assert(!s.applyAlert({ "t" => "alert", "v" => 1, "kind" => "leave", "text" => "hi" }));
         Test.assert(!s.applyAlert({ "t" => "alert", "v" => 1, "id" => "a2", "kind" => "leave" }));
-        Test.assertEqual(s.alertText, null);
+        Test.assert(s.alertText == null);
         return true;
     }
 
@@ -179,7 +179,7 @@ module LinkStateTest {
         // An invented status would render as a blank headline; refuse it and keep
         // whatever the phone last actually said.
         Test.assert(!s.applySosAck({ "t" => "sosAck", "v" => 1, "status" => "delivered" }));
-        Test.assertEqual(s.sosStatus, null);
+        Test.assert(s.sosStatus == null);
         return true;
     }
 

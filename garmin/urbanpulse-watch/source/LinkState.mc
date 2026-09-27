@@ -18,6 +18,13 @@ class LinkState {
     //! kilobytes, and the phone is the real rate limiter.
     static const RECENT_ALERTS = 8;
 
+    //! Most steps of a day the watch will hold. A day longer than this is
+    //! truncated rather than risking the memory budget mid-trip.
+    static const MAX_STEPS = 40;
+
+    //! Step text is drawn over two lines, so it gets more than a status line.
+    static const MAX_STEP_CHARS = 96;
+
     // --- what the phone last told us -------------------------------------
     var live = false;
     var nextTitle = null;   // String or null
@@ -44,6 +51,22 @@ class LinkState {
     var alertId = null;
     var alertKind = null;
     var alertText = null;
+
+    // --- the day's plan ---------------------------------------------------
+    //! Steps received so far, each a dictionary of {n, at, x, m}. Sparse until
+    //! every chunk has arrived, which is why `planTotal` is tracked separately:
+    //! the watch can honestly show "3 of 12" while still receiving.
+    var planSteps = [];
+
+    //! How many steps the day has, as the phone reported it.
+    var planTotal = 0;
+
+    //! "Day 2", when the phone sent one.
+    var planDay = null;
+
+    //! Monotonic millis when the last chunk landed, for the same staleness rule
+    //! the state line uses.
+    var planAtMs = null;
 
     hidden var mRecentIds = [];
 
@@ -134,6 +157,133 @@ class LinkState {
         alertKind = Protocol.str(data, "kind");
         alertText = Protocol.sanitise(text, Protocol.MAX_LINE);
         return true;
+    }
+
+    //! Applies a `plan` chunk. Returns true when anything was stored.
+    //!
+    //! `i` is the index of the first step in this message, so a chunk starting
+    //! at 0 begins a new plan and discards whatever was held. Out-of-order or
+    //! repeated chunks are placed by index rather than appended, so a re-sent
+    //! chunk overwrites rather than duplicating.
+    function applyPlan(data) {
+        var from = Protocol.num(data, "i");
+        var total = Protocol.num(data, "tot");
+        var steps = Protocol.list(data, "steps");
+        if (from == null || total == null || from < 0 || total < 0) {
+            return false;
+        }
+
+        if (from == 0) {
+            planSteps = [];
+            for (var i = 0; i < total && i < MAX_STEPS; i++) {
+                planSteps.add(null);
+            }
+        }
+        // A chunk arriving before its plan started (the `i == 0` message was
+        // lost) still needs somewhere to go.
+        while (planSteps.size() < total && planSteps.size() < MAX_STEPS) {
+            planSteps.add(null);
+        }
+
+        planTotal = total;
+        var day = Protocol.str(data, "day");
+        if (day != null) {
+            planDay = Protocol.sanitise(day, 16);
+        }
+        planAtMs = System.getTimer();
+
+        if (steps == null) {
+            return true;
+        }
+        for (var i = 0; i < steps.size(); i++) {
+            var raw = steps[i];
+            if (!(raw instanceof Lang.Dictionary)) {
+                continue;
+            }
+            var text = Protocol.str(raw, "x");
+            if (text == null) {
+                continue;
+            }
+            var slot = from + i;
+            if (slot < 0 || slot >= planSteps.size()) {
+                continue;
+            }
+            planSteps[slot] = {
+                "n" => Protocol.num(raw, "n") != null ? Protocol.num(raw, "n") : (slot + 1),
+                "at" => Protocol.str(raw, "at"),
+                "x" => Protocol.sanitise(text, MAX_STEP_CHARS),
+                "m" => Protocol.str(raw, "m")
+            };
+        }
+        return true;
+    }
+
+    //! Whether a usable plan has arrived.
+    function hasPlan() {
+        return planTotal > 0 && filledSteps() > 0;
+    }
+
+    //! How many steps actually have content, which may be fewer than
+    //! [planTotal] while chunks are still arriving.
+    function filledSteps() {
+        var n = 0;
+        for (var i = 0; i < planSteps.size(); i++) {
+            if (planSteps[i] != null) { n++; }
+        }
+        return n;
+    }
+
+    //! The step the traveller is most likely to want: the first whose start
+    //! time has not passed, or the last one once the day is over.
+    //!
+    //! Times are compared as text because they are already `HH:MM` on a 24 hour
+    //! clock, which sorts lexicographically. That avoids carrying a timezone
+    //! database onto the watch just to know which step is next.
+    function currentStepIndex() {
+        if (planSteps.size() == 0) {
+            return 0;
+        }
+        var now = clockText();
+        for (var i = 0; i < planSteps.size(); i++) {
+            var step = planSteps[i];
+            if (step == null) {
+                continue;
+            }
+            var at = step["at"];
+            if (at == null || at.length() < 5) {
+                continue;
+            }
+            // First step that has not started yet.
+            if (at.compareTo(now) >= 0) {
+                return i;
+            }
+        }
+        return planSteps.size() - 1;
+    }
+
+    //! The watch's own clock as "HH:MM", to compare against step times.
+    hidden function clockText() {
+        var t = System.getClockTime();
+        return pad(t.hour) + ":" + pad(t.min);
+    }
+
+    hidden function pad(v) {
+        return (v < 10) ? "0" + v.toString() : v.toString();
+    }
+
+    //! The step at `index`, or null if that chunk has not landed.
+    function stepAt(index) {
+        if (index < 0 || index >= planSteps.size()) {
+            return null;
+        }
+        return planSteps[index];
+    }
+
+    function clearPlan() {
+        planSteps = [];
+        planTotal = 0;
+        planDay = null;
+        planAtMs = null;
     }
 
     //! Applies a `sosAck`. Returns true when the status is one we know.
