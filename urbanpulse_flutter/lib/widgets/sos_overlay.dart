@@ -7,6 +7,7 @@ import '../core/routes.dart';
 import '../models/app_notification.dart';
 import '../screens/sos_screen.dart';
 import '../services/sos/sos_models.dart';
+import '../services/watch/watch_service.dart';
 import '../state/app_scope.dart';
 import '../state/notification_controller.dart';
 import '../state/sos_controller.dart';
@@ -40,7 +41,13 @@ class _SosOverlayState extends State<SosOverlay> {
     _nav = services.navigatorKey;
     _subs
       ..add(_sos!.newAlerts.listen(_alert))
-      ..add(_sos!.openRequests.listen((_) => _openSos()));
+      ..add(_sos!.openRequests.listen((_) => _openSos()))
+      // The watch's SOS button, answered on the phone as well as the wrist.
+      ..add(services.watch.watchSosRequests.listen(_watchSos));
+    // Nothing arrives from the watch until the link is listening, and the
+    // traveller should not have to open a settings screen for their SOS button
+    // to work. Does nothing unless a watch has been paired before.
+    unawaited(services.watch.reconnectIfPaired());
   }
 
   @override
@@ -70,6 +77,50 @@ class _SosOverlayState extends State<SosOverlay> {
     if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
     _queue.add(e);
     unawaited(_next());
+  }
+
+  /// The watch asked for an SOS. Say so here, whatever screen is open.
+  ///
+  /// This matters most when the phone could not act: the traveller held a button
+  /// for three seconds, and a silent refusal on the wrist alone would leave them
+  /// believing help was on its way.
+  Future<void> _watchSos(WatchSosNotice notice) async {
+    unawaited(HapticFeedback.heavyImpact());
+    final ctx = _nav?.currentContext;
+    if (ctx == null) return;
+
+    if (notice.started) {
+      // The countdown is running; the SOS screen is where it can be cancelled.
+      _openSos();
+      return;
+    }
+
+    await showDialog<void>(
+      context: ctx,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.watch_off_rounded, color: Color(0xFFDC2626), size: 40),
+        title: const Text('SOS pressed on your watch'),
+        content: Text(
+          '${notice.reason}\n\n'
+          'Nothing has been sent. Use the SOS button in the app to message your '
+          'emergency contacts.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _openSos();
+            },
+            child: const Text('Open SOS'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _next() async {

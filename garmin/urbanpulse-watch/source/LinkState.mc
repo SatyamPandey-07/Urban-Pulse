@@ -18,9 +18,12 @@ class LinkState {
     //! kilobytes, and the phone is the real rate limiter.
     static const RECENT_ALERTS = 8;
 
-    //! Most steps of a day the watch will hold. A day longer than this is
-    //! truncated rather than risking the memory budget mid-trip.
+    //! Most steps the watch will hold, across every day sent. A longer trip is
+    //! truncated rather than risking the memory budget mid-journey.
     static const MAX_STEPS = 40;
+
+    //! The day label of the step at `index`, or null.
+    static const NO_DAY = "";
 
     //! Step text is drawn over two lines, so it gets more than a status line.
     static const MAX_STEP_CHARS = 96;
@@ -208,11 +211,16 @@ class LinkState {
             if (slot < 0 || slot >= planSteps.size()) {
                 continue;
             }
+            var dayLabel = Protocol.str(raw, "d");
             planSteps[slot] = {
                 "n" => Protocol.num(raw, "n") != null ? Protocol.num(raw, "n") : (slot + 1),
                 "at" => Protocol.str(raw, "at"),
                 "x" => Protocol.sanitise(text, MAX_STEP_CHARS),
-                "m" => Protocol.str(raw, "m")
+                "m" => Protocol.str(raw, "m"),
+                // Which day this step belongs to. The list starts a new heading
+                // whenever it changes, which is what turns one scrolling list
+                // into several days.
+                "d" => (dayLabel == null) ? null : Protocol.sanitise(dayLabel, 16)
             };
         }
         return true;
@@ -269,6 +277,41 @@ class LinkState {
 
     hidden function pad(v) {
         return (v < 10) ? "0" + v.toString() : v.toString();
+    }
+
+    //! The day label of step `index`, or null when it has none.
+    function dayOf(index) {
+        var step = stepAt(index);
+        if (step == null) {
+            return null;
+        }
+        return step["d"];
+    }
+
+    //! True when step `index` begins a day: it is the first step, or its day
+    //! label differs from the step before it.
+    function startsDay(index) {
+        var day = dayOf(index);
+        if (day == null) {
+            return false;
+        }
+        if (index == 0) {
+            return true;
+        }
+        var previous = dayOf(index - 1);
+        if (previous == null) {
+            return true;
+        }
+        return !previous.equals(day);
+    }
+
+    //! How many distinct days the held plan covers.
+    function dayCount() {
+        var n = 0;
+        for (var i = 0; i < planSteps.size(); i++) {
+            if (startsDay(i)) { n++; }
+        }
+        return n;
     }
 
     //! The step at `index`, or null if that chunk has not landed.

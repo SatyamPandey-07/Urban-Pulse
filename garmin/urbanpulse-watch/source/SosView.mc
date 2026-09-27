@@ -135,7 +135,8 @@ class SosView extends WatchUi.View {
             var left = (HOLD_MS - mHeldMs + 999) / 1000;
             centre(dc, cx, h, Graphics.COLOR_RED, "Keep holding", left.toString() + " s");
         } else {
-            centre(dc, cx, h, Graphics.COLOR_WHITE, "SOS", "hold START 3 s");
+            // Both routes work: the button, or a finger held on the screen.
+            centre(dc, cx, h, Graphics.COLOR_WHITE, "SOS", "hold 3 s to send");
         }
     }
 
@@ -207,7 +208,7 @@ class SosView extends WatchUi.View {
         }
 
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        var hint = status.equals("countdown") ? "BACK to cancel" : "BACK to close";
+        var hint = status.equals("countdown") ? "Tap or BACK to cancel" : "BACK to close";
         dc.drawText(cx, h * 0.80, Graphics.FONT_XTINY, hint, Graphics.TEXT_JUSTIFY_CENTER);
     }
 

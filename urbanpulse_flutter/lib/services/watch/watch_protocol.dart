@@ -242,6 +242,7 @@ class WatchStep {
     required this.at,
     required this.text,
     this.mode = WatchStepMode.other,
+    this.day,
   });
 
   /// 1-based, and shown as "1)", "2)" on the watch.
@@ -254,6 +255,11 @@ class WatchStep {
   final String text;
   final WatchStepMode mode;
 
+  /// Which day this step belongs to — "Day 2". The watch starts a new heading
+  /// whenever this changes, which is what makes one scrolling list read as
+  /// several days rather than one long one.
+  final String? day;
+
   /// Step text gets two lines on the watch, so it may be longer than one.
   static const maxTextChars = 96;
 
@@ -262,6 +268,7 @@ class WatchStep {
     'at': at,
     'x': sanitiseWatchText(text, max: maxTextChars),
     'm': mode.wire,
+    if (day != null && day!.isNotEmpty) 'd': sanitiseWatchText(day!, max: 16),
   };
 }
 

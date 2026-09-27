@@ -3,51 +3,59 @@ import Toybox.System;
 import Toybox.WatchUi;
 import Toybox.Graphics;
 
-//! The day's plan, one step to a page.
+//! The whole trip as one scrolling list, grouped by day.
 //!
-//! A watch screen cannot hold a day, and a list of twelve four-word rows is not
-//! readable on a wrist at walking pace. So each step gets the whole screen: its
-//! number, when it starts, how it is travelled, and what to do, at the largest
-//! font that fits. DOWN moves to the next step, UP to the previous.
+//! Scrolling runs straight through: the steps of the first day, then a heading
+//! for the next day, then its steps, and so on. Reaching the end of today
+//! continues into tomorrow rather than stopping, which is what makes the list a
+//! trip rather than a page.
 //!
-//! Position is shown twice, deliberately: as "3/12" for precision, and as an arc
-//! around the bezel for a glance. The arc is the part that uses a round screen
-//! for something other than losing corners.
-//!
-//! Every measurement comes from [Layout], so nothing here assumes 454 px.
+//! Pagination is by measurement, not by a fixed rows-per-page. Rows are drawn
+//! until the next one would not fit the *chord* of the round screen at that
+//! height (see [Layout]), and where the page broke becomes the start of the next
+//! one. So a day of short steps fits more rows than a day of long ones, and
+//! nothing is ever half-drawn at the bottom edge.
 class PlanView extends WatchUi.View {
 
-    //! Which step is on screen, 0-based.
-    hidden var mIndex = 0;
+    //! Where each page starts, as an index into the step list. Grown as the
+    //! traveller scrolls, because where a page ends is only known once drawn.
+    hidden var mPageStarts = [0];
+    hidden var mPage = 0;
 
-    function initialize(index) {
+    //! The index after the last row drawn on the current page, so [move] knows
+    //! whether there is anything below.
+    hidden var mNextStart = 0;
+
+    function initialize(startStep) {
         View.initialize();
-        mIndex = (index == null) ? 0 : index;
+        if (startStep != null && startStep > 0) {
+            // Open near the step that is happening now: begin the first page
+            // there rather than at the top of the trip.
+            mPageStarts = [startStep];
+        }
     }
 
-    function index() {
-        return mIndex;
-    }
-
-    //! Moves by `delta` steps, stopping at the ends rather than wrapping: a plan
-    //! has a beginning and an end, and silently looping hides which you are at.
-    //! Returns true if the position changed.
+    //! Moves a page down (+1) or up (-1). Returns true if anything changed.
     function move(delta) {
         var state = UrbanPulseApp.state;
-        if (state == null) {
+        if (state == null || state.planSteps.size() == 0) {
             return false;
         }
-        var count = state.planSteps.size();
-        if (count <= 0) {
-            return false;
+        if (delta > 0) {
+            // Only page down if the last draw actually left rows below.
+            if (mNextStart >= state.planSteps.size()) {
+                return false;
+            }
+            if (mPage + 1 >= mPageStarts.size()) {
+                mPageStarts.add(mNextStart);
+            }
+            mPage++;
+        } else {
+            if (mPage == 0) {
+                return false;
+            }
+            mPage--;
         }
-        var next = mIndex + delta;
-        if (next < 0) { next = 0; }
-        if (next >= count) { next = count - 1; }
-        if (next == mIndex) {
-            return false;
-        }
-        mIndex = next;
         WatchUi.requestUpdate();
         return true;
     }
@@ -55,102 +63,184 @@ class PlanView extends WatchUi.View {
     function onUpdate(dc) {
         var w = dc.getWidth();
         var h = dc.getHeight();
-        var cx = w / 2;
 
         dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
         dc.clear();
 
         var state = UrbanPulseApp.state;
         if (state == null || !state.hasPlan()) {
-            drawEmpty(dc, cx, h);
+            drawEmpty(dc, h);
             return;
         }
 
         var total = state.planSteps.size();
-        drawProgressArc(dc, cx, h / 2, w, mIndex, total);
-
-        var step = state.stepAt(mIndex);
-        if (step == null) {
-            // This chunk has not arrived. Say so rather than draw a blank page.
-            dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-            Layout.drawFitted(dc, h * 0.44, "Step " + (mIndex + 1).toString(), Layout.BODY_FONTS);
-            Layout.drawFitted(dc, h * 0.56, "still loading", Layout.BODY_FONTS);
-            drawFooter(dc, cx, h, total);
-            return;
+        var start = mPageStarts[mPage];
+        if (start >= total) {
+            start = 0;
+            mPage = 0;
+            mPageStarts = [0];
         }
 
-        // --- top: the day, and where we are in it -------------------------
-        var heading = (mIndex + 1).toString() + " / " + total.toString();
-        if (state.planDay != null) {
-            heading = state.planDay + "   " + heading;
+        // Rows run between the top and bottom hints; both are reserved first so
+        // a row is never drawn under them.
+        var top = h * 0.115;
+        var bottom = h * 0.80;
+
+        var y = top;
+        var index = start;
+        while (index < total && y < bottom) {
+            var used = drawRow(dc, y, bottom, state, index);
+            if (used <= 0) {
+                // The next row did not fit: the page ends here.
+                break;
+            }
+            y += used;
+            index++;
         }
-        dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        Layout.drawFitted(dc, h * 0.135, heading, [Graphics.FONT_XTINY]);
-
-        // --- the mode and the time ----------------------------------------
-        var mode = step["m"];
-        var at = step["at"];
-        var line = modeLabel(mode);
-        if (at != null) {
-            line = (line.length() > 0) ? line + "  " + at : at;
+        // A page that could fit nothing at all must still advance, or scrolling
+        // would stall on an over-long step.
+        if (index == start && start < total) {
+            index = start + 1;
         }
-        dc.setColor(modeColour(mode), Graphics.COLOR_TRANSPARENT);
-        Layout.drawFitted(dc, h * 0.245, line, [Graphics.FONT_TINY, Graphics.FONT_XTINY]);
+        mNextStart = index;
 
-        // --- the step itself ----------------------------------------------
-        // The number is part of the sentence ("3) Take the train ..."), so it is
-        // drawn with the text and wraps with it.
-        var body = step["n"].toString() + ") " + step["x"];
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        Layout.drawWrapped(dc, h * 0.375, body, Layout.BODY_FONTS, 4);
-
-        drawFooter(dc, cx, h, total);
+        drawScrollbar(dc, w, h, start, index, total);
+        drawFooter(dc, h, state, index, total);
     }
 
-    hidden function drawEmpty(dc, cx, h) {
+    //! Draws one row (a day heading, if it starts one, plus the step) and
+    //! returns the height used, or 0 when it would not fit above `bottom`.
+    hidden function drawRow(dc, y, bottom, state, index) {
+        var step = state.stepAt(index);
+        var used = 0;
+
+        // --- the day heading ----------------------------------------------
+        if (state.startsDay(index)) {
+            var headFont = Graphics.FONT_XTINY;
+            var headH = dc.getFontHeight(headFont);
+            if (y + headH > bottom) {
+                return 0;
+            }
+            var label = state.dayOf(index);
+            dc.setColor(Graphics.COLOR_ORANGE, Graphics.COLOR_TRANSPARENT);
+            // A rule either side of the label, drawn to the chord so it never
+            // reaches past the curve.
+            var chord = Layout.chordWidth(dc, y + headH / 2);
+            var cx = dc.getWidth() / 2;
+            var textW = dc.getTextWidthInPixels(label, headFont);
+            var ruleY = y + headH / 2;
+            dc.setPenWidth(1);
+            if (chord > textW + 20) {
+                dc.drawLine(cx - chord / 2, ruleY, cx - textW / 2 - 6, ruleY);
+                dc.drawLine(cx + textW / 2 + 6, ruleY, cx + chord / 2, ruleY);
+            }
+            dc.drawText(cx, y, headFont, label, Graphics.TEXT_JUSTIFY_CENTER);
+            y += headH;
+            used += headH;
+        }
+
+        if (step == null) {
+            // A chunk that has not landed. Say so rather than leave a gap.
+            var pendingH = dc.getFontHeight(Graphics.FONT_XTINY);
+            if (y + pendingH > bottom) {
+                return (used > 0) ? used : 0;
+            }
+            dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(dc.getWidth() / 2, y, Graphics.FONT_XTINY, "loading...",
+                        Graphics.TEXT_JUSTIFY_CENTER);
+            return used + pendingH;
+        }
+
+        // --- the step ------------------------------------------------------
+        // "3) 09:30  Take the train from Panvel to CST", wrapped to fit the
+        // chord, at the largest size that keeps it to two lines.
+        var body = step["n"].toString() + ") " + step["x"];
+        var when = step["at"];
+
+        var font = Graphics.FONT_XTINY;
+        var lineH = dc.getFontHeight(font);
+        var lines = Layout.wrap(dc, body, font, Layout.chordWidth(dc, y + lineH));
+        var wanted = lines.size();
+        if (wanted > 3) { wanted = 3; }
+        var timeH = (when == null) ? 0 : dc.getFontHeight(Graphics.FONT_XTINY);
+        var needed = wanted * lineH + timeH * 0;
+
+        if (y + needed > bottom) {
+            return (used > 0) ? used : 0;
+        }
+
+        // The time leads the row in the mode's colour, so the kind of step and
+        // when it happens read before the words do.
+        if (when != null) {
+            dc.setColor(modeColour(step["m"]), Graphics.COLOR_TRANSPARENT);
+            var label = modeLabel(step["m"]);
+            var head = (label.length() > 0) ? when + "  " + label : when;
+            dc.drawText(dc.getWidth() / 2, y, Graphics.FONT_XTINY, head,
+                        Graphics.TEXT_JUSTIFY_CENTER);
+            y += lineH;
+            used += lineH;
+            if (y + wanted * lineH > bottom) {
+                return used;
+            }
+        }
+
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        for (var i = 0; i < wanted; i++) {
+            dc.drawText(dc.getWidth() / 2, y + i * lineH, font, lines[i],
+                        Graphics.TEXT_JUSTIFY_CENTER);
+        }
+        used += wanted * lineH;
+
+        // A little air between steps, so rows do not run together.
+        return used + lineH * 0.25;
+    }
+
+    hidden function drawEmpty(dc, h) {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         Layout.drawFitted(dc, h * 0.40, "No plan yet", Layout.BODY_FONTS);
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
         Layout.drawFitted(dc, h * 0.54, "Open Urban Pulse and", [Graphics.FONT_XTINY]);
-        Layout.drawFitted(dc, h * 0.63, "start Live Mode", [Graphics.FONT_XTINY]);
+        Layout.drawFitted(dc, h * 0.63, "send the plan", [Graphics.FONT_XTINY]);
     }
 
-    //! The hint, and only while it is useful.
-    hidden function drawFooter(dc, cx, h, total) {
-        dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        var hint = "BACK";
-        if (total > 1) {
-            if (mIndex == 0) {
-                hint = "DOWN for next";
-            } else if (mIndex == total - 1) {
-                hint = "UP to go back";
-            } else {
-                hint = "UP / DOWN";
-            }
-        }
-        Layout.drawFitted(dc, h * 0.845, hint, [Graphics.FONT_XTINY]);
-    }
-
-    //! An arc around the bezel: grey for the whole day, bright for how far in.
-    hidden function drawProgressArc(dc, cx, cy, w, index, total) {
-        if (total <= 1) {
+    //! A bar down the right-hand side showing how far through the trip this
+    //! page is - the round-screen equivalent of a scrollbar.
+    hidden function drawScrollbar(dc, w, h, start, end, total) {
+        if (total <= 0) {
             return;
         }
-        var radius = w * 0.47;
-        dc.setPenWidth(w * 0.018);
+        var x = w * 0.955;
+        var top = h * 0.22;
+        var height = h * 0.56;
 
-        // The track runs from 10 o'clock round the top to 2 o'clock.
-        var startDeg = 150;
-        var sweepDeg = 240;
-
+        dc.setPenWidth(w * 0.012);
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        dc.drawArc(cx, cy, radius, Graphics.ARC_CLOCKWISE, startDeg, startDeg - sweepDeg);
+        dc.drawLine(x, top, x, top + height);
 
-        var done = ((index + 1) * 1.0 / total);
-        var progressed = (sweepDeg * done).toNumber();
-        if (progressed < 2) { progressed = 2; }
+        var from = top + height * (start * 1.0 / total);
+        var to = top + height * (end * 1.0 / total);
+        if (to - from < height * 0.06) {
+            to = from + height * 0.06;
+        }
         dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
-        dc.drawArc(cx, cy, radius, Graphics.ARC_CLOCKWISE, startDeg, startDeg - progressed);
+        dc.drawLine(x, from, x, to);
+    }
+
+    //! The bottom line: how far through, and which key does what.
+    hidden function drawFooter(dc, h, state, end, total) {
+        dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+        var more = (end < total);
+        var hint;
+        if (more && mPage > 0) {
+            hint = "UP / DOWN";
+        } else if (more) {
+            hint = "DOWN for more";
+        } else if (mPage > 0) {
+            hint = "UP to go back";
+        } else {
+            hint = "BACK";
+        }
+        Layout.drawFitted(dc, h * 0.835, hint, [Graphics.FONT_XTINY]);
     }
 
     //! Short, upper-case, and ASCII - the watch has one font.

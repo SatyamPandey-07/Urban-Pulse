@@ -68,4 +68,29 @@ class SosDelegate extends WatchUi.BehaviorDelegate {
     function onSelect() {
         return true;
     }
+
+    //! A tap during the phone's countdown cancels, so the SOS can be called off
+    //! by touch as well as by BACK. At any other moment a tap does nothing: this
+    //! screen's one action needs a deliberate three second hold.
+    function onTap(event) {
+        return mView.cancelIfCounting();
+    }
+
+    //! Swiping right leaves the screen, unless a countdown is running - in which
+    //! case it cancels, exactly as BACK does. Walking away from the screen must
+    //! never be the thing that silently cancels an emergency.
+    function onSwipe(event) {
+        if (event.getDirection() != WatchUi.SWIPE_RIGHT) {
+            return false;
+        }
+        if (mView.cancelIfCounting()) {
+            return true;
+        }
+        var state = UrbanPulseApp.state;
+        if (state != null) {
+            state.clearSos();
+        }
+        WatchUi.popView(WatchUi.SLIDE_RIGHT);
+        return true;
+    }
 }

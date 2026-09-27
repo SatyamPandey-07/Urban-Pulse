@@ -262,6 +262,21 @@ class _GarminWatchScreenState extends State<GarminWatchScreen> {
           ),
           const SizedBox(height: 8),
           TextButton.icon(
+            // "Nothing is on my watch" has several causes; this says which.
+            onPressed: _busy || !status.isConnected
+                ? null
+                : () async {
+                    setState(() => _busy = true);
+                    final outcome = await watch.resendPlan();
+                    if (mounted) {
+                      setState(() => _busy = false);
+                      showToast(context, outcome);
+                    }
+                  },
+            icon: const Icon(Icons.download_done_rounded, size: 18),
+            label: const Text("Send today's plan to watch"),
+          ),
+          TextButton.icon(
             // A test buzz is the only way to prove the whole chain end to end
             // without waiting for a real Live Mode update.
             onPressed: _busy || !status.isConnected

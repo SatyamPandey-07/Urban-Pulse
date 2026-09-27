@@ -9,6 +9,10 @@ module PlanTest {
         return { "n" => n, "at" => at, "x" => text, "m" => mode };
     }
 
+    function dayStep(n, at, text, mode, day) {
+        return { "n" => n, "at" => at, "x" => text, "m" => mode, "d" => day };
+    }
+
     function chunk(from, total, steps) {
         return { "t" => "plan", "v" => 1, "i" => from, "tot" => total,
                  "day" => "Day 2", "steps" => steps };
@@ -139,6 +143,52 @@ module PlanTest {
                                  step(2, "10:00", "Two", "walk")]));
         s.applyPlan(chunk(0, 0, []));
         Test.assert(!s.hasPlan());
+        return true;
+    }
+
+    (:test)
+    function groupsStepsByDay(logger) {
+        var s = new LinkState();
+        s.applyPlan(chunk(0, 4, [
+            dayStep(1, "09:00", "Fort", "visit", "Day 1"),
+            dayStep(2, "13:00", "Lunch", "meal", "Day 1"),
+            dayStep(1, "08:00", "Train", "train", "Day 2"),
+            dayStep(2, "12:00", "Palace", "visit", "Day 2")
+        ]));
+        // A heading starts at the first step and wherever the day changes.
+        Test.assert(s.startsDay(0));
+        Test.assert(!s.startsDay(1));
+        Test.assert(s.startsDay(2));
+        Test.assert(!s.startsDay(3));
+        Test.assertEqual(s.dayCount(), 2);
+        Test.assertEqual(s.dayOf(2), "Day 2");
+        return true;
+    }
+
+    (:test)
+    function numberingRestartsEachDay(logger) {
+        var s = new LinkState();
+        s.applyPlan(chunk(0, 3, [
+            dayStep(1, "09:00", "Fort", "visit", "Day 1"),
+            dayStep(1, "08:00", "Train", "train", "Day 2"),
+            dayStep(2, "12:00", "Palace", "visit", "Day 2")
+        ]));
+        // "step 1 of Tuesday", not "step 2 of the trip".
+        Test.assertEqual(s.stepAt(1)["n"], 1);
+        Test.assertEqual(s.stepAt(2)["n"], 2);
+        return true;
+    }
+
+    (:test)
+    function aPlanWithNoDayLabelsStillWorks(logger) {
+        var s = new LinkState();
+        s.applyPlan(chunk(0, 2, [step(1, "09:00", "One", "walk"),
+                                 step(2, "10:00", "Two", "walk")]));
+        // An older phone sends no "d"; the list simply has no headings.
+        Test.assert(!s.startsDay(0));
+        Test.assertEqual(s.dayCount(), 0);
+        Test.assert(s.dayOf(0) == null);
+        Test.assert(s.hasPlan());
         return true;
     }
 

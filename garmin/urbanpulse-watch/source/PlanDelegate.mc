@@ -1,4 +1,5 @@
 import Toybox.Lang;
+import Toybox.System;
 import Toybox.WatchUi;
 
 //! The plan's input: DOWN and UP step through the day.
@@ -27,6 +28,7 @@ class PlanDelegate extends WatchUi.BehaviorDelegate {
     }
 
     //! Swiping up reveals what is further down the list, and vice versa.
+    //! Swiping right leaves, which is the gesture Garmin users expect for back.
     function onSwipe(event) {
         var dir = event.getDirection();
         if (dir == WatchUi.SWIPE_UP) {
@@ -37,8 +39,26 @@ class PlanDelegate extends WatchUi.BehaviorDelegate {
             mView.move(-1);
             return true;
         }
-        // A left/right swipe falls through to BACK.
+        if (dir == WatchUi.SWIPE_RIGHT) {
+            WatchUi.popView(WatchUi.SLIDE_RIGHT);
+            return true;
+        }
         return false;
+    }
+
+    //! A tap pages down, so the whole list can be read by touch alone. Tapping
+    //! the top quarter pages back, for a finger that overshot.
+    function onTap(event) {
+        var coords = event.getCoordinates();
+        var settings = System.getDeviceSettings();
+        if (coords != null && settings != null && settings has :screenHeight) {
+            if (coords[1] < settings.screenHeight * 0.25) {
+                mView.move(-1);
+                return true;
+            }
+        }
+        mView.move(1);
+        return true;
     }
 
     function onBack() {

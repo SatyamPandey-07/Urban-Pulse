@@ -24,7 +24,133 @@ TransportLeg leg({
   walking: walking,
 );
 
+Itinerary tripOn(List<DateTime> dates, {int firstDayNumber = 1}) => Itinerary(
+  id: 't${dates.first.millisecondsSinceEpoch}',
+  createdAt: base,
+  destination: 'Jaipur',
+  origin: 'Delhi',
+  start: dates.first,
+  end: dates.last,
+  budget: const Budget(lines: []),
+  days: [
+    for (var i = 0; i < dates.length; i++)
+      ItineraryDay(
+        number: firstDayNumber + i,
+        date: dates[i],
+        title: 'Day ${firstDayNumber + i}',
+        slots: [
+          ItinerarySlot(
+            kind: SlotKind.visit,
+            start: DateTime(dates[i].year, dates[i].month, dates[i].day, 9),
+            end: DateTime(dates[i].year, dates[i].month, dates[i].day, 11),
+            title: 'Amber Fort',
+          ),
+          ItinerarySlot(
+            kind: SlotKind.meal,
+            start: DateTime(dates[i].year, dates[i].month, dates[i].day, 13),
+            end: DateTime(dates[i].year, dates[i].month, dates[i].day, 14),
+            title: 'Lunch at Laxmi',
+          ),
+        ],
+      ),
+  ],
+);
+
 void main() {
+  group('buildWatchSnapshot', () {
+    final now = DateTime(2026, 10, 12, 10, 30);
+    final today = DateTime(2026, 10, 12);
+    final tomorrow = DateTime(2026, 10, 13);
+    final lastWeek = DateTime(2026, 10, 5);
+
+    test('prefers the day that is today', () {
+      final snap = buildWatchSnapshot([tripOn([today], firstDayNumber: 2)], now);
+      expect(snap, isNotNull);
+      expect(snap!.day, 'Day 2');
+      expect(snap.steps, hasLength(2));
+    });
+
+    test('gives today a next stop, by the clock', () {
+      final snap = buildWatchSnapshot([tripOn([today])], now);
+      expect(snap!.next, isNotNull);
+      // 10:30 is inside the 09:00-11:00 visit, so that is still where to be.
+      // This matches LiveModeEngine.nextSlot, which also keeps a slot until its
+      // end has passed - the two must agree or the watch would jump when Live
+      // Mode starts.
+      expect(snap.next!.at, '09:00');
+      // No Live Mode means no position, so no distance is claimed.
+      expect(snap.next!.distanceM, isNull);
+    });
+
+    test('moves on once a slot has finished', () {
+      // 12:00: the morning visit is over, lunch has not started.
+      final snap = buildWatchSnapshot(
+        [tripOn([today])],
+        DateTime(2026, 10, 12, 12),
+      );
+      expect(snap!.next!.at, '13:00');
+    });
+
+    test('falls back to the soonest day still to come', () {
+      final snap = buildWatchSnapshot([tripOn([tomorrow], firstDayNumber: 4)], now);
+      expect(snap, isNotNull);
+      expect(snap!.day, 'Day 4');
+    });
+
+    test('claims no next stop for a future day', () {
+      final snap = buildWatchSnapshot([tripOn([tomorrow])], now);
+      // "Next stop at 09:00" would be a lie about today.
+      expect(snap!.next, isNull);
+      expect(snap.steps, isNotEmpty);
+    });
+
+    test('never shows a day that has passed', () {
+      expect(buildWatchSnapshot([tripOn([lastWeek])], now), isNull);
+    });
+
+    test('picks today over a trip that also has tomorrow', () {
+      final snap = buildWatchSnapshot(
+        [tripOn([tomorrow], firstDayNumber: 9), tripOn([today], firstDayNumber: 3)],
+        now,
+      );
+      expect(snap!.day, 'Day 3');
+      expect(snap.next, isNotNull);
+    });
+
+    test('is null when there are no trips at all', () {
+      expect(buildWatchSnapshot(const [], now), isNull);
+    });
+
+    test('skips a day whose slots make no steps', () {
+      final empty = Itinerary(
+        id: 'e',
+        createdAt: base,
+        destination: 'X',
+        origin: 'Y',
+        start: today,
+        end: today,
+        budget: const Budget(lines: []),
+        days: [
+          ItineraryDay(
+            number: 1,
+            date: today,
+            title: 'Nothing',
+            // Rest slots are not instructions, so this day has no steps.
+            slots: [
+              ItinerarySlot(
+                kind: SlotKind.rest,
+                start: DateTime(2026, 10, 12, 9),
+                end: DateTime(2026, 10, 12, 18),
+                title: 'Free day',
+              ),
+            ],
+          ),
+        ],
+      );
+      expect(buildWatchSnapshot([empty], now), isNull);
+    });
+  });
+
   group('buildWatchPlan', () {
     test('numbers the steps in time order from one', () {
       final day = ItineraryDay(

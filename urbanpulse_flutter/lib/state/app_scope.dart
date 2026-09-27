@@ -27,6 +27,7 @@ import '../services/trip_pool/trip_pool_service.dart';
 import '../services/voice/voice_service.dart';
 import '../services/watch/method_channel_watch_link.dart';
 import '../services/watch/watch_link.dart';
+import '../services/watch/watch_plan_builder.dart';
 import '../services/watch/watch_service.dart';
 import 'accessibility_controller.dart';
 import 'activity_tracker.dart';
@@ -239,6 +240,9 @@ class AppServices {
     link: _watchLink,
     prefs: prefs,
     sos: emergencySos,
+    // Today's plan, read fresh each time it is asked for, so a trip edited on
+    // the phone reaches the watch on its next connect without any wiring here.
+    snapshot: () => buildWatchSnapshot(itineraries.all(), DateTime.now()),
   );
 
   /// Builds [watch] if needed, then probes for the device.

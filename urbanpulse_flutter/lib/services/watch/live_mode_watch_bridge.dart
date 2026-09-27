@@ -82,10 +82,19 @@ class LiveModeWatchBridge {
     final day = controller.day;
     final metres = controller.metresToNext;
 
-    // The whole day, so the watch can be scrolled through it. Sent once per day.
-    if (day != null && _planSentForDay != day.number) {
+    // The whole trip from today on, so the watch can be scrolled through it.
+    //
+    // Built from the controller's own itinerary rather than just the day Live
+    // Mode is running: sending one day here would replace the multi-day plan the
+    // phone published on connect, and the traveller would lose tomorrow the
+    // moment they switched Live Mode on.
+    final trip = controller.itinerary;
+    if (day != null && trip != null && _planSentForDay != day.number) {
       _planSentForDay = day.number;
-      await mirror.pushPlan(buildWatchPlan(day), day: 'Day ${day.number}');
+      final snapshot = buildWatchSnapshot([trip], _now());
+      if (snapshot != null) {
+        await mirror.pushPlan(snapshot.steps, day: snapshot.day);
+      }
     }
 
     await mirror.pushState(WatchStateMessage(

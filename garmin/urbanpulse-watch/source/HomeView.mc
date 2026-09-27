@@ -135,12 +135,17 @@ class HomeView extends WatchUi.View {
         }
         dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
         if (state.hasPlan()) {
-            var total = state.planSteps.size();
-            Layout.drawFitted(dc, h * 0.815,
-                              "DOWN: " + total.toString() + " steps",
-                              [Graphics.FONT_XTINY]);
+            var steps = state.planSteps.size();
+            var days = state.dayCount();
+            var hint = "DOWN: " + steps.toString() + " steps";
+            if (days > 1) {
+                // Worth saying: the list runs past today into the rest of the trip.
+                hint = "DOWN: " + days.toString() + " days, " + steps.toString() + " steps";
+            }
+            Layout.drawFitted(dc, h * 0.815, hint, [Graphics.FONT_XTINY]);
         } else {
-            Layout.drawFitted(dc, h * 0.825, "Hold START for SOS", [Graphics.FONT_XTINY]);
+            // The bottom band is the SOS tap target, so the words in it say so.
+            Layout.drawFitted(dc, h * 0.825, "Tap here for SOS", [Graphics.FONT_XTINY]);
         }
     }
 
