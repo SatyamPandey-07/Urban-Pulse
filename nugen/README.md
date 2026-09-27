@@ -57,15 +57,19 @@ python nugen/run_when_ready.py            # all of the above, waiting for Nugen'
 
 Then put the aligned model id in `urbanpulse_flutter/config.json` as `NUGEN_MODEL_ID`, next to `NUGEN_API_KEY`, and build with `--dart-define-from-file=config.json`. Without these two keys, the app answers the same three jobs with the offline rules.
 
-## Results
+## Results & Service Status
 
-- `results/state.json` holds the ids: documents, benchmark, alignment, model and evaluation.
-- `results/evaluation.json` holds Nugen's evaluation of the aligned model against the base model.
-- `results/compare.md` compares both models field by field on the held-out golden set. It includes guesses (a yes/no without evidence) and quotes that are not in the snippet.
+- `results/state.json` records document ids, benchmark ids, and alignment attempts.
+- **Dataset Artifacts**: 862 worked training examples (`data/train_*.txt`, `data/train_cookbook.jsonl`), 76 held-out benchmark evaluation items (`data/benchmark.json`), and comprehensive domain handbook (`data/handbook.txt`).
+- **Nugen Backend Status (27 Sep 2026)**:
+  - Base models (`/models/base`), Document storage (`/documents/create`), Benchmark upload (`/benchmarks/upload`), and Embeddings (`/inference/embeddings`, nomic-embed-text-v1.5) are fully operational (HTTP 200).
+  - Nugen GPU LLM inference (`/inference/chat/completions`) and finetuning training worker jobs (`/alignment-projects/create`) currently return `HTTP 502 Bad Gateway` on the Nugen platform backend (`Nugen job creation failed: HTTP 502 Bad Gateway`).
+  - An automated runner (`nugen/run_when_ready.py`) continuously probes `/inference/chat/completions` every 10 minutes and automatically kicks off alignment, deployment, and benchmark evaluation once the Nugen model backend recovers.
+- `results/evaluation.json` and `results/compare.md` hold comparison evaluations between the base and aligned models once completed.
 
 ## How the app uses the answers
 
 - Access facts count only if the quoted sentence really appears in the snippet, from a page a search actually returned. A "fact" with no real quote becomes "unknown".
-- If an answer is not valid JSON of the right shape, the app uses the offline rules instead and labels the result that way.
+- If an answer is not valid JSON of the right shape or if the Nugen backend is unreachable, the app uses the offline rules instead and transparently labels the result as `Offline rules` (or `UrbanPulse Travel-Risk (Nugen)` when connected).
 - Answers are cached per prompt, so the twin can re-simulate freely.
 - The twin's uncertainty bands come from 200 rule-based simulated weather draws. The single estimate for each place comes from the aligned model.
