@@ -54,3 +54,23 @@ String dateRangeLabel(DateTime a, DateTime b) {
       ? '${d(a)} – ${d(b)} ${b.year}'
       : '${d(a)} ${a.year} – ${d(b)} ${b.year}';
 }
+
+/// `"450 m"`, `"2.4 km"`, `"38 km"`: a distance a person reads on a map.
+String distanceLabel(num meters) {
+  if (!meters.isFinite || meters < 0) return '';
+  if (meters < 950) {
+    final tens = (meters / 10).round() * 10;
+    return '${tens == 0 ? meters.round() : tens} m';
+  }
+  final km = meters / 1000;
+  return km < 10 ? '${km.toStringAsFixed(1)} km' : '${km.round()} km';
+}
+
+/// `"7 min"`, `"1 h 5 min"`, `"2 h"`.
+String minutesLabel(int minutes) {
+  if (minutes < 1) return '1 min';
+  if (minutes < 60) return '$minutes min';
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  return m == 0 ? '$h h' : '$h h $m min';
+}

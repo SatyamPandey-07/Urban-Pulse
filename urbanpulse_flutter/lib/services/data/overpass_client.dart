@@ -85,6 +85,12 @@ class OverpassClient {
   nwr["amenity"="place_of_worship"]["name"]["tourism"](around:$radiusM,$lat,$lon);
 );''');
 
+  /// Named places of one kind around a point (for a map's category buttons).
+  /// [filters] are Overpass tag filters such as `["amenity"="hospital"]`; each
+  /// one is a separate alternative.
+  Future<List<OsmPlace>?> nearby(String kind, List<String> filters, double lat, double lon, {int radiusM = 4000, int limit = 40}) =>
+      _run('near.$kind', lat, lon, radiusM, limit, '(\n${[for (final f in filters) '  nwr$f["name"](around:$radiusM,$lat,$lon);'].join('\n')}\n);');
+
   /// Finds a named place (to read its accessibility tags), nearest first.
   Future<List<OsmPlace>?> byName(String name, double lat, double lon, {int radiusM = 3000}) {
     final safe = escapeRegex(name.trim());

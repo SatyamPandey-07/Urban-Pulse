@@ -103,8 +103,9 @@ abstract final class TomTomService {
           final osmResults = <LivePoiResult>[];
           for (final item in list) {
             final m = item as Map<String, dynamic>;
-            final rLat = double.tryParse(m['lat']?.toString() ?? '') ?? lat;
-            final rLon = double.tryParse(m['lon']?.toString() ?? '') ?? lon;
+            final rLat = double.tryParse(m['lat']?.toString() ?? '');
+            final rLon = double.tryParse(m['lon']?.toString() ?? '');
+            if (rLat == null || rLon == null) continue;
             final distM =
                 CarbonEstimator.haversineKm(lat, lon, rLat, rLon) * 1000.0;
             final name = (m['name'] as String?)?.isNotEmpty == true
@@ -183,8 +184,11 @@ abstract final class TomTomService {
       final position = item['position'] as Map<String, dynamic>?;
       final categories = poi?['categories'] as List<dynamic>?;
 
-      final resLat = (position?['lat'] as num?)?.toDouble() ?? userLat;
-      final resLon = (position?['lon'] as num?)?.toDouble() ?? userLon;
+      // A result without a position cannot be shown on a map: skip it rather
+      // than placing it where the traveller is.
+      final resLat = (position?['lat'] as num?)?.toDouble();
+      final resLon = (position?['lon'] as num?)?.toDouble();
+      if (resLat == null || resLon == null) continue;
       final rawDist = (item['dist'] as num?)?.toDouble();
       final distMeters = rawDist ??
           (CarbonEstimator.haversineKm(userLat, userLon, resLat, resLon) *
