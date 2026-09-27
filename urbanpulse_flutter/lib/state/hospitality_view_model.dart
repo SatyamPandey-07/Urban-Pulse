@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../domain/pareto_optimizer.dart';
 import '../models/evidence.dart';
-import '../repositories/hospitality_repository.dart';
+import '../services/live_stays.dart';
 
 enum StayChipFilter {
   all('All Stays'),
@@ -16,14 +16,22 @@ enum StayChipFilter {
   final String label;
 }
 
-/// Loads every stay once, Pareto-ranks it, then applies the search query and
-/// chip filter in memory. Port of `viewmodel/HospitalityViewModel.kt`.
+/// Finds the stays for a place (live, when the screen opens), Pareto-ranks them,
+/// then applies the search query and chip filter in memory. Port of
+/// `viewmodel/HospitalityViewModel.kt`, now fed by the live stay search.
 class HospitalityViewModel extends ChangeNotifier {
-  HospitalityViewModel(this._repository) {
-    _load();
+  HospitalityViewModel(this._loader) {
+    reload();
   }
 
-  final HospitalityRepository _repository;
+  final Future<LiveStaysResult> Function() _loader;
+  bool _disposed = false;
+
+  /// Why nothing was found, and where what was found came from.
+  String? error;
+  List<String> sources = const [];
+  List<String> warnings = const [];
+  int considered = 0;
 
   List<RankedHospitalityStay> _allRanked = const [];
   List<RankedHospitalityStay> _visible = const [];
@@ -37,11 +45,25 @@ class HospitalityViewModel extends ChangeNotifier {
 
   StayChipFilter get chipFilter => _chipFilter;
 
-  Future<void> _load() async {
-    final stays = await _repository.getAllStays();
-    _allRanked = ParetoOptimizer.rank(stays);
+  Future<void> reload() async {
+    _isLoading = true;
+    error = null;
+    notifyListeners();
+    final r = await _loader();
+    if (_disposed) return;
+    _allRanked = ParetoOptimizer.rank(r.stays);
+    error = r.error;
+    sources = r.sources;
+    warnings = r.warnings;
+    considered = r.considered;
     _isLoading = false;
     _applyFilters();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   void updateQuery(String query) {
@@ -82,6 +104,6 @@ class HospitalityViewModel extends ChangeNotifier {
 
       return matchesQuery && matchesChip;
     }).toList();
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 }

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../core/app_colors.dart';
 import '../core/formatting.dart';
@@ -6,12 +9,15 @@ import '../core/routes.dart';
 import '../domain/carbon_estimator.dart';
 import '../domain/mobility_optimizer.dart';
 import '../models/mobility.dart';
-import '../services/tomtom_service.dart';
+import '../models/map_route.dart' show NavMode;
+import '../services/place_geocoder.dart';
+import '../services/routing_service.dart';
 import '../services/trip_intent_parser.dart';
 import '../state/activity_tracker.dart';
 import '../state/app_scope.dart';
 import '../state/trip_plan_manager.dart';
 import '../widgets/common.dart';
+import '../widgets/tool_location_sheet.dart';
 
 /// Port of `GreenRoutePlannerActivity` / `activity_green_route_planner.xml`:
 /// origin/destination entry with a real GPS lock, a real TomTom-routed distance,
@@ -25,13 +31,19 @@ class GreenRoutePlannerScreen extends StatefulWidget {
 }
 
 class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
-  final _origin = TextEditingController(
-    text: 'Current GPS Location (Mulund / Thane)',
-  );
-  final _destination = TextEditingController(
-    text: 'Chhatrapati Shivaji Maharaj Terminus (CSMT)',
-  );
+  final _origin = TextEditingController();
+  final _destination = TextEditingController();
   final _intentController = TextEditingController();
+
+  /// Where the two ends are, found with the geocoder (or chosen from the
+  /// sheet / GPS). Nothing is measured until both are known.
+  final _geocoder = PlaceGeocoder();
+  LatLng? _originPt;
+  LatLng? _destPt;
+  Timer? _resolveTimer;
+  bool _resolving = false;
+  bool _settingText = false;
+  String? _placeMessage;
 
   TravelMode _selectedMode = TravelMode.metro;
   TradeoffPriority _priority = TradeoffPriority.eco;
@@ -50,38 +62,118 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
   @override
   void initState() {
     super.initState();
-    _origin.addListener(_onEndpointChanged);
-    _destination.addListener(_onEndpointChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _recalculate());
+    _origin.addListener(() => _onEndpointChanged(origin: true));
+    _destination.addListener(() => _onEndpointChanged(origin: false));
+    // Start from where the traveller is, if the app knows.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startFromHere());
+  }
+
+  Future<void> _startFromHere() async {
+    final location = AppScope.of(context).location;
+    if (!location.hasFix) return;
+    final lat = location.latitude, lon = location.longitude;
+    if (lat == null || lon == null) return;
+    _setPlace(origin: true, text: location.city ?? 'My location', point: LatLng(lat, lon));
+  }
+
+  void _setPlace({required bool origin, required String text, required LatLng point}) {
+    _settingText = true;
+    (origin ? _origin : _destination).text = text;
+    _settingText = false;
+    if (origin) {
+      _originPt = point;
+    } else {
+      _destPt = point;
+    }
+    _realDistanceOverrideKm = null;
+    _placeMessage = null;
+    _recalculate();
+  }
+
+  Future<void> _choose({required bool origin}) async {
+    final p = await chooseToolPlace(context, title: origin ? 'Where are you starting?' : 'Where are you going?');
+    if (p != null && mounted) _setPlace(origin: origin, text: p.label.contains(' · ') && p.label.startsWith('Current') ? p.city : p.label, point: p.point);
   }
 
   @override
   void dispose() {
+    _resolveTimer?.cancel();
     _origin.dispose();
     _destination.dispose();
     _intentController.dispose();
     super.dispose();
   }
 
-  void _onEndpointChanged() {
-    // Text changed — any previous live route no longer applies.
+  void _onEndpointChanged({required bool origin}) {
+    if (_settingText) return;
+    // Text changed: the place it named and any live route no longer apply.
+    if (origin) {
+      _originPt = null;
+    } else {
+      _destPt = null;
+    }
     _realDistanceOverrideKm = null;
+    _recalculate();
+    _resolveTimer?.cancel();
+    _resolveTimer = Timer(const Duration(milliseconds: 800), _resolveMissing);
+  }
+
+  /// Finds the places named in the boxes that are not yet located.
+  Future<void> _resolveMissing() async {
+    final pending = <bool, String>{
+      if (_originPt == null && _origin.text.trim().length >= 2) true: _origin.text.trim(),
+      if (_destPt == null && _destination.text.trim().length >= 2) false: _destination.text.trim(),
+    };
+    if (pending.isEmpty) return;
+    setState(() {
+      _resolving = true;
+      _placeMessage = null;
+    });
+    String? missing;
+    for (final e in pending.entries) {
+      final area = await _geocoder.lookupArea(e.value);
+      if (!mounted) return;
+      if (area == null) {
+        missing = e.value;
+        continue;
+      }
+      // Ignore an answer for text that has been changed since.
+      if (e.key && _origin.text.trim() == e.value) _originPt = area.center;
+      if (!e.key && _destination.text.trim() == e.value) _destPt = area.center;
+    }
+    setState(() {
+      _resolving = false;
+      _placeMessage = missing == null ? null : 'I could not find "$missing". Try the city name, or pick it from the list.';
+    });
     _recalculate();
   }
 
-  double get _currentDistanceKm =>
-      _realDistanceOverrideKm ??
-      CarbonEstimator.estimateDistanceKm(_origin.text, _destination.text);
+  /// The trip's distance: a live measurement if there is one, otherwise an
+  /// estimate from the two located places. Null until both are known.
+  double? get _distanceKm {
+    if (_realDistanceOverrideKm != null) return _realDistanceOverrideKm;
+    final o = _originPt, d = _destPt;
+    if (o == null || d == null) return null;
+    return CarbonEstimator.estimateDistanceBetween(o.latitude, o.longitude, d.latitude, d.longitude);
+  }
 
   /// Recomputes real distance/cost/carbon for every mode (including walk/cycle
   /// feasibility) and re-ranks them.
   void _recalculate() {
     if (!mounted) return;
+    final km = _distanceKm;
+    if (km == null) {
+      setState(() {
+        _allOptions = const [];
+        _ranked = const [];
+      });
+      return;
+    }
     final requireStepFree =
         AppScope.of(context).accessibility.isWheelchairModeEnabled ||
         _priority == TradeoffPriority.stepFree;
 
-    final allOptions = CarbonEstimator.estimateAllModes(_currentDistanceKm);
+    final allOptions = CarbonEstimator.estimateAllModes(km);
     final ranked = MobilityOptimizer.rank(
       allOptions,
       _priority,
@@ -114,34 +206,33 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
       );
       return;
     }
-    // Prefer the resolved place name; fall back to the raw fix, which
-    // CarbonEstimator can also parse.
-    final place = location.city;
-    _origin.text = place != null
-        ? '$place (${fixed(location.latitude!, 4)}° N, '
-              '${fixed(location.longitude!, 4)}° E)'
-        : 'My GPS Location (${fixed(location.latitude!, 4)}° N, '
-              '${fixed(location.longitude!, 4)}° E)';
-    showToast(context, 'Origin set to real-time GPS coordinates.');
+    _setPlace(origin: true, text: location.city ?? 'My location', point: LatLng(location.latitude!, location.longitude!));
+    showToast(context, 'Starting from your current location.');
   }
 
   Future<void> _recalculateLiveRoute() async {
     setState(() => _isRecalculating = true);
-    final realKm = await TomTomService.fetchRealRouteDistanceKm(
-      _origin.text,
-      _destination.text,
-    );
+    _resolveTimer?.cancel();
+    await _resolveMissing();
+    final o = _originPt, d = _destPt;
+    if (!mounted) return;
+    if (o == null || d == null) {
+      setState(() => _isRecalculating = false);
+      showToast(context, 'Enter where you are starting and where you are going first.');
+      return;
+    }
+    final routes = await RoutingService().routes(o, d, NavMode.drive);
     if (!mounted) return;
 
-    _realDistanceOverrideKm = realKm;
+    _realDistanceOverrideKm = routes.isEmpty ? null : routes.first.distanceKm;
     _recalculate();
     setState(() => _isRecalculating = false);
 
     showToast(
       context,
-      realKm != null
-          ? 'TomTom-routed distance: ${fixed(realKm)} km.'
-          : 'Live route unavailable — using ${fixed(_currentDistanceKm)} km estimate.',
+      routes.isNotEmpty
+          ? 'Road distance measured by ${routes.first.source}: ${fixed(routes.first.distanceKm)} km.'
+          : 'A live route is unavailable, so the distance is an estimate: ${fixed(_distanceKm ?? 0)} km.',
     );
   }
 
@@ -204,7 +295,9 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
   Future<void> _confirmJourney() async {
     final services = AppScope.of(context);
     final navigator = Navigator.of(context);
-    final allOptions = CarbonEstimator.estimateAllModes(_currentDistanceKm);
+    final km = _distanceKm;
+    if (km == null) return;
+    final allOptions = CarbonEstimator.estimateAllModes(km);
     final option = allOptions.where((o) => o.mode == _selectedMode).firstOrNull;
     if (option == null) return;
 
@@ -239,7 +332,7 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final distanceKm = _currentDistanceKm;
+    final distanceKm = _distanceKm;
     final selectedOption = _ranked
         .where((o) => o.mode == _selectedMode)
         .firstOrNull;
@@ -275,15 +368,29 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
               children: [
                 TextField(
                   controller: _origin,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Origin / Start Point',
+                    hintText: 'City, area or landmark',
+                    suffixIcon: IconButton(tooltip: 'Choose a place', icon: const Icon(Icons.place_outlined), onPressed: () => _choose(origin: true)),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _destination,
-                  decoration: const InputDecoration(labelText: 'Destination'),
+                  decoration: InputDecoration(
+                    labelText: 'Destination',
+                    hintText: 'City, area or landmark',
+                    suffixIcon: IconButton(tooltip: 'Choose a place', icon: const Icon(Icons.place_outlined), onPressed: () => _choose(origin: false)),
+                  ),
                 ),
+                if (_resolving || _placeMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(_resolving ? 'Finding the places…' : _placeMessage!, style: theme.textTheme.bodySmall),
+                    ),
+                  ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -338,12 +445,17 @@ class _GreenRoutePlannerScreenState extends State<GreenRoutePlannerScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Ranked Options (${_priority.label}) • ${fixed(distanceKm)} km trip',
+            distanceKm == null ? 'Ranked Options (${_priority.label})' : 'Ranked Options (${_priority.label}) • ${fixed(distanceKm)} km trip',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
+          if (distanceKm == null)
+            const EmptyState(
+              message: 'Enter where you are starting and where you are going to compare the ways to travel.',
+              icon: Icons.alt_route_rounded,
+            ),
           // Every mode is always listed, in ranked order, so nothing is hidden.
           for (final option in _ranked) ...[
             _ModeCard(

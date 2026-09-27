@@ -6,6 +6,10 @@ import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
+import '../../services/live_stays.dart';
+import '../../widgets/tool_location_sheet.dart';
+import '../hospitality_screen.dart';
+import '../location_picker_screen.dart';
 import '../trip_pool_screen.dart';
 
 /// Port of `SettingsFragment` / `fragment_settings.xml` + `item_setting_option.xml`.
@@ -31,15 +35,19 @@ class _SettingsTabState extends State<SettingsTab> {
         services.tripPool,
       ]),
       builder: (context, _) {
-        final wheelchairStatus = services.accessibility.isWheelchairModeEnabled
-            ? 'Active (Step-Free Rerouting)'
-            : 'Disabled';
+        final a = services.accessibility;
+        final accessOn = [
+          if (a.isWheelchairModeEnabled) 'Wheelchair / step-free',
+          if (a.isVisualAssistanceEnabled) 'High contrast',
+          if (a.isHearingAssistanceEnabled) 'Flash alerts',
+          if (a.isServiceAnimalFriendlyOnly) 'Service animal',
+        ];
         final co2Kg = services.gamification.co2SavedGrams / 1000.0;
 
         final items = <_SettingItem>[
           _SettingItem(
             title: 'Inclusive Accessibility Profile',
-            subtitle: 'Wheelchair: $wheelchairStatus, Visual & Hearing alerts',
+            subtitle: accessOn.isEmpty ? 'No needs saved · tap to set them and find suitable stays' : accessOn.join(' · '),
             icon: Icons.accessible_forward_rounded,
             iconBg: const Color(0xFFE0E7FF),
             onTap: _showAccessibilityDialog,
@@ -66,14 +74,14 @@ class _SettingsTabState extends State<SettingsTab> {
           ),
           _SettingItem(
             title: 'Sustainable & Inclusive Stays',
-            subtitle: 'Verified solar hotels & accessibility audits',
+            subtitle: 'Live stays for a place you choose, checked for your access needs',
             icon: Icons.hotel_outlined,
             iconBg: const Color(0xFFE0F2FE),
             onTap: () => Navigator.of(context).pushNamed(Routes.hospitality),
           ),
           _SettingItem(
             title: 'Multimodal Green Route Planner',
-            subtitle: 'Metro, EV cab, bus emissions tradeoff',
+            subtitle: 'Real places and road distances, ranked by emissions',
             icon: Icons.alt_route_rounded,
             iconBg: const Color(0xFFFEF3C7),
             onTap: () =>
@@ -126,17 +134,15 @@ class _SettingsTabState extends State<SettingsTab> {
           ),
           _SettingItem(
             title: 'Detected Location',
-            subtitle: services.location.hasFix
-                ? '${services.location.displayTitle} • ${services.location.displaySubtitle}'
-                : 'Panvel • Maharashtra, India',
+            subtitle: '${services.location.displayTitle} • ${services.location.displaySubtitle}',
             icon: Icons.location_on_rounded,
             iconBg: const Color(0xFFF1F5F9),
-            onTap: () => services.location.resolve(force: true),
+            onTap: () => LocationPickerScreen.open(context),
           ),
           _SettingItem(
             title: 'Sign Out',
             subtitle: services.auth.userEmail.isEmpty
-                ? 'demo.traveler@urbanpulse.ai'
+                ? 'Sign out of this device'
                 : services.auth.userEmail,
             icon: Icons.logout_rounded,
             iconBg: const Color(0xFFFEE2E2),
@@ -294,8 +300,27 @@ class _SettingsTabState extends State<SettingsTab> {
     if (!mounted) return;
     showToast(
       context,
-      'Accessibility preferences updated & synced with Yatri AI.',
+      'Accessibility preferences saved.',
     );
+    if (needsFromSettings(accessibility).isEmpty) return;
+
+    // The saved needs are only useful if something uses them: offer to find
+    // stays that suit them, for the current location or a place typed in.
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Find stays that suit you?'),
+        content: const Text('I can search real stays near your current location, or a place you choose, and check them against these needs.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Not now')),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Choose a place')),
+        ],
+      ),
+    );
+    if (go != true || !mounted) return;
+    final place = await chooseToolPlace(context, title: 'Find accessible stays near…');
+    if (place == null || !mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => HospitalityScreen(place: place)));
   }
 
   Future<void> _showThemeModeSheet() async {
