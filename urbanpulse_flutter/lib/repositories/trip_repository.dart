@@ -1,13 +1,16 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/trip_models.dart';
 import '../services/cloud/cloud_store.dart';
 
 /// The traveler's saved trips, kept on the device as JSON and in their account.
-/// Port of `TripRepository.kt`.
-class TripRepository {
+/// A [ChangeNotifier] so a screen that stays alive (My Trips) can reload when a
+/// trip changes elsewhere instead of showing a stale copy. Port of
+/// `TripRepository.kt`.
+class TripRepository extends ChangeNotifier {
   TripRepository(this._prefs, {this.cloud});
 
   final SharedPreferences _prefs;
@@ -48,10 +51,13 @@ class TripRepository {
   }
 
   /// The device copy becomes [trips] (the account's, after sign-in).
-  Future<void> replaceAll(List<TripPlan> trips) => _prefs.setString(
-    _keyTrips,
-    jsonEncode(trips.map((t) => t.toJson()).toList()),
-  );
+  Future<void> replaceAll(List<TripPlan> trips) async {
+    await _prefs.setString(_keyTrips, jsonEncode(trips.map((t) => t.toJson()).toList()));
+    notifyListeners();
+  }
 
-  Future<void> clear() => _prefs.remove(_keyTrips);
+  Future<void> clear() async {
+    await _prefs.remove(_keyTrips);
+    notifyListeners();
+  }
 }

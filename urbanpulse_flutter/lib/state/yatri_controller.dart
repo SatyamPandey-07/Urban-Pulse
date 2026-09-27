@@ -477,17 +477,23 @@ class YatriController extends ChangeNotifier {
     // 3. If an itinerary is active, run ItineraryEditor with context
     final tk = toolkit;
     if (activeItinerary != null && tk != null) {
+      // The plan may have been edited elsewhere (My Trips) since this chat
+      // card last saw it: continue from the stored copy.
+      refreshFromStore(activeItinerary);
       final editor = ItineraryEditor(
         toolkit: tk,
-        ask: (q) async => const ChoiceAnswer('', ''),
+        // A real question here shows as a card in this same chat, the same
+        // way planning questions do, instead of being silently answered.
+        ask: askPlanQuestion,
         now: () => now,
       );
       try {
         final outcome = await editor.edit(activeItinerary.itinerary, text, history: List.of(_history));
         if (outcome.status == EditStatus.applied && outcome.itinerary != null) {
           final updated = outcome.itinerary!;
-          activeItinerary.itinerary = updated;
-          await itineraries?.save(updated);
+          // Keeps the itinerary store AND the My Trips card (or the cloud
+          // draft, if unsaved) in step, the same as editing from the panel does.
+          await updateItinerary(activeItinerary, updated);
 
           final summaryParts = <String>[];
           if (briefModified) {
@@ -1236,6 +1242,17 @@ class YatriController extends ChangeNotifier {
         },
       ),
     );
+  }
+
+  /// A saved plan may have been edited elsewhere (My Trips): continue from the
+  /// stored copy rather than an older one still sitting in this chat card, so
+  /// the two screens can never silently overwrite each other.
+  void refreshFromStore(ItineraryEntry entry) {
+    if (!entry.saved) return;
+    final stored = itineraries?.byId(entry.itinerary.id);
+    if (stored == null) return;
+    entry.itinerary = stored;
+    _notify();
   }
 
   /// The plan was edited: the chat card shows the new version, and it is kept
