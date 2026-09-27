@@ -8,6 +8,7 @@ import 'core/app_theme.dart';
 import 'core/config.dart';
 import 'core/routes.dart';
 import 'state/app_scope.dart';
+import 'widgets/in_app_notification_overlay.dart';
 import 'widgets/sos_overlay.dart';
 
 Future<void> main() async {
@@ -58,8 +59,10 @@ class UrbanPulseApp extends StatelessWidget {
             initialRoute: Routes.splash,
             routes: Routes.table,
             onGenerateRoute: Routes.onGenerateRoute,
-            // Your active SOS, and alerts from people nearby, on every screen.
-            builder: (context, child) => SosOverlay(child: child ?? const SizedBox.shrink()),
+            // In-app notifications and your active SOS on every screen.
+            builder: (context, child) => InAppNotificationOverlay(
+              child: SosOverlay(child: child ?? const SizedBox.shrink()),
+            ),
           );
         },
       ),

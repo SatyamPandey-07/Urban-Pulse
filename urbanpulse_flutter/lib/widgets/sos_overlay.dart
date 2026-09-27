@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/routes.dart';
+import '../models/app_notification.dart';
 import '../screens/sos_screen.dart';
 import '../services/sos/sos_models.dart';
 import '../state/app_scope.dart';
+import '../state/notification_controller.dart';
 import '../state/sos_controller.dart';
 
 /// Above every screen: a red pill while your own SOS is active (tap to manage
@@ -22,6 +24,7 @@ class SosOverlay extends StatefulWidget {
 
 class _SosOverlayState extends State<SosOverlay> {
   SosController? _sos;
+  NotificationController? _notifications;
   GlobalKey<NavigatorState>? _nav;
   final _subs = <StreamSubscription<Object?>>[];
   final _queue = <SosEvent>[];
@@ -33,6 +36,7 @@ class _SosOverlayState extends State<SosOverlay> {
     if (_sos != null) return;
     final services = AppScope.of(context);
     _sos = services.sos;
+    _notifications = services.notifications;
     _nav = services.navigatorKey;
     _subs
       ..add(_sos!.newAlerts.listen(_alert))
@@ -53,7 +57,16 @@ class _SosOverlayState extends State<SosOverlay> {
   }
 
   void _alert(SosEvent e) {
-    // In the background Android's notification does this job.
+    final away = _sos?.distanceKm(e);
+    unawaited(
+      _notifications?.add(
+        kind: NotificationKind.sos,
+        title: '${e.name} needs help nearby',
+        body: '${e.category.label}${away == null ? '' : ' · ${SosController.distanceLabel(away)} away'}.',
+        target: const NotificationTarget.route(Routes.sos),
+      ),
+    );
+    // In the background Android's own notification is the alert.
     if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
     _queue.add(e);
     unawaited(_next());

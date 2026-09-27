@@ -8,6 +8,7 @@ import '../../agents/core/llm_gateway.dart';
 import '../../agents/receptionist/receptionist_agent.dart';
 import '../../core/config.dart';
 import '../../core/routes.dart';
+import '../../models/app_notification.dart';
 import '../../models/trip_brief.dart';
 import '../../models/trip_models.dart';
 import '../../services/place_geocoder.dart';
@@ -70,8 +71,36 @@ class _YatriAiTabState extends State<YatriAiTab> {
             hasKey: () => AppConfig.hasGroqKey,
             detectedCity: () => services.location.originCity,
             settingsNeeds: () => _settingsNeeds(services),
-            onTripPlanned: () => services.activity.increment(TrackedAction.tripsPlanned),
-            onTripSaved: () => services.activity.increment(TrackedAction.tripsSaved),
+            onTripCreated: (dest) => services.notifications.add(
+              kind: NotificationKind.itinerary,
+              title: 'Planning your trip to ${_short(dest)}',
+              body: 'Yatri and the team are putting together your ${_short(dest)} itinerary.',
+              target: const NotificationTarget.tab(3),
+            ),
+            onTripPlanned: (dest) {
+              services.activity.increment(TrackedAction.tripsPlanned);
+              return services.notifications.add(
+                kind: NotificationKind.itinerary,
+                title: 'Your itinerary is ready',
+                body: 'The plan for ${_short(dest)} is ready to review.',
+                target: const NotificationTarget.tab(3),
+              );
+            },
+            onTripSaved: (dest) {
+              services.activity.increment(TrackedAction.tripsSaved);
+              return services.notifications.add(
+                kind: NotificationKind.tripSaved,
+                title: 'Trip saved',
+                body: '${_short(dest)} was added to My Trips.',
+                target: const NotificationTarget.tab(2),
+              );
+            },
+            onTripUpdated: (dest) => services.notifications.add(
+              kind: NotificationKind.tripUpdated,
+              title: 'Itinerary updated',
+              body: 'Changes applied to your ${_short(dest)} itinerary.',
+              target: const NotificationTarget.tab(3),
+            ),
             geocode: _geocoder.lookup,
             toolkit: services.agentToolkit,
             itineraries: services.itineraries,
@@ -117,6 +146,9 @@ class _YatriAiTabState extends State<YatriAiTab> {
     _speech.cancel();
     super.dispose();
   }
+
+  /// "Jaipur, Rajasthan" -> "Jaipur", for a short notification title.
+  static String _short(String destination) => destination.split(',').first.trim();
 
   static Set<AccessibilityNeed> _settingsNeeds(AppServices s) => {
     if (s.accessibility.isWheelchairModeEnabled) AccessibilityNeed.wheelchair,

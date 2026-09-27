@@ -27,6 +27,7 @@ import 'activity_tracker.dart';
 import 'auth_controller.dart';
 import 'gamification_controller.dart';
 import 'location_controller.dart';
+import 'notification_controller.dart';
 import 'sos_controller.dart';
 import 'map_requests.dart';
 import 'theme_controller.dart';
@@ -48,6 +49,11 @@ class AppServices {
     final activity = ActivityTracker(prefs, cloud: cloud);
     final gamification = GamificationController(prefs, activity, cloud: cloud);
     final accessibility = AccessibilityController(prefs, cloud: cloud);
+    final notifications = NotificationController(prefs)
+      // A badge can already be unlocked the moment this runs (a level-up while
+      // the app was closed); re-checked on every change to XP or a counter.
+      ..checkNewBadges(gamification.allBadges);
+    gamification.addListener(() => notifications.checkNewBadges(gamification.allBadges));
     final trips = TripRepository(prefs, cloud: cloud);
     final itineraries = ItineraryRepository(prefs, cloud: cloud);
     final tripBriefs = TripBriefRepository(prefs, cloud: cloud);
@@ -66,6 +72,7 @@ class AppServices {
       client: supabase,
       myName: () => auth.userName.isNotEmpty ? auth.userName : auth.userEmail.split('@').first,
       itineraries: itineraries,
+      notifications: notifications,
     );
     final sos = SosController(
       prefs: prefs,
@@ -85,6 +92,9 @@ class AppServices {
       ..afterSignOut = () async {
         await sync.afterSignOut();
         await sos.onSignedOut();
+        // A shared or reused device never carries one traveller's activity
+        // feed into the next account.
+        await notifications.clear();
       };
     final locationService = LocationService();
     final savedPlaces = SavedPlacesRepository(prefs);
@@ -110,6 +120,7 @@ class AppServices {
       locationService: locationService,
       tripPool: tripPool,
       sos: sos,
+      notifications: notifications,
     );
   }
 
@@ -135,6 +146,7 @@ class AppServices {
     required this.locationService,
     required this.tripPool,
     required this.sos,
+    required this.notifications,
   });
 
   final SharedPreferences prefs;
@@ -170,6 +182,10 @@ class AppServices {
   /// Emergency SOS: yours (power button or SOS screen) and alerts from people nearby.
   final SosController sos;
 
+  /// The in-app notification feed: trips planned, itineraries ready, Trip-pool
+  /// activity, SOS alerts nearby, badges unlocked.
+  final NotificationController notifications;
+
   /// The app's navigator, so an SOS alert can open the SOS screen from anywhere.
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -195,6 +211,7 @@ class AppServices {
     location.dispose();
     tripPool.dispose();
     sos.dispose();
+    notifications.dispose();
     yatriInbox.dispose();
     mapRequests.dispose();
   }

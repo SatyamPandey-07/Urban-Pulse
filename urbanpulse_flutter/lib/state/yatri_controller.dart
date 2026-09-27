@@ -168,8 +168,10 @@ class YatriController extends ChangeNotifier {
     required this.hasKey,
     this.detectedCity = _none,
     this.settingsNeeds = _noNeeds,
+    this.onTripCreated,
     this.onTripPlanned,
     this.onTripSaved,
+    this.onTripUpdated,
     this.geocode,
     this.toolkit,
     this.itineraries,
@@ -190,8 +192,19 @@ class YatriController extends ChangeNotifier {
   final bool Function() hasKey;
   final String? Function() detectedCity;
   final Set<AccessibilityNeed> Function() settingsNeeds;
-  final Future<void> Function()? onTripPlanned;
-  final Future<void> Function()? onTripSaved;
+  /// The traveller confirmed their brief and planning has begun, with the
+  /// destination it is for.
+  final Future<void> Function(String destination)? onTripCreated;
+
+  /// A plan finished (either the full multi-agent itinerary or the phase-1
+  /// fallback), with the destination it was for.
+  final Future<void> Function(String destination)? onTripPlanned;
+
+  /// A plan was saved to My Trips, with the destination it was for.
+  final Future<void> Function(String destination)? onTripSaved;
+
+  /// An itinerary was edited and updated, with the destination it is for.
+  final Future<void> Function(String destination)? onTripUpdated;
 
   /// Looks up a place's coordinates for the route map. Null disables the map.
   final Future<LatLng?> Function(String place)? geocode;
@@ -928,6 +941,7 @@ class YatriController extends ChangeNotifier {
     _notify();
 
     await briefs.save(confirmed);
+    unawaited(onTripCreated?.call(confirmed.destination ?? 'your trip'));
     if (confirmed.tripPool) await _openToTripPool(confirmed);
     if (tk != null) {
       await _planWithAgents(tk, confirmed);
@@ -947,7 +961,7 @@ class YatriController extends ChangeNotifier {
             ),
           )
           ..add(PlanEntry(value));
-        await onTripPlanned?.call();
+        await onTripPlanned?.call(confirmed.destination ?? 'your trip');
       case AgentErr(:final kind):
         phase = YatriPhase.review;
         entries.add(ErrorEntry(kind, () => confirmBrief(confirmed)));
@@ -1090,7 +1104,7 @@ class YatriController extends ChangeNotifier {
           ),
         )
         ..add(ItineraryEntry(itinerary));
-      await onTripPlanned?.call();
+      await onTripPlanned?.call(confirmed.destination ?? 'your trip');
       busy = false;
       _notify();
       return;
@@ -1128,7 +1142,7 @@ class YatriController extends ChangeNotifier {
             ),
           )
           ..add(PlanEntry(plan));
-        await onTripPlanned?.call();
+        await onTripPlanned?.call(confirmed.destination ?? 'your trip');
       case AgentErr(:final kind):
         phase = YatriPhase.review;
         entries.add(ErrorEntry(kind, () => confirmBrief(confirmed)));
@@ -1236,6 +1250,7 @@ class YatriController extends ChangeNotifier {
       final c = cloud;
       if (c != null && c.enabled) unawaited(c.saveItinerary(updated, saved: false, briefClientId: updated.brief?.id));
     }
+    unawaited(onTripUpdated?.call(updated.destination));
   }
 
   Future<void> saveItinerary(ItineraryEntry entry) async {
@@ -1245,7 +1260,7 @@ class YatriController extends ChangeNotifier {
     entry.saved = true;
     // An approved Trip-pool for this trip applies to the saved plan.
     unawaited(tripPool?.refresh());
-    await onTripSaved?.call();
+    await onTripSaved?.call(entry.itinerary.destination);
     _notify();
   }
 
@@ -1253,7 +1268,7 @@ class YatriController extends ChangeNotifier {
     if (entry.saved) return;
     await trips.addTrip(entry.plan);
     entry.saved = true;
-    await onTripSaved?.call();
+    await onTripSaved?.call(entry.plan.destination);
     _notify();
   }
 

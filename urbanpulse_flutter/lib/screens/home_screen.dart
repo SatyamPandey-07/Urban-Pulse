@@ -42,6 +42,12 @@ class HomeTabController extends InheritedWidget {
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  /// Allows external navigation (like in-app notification toasts) to switch tabs.
+  static final ValueNotifier<int?> tabSwitcher = ValueNotifier<int?>(null);
+  static void selectTab(int index) {
+    tabSwitcher.value = index;
+  }
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -62,9 +68,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    HomeScreen.tabSwitcher.addListener(_onExternalTabSwitch);
+  }
+
+  @override
   void dispose() {
     _mapRequests?.removeListener(_mapRequested);
+    HomeScreen.tabSwitcher.removeListener(_onExternalTabSwitch);
     super.dispose();
+  }
+
+  void _onExternalTabSwitch() {
+    final target = HomeScreen.tabSwitcher.value;
+    if (target != null && mounted) {
+      _switchToTab(target);
+      HomeScreen.tabSwitcher.value = null;
+    }
   }
 
   static const _pages = <Widget>[
@@ -303,43 +324,50 @@ class _LocationAppBarState extends State<_LocationAppBar> {
         ),
       ),
       actions: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerLow,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: theme.colorScheme.outlineVariant,
-                    width: 1,
+        AnimatedBuilder(
+          animation: AppScope.of(context).notifications,
+          builder: (context, _) {
+            final unread = AppScope.of(context).notifications.unreadCount;
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerLow,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant,
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      unread > 0 ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
+                      size: 20,
+                      color: unread > 0 ? AppColors.primaryGreen : theme.colorScheme.onSurface,
+                    ),
                   ),
+                  tooltip: 'Notifications',
+                  onPressed: () => Navigator.of(context).pushNamed(Routes.notifications),
                 ),
-                child: Icon(
-                  Icons.notifications_none_rounded,
-                  size: 20,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              tooltip: 'Notifications & Achievements',
-              onPressed: () => Navigator.of(context).pushNamed(Routes.achievements),
-            ),
-            Positioned(
-              top: 16,
-              right: 14,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppColors.solidError,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ],
+                if (unread > 0)
+                  Positioned(
+                    top: 15,
+                    right: 13,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.solidError,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
         Padding(
           padding: const EdgeInsets.only(right: 14),

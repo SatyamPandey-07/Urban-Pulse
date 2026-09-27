@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
+import '../../models/app_notification.dart';
 import '../../models/trip_models.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
@@ -49,6 +50,12 @@ class _TripsTabState extends State<TripsTab> {
                 onChanged: (updated) async {
                   await services.itineraries.save(updated);
                   await services.trips.upsertTrip(updated.toTripPlan(), itineraryClientId: updated.id);
+                  await services.notifications.add(
+                    kind: NotificationKind.tripUpdated,
+                    title: 'Itinerary updated',
+                    body: 'Plan for ${updated.destination.split(',').first.trim()} updated.',
+                    target: const NotificationTarget.tab(2),
+                  );
                 },
               ),
             ),
