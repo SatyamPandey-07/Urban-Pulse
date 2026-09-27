@@ -161,25 +161,135 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
+  String _selectedCategory = 'All';
+
+  static final List<_CuratedPlace> _allPlaces = [
+    _CuratedPlace(
+      name: 'Lonavala & Khandala',
+      category: 'Hill Stations',
+      distanceStr: '28 km from Panvel',
+      travelTime: '1.2 hrs by train / cab',
+      rating: 4.8,
+      reviewsCount: 1420,
+      imageUrl: 'https://images.unsplash.com/photo-1570789210967-2cac24afeb00?w=800&auto=format&fit=crop&q=80',
+      tag: 'Mist & Waterfalls',
+      tagColor: Color(0xFF047857),
+      description: 'Scenic Western Ghats hill station famous for lush valleys, Karla & Bhaja rock-cut caves, and panoramic mountain lookouts.',
+      highlights: ['Tiger Point', 'Bhushi Dam', 'Karla Caves', 'Rajmachi Fort'],
+      ecoScore: '🌱 -65% CO2e via Central Rail',
+      accentColor: Color(0xFF047857),
+    ),
+    _CuratedPlace(
+      name: 'Alibaug Coastal Bay',
+      category: 'Beaches',
+      distanceStr: '56 km via Mandwa Jetty',
+      travelTime: '1.5 hrs via Ro-Ro Ferry + eBus',
+      rating: 4.7,
+      reviewsCount: 980,
+      imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80',
+      tag: 'Beaches & Forts',
+      tagColor: Color(0xFF0284C7),
+      description: 'Coastal paradise renowned for clean sandy beaches, sea forts reachable during low tide, and sustainable homestays.',
+      highlights: ['Kolaba Sea Fort', 'Mandwa Beach', 'Varsoli Coast', 'Kihim Beach'],
+      ecoScore: '🌱 Low-emission electric ferry link',
+      accentColor: Color(0xFF0284C7),
+    ),
+    _CuratedPlace(
+      name: 'Matheran Eco-Reserve',
+      category: 'Eco & Nature',
+      distanceStr: '65 km from Panvel',
+      travelTime: '2 hrs via Neral Toy Train',
+      rating: 4.9,
+      reviewsCount: 1850,
+      imageUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&auto=format&fit=crop&q=80',
+      tag: 'Zero Automobile Zone',
+      tagColor: Color(0xFF059669),
+      description: "Asia's only automobile-free hill retreat. Red soil pathways, thick forest canopy, and over 38 lookout points.",
+      highlights: ['Charlotte Lake', 'Panorama Point', 'Echo Point', 'Louisa Lookout'],
+      ecoScore: '🌱 100% Zero-tailpipe emission zone',
+      accentColor: Color(0xFF059669),
+    ),
+    _CuratedPlace(
+      name: 'Mahabaleshwar & Panchgani',
+      category: 'Hill Stations',
+      distanceStr: '115 km from Pune/Panvel',
+      travelTime: '3 hrs via eBus express',
+      rating: 4.8,
+      reviewsCount: 2100,
+      imageUrl: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&auto=format&fit=crop&q=80',
+      tag: 'Strawberry Valleys',
+      tagColor: Color(0xFFE11D48),
+      description: 'Elevated plateau in the Sahyadri range featuring fresh strawberry farms, evergreen viewpoints, and Venna Lake boating.',
+      highlights: ["Arthur's Seat", 'Venna Lake', 'Mapro Garden', "Elephant's Head"],
+      ecoScore: '🌱 Certified organic farm trails',
+      accentColor: Color(0xFFE11D48),
+    ),
+    _CuratedPlace(
+      name: 'Jaipur Pink City',
+      category: 'Heritage & Forts',
+      distanceStr: 'Rajasthan Heritage Hub',
+      travelTime: 'Direct Vande Bharat / Flight',
+      rating: 4.9,
+      reviewsCount: 3400,
+      imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&auto=format&fit=crop&q=80',
+      tag: 'Royal Palaces & Forts',
+      tagColor: Color(0xFFD97706),
+      description: 'UNESCO World Heritage city with sandstone palaces, astronomical observatories, and vibrant bazaar culture.',
+      highlights: ['Amber Palace', 'Hawa Mahal', 'City Palace', 'Jantar Mantar'],
+      ecoScore: '🌱 Solar-powered transit metro',
+      accentColor: Color(0xFFD97706),
+    ),
+    _CuratedPlace(
+      name: 'Coorg (Kodagu)',
+      category: 'Coffee & Highlands',
+      distanceStr: 'Western Ghats Rainforest',
+      travelTime: 'Scenic Hill Road Connection',
+      rating: 4.9,
+      reviewsCount: 1680,
+      imageUrl: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=800&auto=format&fit=crop&q=80',
+      tag: 'Coffee & Waterfalls',
+      tagColor: Color(0xFF15803D),
+      description: 'The Scotland of India. Misty valleys, sprawling coffee and spice plantations, and gushing Abbey Falls.',
+      highlights: ['Abbey Falls', "Raja's Seat", 'Dubare Elephant Sanctuary', 'Talakaveri'],
+      ecoScore: '🌱 Certified Rainforest Alliance Stay',
+      accentColor: Color(0xFF15803D),
+    ),
+    _CuratedPlace(
+      name: 'Goa Coastal Trail',
+      category: 'Beaches',
+      distanceStr: 'Konkan Coastline',
+      travelTime: 'Vande Bharat Express Route',
+      rating: 4.8,
+      reviewsCount: 2950,
+      imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&auto=format&fit=crop&q=80',
+      tag: 'Sunset & Heritage',
+      tagColor: Color(0xFF0284C7),
+      description: 'Pristine golden coastline, Portuguese baroque architecture, mangrove estuaries, and oceanfront eco-huts.',
+      highlights: ['Palolem Bay', 'Fort Aguada', 'Dudhsagar Falls', 'Fontainhas Quarter'],
+      ecoScore: '🌱 Electric scooter & bike routes',
+      accentColor: Color(0xFF0284C7),
+    ),
+  ];
+
   Widget _searchBar(BuildContext context) {
     return InkWell(
-      onTap: () => HomeTabController.maybeOf(context)?.switchToTab(1),
+      onTap: () => _showSearchPlacesSheet(context),
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        height: 48,
+        height: 50,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: AppColors.surfaceLightBorder,
-            width: 1,
+            width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -187,30 +297,43 @@ class _DashboardTabState extends State<DashboardTab> {
           children: [
             const Icon(
               Icons.search_rounded,
-              color: AppColors.textSecondary,
-              size: 20,
+              color: AppColors.primaryGreen,
+              size: 22,
             ),
             const SizedBox(width: 10),
             const Expanded(
               child: Text(
-                'Search places, hotels, facilities...',
+                'Explore destinations, hill stations, beaches…',
                 style: TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.normal,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.bgLight,
+                color: AppColors.primaryGreen.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.tune_rounded,
-                color: AppColors.textSecondary,
-                size: 18,
+              child: Row(
+                children: const [
+                  Icon(
+                    Icons.auto_awesome,
+                    color: AppColors.primaryGreen,
+                    size: 14,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    'AI Finder',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryGreen,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -414,26 +537,11 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _popularDestinationsSection(BuildContext context) {
-    final destinations = [
-      (
-        'Lonavala',
-        '28 km • Hill station',
-        'https://images.unsplash.com/photo-1570789210967-2cac24afeb00?w=600&auto=format&fit=crop&q=80',
-        const Color(0xFF047857),
-      ),
-      (
-        'Alibaug',
-        '56 km • Beach',
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
-        const Color(0xFF0284C7),
-      ),
-      (
-        'Matheran',
-        '65 km • Hill station',
-        'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&auto=format&fit=crop&q=80',
-        const Color(0xFF059669),
-      ),
-    ];
+    final theme = Theme.of(context);
+    final categories = ['All', 'Hill Stations', 'Beaches', 'Heritage & Forts', 'Eco & Nature', 'Coffee & Highlands'];
+    final filteredPlaces = _selectedCategory == 'All'
+        ? _allPlaces
+        : _allPlaces.where((p) => p.category == _selectedCategory).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -441,128 +549,598 @@ class _DashboardTabState extends State<DashboardTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Popular Destinations Near You',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.2,
-                color: AppColors.textPrimary,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Curated Places & Getaways',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                Text(
+                  'Hand-picked sustainable destinations with real-time transit & AI planning',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
             InkWell(
-              onTap: () => HomeTabController.maybeOf(context)?.switchToTab(2),
-              child: const Text(
-                'See all >',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF00A86B),
+              onTap: () => HomeTabController.maybeOf(context)?.switchToTab(3),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'Yatri AI >',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryGreen,
+                  ),
                 ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          height: 170,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: destinations.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final d = destinations[index];
-              return InkWell(
-                onTap: () {
-                  HomeTabController.maybeOf(context)?.switchToTab(3);
-                  showToast(context, 'Ask Yatri AI: "Plan a trip to ${d.$1}"');
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: 140,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: AppColors.surfaceLightBorder,
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+
+        // Category Filter Chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: categories.map((cat) {
+              final isSelected = _selectedCategory == cat;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(cat),
+                  selected: isSelected,
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? Colors.white : theme.colorScheme.onSurface,
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.network(
-                              d.$3,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: d.$4.withValues(alpha: 0.2),
-                                child: Icon(Icons.terrain_rounded, color: d.$4, size: 36),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.location_on_rounded,
-                                  size: 14,
-                                  color: Color(0xFF00A86B),
-                                ),
-                                const SizedBox(width: 3),
-                                Expanded(
-                                  child: Text(
-                                    d.$1,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 13,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              d.$2,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 10.5,
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  selectedColor: AppColors.primaryGreen,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  side: BorderSide(
+                    color: isSelected ? AppColors.primaryGreen : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                   ),
+                  onSelected: (_) => setState(() => _selectedCategory = cat),
                 ),
               );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Elevated Destination Cards Carousel
+        SizedBox(
+          height: 235,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: filteredPlaces.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            itemBuilder: (context, index) {
+              final place = filteredPlaces[index];
+              return _buildPlaceCard(context, place);
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPlaceCard(BuildContext context, _CuratedPlace place) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () => _showPlaceDetailsSheet(context, place),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: 195,
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.surfaceLightBorder,
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Image with Rating Badge & Category Tag
+            SizedBox(
+              height: 125,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    place.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: place.accentColor.withValues(alpha: 0.15),
+                      child: Icon(Icons.terrain_rounded, color: place.accentColor, size: 40),
+                    ),
+                  ),
+                  // Gradient scrim
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.3),
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.6),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Rating Pill
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white24, width: 0.5),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star_rounded, color: Color(0xFFFBBF24), size: 14),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${place.rating}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Category Tag
+                  Positioned(
+                    bottom: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: place.tagColor.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        place.tag,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Bottom Metadata Details
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    place.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.5,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.near_me_outlined,
+                        size: 12,
+                        color: AppColors.primaryGreen,
+                      ),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          place.distanceStr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 10.5,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        place.ecoScore,
+                        style: const TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_circle_right_rounded,
+                        size: 16,
+                        color: AppColors.primaryGreen,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Interactive Bottom Sheet with high-def details, key attractions & one-tap AI planning.
+  void _showPlaceDetailsSheet(BuildContext context, _CuratedPlace place) {
+    final theme = Theme.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        height: MediaQuery.of(sheetContext).size.height * 0.78,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            // Top Hero Image Banner
+            SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(place.imageUrl, fit: BoxFit.cover),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.4),
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.8),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: IconButton.filled(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black.withValues(alpha: 0.5),
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.close, size: 20),
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 16,
+                    left: 20,
+                    right: 20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: place.tagColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                place.tag,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.star_rounded, color: Color(0xFFFBBF24), size: 14),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    '${place.rating} (${place.reviewsCount}+)',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          place.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Body Content
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.timer_outlined, size: 16, color: AppColors.primaryGreen),
+                      const SizedBox(width: 6),
+                      Text(
+                        place.travelTime,
+                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGreen.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.eco_rounded, color: AppColors.primaryGreen, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            place.ecoScore,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryGreen,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'About this Destination',
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    place.description,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Must-Visit Spots & Highlights',
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: place.highlights.map((h) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.place_rounded, size: 14, color: AppColors.primaryGreen),
+                          const SizedBox(width: 6),
+                          Text(h, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 28),
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          icon: const Icon(Icons.map_outlined, size: 18),
+                          label: const Text('Live Map'),
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop();
+                            HomeTabController.maybeOf(context)?.switchToTab(1);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primaryGreen,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          icon: const Icon(Icons.auto_awesome, size: 18),
+                          label: const Text('Plan with Yatri AI'),
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop();
+                            final tabs = HomeTabController.maybeOf(context);
+                            tabs?.switchToTab(3);
+                            showToast(
+                              context,
+                              'Yatri AI ready! Type "Plan a sustainable trip to ${place.name}"',
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Instant Search Modal for Quick Place Discovery
+  void _showSearchPlacesSheet(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          return Container(
+            height: MediaQuery.of(sheetContext).size.height * 0.82,
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Search & Select Places',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Search forts, hill stations, beaches, tea estates…',
+                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryGreen),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (val) {
+                    setModalState(() {});
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Recommended Getaways',
+                  style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: _allPlaces.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (c, i) {
+                      final p = _allPlaces[i];
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(p.imageUrl, width: 50, height: 50, fit: BoxFit.cover),
+                        ),
+                        title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text('${p.distanceStr} • ${p.tag}'),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.primaryGreen),
+                        onTap: () {
+                          Navigator.of(sheetContext).pop();
+                          _showPlaceDetailsSheet(context, p);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -1119,3 +1697,36 @@ class _DashboardTabState extends State<DashboardTab> {
 
   static String _weekdayLabel(DateTime date) => _weekdayNames[date.weekday - 1];
 }
+
+class _CuratedPlace {
+  const _CuratedPlace({
+    required this.name,
+    required this.category,
+    required this.distanceStr,
+    required this.travelTime,
+    required this.rating,
+    required this.reviewsCount,
+    required this.imageUrl,
+    required this.tag,
+    required this.tagColor,
+    required this.description,
+    required this.highlights,
+    required this.ecoScore,
+    required this.accentColor,
+  });
+
+  final String name;
+  final String category;
+  final String distanceStr;
+  final String travelTime;
+  final double rating;
+  final int reviewsCount;
+  final String imageUrl;
+  final String tag;
+  final Color tagColor;
+  final String description;
+  final List<String> highlights;
+  final String ecoScore;
+  final Color accentColor;
+}
+

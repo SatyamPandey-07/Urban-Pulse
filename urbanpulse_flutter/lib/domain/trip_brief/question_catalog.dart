@@ -7,10 +7,10 @@ import 'accessibility_followups.dart';
 /// may only re-phrase [YatriQuestion.defaultText], never change the contract.
 abstract final class QuestionCatalog {
   static const popularDestinations = [
-    'Munnar', 'Rishikesh', 'Coorg', 'Hampi', 'Shillong', 'Goa', //
+    'Lonavala', 'Alibaug', 'Matheran', 'Mahabaleshwar', 'Coorg', 'Munnar', 'Jaipur', 'Goa', 'Rishikesh', 'Hampi', 'Shillong',
   ];
   static const popularOrigins = [
-    'Mumbai', 'Delhi', 'Bengaluru', 'Pune', 'Chennai', 'Kolkata', //
+    'Panvel', 'Mumbai', 'Pune', 'Delhi', 'Bengaluru', 'Chennai', 'Kolkata', 'Hyderabad',
   ];
   static const skipId = 'skip';
 
