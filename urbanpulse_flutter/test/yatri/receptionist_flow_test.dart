@@ -14,8 +14,8 @@ import 'test_support.dart';
 
 /// Scripted stand-in for Groq. Extraction and phrasing calls are told apart by
 /// their system prompt.
-class FakeLlm implements LlmGateway {
-  FakeLlm({this.configured = true});
+class ScriptedLlmReply implements LlmGateway {
+  ScriptedLlmReply({this.configured = true});
 
   bool configured;
   final List<String> extractions = [];
@@ -47,18 +47,18 @@ class FakeLlm implements LlmGateway {
         failNextExtraction = false;
         return const GroqFailure(GroqErrorKind.timeout);
       }
-      return GroqSuccess(extractions.removeAt(0), 'fake');
+      return GroqSuccess(extractions.removeAt(0), 'scripted');
     }
     if (system.contains('whether to ask the traveller anything more')) {
       nextBestCalls++;
-      return GroqSuccess(nextBestReply, 'fake');
+      return GroqSuccess(nextBestReply, 'scripted');
     }
     if (!phrasingWorks) return const GroqFailure(GroqErrorKind.timeout);
-    return GroqSuccess(phrasingReply, 'fake');
+    return GroqSuccess(phrasingReply, 'scripted');
   }
 }
 
-TripPlan fakePlan() => const TripPlan(
+TripPlan scriptedPlan() => const TripPlan(
   id: 'p1',
   destination: 'Munnar',
   title: 'Munnar',
@@ -77,12 +77,12 @@ TripPlan fakePlan() => const TripPlan(
   dailyItinerary: [],
 );
 
-Future<(YatriController, FakeLlm, List<Map<String, Object?>>)> build({
+Future<(YatriController, ScriptedLlmReply, List<Map<String, Object?>>)> build({
   bool hasKey = true,
 }) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
-  final llm = FakeLlm(configured: hasKey);
+  final llm = ScriptedLlmReply(configured: hasKey);
   final handoffCalls = <Map<String, Object?>>[];
   final controller = YatriController(
     receptionist: ReceptionistAgent(llm, clock: () => testNow),
@@ -101,7 +101,7 @@ Future<(YatriController, FakeLlm, List<Map<String, Object?>>)> build({
               'days': days,
               'accessible': isAccessible,
             });
-            return fakePlan();
+            return scriptedPlan();
           },
     ),
     briefs: TripBriefRepository(prefs),

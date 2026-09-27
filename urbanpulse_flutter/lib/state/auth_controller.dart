@@ -127,7 +127,7 @@ class AuthController extends ChangeNotifier {
       return const AuthOk();
     }
     try {
-      final r = await c.auth.signUp(email: cleanEmail, password: password, data: {'full_name': cleanName});
+      await c.auth.signUp(email: cleanEmail, password: password, data: {'full_name': cleanName});
       await _prefs.setBool(_keyLoggedIn, true);
       await _afterSignIn();
       return const AuthOk();

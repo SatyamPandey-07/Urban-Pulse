@@ -18,7 +18,7 @@ import 'package:urbanpulse/state/yatri_controller.dart';
 import 'package:urbanpulse/widgets/yatri/answer_view.dart';
 import 'package:urbanpulse/widgets/yatri/route_map_card.dart';
 
-import 'receptionist_flow_test.dart' show FakeLlm;
+import 'receptionist_flow_test.dart' show ScriptedLlmReply;
 import 'test_support.dart';
 
 const _phone = Size(360, 740);
@@ -298,12 +298,12 @@ void main() {
   });
 
   group('map entry in the conversation', () {
-    Future<(YatriController, FakeLlm, List<String>)> build({
+    Future<(YatriController, ScriptedLlmReply, List<String>)> build({
       Map<String, LatLng?> places = const {},
     }) async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
-      final llm = FakeLlm();
+      final llm = ScriptedLlmReply();
       final looked = <String>[];
       final c = YatriController(
         receptionist: ReceptionistAgent(llm, clock: () => testNow),
@@ -379,7 +379,7 @@ void main() {
     test('without a geocoder there is no map', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
-      final llm = FakeLlm();
+      final llm = ScriptedLlmReply();
       final c = YatriController(
         receptionist: ReceptionistAgent(llm, clock: () => testNow),
         handoff: TripPlanHandoffAgent(),

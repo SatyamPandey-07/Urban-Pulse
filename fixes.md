@@ -61,7 +61,7 @@ Line references are for `main` at ef76818 (PRs #8–#12 merged).
 - The traveller is never shown the actual near-miss hotels or places, each with what it does and does not meet, to choose from.
 
 ### 7. Invented locations
-- Places that could not be geocoded get a **hash-based fake coordinate** ([hotspot_finder.dart:551](urbanpulse_flutter/lib/agents/bhatkanti/hotspot_finder.dart#L551)), so their pins and routes are invented.
+- Places that could not be geocoded used to get a coordinate computed from their name, so their pins and routes were not real. Now a place that cannot be located is left out ([hotspot_finder.dart](urbanpulse_flutter/lib/agents/bhatkanti/hotspot_finder.dart)).
 
 ## Principles for the fix
 - **No time limits on planning.** The loop ends only when:
@@ -193,8 +193,8 @@ Line references are for `main` at ef76818 (PRs #8–#12 merged).
 5. Narrate every repair step in the feed.
 
 ## Verification
-- **Unit and orchestrator tests** (fakes in `test/agents/fakes.dart` and `hotel_world.dart`):
-  - A slow Bhatkanti (fake HTTP delay of several minutes on the fake clock) still completes, and the days have visits.
+- **Unit and orchestrator tests** (scripted replies in `test/agents/scripted.dart` and `hotel_world.dart`):
+  - A slow Bhatkanti (a scripted HTTP delay of several minutes on the test clock) still completes, and the days have visits.
   - An itinerary with only check-in fails the gate and triggers a repair.
   - Wheelchair + elderly + `lt100` with no matching hotel leads to an MCQ listing real hotels, and picking one sets the stay.
   - Too few accessible places leads to the near-miss multi-select question, and "accept gap" ends the loop.

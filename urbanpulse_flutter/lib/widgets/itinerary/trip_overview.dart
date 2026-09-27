@@ -54,6 +54,21 @@ class TripOverview extends StatelessWidget {
         else
           for (final l in itinerary.transportOptions)
             _LegTile(leg: l, chosen: itinerary.chosenTransport?.id == l.id, needs: needs),
+        if (itinerary.edits.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _Heading(icon: Icons.history_rounded, color: AgentKind.yatri.color, text: 'Your changes (version ${itinerary.version})'),
+          for (final e in itinerary.edits.reversed.take(20))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('“${e.request}”', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                  Text('${shortDate(e.at)} · ${e.summary}', style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                ],
+              ),
+            ),
+        ],
         if (itinerary.timings.isNotEmpty) ...[
           const SizedBox(height: 20),
           _Heading(icon: Icons.timer_outlined, color: AgentKind.yatri.color, text: 'How this plan was made'),

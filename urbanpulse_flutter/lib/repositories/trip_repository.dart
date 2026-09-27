@@ -15,8 +15,7 @@ class TripRepository {
 
   static const _keyTrips = 'urbanpulse_trips.saved_trips_json';
 
-  /// The user's real saved trips — starts empty on first run, not pre-seeded
-  /// with sample data.
+  /// The user's own saved trips. The list is empty until they save one.
   List<TripPlan> getTrips() {
     final json = _prefs.getString(_keyTrips);
     if (json == null) return const [];

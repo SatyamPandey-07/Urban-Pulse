@@ -229,9 +229,10 @@ class _LiveMapTabState extends State<LiveMapTab> {
     _calculateAndDrawDualRoutes(result.lat, result.lon, result.name);
   }
 
-  /// Fetches the two real routes plus live AQI, computes the authentic
-  /// Maharashtra taxi fare and per-km carbon figures, then hands the geometry to
-  /// Leaflet.
+  /// Fetches the two real routes, computes the Maharashtra taxi fare and per-km
+  /// carbon figures from their real distance, then hands the geometry to
+  /// Leaflet. When a live route cannot be had, nothing is drawn and the traveller
+  /// is told, rather than showing a distance or time that was not measured.
   Future<void> _calculateAndDrawDualRoutes(
     double destLat,
     double destLon,
@@ -257,26 +258,20 @@ class _LiveMapTabState extends State<LiveMapTab> {
       traffic: false,
     );
 
-    final normalPoints = normal?.points.isNotEmpty == true
-        ? normal!.points
-        : _fallbackGeometry(
-            destLat,
-            destLon,
-            latNudge: -0.005,
-            lonNudge: 0.006,
-          );
-    final greenPoints = green?.points.isNotEmpty == true
-        ? green!.points
-        : _fallbackGeometry(
-            destLat,
-            destLon,
-            latNudge: 0.004,
-            lonNudge: -0.003,
-          );
+    if (!mounted) return;
+    if (normal == null || green == null || normal.points.isEmpty || green.points.isEmpty) {
+      setState(() => _isRouting = false);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Live routes are not available right now, so no comparison is shown. Please try again in a moment.')),
+      );
+      return;
+    }
+    final normalPoints = normal.points;
+    final greenPoints = green.points;
 
-    final distanceKm = normal?.distanceKm ?? green?.distanceKm ?? 12.6;
-    final normalTimeMin = (normal?.durationMin ?? 34).coerceAtLeast(10);
-    final greenTimeMin = (green?.durationMin ?? 22).coerceAtLeast(8);
+    final distanceKm = normal.distanceKm;
+    final normalTimeMin = normal.durationMin.coerceAtLeast(10);
+    final greenTimeMin = green.durationMin.coerceAtLeast(8);
 
     // Standard petrol cab, MH official taxi formula: base ₹28 + ₹18.5/km.
     final normalFare = (28.0 + distanceKm * 18.5).round();
@@ -319,20 +314,6 @@ class _LiveMapTabState extends State<LiveMapTab> {
       '${jsonEncode(comparison.normalSummary)});',
     );
   }
-
-  List<List<double>> _fallbackGeometry(
-    double destLat,
-    double destLon, {
-    required double latNudge,
-    required double lonNudge,
-  }) => [
-    [_currentLat, _currentLon],
-    [
-      (_currentLat + destLat) / 2 + latNudge,
-      (_currentLon + destLon) / 2 + lonNudge,
-    ],
-    [destLat, destLon],
-  ];
 
   @override
   Widget build(BuildContext context) {

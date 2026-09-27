@@ -876,6 +876,9 @@ class DayPlanner {
     if (i == count - 1 && count > 1 && slots.any((s) => s.title.startsWith('Check out'))) {
       return where == null ? 'Head home' : '$where · head home';
     }
+    if (where == null && slots.any((s) => s.kind == SlotKind.transit && (s.leg?.id.startsWith('intercity') ?? false))) {
+      return 'Travel day';
+    }
     return where ?? 'A free day';
   }
 

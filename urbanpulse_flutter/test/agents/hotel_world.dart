@@ -15,12 +15,12 @@ import 'package:urbanpulse/services/data/location_key_resolver.dart';
 import 'package:urbanpulse/services/data/overpass_client.dart';
 import 'package:urbanpulse/services/data/xotelo_client.dart';
 
-import 'fakes.dart';
+import 'scripted.dart';
 
 const munnarCenter = LatLng(10.0889, 77.0595);
 const bengaluruCenter = LatLng(12.9716, 77.5946);
 
-/// One hotel as the fake TripAdvisor / Xotelo knows it.
+/// One hotel as the scripted TripAdvisor / Xotelo answers describe it.
 class WorldHotel {
   const WorldHotel(
     this.key,
@@ -53,7 +53,7 @@ class WorldHotel {
   LatLng get where => LatLng(munnarCenter.latitude + dLat, munnarCenter.longitude + dLng);
 }
 
-/// A fake internet for hotel tests: Xotelo, Geoapify, Overpass and TripAdvisor
+/// Scripted answers from the outside world for hotel tests: Xotelo, Geoapify, Overpass and TripAdvisor
 /// pages for Munnar, with switches to knock each service out.
 class HotelWorld {
   HotelWorld({
@@ -289,7 +289,7 @@ class FinderRig {
     final overpass = OverpassClient(client: client, cache: cache);
     budget = ToolBudget();
     final providers = <SearchProvider>[
-      FakeSearchProvider('T', results: searchResults ?? [result('Munnar hotels', 'https://www.tripadvisor.com/Hotels-g100001-Munnar-Hotels.html')]),
+      ScriptedSearchProvider('T', results: searchResults ?? [result('Munnar hotels', 'https://www.tripadvisor.com/Hotels-g100001-Munnar-Hotels.html')]),
     ];
     search = WebSearchTool(providers: providers, budget: budget, cache: cache);
     fetch = FetchPageTool(budget: budget, client: client, cache: cache);

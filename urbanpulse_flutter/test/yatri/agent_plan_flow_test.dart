@@ -12,7 +12,7 @@ import 'package:urbanpulse/state/yatri_controller.dart';
 
 import '../agents/hotel_world.dart';
 import '../agents/planner_orchestrator_test.dart' show toolkitFor;
-import 'receptionist_flow_test.dart' show FakeLlm, fakePlan;
+import 'receptionist_flow_test.dart' show ScriptedLlmReply, scriptedPlan;
 import 'test_support.dart';
 
 Future<(YatriController, List<String>)> build({Map<String, LatLng>? places, HotelWorld? world}) async {
@@ -20,7 +20,7 @@ Future<(YatriController, List<String>)> build({Map<String, LatLng>? places, Hote
   final prefs = await SharedPreferences.getInstance();
   final drafts = <String>[];
   final c = YatriController(
-    receptionist: ReceptionistAgent(FakeLlm(), clock: () => testNow),
+    receptionist: ReceptionistAgent(ScriptedLlmReply(), clock: () => testNow),
     handoff: TripPlanHandoffAgent(
       generator:
           ({
@@ -31,7 +31,7 @@ Future<(YatriController, List<String>)> build({Map<String, LatLng>? places, Hote
             required travelStyle,
           }) async {
             drafts.add(destination);
-            return fakePlan();
+            return scriptedPlan();
           },
     ),
     briefs: TripBriefRepository(prefs),
@@ -147,9 +147,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     final c = YatriController(
-      receptionist: ReceptionistAgent(FakeLlm(), clock: () => testNow),
+      receptionist: ReceptionistAgent(ScriptedLlmReply(), clock: () => testNow),
       handoff: TripPlanHandoffAgent(
-        generator: ({required destination, required originCity, required days, required isAccessible, required travelStyle}) async => fakePlan(),
+        generator: ({required destination, required originCity, required days, required isAccessible, required travelStyle}) async => scriptedPlan(),
       ),
       briefs: TripBriefRepository(prefs),
       trips: TripRepository(prefs),

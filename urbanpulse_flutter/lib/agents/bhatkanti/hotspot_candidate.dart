@@ -113,8 +113,12 @@ abstract final class HotspotCandidates {
     final nb = HotelCandidates.normalize(b.name);
     if (na.isEmpty || nb.isEmpty) return false;
     final km = haversineKm(a.location.latitude, a.location.longitude, b.location.latitude, b.location.longitude);
-    if (na == nb) return km <= 3;
-    if (sameName(a.name, b.name) && km <= 1.5) return true;
+    // One place is often located a few kilometres apart by different sources
+    // (a point, a centre, a gate). A distinctive name ("Amber Fort") is allowed
+    // more room than a generic one ("Sunset Point"), which can exist many times.
+    final distinctive = coreWords(a.name).length >= 2 && coreWords(b.name).length >= 2;
+    if (na == nb) return km <= (distinctive ? 8 : 3);
+    if (sameName(a.name, b.name) && km <= (distinctive ? 3 : 1.5)) return true;
     final sim = HotelCandidates.similarity(a.name, b.name);
     return (sim >= 0.75 && km <= 0.6) || (sim >= 0.9 && km <= 2);
   }

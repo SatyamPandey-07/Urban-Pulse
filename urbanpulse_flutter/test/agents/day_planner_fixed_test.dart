@@ -3,7 +3,7 @@ import 'package:urbanpulse/agents/raah/day_planner.dart';
 import 'package:urbanpulse/models/itinerary/itinerary.dart';
 import 'package:urbanpulse/models/itinerary/itinerary_parts.dart';
 
-import 'day_planner_test.dart' show centre, spot;
+import 'day_planner_test.dart' show centre, input, spot, train;
 
 DayPlanInput fixed(List<Hotspot> places, Map<int, List<String>> days, {Map<int, (int, int)> windows = const {}, Map<int, int> caps = const {}}) => DayPlanInput(
   start: DateTime(2026, 10, 12, 8),
@@ -80,5 +80,14 @@ void main() {
     final r = DayPlanner.plan(fixed(pool, {0: ['a'], 9: ['b'], 1: ['c']}, windows: {7: (600, 700)}, caps: {-1: 0}));
     expect(r.days.length, 3);
     expect(ids(r, 1), ['c']);
+  });
+
+  test('a day that is only a long journey is a travel day, not a free day', () {
+    final r = DayPlanner.plan(input(pool, start: DateTime(2026, 10, 12, 8), end: DateTime(2026, 10, 13, 20), arrival: train('Pune', 'Munnar', minutes: 780), departure: train('Munnar', 'Pune', minutes: 780)));
+    for (final d in r.days) {
+      if (d.slots.where((s) => s.kind == SlotKind.visit).isEmpty) {
+        expect(d.title, isNot('A free day'), reason: 'day ${d.number}');
+      }
+    }
   });
 }

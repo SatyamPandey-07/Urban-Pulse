@@ -43,8 +43,8 @@ class ScriptedLlm implements AgentLlm {
 }
 
 /// A search provider with a canned answer and a call counter.
-class FakeSearchProvider implements SearchProvider {
-  FakeSearchProvider(this.name, {this.results, this.available = true});
+class ScriptedSearchProvider implements SearchProvider {
+  ScriptedSearchProvider(this.name, {this.results, this.available = true});
 
   @override
   final String name;
@@ -65,11 +65,11 @@ class FakeSearchProvider implements SearchProvider {
 }
 
 SearchResult result(String title, String url, [String snippet = '']) =>
-    SearchResult(title: title, url: url, snippet: snippet, provider: 'fake');
+    SearchResult(title: title, url: url, snippet: snippet, provider: 'scripted');
 
 /// A tool that records its calls and returns a fixed output.
-class FakeTool extends AgentTool {
-  FakeTool(this.name, this.output);
+class ScriptedTool extends AgentTool {
+  ScriptedTool(this.name, this.output);
 
   @override
   final String name;
@@ -78,7 +78,7 @@ class FakeTool extends AgentTool {
   final List<Map<String, Object?>> calls = [];
 
   @override
-  String get description => 'fake $name';
+  String get description => 'scripted $name';
 
   @override
   String get argsHelp => 'query: string';

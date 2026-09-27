@@ -10,7 +10,7 @@ import 'package:urbanpulse/services/data/data_cache.dart';
 import 'package:urbanpulse/services/data/location_key_resolver.dart';
 import 'package:urbanpulse/services/data/xotelo_client.dart';
 
-import '../agents/fakes.dart';
+import '../agents/scripted.dart';
 
 const munnar = LatLng(10.0889, 77.0595);
 const bengaluru = LatLng(12.9716, 77.5946);
@@ -35,7 +35,7 @@ Map<String, dynamic> hotelsAround(LatLng c, int n, {String prefix = 'g1'}) => {
 };
 
 /// Xotelo serving a different set of hotels per location key.
-XoteloClient fakeXotelo(Map<String, LatLng> places, {int hotels = 10, List<String>? calls, String? rapidKey, Map<String, dynamic> Function(String key)? searchResult}) {
+XoteloClient scriptedXotelo(Map<String, LatLng> places, {int hotels = 10, List<String>? calls, String? rapidKey, Map<String, dynamic> Function(String key)? searchResult}) {
   return XoteloClient(
     rapidApiKey: rapidKey,
     cache: MemoryCache(),
@@ -70,7 +70,7 @@ LocationKeyResolver resolver(
 );
 
 WebSearchTool webWith(List<SearchResult> results) =>
-    WebSearchTool(providers: [FakeSearchProvider('T', results: results)], budget: ToolBudget());
+    WebSearchTool(providers: [ScriptedSearchProvider('T', results: results)], budget: ToolBudget());
 
 void main() {
   group('extracting keys from text', () {
@@ -97,7 +97,7 @@ void main() {
   group('validation', () {
     test('a key whose hotels are near the destination is accepted', () async {
       final r = await resolver(
-        fakeXotelo({'g100': munnar}),
+        scriptedXotelo({'g100': munnar}),
         search: webWith([result('Munnar hotels', 'https://www.tripadvisor.com/Hotels-g100-Munnar-Hotels.html')]),
       ).resolve('Munnar');
       expect(r!.key, 'g100');
@@ -110,7 +110,7 @@ void main() {
     test('the Munnar-vs-Bengaluru mistake is caught: a wrong key is rejected', () async {
       // The web page pointed at a key that actually lists Bengaluru hotels.
       final r = await resolver(
-        fakeXotelo({'g297628': bengaluru}),
+        scriptedXotelo({'g297628': bengaluru}),
         search: webWith([result('Munnar', 'https://www.tripadvisor.com/Hotels-g297628-Munnar-Hotels.html')]),
       ).resolve('Munnar');
       expect(r, isNull);
@@ -118,7 +118,7 @@ void main() {
 
     test('the first VALID candidate wins, even if an earlier one is wrong', () async {
       final r = await resolver(
-        fakeXotelo({'g111': bengaluru, 'g222': munnar}),
+        scriptedXotelo({'g111': bengaluru, 'g222': munnar}),
         search: webWith([
           result('wrong first', 'https://www.tripadvisor.com/Hotels-g111-Somewhere-Hotels.html'),
           result('right second', 'https://www.tripadvisor.com/Hotels-g222-Munnar-Hotels.html'),
@@ -129,7 +129,7 @@ void main() {
 
     test('too few hotels with coordinates means the key is not believed', () async {
       final r = await resolver(
-        fakeXotelo({'g100': munnar}, hotels: 2),
+        scriptedXotelo({'g100': munnar}, hotels: 2),
         search: webWith([result('Munnar', 'https://www.tripadvisor.com/Hotels-g100-Munnar-Hotels.html')]),
       ).resolve('Munnar');
       expect(r, isNull);
@@ -138,7 +138,7 @@ void main() {
     test('only TripAdvisor URLs are trusted for keys', () async {
       final calls = <String>[];
       final r = await resolver(
-        fakeXotelo({'g100': munnar}, calls: calls),
+        scriptedXotelo({'g100': munnar}, calls: calls),
         search: webWith([result('Some blog', 'https://blog.example/munnar-g100-guide')]),
       ).resolve('Munnar');
       expect(r, isNull);
@@ -149,7 +149,7 @@ void main() {
   group('sources of candidates', () {
     test('Xotelo search is used when a RapidAPI key is set', () async {
       final r = await resolver(
-        fakeXotelo(
+        scriptedXotelo(
           {'g100': munnar},
           rapidKey: 'k',
           searchResult: (q) => {
@@ -169,7 +169,7 @@ void main() {
 
     test('the model is only asked when the other sources find nothing valid', () async {
       final llm = ScriptedLlm(['{"keys": ["g100", "bogus", "g999999"]}']);
-      final r = await resolver(fakeXotelo({'g100': munnar}), llm: llm).resolve('Munnar');
+      final r = await resolver(scriptedXotelo({'g100': munnar}), llm: llm).resolve('Munnar');
       expect(r!.key, 'g100');
       expect(r.source, 'ai guess');
       expect(llm.asked, hasLength(1));
@@ -177,7 +177,7 @@ void main() {
       // With a valid web candidate the model is never consulted.
       final llm2 = ScriptedLlm();
       await resolver(
-        fakeXotelo({'g100': munnar}),
+        scriptedXotelo({'g100': munnar}),
         llm: llm2,
         search: webWith([result('Munnar', 'https://www.tripadvisor.com/Hotels-g100-Munnar-Hotels.html')]),
       ).resolve('Munnar');
@@ -186,13 +186,13 @@ void main() {
 
     test('a hallucinated key is validated like any other', () async {
       final llm = ScriptedLlm(['{"keys": ["g297628"]}']);
-      final r = await resolver(fakeXotelo({'g297628': bengaluru}), llm: llm).resolve('Munnar');
+      final r = await resolver(scriptedXotelo({'g297628': bengaluru}), llm: llm).resolve('Munnar');
       expect(r, isNull);
     });
 
     test('junk from the model is ignored', () async {
       for (final junk in ['not json', '{"keys": "g100"}', '{"keys": [1, null, {"a": 1}]}', '{}']) {
-        final r = await resolver(fakeXotelo({'g100': munnar}), llm: ScriptedLlm([junk])).resolve('Munnar');
+        final r = await resolver(scriptedXotelo({'g100': munnar}), llm: ScriptedLlm([junk])).resolve('Munnar');
         expect(r, isNull, reason: junk);
       }
     });
@@ -203,7 +203,7 @@ void main() {
       final calls = <String>[];
       final cache = MemoryCache();
       final res = resolver(
-        fakeXotelo({'g100': munnar}, calls: calls),
+        scriptedXotelo({'g100': munnar}, calls: calls),
         search: webWith([result('Munnar', 'https://www.tripadvisor.com/Hotels-g100-Munnar-Hotels.html')]),
         cache: cache,
       );
@@ -218,10 +218,10 @@ void main() {
     test('a failure is remembered briefly so credits are not spent again', () async {
       var searches = 0;
       final tool = WebSearchTool(
-        providers: [FakeSearchProviderCounting(() => searches++)],
+        providers: [ScriptedSearchProviderCounting(() => searches++)],
         budget: ToolBudget(),
       );
-      final res = resolver(fakeXotelo(const {}), search: tool);
+      final res = resolver(scriptedXotelo(const {}), search: tool);
       expect(await res.resolve('Atlantis'), isNull);
       final before = searches;
       expect(await res.resolve('Atlantis'), isNull);
@@ -230,7 +230,7 @@ void main() {
 
     test('an unknown place or blank name resolves to nothing without any calls', () async {
       final calls = <String>[];
-      final res = resolver(fakeXotelo({'g100': munnar}, calls: calls), geocoded: null);
+      final res = resolver(scriptedXotelo({'g100': munnar}, calls: calls), geocoded: null);
       expect(await res.resolve('Nowhereville'), isNull);
       expect(await res.resolve('   '), isNull);
       expect(calls, isEmpty);
@@ -239,7 +239,7 @@ void main() {
     test('a supplied centre is used instead of geocoding', () async {
       var geocoded = false;
       final res = LocationKeyResolver(
-        xotelo: fakeXotelo({'g100': munnar}),
+        xotelo: scriptedXotelo({'g100': munnar}),
         geocode: (_) async {
           geocoded = true;
           return null;
@@ -261,8 +261,8 @@ void main() {
 }
 
 /// A provider that counts its calls and never has results.
-class FakeSearchProviderCounting extends FakeSearchProvider {
-  FakeSearchProviderCounting(this.onCall) : super('T', results: null);
+class ScriptedSearchProviderCounting extends ScriptedSearchProvider {
+  ScriptedSearchProviderCounting(this.onCall) : super('T', results: null);
 
   final void Function() onCall;
 
