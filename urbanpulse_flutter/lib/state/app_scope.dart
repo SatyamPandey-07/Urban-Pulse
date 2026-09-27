@@ -8,17 +8,21 @@ import '../repositories/facility_repository.dart';
 import '../repositories/hospitality_repository.dart';
 import '../repositories/hotel_metrics_repository.dart';
 import '../repositories/itinerary_repository.dart';
+import '../repositories/saved_places_repository.dart';
+import '../services/place_suggestions.dart';
 import '../repositories/traffic_history_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
 import '../services/cloud/cloud_store.dart';
 import '../services/cloud/user_sync.dart';
 import '../services/location_service.dart';
+import '../services/voice/voice_service.dart';
 import 'accessibility_controller.dart';
 import 'activity_tracker.dart';
 import 'auth_controller.dart';
 import 'gamification_controller.dart';
 import 'location_controller.dart';
+import 'map_requests.dart';
 import 'theme_controller.dart';
 import 'trip_plan_manager.dart';
 
@@ -57,6 +61,7 @@ class AppServices {
       ..beforeSignOut = sync.beforeSignOut
       ..afterSignOut = sync.afterSignOut;
     final locationService = LocationService();
+    final savedPlaces = SavedPlacesRepository(prefs);
     return AppServices._(
       prefs: prefs,
       cloud: cloud,
@@ -66,7 +71,8 @@ class AppServices {
       gamification: gamification,
       accessibility: accessibility,
       tripPlan: TripPlanManager(prefs),
-      location: LocationController(locationService),
+      location: LocationController(locationService, places: savedPlaces),
+      savedPlaces: savedPlaces,
       trips: trips,
       itineraries: itineraries,
       tripBriefs: tripBriefs,
@@ -89,6 +95,7 @@ class AppServices {
     required this.accessibility,
     required this.tripPlan,
     required this.location,
+    required this.savedPlaces,
     required this.trips,
     required this.itineraries,
     required this.tripBriefs,
@@ -111,6 +118,12 @@ class AppServices {
   final AccessibilityController accessibility;
   final TripPlanManager tripPlan;
   final LocationController location;
+
+  /// Home, Work and the traveller's own addresses.
+  final SavedPlacesRepository savedPlaces;
+
+  /// Completions while typing a place.
+  final PlaceSuggestions placeSuggestions = PlaceSuggestions();
   final TripRepository trips;
   final ItineraryRepository itineraries;
   final TripBriefRepository tripBriefs;
@@ -120,6 +133,12 @@ class AppServices {
   final FacilityRepository facility;
   final TrafficHistoryRepository trafficHistory;
   final LocationService locationService;
+
+  /// Talking to the app (Groq speech to text, and replies read aloud); built on first use.
+  late final VoiceService voice = VoiceService(prefs: prefs);
+
+  /// Where the itinerary screen asks the Live Map to show a day of the trip.
+  final MapRequests mapRequests = MapRequests();
 
   /// The planner's shared models, data clients and caches (built on first use).
   late final AgentToolkit agentToolkit = AgentToolkit.fromConfig(prefs: prefs);
@@ -132,6 +151,7 @@ class AppServices {
     accessibility.dispose();
     tripPlan.dispose();
     location.dispose();
+    mapRequests.dispose();
   }
 }
 

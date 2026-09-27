@@ -69,8 +69,8 @@ abstract final class QuestionCatalog {
         return YatriQuestion(
           id: id,
           fields: const [BriefField.origin],
-          widget: AnswerWidget.mcq,
-          defaultText: 'Which city will you start from?',
+          widget: AnswerWidget.place,
+          defaultText: 'Where will you start from? Use your location, pick a saved address, or type it.',
           hint: shownHint,
           reason: reason,
           attempt: attempt,

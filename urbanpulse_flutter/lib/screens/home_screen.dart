@@ -1,3 +1,4 @@
+import 'location_picker_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
@@ -136,7 +137,7 @@ class _LocationAppBarState extends State<_LocationAppBar> {
         animation: location,
         builder: (context, _) => InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => location.resolve(force: true),
+          onTap: () => LocationPickerScreen.open(context),
           child: Row(
             children: [
               Container(

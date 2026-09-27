@@ -15,15 +15,15 @@ class LocationService {
   Future<Position?> currentPosition() async {
     if (!await ensurePermission()) return null;
     try {
-      // Prefer the cached fix (the Kotlin code used `lastLocation`), then fall
-      // back to an active read.
-      final last = await Geolocator.getLastKnownPosition();
-      if (last != null) return last;
-      return await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-        ),
-      );
+      // A fresh, accurate reading first (a cached fix can be hours and
+      // kilometres old); the last known one only if that cannot be had.
+      try {
+        return await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        ).timeout(const Duration(seconds: 12));
+      } catch (_) {
+        return await Geolocator.getLastKnownPosition();
+      }
     } catch (_) {
       return null;
     }

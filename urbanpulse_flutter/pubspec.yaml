@@ -30,10 +30,6 @@ dependencies:
   # name for the Yatri AI origin city.
   geocoding: ^5.0.0
 
-  # The Live Map is a Leaflet map inside a WebView driven by injected JS in the
-  # original; this keeps that implementation (and its behaviour) intact.
-  webview_flutter: ^4.10.0
-
   # Replaces Intent.ACTION_DIAL for the "Call Venue" action on a stay.
   url_launcher: ^6.3.1
 
@@ -53,6 +49,10 @@ dependencies:
   latlong2: ^0.10.1
   table_calendar: ^3.2.1
   supabase_flutter: ^2.17.2
+  # Voice: the microphone (sent to Groq Whisper for transcription) and the
+  # device's speech engine (to read replies and turn-by-turn directions aloud).
+  record: ^6.2.1
+  flutter_tts: ^4.2.5
 
 dev_dependencies:
   flutter_test:

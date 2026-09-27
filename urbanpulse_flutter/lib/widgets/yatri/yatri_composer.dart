@@ -11,6 +11,7 @@ class YatriComposer extends StatelessWidget {
     required this.enabled,
     required this.hint,
     required this.isListening,
+    this.transcribing = false,
     required this.onSend,
     required this.onMic,
     super.key,
@@ -20,6 +21,9 @@ class YatriComposer extends StatelessWidget {
   final bool enabled;
   final String hint;
   final bool isListening;
+
+  /// The recording is being turned into words.
+  final bool transcribing;
   final ValueChanged<String> onSend;
   final VoidCallback onMic;
 
@@ -75,21 +79,23 @@ class YatriComposer extends StatelessWidget {
             builder: (context, _) {
               final hasText = controller.text.trim().isNotEmpty;
               return IconButton.filled(
-                tooltip: hasText ? 'Send' : (isListening ? 'Stop listening' : 'Speak'),
+                tooltip: hasText ? 'Send' : (transcribing ? 'Working out what you said…' : (isListening ? 'Stop and send' : 'Speak')),
                 style: IconButton.styleFrom(
                   minimumSize: const Size(48, 48),
                   backgroundColor: isListening ? scheme.error : null,
                 ),
-                onPressed: !enabled
+                onPressed: !enabled || transcribing
                     ? null
                     : hasText
                     ? () => onSend(controller.text)
                     : onMic,
-                icon: Icon(
-                  hasText
-                      ? Icons.send_rounded
-                      : (isListening ? Icons.stop_rounded : Icons.mic_rounded),
-                ),
+                icon: transcribing && !hasText
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                    : Icon(
+                        hasText
+                            ? Icons.send_rounded
+                            : (isListening ? Icons.stop_rounded : Icons.mic_rounded),
+                      ),
               );
             },
           ),
