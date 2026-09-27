@@ -80,13 +80,20 @@ class _YatriAiTabState extends State<YatriAiTab> {
 
   /// A trip handed to Yatri (Surprise Me): open it for review and planning.
   void _takeFromInbox() {
-    final inbox = _inbox;
-    final b = inbox?.value;
-    final c = _controller;
-    if (!mounted || b == null || c == null || c.busy) return;
-    inbox!.value = null;
-    c.loadBrief(b, note: 'Here’s the surprise trip I picked for you. Check the brief, change anything you like, and confirm: my team will plan it.');
-    unawaited(_openForm());
+    if (!mounted || _inbox?.value == null) return;
+    // After this frame: the screen that handed the trip over may still be
+    // closing, and the form must open on top of the home screen.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final inbox = _inbox;
+      final b = inbox?.value;
+      final c = _controller;
+      if (!mounted || b == null || c == null) return;
+      inbox!.value = null;
+      // Starts a fresh conversation, stopping anything in progress.
+      c.loadBrief(b, note: 'Here’s the surprise trip I picked for you. Check the brief, change anything you like, and confirm: my team will plan it.');
+      unawaited(_openForm());
+    });
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   @override

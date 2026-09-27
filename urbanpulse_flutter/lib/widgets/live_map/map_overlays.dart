@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/formatting.dart';
+import '../../core/routes.dart';
 import '../../models/live_city_data.dart';
 import '../../models/map_category.dart';
 import '../../services/live_location.dart';
@@ -232,6 +233,14 @@ class MapControls extends StatelessWidget {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            _RoundButton(
+              icon: Icons.emergency_rounded,
+              tooltip: 'Emergency SOS & BLE Mesh',
+              backgroundColor: const Color(0xFFDC2626),
+              iconColor: Colors.white,
+              onTap: () => Navigator.of(context).pushNamed(Routes.sos),
+            ),
+            const SizedBox(height: 10),
             _RoundButton(icon: Icons.layers_rounded, tooltip: 'Map layers', onTap: onLayers),
             const SizedBox(height: 10),
             _RoundButton(icon: Icons.add_rounded, tooltip: 'Zoom in', onTap: () => onZoom(1)),
@@ -253,17 +262,29 @@ class MapControls extends StatelessWidget {
 }
 
 class _RoundButton extends StatelessWidget {
-  const _RoundButton({required this.icon, required this.tooltip, required this.onTap, this.busy = false, this.highlight = false});
+  const _RoundButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.busy = false,
+    this.highlight = false,
+    this.backgroundColor,
+    this.iconColor,
+  });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
   final bool busy;
   final bool highlight;
+  final Color? backgroundColor;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final bg = backgroundColor ?? (highlight ? scheme.primary : scheme.surface);
+    final fg = iconColor ?? (highlight ? scheme.onPrimary : scheme.onSurface);
     return Semantics(
       button: true,
       label: tooltip,
@@ -272,7 +293,7 @@ class _RoundButton extends StatelessWidget {
         child: Material(
           elevation: 3,
           shadowColor: Colors.black45,
-          color: highlight ? scheme.primary : scheme.surface,
+          color: bg,
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
@@ -280,7 +301,9 @@ class _RoundButton extends StatelessWidget {
             child: SizedBox(
               width: 44,
               height: 44,
-              child: busy ? const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2.5)) : Icon(icon, size: 22, color: highlight ? scheme.onPrimary : scheme.onSurface),
+              child: busy
+                  ? const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2.5))
+                  : Icon(icon, size: 22, color: fg),
             ),
           ),
         ),

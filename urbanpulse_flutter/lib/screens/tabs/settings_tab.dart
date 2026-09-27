@@ -94,6 +94,13 @@ class _SettingsTabState extends State<SettingsTab> {
             onTap: () => Navigator.of(context).pushNamed(Routes.weatherTwin),
           ),
           _SettingItem(
+            title: 'Emergency SOS & Offline BLE Mesh',
+            subtitle: 'Offline beacon broadcast, siren & nearby peer mesh responder',
+            icon: Icons.emergency_rounded,
+            iconBg: const Color(0xFFFEE2E2),
+            onTap: () => Navigator.of(context).pushNamed(Routes.sos),
+          ),
+          _SettingItem(
             title: 'Hotel Resource & Waste Hub',
             subtitle: 'Energy, water, food surplus & ESG compliance',
             icon: Icons.recycling_rounded,
