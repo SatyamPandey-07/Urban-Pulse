@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'responsive.dart';
 
 /// Material 3 day/night themes, seeded from the selected accent — the Flutter
 /// equivalent of `Theme.Material3.DayNight.NoActionBar` plus the six
@@ -55,6 +56,8 @@ abstract final class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      // Pushed screens sit centred at a readable width on wide windows.
+      pageTransitionsTheme: WidePageTransitionsBuilder.theme(),
       scaffoldBackgroundColor: scheme.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,

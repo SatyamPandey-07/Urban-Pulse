@@ -88,9 +88,11 @@ class _DashboardTabState extends State<DashboardTab> {
           const SizedBox(height: 24),
           _travelHubSection(context),
           const SizedBox(height: 24),
-          _aqiTrendCard(context),
-          const SizedBox(height: 16),
-          _congestionCard(context),
+          LayoutBuilder(
+            builder: (context, box) => box.maxWidth >= 900
+                ? _evenRow([_aqiTrendCard(context), _congestionCard(context)])
+                : Column(children: [_aqiTrendCard(context), const SizedBox(height: 16), _congestionCard(context)]),
+          ),
         ],
       ),
     );
@@ -697,72 +699,94 @@ class _DashboardTabState extends State<DashboardTab> {
             ),
           ),
         ),
-        Row(
-          children: [
-            Expanded(
-              child: _bentoCard(
+        LayoutBuilder(
+          builder: (context, box) {
+            // Four across (and the two wide cards side by side) when there is
+            // room, as on the website; two across on phones.
+            final wide = box.maxWidth >= 900;
+            final cards = [
+              _bentoCard(
                 context: context,
                 title: 'Eco Stays',
                 subtitle: 'Verified sustainable & accessible stays',
                 icon: Icons.hotel_outlined,
                 route: Routes.hospitality,
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _bentoCard(
+              _bentoCard(
                 context: context,
                 title: 'Green Routes',
                 subtitle: 'Low-emission multimodal routes',
                 icon: Icons.alt_route_rounded,
                 route: Routes.greenRoutePlanner,
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _bentoCard(
+              _bentoCard(
                 context: context,
                 title: 'Hotel Optimizer',
                 subtitle: 'Best value & lowest footprint',
                 icon: Icons.trending_up_rounded,
                 route: Routes.hotelOptimizer,
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _bentoCard(
+              _bentoCard(
                 context: context,
                 title: 'Carbon Wallet',
                 subtitle: 'Track your CO2 savings & rewards',
                 icon: Icons.account_balance_wallet_outlined,
                 route: Routes.carbonWallet,
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _wideBentoCard(
-          context: context,
-          title: 'AI Eco Itinerary Generator',
-          subtitle: 'Personalized step-free & low-carbon day plans',
-          icon: Icons.auto_awesome_rounded,
-          route: Routes.itinerary,
-        ),
-        const SizedBox(height: 12),
-        _wideBentoCard(
-          context: context,
-          title: 'Weather Digital Twin',
-          subtitle: 'Live weather, reports and what-ifs: see how rain, heat or floods change your trip',
-          icon: Icons.thunderstorm_outlined,
-          route: Routes.weatherTwin,
+            ];
+            final features = [
+              _wideBentoCard(
+                context: context,
+                title: 'AI Eco Itinerary Generator',
+                subtitle: 'Personalized step-free & low-carbon day plans',
+                icon: Icons.auto_awesome_rounded,
+                route: Routes.itinerary,
+              ),
+              _wideBentoCard(
+                context: context,
+                title: 'Weather Digital Twin',
+                subtitle: 'Live weather, reports and what-ifs: see how rain, heat or floods change your trip',
+                icon: Icons.thunderstorm_outlined,
+                route: Routes.weatherTwin,
+              ),
+            ];
+            return Column(
+              children: [
+                for (final row in _rows(cards, wide ? 4 : 2)) ...[
+                  _evenRow(row),
+                  const SizedBox(height: 12),
+                ],
+                if (wide)
+                  _evenRow(features)
+                else
+                  for (final (i, f) in features.indexed) ...[
+                    if (i > 0) const SizedBox(height: 12),
+                    f,
+                  ],
+              ],
+            );
+          },
         ),
       ],
     );
   }
+
+  static List<List<Widget>> _rows(List<Widget> items, int perRow) => [
+    for (var i = 0; i < items.length; i += perRow) items.sublist(i, (i + perRow).clamp(0, items.length)),
+  ];
+
+  /// Equal-width cells of equal height.
+  static Widget _evenRow(List<Widget> cells) => IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, c) in cells.indexed) ...[
+          if (i > 0) const SizedBox(width: 12),
+          Expanded(child: c),
+        ],
+      ],
+    ),
+  );
 
   Widget _bentoCard({
     required BuildContext context,

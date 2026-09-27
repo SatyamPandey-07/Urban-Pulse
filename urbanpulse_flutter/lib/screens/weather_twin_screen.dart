@@ -119,37 +119,88 @@ class _WeatherTwinScreenState extends State<WeatherTwinScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: ListView(
-          key: const Key('weather-twin-list'),
-          padding: const EdgeInsets.fromLTRB(14, 8, 14, 32),
-          children: [
-            _Status(c: c),
-            const SizedBox(height: 10),
-            _ScenarioPanel(c: c),
-            const SizedBox(height: 10),
-            _TwinMap(c: c, tileLayer: widget.tileLayer),
-            const SizedBox(height: 10),
-            if (c.state == null)
-              const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()))
-            else ...[
-              _Summary(c: c),
-              const SizedBox(height: 10),
-              _Chain(state: c.state!),
-              const SizedBox(height: 10),
-              for (final d in c.state!.days) ...[_DayCard(c: c, day: d), const SizedBox(height: 10)],
-              _Ecosystem(state: c.state!),
-              const SizedBox(height: 10),
-            ],
-            _Signals(c: c),
-            const SizedBox(height: 10),
-            _Learning(c: c),
-            const SizedBox(height: 10),
-            _Timeline(c: c),
-          ],
+        child: LayoutBuilder(
+          builder: (context, box) => box.maxWidth >= 1100 ? _wide(c, box.maxHeight) : _single(c),
         ),
       ),
     );
   }
+
+  static const _gap = SizedBox(height: 10);
+
+  List<Widget> _results(TwinController c) => [
+    _Chain(state: c.state!),
+    _gap,
+    for (final d in c.state!.days) ...[_DayCard(c: c, day: d), _gap],
+    _Ecosystem(state: c.state!),
+    _gap,
+  ];
+
+  List<Widget> _feeds(TwinController c) => [
+    _Signals(c: c),
+    _gap,
+    _Learning(c: c),
+    _gap,
+    _Timeline(c: c),
+  ];
+
+  static const _loading = Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()));
+
+  /// Phones and tablets: one column.
+  Widget _single(TwinController c) => ListView(
+    key: const Key('weather-twin-list'),
+    padding: const EdgeInsets.fromLTRB(14, 8, 14, 32),
+    children: [
+      _Status(c: c),
+      _gap,
+      _ScenarioPanel(c: c),
+      _gap,
+      _TwinMap(c: c, tileLayer: widget.tileLayer),
+      _gap,
+      if (c.state == null) _loading else ...[_Summary(c: c), _gap, ..._results(c)],
+      ..._feeds(c),
+    ],
+  );
+
+  /// Desktops: the what-if controls, the map and the summary stay on the
+  /// left while the effects, days and reports scroll on the right.
+  Widget _wide(TwinController c, double height) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 1560),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 11,
+            child: ListView(
+              key: const Key('weather-twin-controls'),
+              padding: const EdgeInsets.fromLTRB(20, 8, 10, 32),
+              children: [
+                _Status(c: c),
+                _gap,
+                _TwinMap(c: c, tileLayer: widget.tileLayer, height: (height * 0.5).clamp(320, 560)),
+                _gap,
+                _ScenarioPanel(c: c),
+                _gap,
+                if (c.state == null) _loading else _Summary(c: c),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 10,
+            child: ListView(
+              key: const Key('weather-twin-results'),
+              padding: const EdgeInsets.fromLTRB(10, 8, 20, 32),
+              children: [
+                if (c.state == null) _loading else ..._results(c),
+                ..._feeds(c),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 // --- colours -------------------------------------------------------------------------
@@ -459,10 +510,11 @@ class _SliderRow extends StatelessWidget {
 // --- map ----------------------------------------------------------------------------------
 
 class _TwinMap extends StatelessWidget {
-  const _TwinMap({required this.c, this.tileLayer});
+  const _TwinMap({required this.c, this.tileLayer, this.height = 320});
 
   final TwinController c;
   final Widget? tileLayer;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -489,7 +541,7 @@ class _TwinMap extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(18),
           child: SizedBox(
-            height: 320,
+            height: height,
             child: DecoratedBox(
               decoration: BoxDecoration(border: Border.all(color: scheme.outlineVariant), borderRadius: BorderRadius.circular(18)),
               child: FlutterMap(

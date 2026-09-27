@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Build-time configuration, the Flutter equivalent of the Android
@@ -18,10 +19,20 @@ abstract final class AppConfig {
     defaultValue: 'DEMO_GROQ_KEY',
   );
 
-  static const _embeddedCentralRegistryBaseUrl = String.fromEnvironment(
-    'CENTRAL_REGISTRY_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3001',
-  );
+  static const _centralRegistryFromBuild = String.fromEnvironment('CENTRAL_REGISTRY_BASE_URL');
+
+  /// 10.0.2.2 is the Android emulator's name for the dev machine; a browser
+  /// reaches the same server as localhost.
+  static String get _embeddedCentralRegistryBaseUrl => _centralRegistryFromBuild.isNotEmpty
+      ? _centralRegistryFromBuild
+      : (kIsWeb ? 'http://localhost:3001' : 'http://10.0.2.2:3001');
+
+  /// The website's relay for sources that refuse browser requests (the
+  /// backend in `server/`). Empty: those sources are simply unavailable on the
+  /// website, as when offline.
+  static const _webRelayUrl = String.fromEnvironment('WEB_RELAY_URL');
+
+  static String get webRelayUrl => _webRelayUrl.endsWith('/') ? _webRelayUrl.substring(0, _webRelayUrl.length - 1) : _webRelayUrl;
 
   static const _embeddedTavilyApiKey = String.fromEnvironment('TAVILY_API_KEY');
   static const _embeddedGeoapifyApiKey = String.fromEnvironment('GEOAPIFY_API_KEY');

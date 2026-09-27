@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
@@ -13,6 +10,7 @@ import '../../services/location_service.dart';
 import '../../services/tomtom_service.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
+import '../../widgets/html_map/html_map.dart';
 import 'live_map_html.dart';
 
 /// Port of `LiveMapFragment` / `fragment_live_map.xml`.
@@ -29,7 +27,7 @@ class LiveMapTab extends StatefulWidget {
 }
 
 class _LiveMapTabState extends State<LiveMapTab> {
-  late final WebViewController _webView;
+  late final HtmlMapController _webView;
   final _searchController = TextEditingController();
   Timer? _searchDebounce;
   bool _isSearching = false;
@@ -46,21 +44,18 @@ class _LiveMapTabState extends State<LiveMapTab> {
   @override
   void initState() {
     super.initState();
-    _webView = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(AppColors.bgDark)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) {
-            _centerMap(_currentLat, _currentLon, 13);
-            // Draw the real nearby POIs and the live flow segment for wherever
-            // the traveler actually is. Routes are drawn once they pick a
-            // destination, rather than to a fixed demo coordinate.
-            _loadNearbyPois();
-          },
-        ),
-      )
-      ..loadHtmlString(liveMapHtml, baseUrl: 'https://unpkg.com');
+    _webView = HtmlMapController(
+      html: liveMapHtml,
+      baseUrl: 'https://unpkg.com',
+      background: AppColors.bgDark,
+      onLoaded: () {
+        _centerMap(_currentLat, _currentLon, 13);
+        // Draw the real nearby POIs and the live flow segment for wherever
+        // the traveler actually is. Routes are drawn once they pick a
+        // destination, rather than to a fixed demo coordinate.
+        _loadNearbyPois();
+      },
+    );
     // Deferred: _locateUser() reads AppScope, and an inherited-widget lookup is
     // not legal until the first frame has been scheduled.
     WidgetsBinding.instance.addPostFrameCallback((_) => _locateUser());
@@ -70,6 +65,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _webView.dispose();
     super.dispose();
   }
 
@@ -125,7 +121,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
     ];
 
     if (!mounted) return;
-    await _webView.runJavaScript('window.setPois(${jsonEncode(pins)});');
+    await _webView.run('window.setPois(${jsonEncode(pins)});');
     await _drawLiveTrafficSegment();
   }
 
@@ -146,7 +142,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
     final label =
         '${flow.roadName}: ${flow.currentSpeedKmh} km/h '
         '(free flow ${flow.freeFlowSpeedKmh} km/h)';
-    await _webView.runJavaScript(
+    await _webView.run(
       'window.setTrafficSegment('
       '${jsonEncode(traffic.geometry)}, '
       '${jsonEncode(label)}, '
@@ -157,11 +153,11 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
 
   Future<void> _centerMap(double lat, double lon, int zoom) =>
-      _webView.runJavaScript('window.setCenter($lat, $lon, $zoom);');
+      _webView.run('window.setCenter($lat, $lon, $zoom);');
 
   Future<void> _toggleTraffic() async {
     setState(() => _isTrafficEnabled = !_isTrafficEnabled);
-    await _webView.runJavaScript(
+    await _webView.run(
       'window.toggleTrafficOverlay($_isTrafficEnabled);',
     );
     if (!mounted) return;
@@ -310,7 +306,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
       _isRouting = false;
     });
 
-    await _webView.runJavaScript(
+    await _webView.run(
       'window.drawDualRoutes('
       '${jsonEncode(greenPoints)}, '
       '${jsonEncode(normalPoints)}, '
@@ -338,16 +334,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned.fill(
-          child: WebViewWidget(
-            controller: _webView,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<OneSequenceGestureRecognizer>(
-                () => EagerGestureRecognizer(),
-              ),
-            },
-          ),
-        ),
+        Positioned.fill(child: _webView.view()),
         _topOverlay(context),
         _floatingControls(context),
         if (_comparison != null)

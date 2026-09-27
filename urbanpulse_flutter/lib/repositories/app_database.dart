@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 /// On-device relational store for data that used to live as literal array/list
 /// constants. Every table is generated programmatically on first run (a seed,
@@ -39,10 +41,12 @@ class AppDatabase {
           return db;
         }));
 
+  /// In a browser the same SQLite runs as WebAssembly in a shared worker and
+  /// keeps its file in IndexedDB (`web/sqlite3.wasm`, `web/sqflite_sw.js`).
   Future<Database> _open() async {
-    final path = '${await getDatabasesPath()}/$_dbName';
-    return openDatabase(
-      path,
+    final factory = kIsWeb ? databaseFactoryFfiWeb : databaseFactory;
+    final path = kIsWeb ? _dbName : '${await getDatabasesPath()}/$_dbName';
+    return factory.openDatabase(path, options: OpenDatabaseOptions(
       version: _dbVersion,
       onCreate: (db, version) async {
         await _createSchema(db);
@@ -69,7 +73,7 @@ class AppDatabase {
         await _seedExperiences(db);
         await _seedFacilityProfile(db);
       },
-    );
+    ));
   }
 
   Future<void> _createSchema(Database db) async {

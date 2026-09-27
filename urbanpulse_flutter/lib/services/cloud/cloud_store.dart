@@ -165,7 +165,14 @@ class CloudStore {
         if (next == null) break;
         try {
           await _send(c, uid, next['kind'] as String, Map<String, dynamic>.from(next['data'] as Map));
+          _tokenRetries = 0;
         } on PostgrestException catch (e) {
+          if (_isTokenTiming(e)) {
+            // Just signed in: the token can be a second "from the future" for
+            // the database, or refreshing. Not a refusal; try again shortly.
+            if (_tokenRetries++ < 5) Future.delayed(const Duration(seconds: 3), flush);
+            break;
+          }
           // The database refused it (a constraint or policy): retrying cannot
           // help, so it is set aside with the reason, never retried forever.
           await _setAside(next, '${e.code}: ${e.message}');
@@ -178,6 +185,12 @@ class CloudStore {
       _flushing = false;
     }
   }
+
+  int _tokenRetries = 0;
+
+  /// PGRST301-303: the token is expired, unreadable or issued "in the future"
+  /// (clock skew between the auth and database servers right after sign-in).
+  static bool _isTokenTiming(PostgrestException e) => (e.code ?? '').startsWith('PGRST30') || e.message.toLowerCase().contains('jwt');
 
   Future<void> _send(SupabaseClient c, String uid, String kind, Map<String, dynamic> data) async {
     final row = {...Map<String, dynamic>.from(data['row'] as Map), 'user_id': uid};

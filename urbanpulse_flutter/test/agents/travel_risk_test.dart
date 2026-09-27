@@ -180,6 +180,8 @@ void main() {
       expect(b.severity, EventSeverity.moderate);
       expect(b.place, 'Hindmata');
       expect(RuleTravelRisk.readEvent('Lovely weather today, perfect for chai and pakode').isEvent, isFalse);
+      expect(RuleTravelRisk.readEvent('Rajasthan Weather: Rain and Thunderstorms Expected in East From September 27, Heat to Continue').place, isNull);
+      expect(RuleTravelRisk.readEvent('Knee-deep water at Tonk Road Today, avoid the route').place, 'Tonk Road');
       final c = RuleTravelRisk.readEvent('Hawa Mahal closed today due to heavy rain, officials say');
       expect(c.type, 'attraction_closed');
       expect(c.place, 'Hawa Mahal');

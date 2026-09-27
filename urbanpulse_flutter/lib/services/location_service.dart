@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 
 /// One place for the runtime location-permission dance and the "last known, else
 /// current" fix that `LiveMapFragment`, `YatriAiFragment` and
@@ -16,9 +20,11 @@ class LocationService {
     if (!await ensurePermission()) return null;
     try {
       // Prefer the cached fix (the Kotlin code used `lastLocation`), then fall
-      // back to an active read.
-      final last = await Geolocator.getLastKnownPosition();
-      if (last != null) return last;
+      // back to an active read. Browsers have no cached fix to ask for.
+      if (!kIsWeb) {
+        final last = await Geolocator.getLastKnownPosition();
+        if (last != null) return last;
+      }
       return await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
@@ -49,6 +55,7 @@ class LocationService {
   /// resolves, so callers can show an honest "unavailable" rather than a
   /// made-up city.
   Future<ResolvedPlace?> resolvePlace(double lat, double lon) async {
+    if (kIsWeb) return _resolveOnWeb(lat, lon);
     try {
       final placemarks =
           await Geocoding().placemarkFromCoordinates(lat, lon);
@@ -78,6 +85,42 @@ class LocationService {
       return null;
     }
   }
+
+  /// Browsers have no platform geocoder: OpenStreetMap's Nominatim answers
+  /// the same question (and allows requests from web pages).
+  Future<ResolvedPlace?> _resolveOnWeb(double lat, double lon) async {
+    try {
+      final uri = Uri.https('nominatim.openstreetmap.org', '/reverse', {
+        'format': 'jsonv2',
+        'lat': '$lat',
+        'lon': '$lon',
+        // Street-level detail names the city itself ("Jaipur"); coarser zooms
+        // name the civic body ("Jaipur Municipal Corporation").
+        'zoom': '14',
+        'addressdetails': '1',
+        'accept-language': 'en',
+      });
+      final res = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (res.statusCode != 200) return null;
+      final address = (jsonDecode(res.body) as Map<String, dynamic>)['address'];
+      if (address is! Map<String, dynamic>) return null;
+      String? at(String k) => address[k] is String ? _tidy(address[k] as String) : null;
+      final city = _firstNonEmpty([at('city'), at('town'), at('village'), at('state_district'), at('county'), at('state')]);
+      if (city == null) return null;
+      final region = [
+        for (final r in [at('state'), at('country')])
+          if (r != null && r.trim().isNotEmpty && r.trim() != city) r.trim(),
+      ].join(', ');
+      return ResolvedPlace(city: city, region: region.isEmpty ? null : region);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// "Pune Municipal Corporation" -> "Pune", "Jaipur Tehsil" -> "Jaipur".
+  static String _tidy(String name) => name
+      .replaceAll(RegExp(r'\s+(Municipal Corporation|Municipal Council|Nagar Nigam|Nagar Palika|Cantonment Board|Tehsil|Taluka|District)$', caseSensitive: false), '')
+      .trim();
 
   static String? _firstNonEmpty(List<String?> candidates) {
     for (final candidate in candidates) {
