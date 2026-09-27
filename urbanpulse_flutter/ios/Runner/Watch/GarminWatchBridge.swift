@@ -70,6 +70,13 @@ final class GarminWatchBridge: NSObject {
 
     private var initialized = false
 
+    /// The live instance.
+    ///
+    /// Needed because the Garmin Connect round trip arrives as a URL, and on a
+    /// scene-based app that is delivered to `SceneDelegate`, which has no
+    /// reference to the Flutter engine or to this object.
+    static private(set) weak var shared: GarminWatchBridge?
+
     init(messenger: FlutterBinaryMessenger) {
         methodChannel = FlutterMethodChannel(name: GarminWatchBridge.methodChannelName,
                                             binaryMessenger: messenger)
@@ -80,6 +87,7 @@ final class GarminWatchBridge: NSObject {
             self?.handle(call, result)
         }
         eventChannel.setStreamHandler(self)
+        GarminWatchBridge.shared = self
     }
 
     // MARK: - method channel

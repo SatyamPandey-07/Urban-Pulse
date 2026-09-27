@@ -21,7 +21,10 @@ import UIKit
   }
 
   /// Garmin Connect Mobile returns the chosen devices by opening our URL scheme.
-  /// Without this, the iOS device list never arrives.
+  ///
+  /// Kept as a fallback for a non-scene configuration only. This app declares a
+  /// `UISceneConfiguration`, so iOS routes URLs to `SceneDelegate` instead and
+  /// this is never called — see the comment there.
   override func application(
     _ app: UIApplication,
     open url: URL,
