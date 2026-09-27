@@ -1,0 +1,43 @@
+{
+    "name": "UrbanPulse · Sustainable & Accessible Travel",
+    "short_name": "UrbanPulse",
+    "id": ".",
+    "start_url": ".",
+    "scope": ".",
+    "display": "standalone",
+    "background_color": "#0B1015",
+    "theme_color": "#0B1015",
+    "description": "AI trip planning for everyone: step-free itineraries, a live weather digital twin, eco stays and green routes across India.",
+    "categories": ["travel", "navigation", "lifestyle"],
+    "orientation": "any",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
