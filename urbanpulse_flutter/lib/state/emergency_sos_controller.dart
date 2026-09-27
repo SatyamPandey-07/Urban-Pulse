@@ -26,7 +26,7 @@ import '../services/live_location.dart';
 import '../services/watch/watch_protocol.dart';
 
 /// How far the controller has got.
-enum SosPhase {
+enum EmergencySosPhase {
   idle,
 
   /// Counting down, cancellable.
@@ -49,9 +49,9 @@ enum SosOrigin { phone, watch }
 /// Everything the SOS screen and the watch need to render. Immutable, so a
 /// listener can tell one update from the next.
 @immutable
-class SosState {
-  const SosState({
-    this.phase = SosPhase.idle,
+class EmergencySosState {
+  const EmergencySosState({
+    this.phase = EmergencySosPhase.idle,
     this.origin = SosOrigin.phone,
     this.secondsLeft = 0,
     this.detail,
@@ -60,10 +60,10 @@ class SosState {
     this.reached = const [],
   });
 
-  final SosPhase phase;
+  final EmergencySosPhase phase;
   final SosOrigin origin;
 
-  /// Seconds left in the cancel window, 0 outside [SosPhase.armed].
+  /// Seconds left in the cancel window, 0 outside [EmergencySosPhase.armed].
   final int secondsLeft;
 
   /// A sentence for the traveller: why it failed, or who it reached.
@@ -79,23 +79,23 @@ class SosState {
   final List<String> reached;
 
   bool get isActive =>
-      phase == SosPhase.armed || phase == SosPhase.locating || phase == SosPhase.sending;
+      phase == EmergencySosPhase.armed || phase == EmergencySosPhase.locating || phase == EmergencySosPhase.sending;
 
   bool get isFinished =>
-      phase == SosPhase.sent ||
-      phase == SosPhase.prepared ||
-      phase == SosPhase.failed ||
-      phase == SosPhase.cancelled;
+      phase == EmergencySosPhase.sent ||
+      phase == EmergencySosPhase.prepared ||
+      phase == EmergencySosPhase.failed ||
+      phase == EmergencySosPhase.cancelled;
 
-  SosState copyWith({
-    SosPhase? phase,
+  EmergencySosState copyWith({
+    EmergencySosPhase? phase,
     SosOrigin? origin,
     int? secondsLeft,
     String? detail,
     int? positionAgeS,
     String? mapsUrl,
     List<String>? reached,
-  }) => SosState(
+  }) => EmergencySosState(
     phase: phase ?? this.phase,
     origin: origin ?? this.origin,
     secondsLeft: secondsLeft ?? this.secondsLeft,
@@ -110,8 +110,8 @@ class SosState {
 /// depend on the mirror, and tests can record the acks directly.
 typedef SosAckSink = Future<void> Function(SosAckMessage ack);
 
-class SosController extends ChangeNotifier {
-  SosController({
+class EmergencySosController extends ChangeNotifier {
+  EmergencySosController({
     required this.contacts,
     required this.sms,
     required this.location,
@@ -141,10 +141,10 @@ class SosController extends ChangeNotifier {
   void Function(SosOrigin origin)? onRaised;
 
   /// Called when the sequence ends, so the alarm can be silenced.
-  void Function(SosState state)? onFinished;
+  void Function(EmergencySosState state)? onFinished;
 
-  SosState _state = const SosState();
-  SosState get state => _state;
+  EmergencySosState _state = const EmergencySosState();
+  EmergencySosState get state => _state;
 
   Timer? _countdown;
 
@@ -161,13 +161,13 @@ class SosController extends ChangeNotifier {
 
   /// Starts the cancel window. Does nothing if one is already running.
   ///
-  /// Returns false, with [SosPhase.failed] and a reason, when there is nobody to
+  /// Returns false, with [EmergencySosPhase.failed] and a reason, when there is nobody to
   /// send to.
   Future<bool> trigger({SosOrigin origin = SosOrigin.phone}) async {
     if (_state.isActive) return true;
     if (contacts.isEmpty) {
-      _set(const SosState(
-        phase: SosPhase.failed,
+      _set(const EmergencySosState(
+        phase: EmergencySosPhase.failed,
         detail: 'No emergency contacts yet - add one in Settings first',
       ));
       await _push(const SosAckMessage(
@@ -179,14 +179,14 @@ class SosController extends ChangeNotifier {
     }
 
     final total = _cancelWindow.inSeconds;
-    _set(SosState(phase: SosPhase.armed, origin: origin, secondsLeft: total));
+    _set(EmergencySosState(phase: EmergencySosPhase.armed, origin: origin, secondsLeft: total));
     onRaised?.call(origin);
     await _push(SosAckMessage(status: SosAckStatus.countdown, secondsLeft: total));
 
     _countdown?.cancel();
     _countdown = Timer.periodic(const Duration(seconds: 1), (timer) {
       final left = _state.secondsLeft - 1;
-      if (_state.phase != SosPhase.armed) {
+      if (_state.phase != EmergencySosPhase.armed) {
         timer.cancel();
         return;
       }
@@ -201,21 +201,21 @@ class SosController extends ChangeNotifier {
     return true;
   }
 
-  /// Stops the countdown. Only possible while [SosPhase.armed]: once the message
+  /// Stops the countdown. Only possible while [EmergencySosPhase.armed]: once the message
   /// is on its way there is nothing left to cancel, and saying otherwise would
   /// be the same lie in the other direction.
   Future<bool> cancel() async {
-    if (_state.phase != SosPhase.armed) return false;
+    if (_state.phase != EmergencySosPhase.armed) return false;
     _countdown?.cancel();
     _countdown = null;
-    _set(_state.copyWith(phase: SosPhase.cancelled, secondsLeft: 0, detail: 'Cancelled'));
+    _set(_state.copyWith(phase: EmergencySosPhase.cancelled, secondsLeft: 0, detail: 'Cancelled'));
     await _push(const SosAckMessage(status: SosAckStatus.cancelled));
     onFinished?.call(_state);
     return true;
   }
 
   Future<void> _dispatch() async {
-    _set(_state.copyWith(phase: SosPhase.locating, secondsLeft: 0));
+    _set(_state.copyWith(phase: EmergencySosPhase.locating, secondsLeft: 0));
 
     // One fresh fix, then the last one we saw, then neither.
     String where;
@@ -235,7 +235,7 @@ class SosController extends ChangeNotifier {
       where = 'Location unknown - GPS unavailable.';
     }
 
-    _set(_state.copyWith(phase: SosPhase.sending, mapsUrl: mapsUrl, positionAgeS: ageS));
+    _set(_state.copyWith(phase: EmergencySosPhase.sending, mapsUrl: mapsUrl, positionAgeS: ageS));
 
     final body = buildSosMessage(where: where, at: _now(), origin: _state.origin);
     final outcome = await sms.send(to: contacts.contacts, body: body);
@@ -243,19 +243,19 @@ class SosController extends ChangeNotifier {
     switch (outcome.outcome) {
       case SmsOutcome.sent:
         _set(_state.copyWith(
-          phase: SosPhase.sent,
+          phase: EmergencySosPhase.sent,
           detail: outcome.detail,
           reached: outcome.reached,
         ));
         await _push(SosAckMessage(status: SosAckStatus.sent, detail: outcome.detail));
       case SmsOutcome.prepared:
-        _set(_state.copyWith(phase: SosPhase.prepared, detail: outcome.detail));
+        _set(_state.copyWith(phase: EmergencySosPhase.prepared, detail: outcome.detail));
         await _push(SosAckMessage(
           status: SosAckStatus.prepared,
           detail: outcome.detail ?? 'Tap send on the phone',
         ));
       case SmsOutcome.failed:
-        _set(_state.copyWith(phase: SosPhase.failed, detail: outcome.detail));
+        _set(_state.copyWith(phase: EmergencySosPhase.failed, detail: outcome.detail));
         await _push(SosAckMessage(
           status: SosAckStatus.failed,
           detail: outcome.detail ?? 'Could not send',
@@ -267,7 +267,7 @@ class SosController extends ChangeNotifier {
   /// Clears a finished SOS so the screen goes back to its resting state.
   void acknowledge() {
     if (_state.isActive) return;
-    _set(const SosState());
+    _set(const EmergencySosState());
   }
 
   static String _mapsUrl(UserFix fix) {
@@ -291,7 +291,7 @@ class SosController extends ChangeNotifier {
     }
   }
 
-  void _set(SosState next) {
+  void _set(EmergencySosState next) {
     _state = next;
     notifyListeners();
   }

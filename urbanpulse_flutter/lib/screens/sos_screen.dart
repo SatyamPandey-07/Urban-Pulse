@@ -6,7 +6,7 @@ import '../core/app_colors.dart';
 import '../core/formatting.dart';
 import '../services/ble_sos_service.dart';
 import '../state/app_scope.dart';
-import '../state/sos_controller.dart';
+import '../state/emergency_sos_controller.dart';
 import '../widgets/common.dart';
 import 'emergency_contacts_screen.dart';
 
@@ -42,7 +42,7 @@ class _SosScreenState extends State<SosScreen>
   bool _isSending = false;
   String? _category = 'Medical';
 
-  SosController? _sos;
+  EmergencySosController? _sos;
 
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _SosScreenState extends State<SosScreen>
     super.didChangeDependencies();
     // The same controller the watch drives, so an SOS raised on either side shows
     // the same countdown and the same outcome here.
-    final sos = AppScope.of(context).sos;
+    final sos = AppScope.of(context).emergencySos;
     if (_sos != sos) {
       _sos?.removeListener(_onBleUpdate);
       _sos = sos..addListener(_onBleUpdate);
@@ -151,7 +151,7 @@ class _SosScreenState extends State<SosScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // The shared SOS: its countdown, and the true outcome afterwards.
-              if (_sos != null && _sos!.state.phase != SosPhase.idle) ...[
+              if (_sos != null && _sos!.state.phase != EmergencySosPhase.idle) ...[
                 _buildSosStatusCard(theme, _sos!),
                 const SizedBox(height: 16),
               ],
@@ -318,46 +318,46 @@ class _SosScreenState extends State<SosScreen>
     );
   }
 
-  /// The shared [SosController]'s state, worded so it never over-claims: "sent"
+  /// The shared [EmergencySosController]'s state, worded so it never over-claims: "sent"
   /// only where the OS accepted a message, "ready" where a composer opened.
-  Widget _buildSosStatusCard(ThemeData theme, SosController sos) {
+  Widget _buildSosStatusCard(ThemeData theme, EmergencySosController sos) {
     final state = sos.state;
     final (String title, String body, Color colour) = switch (state.phase) {
-      SosPhase.armed => (
+      EmergencySosPhase.armed => (
         'Sending in ${state.secondsLeft}s',
         state.origin == SosOrigin.watch
             ? 'Raised from your Garmin watch. Tap Cancel to stop.'
             : 'Tap Cancel to stop before your contacts are messaged.',
         AppColors.sosRed,
       ),
-      SosPhase.locating => ('Getting your location', 'One moment.', AppColors.sosRed),
-      SosPhase.sending => ('Messaging your contacts', 'Sending now.', AppColors.sosRed),
-      SosPhase.sent => (
+      EmergencySosPhase.locating => ('Getting your location', 'One moment.', AppColors.sosRed),
+      EmergencySosPhase.sending => ('Messaging your contacts', 'Sending now.', AppColors.sosRed),
+      EmergencySosPhase.sent => (
         'Message sent',
         state.detail ?? 'Your emergency contacts have been messaged.',
         const Color(0xFF16A34A),
       ),
-      SosPhase.prepared => (
+      EmergencySosPhase.prepared => (
         'Ready to send',
         // Deliberately not "sent": on iPhone nothing leaves without this tap.
         state.detail ?? 'Your messaging app is open with the message ready. Tap send.',
         const Color(0xFFD97706),
       ),
-      SosPhase.failed => (
+      EmergencySosPhase.failed => (
         'Could not send',
         state.detail ?? 'Nothing was sent.',
         AppColors.sosRed,
       ),
-      SosPhase.cancelled => (
+      EmergencySosPhase.cancelled => (
         'Cancelled',
         'No message was sent.',
         theme.colorScheme.onSurfaceVariant,
       ),
-      SosPhase.idle => ('', '', theme.colorScheme.onSurfaceVariant),
+      EmergencySosPhase.idle => ('', '', theme.colorScheme.onSurfaceVariant),
     };
 
     final noContacts =
-        state.phase == SosPhase.failed && (state.detail ?? '').contains('No emergency contacts');
+        state.phase == EmergencySosPhase.failed && (state.detail ?? '').contains('No emergency contacts');
 
     return SectionCard(
       borderColor: colour,
@@ -375,9 +375,9 @@ class _SosScreenState extends State<SosScreen>
                 )
               else
                 Icon(
-                  state.phase == SosPhase.sent
+                  state.phase == EmergencySosPhase.sent
                       ? Icons.check_circle_rounded
-                      : state.phase == SosPhase.cancelled
+                      : state.phase == EmergencySosPhase.cancelled
                       ? Icons.cancel_rounded
                       : Icons.error_rounded,
                   color: colour,
@@ -405,7 +405,7 @@ class _SosScreenState extends State<SosScreen>
             ),
           ],
           const SizedBox(height: 12),
-          if (state.phase == SosPhase.armed)
+          if (state.phase == EmergencySosPhase.armed)
             FilledButton.icon(
               onPressed: sos.cancel,
               style: FilledButton.styleFrom(backgroundColor: AppColors.sosRed),

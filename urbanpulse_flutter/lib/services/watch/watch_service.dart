@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../state/sos_controller.dart';
+import '../../state/emergency_sos_controller.dart';
 import 'watch_link.dart';
 import 'watch_mirror.dart';
 import 'watch_protocol.dart';
@@ -17,7 +17,7 @@ class WatchService extends ChangeNotifier {
   WatchService({
     required this.link,
     required SharedPreferences prefs,
-    SosController? sos,
+    EmergencySosController? sos,
     WatchMirrorLimits limits = const WatchMirrorLimits(),
     DateTime Function()? now,
   }) : _prefs = prefs,
@@ -37,7 +37,7 @@ class WatchService extends ChangeNotifier {
 
   final WatchLink link;
   final SharedPreferences _prefs;
-  final SosController? _sos;
+  final EmergencySosController? _sos;
   final DateTime Function() _now;
 
   late final WatchMirror mirror;

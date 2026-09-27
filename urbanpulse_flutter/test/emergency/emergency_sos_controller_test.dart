@@ -5,7 +5,7 @@ import 'package:urbanpulse/services/emergency/emergency_contacts.dart';
 import 'package:urbanpulse/services/emergency/emergency_sms.dart';
 import 'package:urbanpulse/services/live_location.dart';
 import 'package:urbanpulse/services/watch/watch_protocol.dart';
-import 'package:urbanpulse/state/sos_controller.dart';
+import 'package:urbanpulse/state/emergency_sos_controller.dart';
 
 /// An [EmergencySms] the test drives, recording what it was asked to send.
 class FakeSms implements EmergencySms {
@@ -73,7 +73,7 @@ void main() {
     now = DateTime(2026, 9, 27, 14, 30);
   });
 
-  SosController build({Duration window = const Duration(seconds: 10)}) => SosController(
+  EmergencySosController build({Duration window = const Duration(seconds: 10)}) => EmergencySosController(
     contacts: contacts,
     sms: sms,
     location: location,
@@ -93,7 +93,7 @@ void main() {
       addTearDown(c.dispose);
 
       expect(await c.trigger(), isFalse);
-      expect(c.state.phase, SosPhase.failed);
+      expect(c.state.phase, EmergencySosPhase.failed);
       expect(c.state.detail, contains('No emergency contacts'));
       // Nothing was sent, and the watch is told so rather than left counting.
       expect(sms.bodies, isEmpty);
@@ -115,14 +115,14 @@ void main() {
       addTearDown(c.dispose);
 
       expect(await c.trigger(), isTrue);
-      expect(c.state.phase, SosPhase.armed);
+      expect(c.state.phase, EmergencySosPhase.armed);
       expect(c.state.secondsLeft, 3);
       expect(acks.first.status, SosAckStatus.countdown);
       expect(acks.first.secondsLeft, 3);
 
       // Let the real timer run out.
       await Future<void>.delayed(const Duration(milliseconds: 3400));
-      expect(c.state.phase, SosPhase.sent);
+      expect(c.state.phase, EmergencySosPhase.sent);
       // Countdowns for 2 and 1, then the outcome.
       expect(acks.where((a) => a.status == SosAckStatus.countdown).length, greaterThanOrEqualTo(2));
       expect(acks.last.status, SosAckStatus.sent);
@@ -170,7 +170,7 @@ void main() {
 
       await c.trigger();
       expect(await c.cancel(), isTrue);
-      expect(c.state.phase, SosPhase.cancelled);
+      expect(c.state.phase, EmergencySosPhase.cancelled);
       expect(acks.last.status, SosAckStatus.cancelled);
       // The whole point: nothing left the phone.
       expect(sms.bodies, isEmpty);
@@ -185,7 +185,7 @@ void main() {
       await c.cancel();
       await Future<void>.delayed(const Duration(milliseconds: 2500));
       expect(sms.bodies, isEmpty);
-      expect(c.state.phase, SosPhase.cancelled);
+      expect(c.state.phase, EmergencySosPhase.cancelled);
     });
 
     test('refuses to cancel once it is no longer cancellable', () async {
@@ -195,10 +195,10 @@ void main() {
 
       await c.trigger();
       await Future<void>.delayed(const Duration(milliseconds: 1400));
-      expect(c.state.phase, SosPhase.sent);
+      expect(c.state.phase, EmergencySosPhase.sent);
       // Claiming to cancel a sent message would be the same lie inverted.
       expect(await c.cancel(), isFalse);
-      expect(c.state.phase, SosPhase.sent);
+      expect(c.state.phase, EmergencySosPhase.sent);
     });
 
     test('cancelling when idle does nothing', () async {
@@ -210,7 +210,7 @@ void main() {
   });
 
   group('honest outcomes', () {
-    Future<SosController> run({Duration window = const Duration(seconds: 1)}) async {
+    Future<EmergencySosController> run({Duration window = const Duration(seconds: 1)}) async {
       await addContact();
       final c = build(window: window);
       await c.trigger();
@@ -221,7 +221,7 @@ void main() {
     test('sent only when the OS accepted the message', () async {
       final c = await run();
       addTearDown(c.dispose);
-      expect(c.state.phase, SosPhase.sent);
+      expect(c.state.phase, EmergencySosPhase.sent);
       expect(c.state.reached, ['+919876543210']);
       expect(acks.last.status, SosAckStatus.sent);
     });
@@ -231,7 +231,7 @@ void main() {
       final c = await run();
       addTearDown(c.dispose);
       // This is the iOS path, and it must never read as "sent".
-      expect(c.state.phase, SosPhase.prepared);
+      expect(c.state.phase, EmergencySosPhase.prepared);
       expect(c.state.reached, isEmpty);
       expect(acks.last.status, SosAckStatus.prepared);
       expect(acks.last.status, isNot(SosAckStatus.sent));
@@ -241,14 +241,14 @@ void main() {
       sms.result = const SmsResult.failed('No messaging app would open');
       final c = await run();
       addTearDown(c.dispose);
-      expect(c.state.phase, SosPhase.failed);
+      expect(c.state.phase, EmergencySosPhase.failed);
       expect(acks.last.status, SosAckStatus.failed);
       expect(acks.last.detail, contains('No messaging app'));
     });
 
     test('still sends when the watch ack cannot be delivered', () async {
       await addContact();
-      final c = SosController(
+      final c = EmergencySosController(
         contacts: contacts,
         sms: sms,
         location: location,
@@ -260,13 +260,13 @@ void main() {
       addTearDown(c.dispose);
       await c.trigger();
       await Future<void>.delayed(const Duration(milliseconds: 1400));
-      expect(c.state.phase, SosPhase.sent);
+      expect(c.state.phase, EmergencySosPhase.sent);
       expect(sms.bodies, hasLength(1));
     });
   });
 
   group('position', () {
-    Future<SosController> run() async {
+    Future<EmergencySosController> run() async {
       await addContact();
       final c = build(window: const Duration(seconds: 1));
       await c.trigger();
@@ -307,7 +307,7 @@ void main() {
       expect(sms.bodies.single, isNot(contains('maps.google.com')));
       expect(c.state.mapsUrl, isNull);
       // A missing position must not stop the SOS.
-      expect(c.state.phase, SosPhase.sent);
+      expect(c.state.phase, EmergencySosPhase.sent);
     });
   });
 
@@ -342,7 +342,7 @@ void main() {
       await c.trigger();
       await Future<void>.delayed(const Duration(milliseconds: 1400));
       c.acknowledge();
-      expect(c.state.phase, SosPhase.idle);
+      expect(c.state.phase, EmergencySosPhase.idle);
     });
 
     test('refuses to reset one that is still running', () async {
@@ -351,7 +351,7 @@ void main() {
       addTearDown(c.dispose);
       await c.trigger();
       c.acknowledge();
-      expect(c.state.phase, SosPhase.armed);
+      expect(c.state.phase, EmergencySosPhase.armed);
     });
   });
 }

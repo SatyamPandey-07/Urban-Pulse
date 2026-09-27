@@ -29,7 +29,7 @@ import 'activity_tracker.dart';
 import 'auth_controller.dart';
 import 'gamification_controller.dart';
 import 'location_controller.dart';
-import 'sos_controller.dart';
+import 'emergency_sos_controller.dart';
 import 'theme_controller.dart';
 import 'trip_plan_manager.dart';
 
@@ -174,7 +174,7 @@ class AppServices {
 
   /// The SOS sequence, shared by the SOS screen and the watch. Built on first
   /// use, and before [watch] so the watch can push its acknowledgements here.
-  late final SosController sos = SosController(
+  late final EmergencySosController emergencySos = EmergencySosController(
     contacts: emergencyContacts,
     sms: _emergencySms,
     location: _emergencyLocation,
@@ -189,7 +189,7 @@ class AppServices {
   WatchService get watch => _watch ??= WatchService(
     link: _watchLink,
     prefs: prefs,
-    sos: sos,
+    sos: emergencySos,
   );
 
   /// Builds [watch] if needed, then probes for the device.
@@ -214,7 +214,7 @@ class AppServices {
     // Only if something actually asked for it; building one here would start
     // the SDK on the way out.
     _watch?.dispose();
-    sos.dispose();
+    emergencySos.dispose();
     emergencyContacts.dispose();
     yatriInbox.dispose();
   }
