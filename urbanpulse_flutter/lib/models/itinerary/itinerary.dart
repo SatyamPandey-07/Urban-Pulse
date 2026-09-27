@@ -5,6 +5,7 @@ import '../trip_brief.dart';
 import '../trip_models.dart';
 import 'itinerary_parts.dart';
 import 'plan_snapshot.dart';
+import 'trip_pool.dart';
 
 enum SlotKind { stay, visit, meal, transit, rest }
 
@@ -328,6 +329,7 @@ class Itinerary {
     this.snapshot,
     this.version = 1,
     this.edits = const [],
+    this.pool,
   });
 
   final String id;
@@ -373,6 +375,9 @@ class Itinerary {
   /// What the traveller has asked to change so far, oldest first.
   final List<EditRecord> edits;
 
+  /// Trip-pooling: the shared journey and who shares it. Null when solo.
+  final TripPool? pool;
+
   int get dayCount => days.length;
 
   Itinerary copyWith({
@@ -395,7 +400,9 @@ class Itinerary {
     DateTime? end,
     TripBrief? brief,
     String? travellerSummary,
+    TripPool? pool,
     bool clearHotel = false,
+    bool clearPool = false,
   }) => Itinerary(
     id: id,
     createdAt: createdAt,
@@ -420,6 +427,7 @@ class Itinerary {
     snapshot: snapshot ?? this.snapshot,
     version: version ?? this.version,
     edits: edits ?? this.edits,
+    pool: clearPool ? null : (pool ?? this.pool),
   );
 
   Map<String, dynamic> toJson() => {
@@ -446,6 +454,7 @@ class Itinerary {
     'snapshot': snapshot?.toJson(),
     'version': version,
     'edits': [for (final e in edits) e.toJson()],
+    'pool': pool?.toJson(),
   };
 
   static Itinerary fromJson(Map<String, dynamic> j) {
@@ -483,6 +492,7 @@ class Itinerary {
       snapshot: obj('snapshot') == null ? null : PlanSnapshot.fromJson(obj('snapshot')!),
       version: (j['version'] as num?)?.toInt() ?? 1,
       edits: list('edits', EditRecord.fromJson),
+      pool: obj('pool') == null ? null : TripPool.fromJson(obj('pool')!),
     );
   }
 

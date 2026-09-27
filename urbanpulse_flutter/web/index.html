@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    The base path the site is served from. `flutter build web --base-href /app/`
+    replaces this placeholder when the site does not live at the domain root.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="UrbanPulse plans greener, step-free trips across India: multi-agent AI itineraries, a live weather digital twin, accessible stays and low-carbon routes.">
+  <meta name="theme-color" content="#0B1015">
+  <meta name="color-scheme" content="dark light">
+
+  <!-- Link previews -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="UrbanPulse: sustainable & accessible travel">
+  <meta property="og:description" content="AI trip planning for everyone: step-free itineraries, a live weather digital twin, eco stays and green routes.">
+  <meta property="og:image" content="icons/Icon-512.png">
+  <meta name="twitter:card" content="summary">
+
+  <!-- Installable (home screen / desktop app) -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="UrbanPulse">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+
+  <title>UrbanPulse · Sustainable & Accessible Travel</title>
+
+  <style>
+    html, body { margin: 0; height: 100%; background: #0B1015; }
+    #loading {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #E2E8F0; transition: opacity .35s ease;
+    }
+    #loading img { width: 84px; height: 92px; animation: pulse 1.6s ease-in-out infinite; }
+    #loading .name { font-size: 22px; font-weight: 800; letter-spacing: .2px; }
+    #loading .line { font-size: 13px; color: #94A3B8; }
+    #loading .bar { width: 160px; height: 3px; border-radius: 3px; background: #1E293B; overflow: hidden; }
+    #loading .bar::after {
+      content: ""; display: block; width: 40%; height: 100%; border-radius: 3px;
+      background: #10B981; animation: slide 1.1s ease-in-out infinite;
+    }
+    #loading.done { opacity: 0; pointer-events: none; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+    @media (prefers-reduced-motion: reduce) {
+      #loading img, #loading .bar::after { animation: none; }
+    }
+    noscript { color: #E2E8F0; font-family: system-ui, sans-serif; display: block; padding: 24px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div id="loading" role="status" aria-live="polite">
+    <img src="favicon.svg" alt="">
+    <div class="name">UrbanPulse</div>
+    <div class="line">Sustainable &amp; accessible travel</div>
+    <div class="bar" aria-hidden="true"></div>
+  </div>
+  <noscript>UrbanPulse needs JavaScript to run.</noscript>
+
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine();
+        await appRunner.runApp();
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.classList.add('done');
+          setTimeout(function () { loading.remove(); }, 400);
+        }
+      },
+    });
+  </script>
+</body>
+</html>

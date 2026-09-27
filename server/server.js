@@ -160,6 +160,58 @@ function reportRowToJson(row) {
 
 const app = express();
 app.use(cors());
+
+// --- Relay for the website -------------------------------------------------
+// The Flutter web build calls most APIs straight from the browser. A few data
+// sources the app reads do not allow requests from web pages (CORS), so the
+// website sends just those requests here. Only these hosts are relayed; this is
+// not an open proxy.
+const { Readable } = require("stream");
+const RELAY_HOSTS = new Set(["data.xotelo.com", "api.nugen.in", "news.google.com", "www.reddit.com"]);
+const RELAY_REQUEST_HEADERS = ["authorization", "content-type", "accept"];
+const RELAY_RESPONSE_HEADERS = ["content-type", "cache-control"];
+const RELAY_UA = "UrbanPulse/1.3 (+https://github.com/SatyamPandey-07/Urban-Pulse; web relay)";
+
+app.all("/relay", express.raw({ type: "*/*", limit: "1mb" }), async (req, res) => {
+  let target;
+  try {
+    target = new URL(String(req.query.url || ""));
+  } catch {
+    return res.status(400).json({ error: "url is required" });
+  }
+  if (target.protocol !== "https:" || !RELAY_HOSTS.has(target.hostname)) {
+    return res.status(403).json({ error: `not relayed: ${target.hostname}` });
+  }
+  if (!["GET", "POST"].includes(req.method)) {
+    return res.status(405).json({ error: "GET or POST only" });
+  }
+  const headers = { "user-agent": RELAY_UA };
+  for (const h of RELAY_REQUEST_HEADERS) {
+    // The API key only ever goes to the model host it belongs to.
+    if (h === "authorization" && target.hostname !== "api.nugen.in") continue;
+    if (req.headers[h]) headers[h] = req.headers[h];
+  }
+  try {
+    const upstream = await fetch(target, {
+      method: req.method,
+      headers,
+      body: req.method === "POST" && req.body && req.body.length ? req.body : undefined,
+      redirect: "follow",
+      signal: AbortSignal.timeout(60000),
+    });
+    res.status(upstream.status);
+    for (const h of RELAY_RESPONSE_HEADERS) {
+      const v = upstream.headers.get(h);
+      if (v) res.setHeader(h, v);
+    }
+    if (!upstream.body) return res.end();
+    // Streamed through, so a model's streamed answer arrives as it is written.
+    Readable.fromWeb(upstream.body).pipe(res);
+  } catch (e) {
+    res.status(502).json({ error: `relay failed: ${e.message}` });
+  }
+});
+
 app.use(express.json());
 
 app.get("/api/health", (req, res) => {

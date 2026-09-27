@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
@@ -121,7 +122,7 @@ class SocialSignalFeed {
     try {
       final q = Uri.encodeQueryComponent('$city (rain OR flood OR waterlogging OR heat)');
       final res = await _client
-          .get(Uri.parse('https://www.reddit.com/search.json?q=$q&sort=new&t=week&limit=15'), headers: {'User-Agent': 'UrbanPulseApp/1.0 (weather twin)'})
+          .get(Uri.parse('https://www.reddit.com/search.json?q=$q&sort=new&t=week&limit=15'), headers: kIsWeb ? null : {'User-Agent': 'UrbanPulseApp/1.0 (weather twin)'})
           .timeout(timeout);
       if (res.statusCode != 200) return const [];
       final posts = parseReddit(utf8.decode(res.bodyBytes));

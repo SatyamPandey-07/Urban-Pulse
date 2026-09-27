@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../core/routes.dart';
 import '../state/app_scope.dart';
+import '../widgets/urbanpulse_logo.dart';
 import 'tabs/dashboard_tab.dart';
 import 'tabs/live_map_tab.dart';
 import 'tabs/settings_tab.dart';
@@ -31,6 +33,10 @@ class HomeTabController extends InheritedWidget {
 /// Achievements and SOS actions, five tabs in a bottom navigation bar, and the
 /// pages kept alive between switches (the original disabled ViewPager2 swiping,
 /// so an [IndexedStack] is the faithful equivalent).
+///
+/// On wider windows (tablets, the website) the tabs move to a navigation rail,
+/// labelled with the logo on desktops, and each tab keeps a readable width;
+/// the live map always uses the whole window.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -42,11 +48,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
   static const _pages = <Widget>[
-    DashboardTab(),
+    ResponsiveCenter(maxWidth: 1180, child: DashboardTab()),
     LiveMapTab(),
-    TripsTab(),
-    YatriAiTab(),
-    SettingsTab(),
+    ResponsiveCenter(maxWidth: 1000, child: TripsTab()),
+    ResponsiveCenter(maxWidth: 880, child: YatriAiTab()),
+    ResponsiveCenter(maxWidth: 760, child: SettingsTab()),
   ];
 
   static const _destinations = <NavigationDestination>[
@@ -83,19 +89,92 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  Widget build(BuildContext context) => HomeTabController(
+    switchToTab: _switchToTab,
+    child: AdaptiveNavShell(
+      selectedIndex: _index,
+      onDestinationSelected: _switchToTab,
+      destinations: _destinations,
+      header: const _LocationAppBar(),
+      body: IndexedStack(index: _index, children: _pages),
+    ),
+  );
+}
+
+/// The home screen's frame for any window: a bottom navigation bar on phones,
+/// a navigation rail on tablets, and a labelled side menu with the logo on
+/// desktops (the website).
+class AdaptiveNavShell extends StatelessWidget {
+  const AdaptiveNavShell({
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+    required this.destinations,
+    required this.header,
+    required this.body,
+    super.key,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
+  final List<NavigationDestination> destinations;
+  final PreferredSizeWidget header;
+  final Widget body;
+
+  @override
   Widget build(BuildContext context) {
-    return HomeTabController(
-      switchToTab: _switchToTab,
-      child: Scaffold(
-        appBar: const _LocationAppBar(),
-        body: SafeArea(
-          top: false,
-          child: IndexedStack(index: _index, children: _pages),
-        ),
+    final size = WindowSize.of(context);
+    if (size.isCompact) {
+      return Scaffold(
+        appBar: header,
+        body: SafeArea(top: false, child: body),
         bottomNavigationBar: NavigationBar(
-          selectedIndex: _index,
-          onDestinationSelected: _switchToTab,
-          destinations: _destinations,
+          selectedIndex: selectedIndex,
+          onDestinationSelected: onDestinationSelected,
+          destinations: destinations,
+        ),
+      );
+    }
+    final theme = Theme.of(context);
+    final extended = size.isExpanded;
+    return Scaffold(
+      body: SafeArea(
+        child: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected,
+              extended: extended,
+              minExtendedWidth: 232,
+              labelType: extended ? NavigationRailLabelType.none : NavigationRailLabelType.all,
+              backgroundColor: theme.colorScheme.surfaceContainerLow,
+              leading: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 12, 8, 20),
+                child: extended
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const UrbanPulseLogo(size: 40),
+                          const SizedBox(width: 10),
+                          Text('UrbanPulse', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                        ],
+                      )
+                    : const UrbanPulseLogo(size: 40),
+              ),
+              destinations: [
+                for (final d in destinations)
+                  NavigationRailDestination(icon: d.icon, selectedIcon: d.selectedIcon, label: Text(d.label)),
+              ],
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(
+              child: Column(
+                children: [
+                  SizedBox(height: header.preferredSize.height, child: header),
+                  Expanded(child: body),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

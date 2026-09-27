@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../agents/runtime/agent_toolkit.dart';
+import '../models/trip_brief.dart';
 import '../repositories/experience_repository.dart';
 import '../repositories/facility_repository.dart';
 import '../repositories/hospitality_repository.dart';
@@ -14,6 +17,7 @@ import '../repositories/trip_repository.dart';
 import '../services/cloud/cloud_store.dart';
 import '../services/cloud/user_sync.dart';
 import '../services/location_service.dart';
+import '../services/trip_pool/trip_pool_service.dart';
 import 'accessibility_controller.dart';
 import 'activity_tracker.dart';
 import 'auth_controller.dart';
@@ -52,8 +56,18 @@ class AppServices {
       gamification: gamification,
       activity: activity,
     );
+    final tripPool = TripPoolService(
+      client: supabase,
+      myName: () => auth.userName.isNotEmpty ? auth.userName : auth.userEmail.split('@').first,
+      itineraries: itineraries,
+    );
     auth
-      ..onSignedIn = sync.onSignedIn
+      // After the account's data is in place, bring Trip-pool requests (and the
+      // itineraries they change) up to date.
+      ..onSignedIn = () async {
+        await sync.onSignedIn();
+        unawaited(tripPool.refresh());
+      }
       ..beforeSignOut = sync.beforeSignOut
       ..afterSignOut = sync.afterSignOut;
     final locationService = LocationService();
@@ -76,6 +90,7 @@ class AppServices {
       facility: FacilityRepository(),
       trafficHistory: TrafficHistoryRepository(),
       locationService: locationService,
+      tripPool: tripPool,
     );
   }
 
@@ -98,6 +113,7 @@ class AppServices {
     required this.facility,
     required this.trafficHistory,
     required this.locationService,
+    required this.tripPool,
   });
 
   final SharedPreferences prefs;
@@ -121,6 +137,13 @@ class AppServices {
   final TrafficHistoryRepository trafficHistory;
   final LocationService locationService;
 
+  /// Trip-pooling: shared rides with travellers going the same way that day.
+  final TripPoolService tripPool;
+
+  /// A trip brief handed to Yatri from elsewhere in the app (Surprise Me); the
+  /// Yatri tab picks it up, opens it for review, and plans it.
+  final ValueNotifier<TripBrief?> yatriInbox = ValueNotifier(null);
+
   /// The planner's shared models, data clients and caches (built on first use).
   late final AgentToolkit agentToolkit = AgentToolkit.fromConfig(prefs: prefs);
 
@@ -132,6 +155,8 @@ class AppServices {
     accessibility.dispose();
     tripPlan.dispose();
     location.dispose();
+    tripPool.dispose();
+    yatriInbox.dispose();
   }
 }
 

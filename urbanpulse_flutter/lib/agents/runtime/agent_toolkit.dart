@@ -14,6 +14,7 @@ import '../../services/data/wikipedia_client.dart';
 import '../../services/data/xotelo_client.dart';
 import '../../services/nugen/nugen_client.dart';
 import '../../services/place_geocoder.dart';
+import '../../services/web_relay_client.dart';
 import '../tools/agent_tool.dart';
 import '../tools/fetch_page_tool.dart';
 import '../tools/web_search_tool.dart';
@@ -74,7 +75,8 @@ class AgentToolkit {
 
   /// Wires everything from the build-time configuration.
   factory AgentToolkit.fromConfig({SharedPreferences? prefs, http.Client? client, AgentLlm? llm}) {
-    final http_ = client ?? http.Client();
+    // On the website, sources that refuse browser requests go through the relay.
+    final http_ = client ?? WebRelayClient.forPlatform();
     final DataCache cache = prefs == null ? MemoryCache() : PrefsCache(prefs);
     final pool = llm ?? LlmPool.fromConfig();
     final tavilyKeys = AppConfig.tavilyKeys;

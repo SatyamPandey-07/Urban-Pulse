@@ -308,15 +308,33 @@ class RuleTravelRisk implements TravelRiskModel {
   /// A capitalised place named after "at", "on", "near", "around" or before
   /// "mein" / "closed" / "shut".
   static String? _placeIn(String post) {
-    final after = RegExp(r"\b(?:at|on|near|around|in)\s+((?:[A-Z][\w'-]*\s?){1,4})").firstMatch(post);
-    if (after != null) {
-      final p = after.group(1)!.trim();
-      if (p.isNotEmpty && !const {'The', 'It', 'I'}.contains(p)) return p;
+    for (final after in RegExp(r"\b(?:at|on|near|around|in)\s+((?:[A-Z][\w'-]*\s?){1,4})").allMatches(post)) {
+      final p = _nameOnly(after.group(1)!);
+      if (p != null) return p;
     }
     final before = RegExp(r"^((?:[A-Z][\w'-]*\s?){1,5})\s*(?:mein|completely|closed|shut|is|flooded)").firstMatch(post.trim());
-    if (before != null) return before.group(1)!.trim();
+    if (before != null) return _nameOnly(before.group(1)!);
     final band = RegExp(r"Aaj\s+((?:[A-Z][\w'-]*\s?){1,4})\s+band").firstMatch(post);
-    return band?.group(1)?.trim();
+    return band == null ? null : _nameOnly(band.group(1)!);
+  }
+
+  /// Capitalised words that are not part of a place name in a headline
+  /// ("Rain expected in East From September 27" names no place).
+  static const _notPlace = {
+    'the', 'it', 'i', 'a', 'an', 'from', 'for', 'till', 'until', 'after', 'before', 'today', 'tomorrow', 'tonight', 'this', 'next',
+    'east', 'west', 'north', 'south', 'parts', 'several', 'many', 'some', 'rain', 'heavy', 'alert', 'weather', 'imd', 'update', 'live',
+    'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
+    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+  };
+
+  /// The leading run of words that can be a place, or null.
+  static String? _nameOnly(String words) {
+    final kept = <String>[];
+    for (final w in words.trim().split(RegExp(r'\s+'))) {
+      if (_notPlace.contains(w.toLowerCase())) break;
+      kept.add(w);
+    }
+    return kept.isEmpty ? null : kept.join(' ');
   }
 }
 

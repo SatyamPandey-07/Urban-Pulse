@@ -53,6 +53,8 @@ dependencies:
   latlong2: ^0.10.1
   table_calendar: ^3.2.1
   supabase_flutter: ^2.17.2
+  sqflite_common_ffi_web: ^1.2.0
+  web: 1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -61,3 +63,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# sqlite3 (pulled in by sqflite_common_ffi_web for the website) would otherwise
+# download and bundle its own SQLite into the Android and iOS apps. They never
+# use it (sqflite goes through the platform's SQLite there), so point it at the
+# system library instead of shipping a second copy.
+hooks:
+  user_defines:
+    sqlite3:
+      source: system
