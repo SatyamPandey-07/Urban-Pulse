@@ -16,6 +16,10 @@
     {
       "alignment_id": "alignment_01m3g8cdpa20eaty",
       "error": "Finetuning failed: Nugen job creation failed: HTTP 502 Bad Gateway"
+    },
+    {
+      "alignment_id": "alignment_01m3ga59s5yfgeg2",
+      "error": "Finetuning failed: Nugen job creation failed: HTTP 502 Bad Gateway"
     }
   ],
   "old_document_ids": [
@@ -26,11 +30,12 @@
   ],
   "old_benchmark_id": "benchmark_01m3fxm1q0fab5t9",
   "document_ids": [
-    "document_01m3fy2g8b1tf1vs",
-    "document_01m3fy2g8nmv64b4",
-    "document_01m3fy2g93taztm1",
-    "document_01m3fy2g9g4fm8wm"
+    "document_01m3ga546tqx5k23"
   ],
   "benchmark_id": "benchmark_01m3fy3k05b73jhv",
-  "benchmark_samples": 76
+  "benchmark_samples": 76,
+  "cookbook_attempt": {
+    "document_id": "document_01m3ga546tqx5k23",
+    "alignment_id": "alignment_01m3ga59s5yfgeg2"
+  }
 }

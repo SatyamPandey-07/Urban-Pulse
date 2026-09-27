@@ -100,15 +100,15 @@ class AuthController extends ChangeNotifier {
         await _afterSignIn();
         return const AuthOk();
       }
-      return _localSignIn(cleanEmail, password);
+      return await _localSignIn(cleanEmail, password);
     } on AuthException catch (e) {
       final m = e.message.toLowerCase();
       if (m.contains('rate limit') || m.contains('too many') || m.contains('invalid login') || m.contains('invalid credentials')) {
-        return _localSignIn(cleanEmail, password);
+        return await _localSignIn(cleanEmail, password);
       }
       return AuthFailed(_explain(e));
     } catch (_) {
-      return _localSignIn(cleanEmail, password);
+      return await _localSignIn(cleanEmail, password);
     }
   }
 

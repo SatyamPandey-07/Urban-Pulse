@@ -4,7 +4,6 @@ import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../models/live_city_data.dart';
-import '../../repositories/traffic_history_repository.dart';
 import '../../services/open_meteo_service.dart';
 import '../../services/tomtom_service.dart';
 import '../../state/app_scope.dart';
@@ -31,7 +30,6 @@ class DashboardTab extends StatefulWidget {
 class _DashboardTabState extends State<DashboardTab> {
   DashboardTelemetry? _telemetry;
   LiveTrafficData? _traffic;
-  List<TrafficReading> _trafficHistory = const [];
   bool _isLoading = true;
 
   @override
@@ -52,13 +50,11 @@ class _DashboardTabState extends State<DashboardTab> {
     final telemetry = await OpenMeteoService.fetchDashboardTelemetry(lat, lon);
     final traffic = await TomTomService.getLiveTraffic(lat, lon);
     if (traffic != null) await services.trafficHistory.record(traffic);
-    final history = await services.trafficHistory.recentReadings();
 
     if (!mounted) return;
     setState(() {
       _telemetry = telemetry;
       _traffic = traffic;
-      _trafficHistory = history;
       _isLoading = false;
     });
   }
@@ -1122,9 +1118,4 @@ class _DashboardTabState extends State<DashboardTab> {
   ];
 
   static String _weekdayLabel(DateTime date) => _weekdayNames[date.weekday - 1];
-
-  static String _clockLabel(DateTime at) {
-    final hour = at.hour % 12 == 0 ? 12 : at.hour % 12;
-    return '$hour${at.hour < 12 ? "a" : "p"}';
-  }
 }
