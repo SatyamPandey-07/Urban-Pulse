@@ -11,6 +11,8 @@ import '../repositories/facility_repository.dart';
 import '../repositories/hospitality_repository.dart';
 import '../repositories/hotel_metrics_repository.dart';
 import '../repositories/itinerary_repository.dart';
+import '../repositories/saved_places_repository.dart';
+import '../services/place_suggestions.dart';
 import '../repositories/traffic_history_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
@@ -20,7 +22,9 @@ import '../services/emergency/emergency_contacts.dart';
 import '../services/emergency/emergency_sms.dart';
 import '../services/live_location.dart';
 import '../services/location_service.dart';
+import '../services/sos/sos_backend.dart';
 import '../services/trip_pool/trip_pool_service.dart';
+import '../services/voice/voice_service.dart';
 import '../services/watch/method_channel_watch_link.dart';
 import '../services/watch/watch_link.dart';
 import '../services/watch/watch_service.dart';
@@ -30,6 +34,9 @@ import 'auth_controller.dart';
 import 'gamification_controller.dart';
 import 'location_controller.dart';
 import 'emergency_sos_controller.dart';
+import 'map_requests.dart';
+import 'notification_controller.dart';
+import 'sos_controller.dart';
 import 'theme_controller.dart';
 import 'trip_plan_manager.dart';
 
@@ -57,6 +64,11 @@ class AppServices {
     final activity = ActivityTracker(prefs, cloud: cloud);
     final gamification = GamificationController(prefs, activity, cloud: cloud);
     final accessibility = AccessibilityController(prefs, cloud: cloud);
+    final notifications = NotificationController(prefs)
+      // A badge can already be unlocked the moment this runs (a level-up while
+      // the app was closed); re-checked on every change to XP or a counter.
+      ..checkNewBadges(gamification.allBadges);
+    gamification.addListener(() => notifications.checkNewBadges(gamification.allBadges));
     final trips = TripRepository(prefs, cloud: cloud);
     final itineraries = ItineraryRepository(prefs, cloud: cloud);
     final tripBriefs = TripBriefRepository(prefs, cloud: cloud);
@@ -75,17 +87,32 @@ class AppServices {
       client: supabase,
       myName: () => auth.userName.isNotEmpty ? auth.userName : auth.userEmail.split('@').first,
       itineraries: itineraries,
+      notifications: notifications,
+    );
+    final sos = SosController(
+      prefs: prefs,
+      myName: () => auth.userName.isNotEmpty ? auth.userName : auth.userEmail.split('@').first,
+      backend: supabase == null ? null : SupabaseSosBackend(supabase),
     );
     auth
       // After the account's data is in place, bring Trip-pool requests (and the
-      // itineraries they change) up to date.
+      // itineraries they change) up to date, and start SOS (the power-button
+      // watch and alerts from people nearby).
       ..onSignedIn = () async {
         await sync.onSignedIn();
         unawaited(tripPool.refresh());
+        unawaited(sos.onSignedIn());
       }
       ..beforeSignOut = sync.beforeSignOut
-      ..afterSignOut = sync.afterSignOut;
+      ..afterSignOut = () async {
+        await sync.afterSignOut();
+        await sos.onSignedOut();
+        // A shared or reused device never carries one traveller's activity
+        // feed into the next account.
+        await notifications.clear();
+      };
     final locationService = LocationService();
+    final savedPlaces = SavedPlacesRepository(prefs);
     return AppServices._(
       prefs: prefs,
       cloud: cloud,
@@ -95,7 +122,8 @@ class AppServices {
       gamification: gamification,
       accessibility: accessibility,
       tripPlan: TripPlanManager(prefs),
-      location: LocationController(locationService),
+      location: LocationController(locationService, places: savedPlaces),
+      savedPlaces: savedPlaces,
       trips: trips,
       itineraries: itineraries,
       tripBriefs: tripBriefs,
@@ -106,6 +134,8 @@ class AppServices {
       trafficHistory: TrafficHistoryRepository(),
       locationService: locationService,
       tripPool: tripPool,
+      sos: sos,
+      notifications: notifications,
       emergencyContacts: EmergencyContactsRepository(prefs),
       watchLink: watchLink ?? MethodChannelWatchLink(),
       emergencySms: emergencySms ?? PlatformEmergencySms(),
@@ -123,6 +153,7 @@ class AppServices {
     required this.accessibility,
     required this.tripPlan,
     required this.location,
+    required this.savedPlaces,
     required this.trips,
     required this.itineraries,
     required this.tripBriefs,
@@ -133,6 +164,8 @@ class AppServices {
     required this.trafficHistory,
     required this.locationService,
     required this.tripPool,
+    required this.sos,
+    required this.notifications,
     required this.emergencyContacts,
     required WatchLink watchLink,
     required EmergencySms emergencySms,
@@ -152,6 +185,12 @@ class AppServices {
   final AccessibilityController accessibility;
   final TripPlanManager tripPlan;
   final LocationController location;
+
+  /// Home, Work and the traveller's own addresses.
+  final SavedPlacesRepository savedPlaces;
+
+  /// Completions while typing a place.
+  final PlaceSuggestions placeSuggestions = PlaceSuggestions();
   final TripRepository trips;
   final ItineraryRepository itineraries;
   final TripBriefRepository tripBriefs;
@@ -165,7 +204,17 @@ class AppServices {
   /// Trip-pooling: shared rides with travellers going the same way that day.
   final TripPoolService tripPool;
 
-  /// The people an SOS reaches.
+  /// Emergency SOS: yours (power button or SOS screen) and alerts from people nearby.
+  final SosController sos;
+
+  /// The in-app notification feed: trips planned, itineraries ready, Trip-pool
+  /// activity, SOS alerts nearby, badges unlocked.
+  final NotificationController notifications;
+
+  /// The app's navigator, so an SOS alert can open the SOS screen from anywhere.
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  /// The people the emergency-contact SOS reaches.
   final EmergencyContactsRepository emergencyContacts;
 
   final WatchLink _watchLink;
@@ -198,6 +247,11 @@ class AppServices {
   /// A trip brief handed to Yatri from elsewhere in the app (Surprise Me); the
   /// Yatri tab picks it up, opens it for review, and plans it.
   final ValueNotifier<TripBrief?> yatriInbox = ValueNotifier(null);
+  /// Talking to the app (Groq speech to text, and replies read aloud); built on first use.
+  late final VoiceService voice = VoiceService(prefs: prefs);
+
+  /// Where the itinerary screen asks the Live Map to show a day of the trip.
+  final MapRequests mapRequests = MapRequests();
 
   /// The planner's shared models, data clients and caches (built on first use).
   late final AgentToolkit agentToolkit = AgentToolkit.fromConfig(prefs: prefs);
@@ -211,12 +265,15 @@ class AppServices {
     tripPlan.dispose();
     location.dispose();
     tripPool.dispose();
-    // Only if something actually asked for it; building one here would start
-    // the SDK on the way out.
+    sos.dispose();
+    notifications.dispose();
+    // Only if something actually asked for it; building one here would start the
+    // SDK on the way out.
     _watch?.dispose();
     emergencySos.dispose();
     emergencyContacts.dispose();
     yatriInbox.dispose();
+    mapRequests.dispose();
   }
 }
 

@@ -260,7 +260,7 @@ void main() {
     llm.extractions.add('{"updates": {"destination": "Munnar"}, "ack": "Nice choice!"}');
     await c.sendText('Munnar');
 
-    expect(c.activeQuestion!.question.displayText, 'Which city will you start from?');
+    expect(c.activeQuestion!.question.displayText, 'Where will you start from? Use your location, pick a saved address, or type it.');
     expect(
       c.entries.whereType<AgentText>().map((e) => e.text),
       contains('Nice choice!'),

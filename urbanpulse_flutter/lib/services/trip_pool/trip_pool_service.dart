@@ -5,10 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../agents/yatri/trip_pool_applier.dart';
+import '../../models/app_notification.dart';
 import '../../models/itinerary/itinerary.dart';
 import '../../models/itinerary/trip_pool.dart';
 import '../../models/trip_brief.dart';
 import '../../repositories/itinerary_repository.dart';
+import '../../state/notification_controller.dart';
 
 /// A trip someone opened to Trip-pooling (another traveller's, or your own).
 class PoolListing {
@@ -123,13 +125,17 @@ class PoolRequest {
 /// Trip-pooling: travellers going to the same place on the same day share the
 /// ride. Needs accounts (Supabase); without them every call is a quiet no-op.
 class TripPoolService extends ChangeNotifier {
-  TripPoolService({SupabaseClient? client, required this.myName, this.itineraries}) : _client = client;
+  TripPoolService({SupabaseClient? client, required this.myName, this.itineraries, this.notifications}) : _client = client;
 
   final SupabaseClient? _client;
 
   /// The first name shown to other travellers.
   final String Function() myName;
   final ItineraryRepository? itineraries;
+
+  /// Where "X wants to Trip-pool with you" and "Y approved/declined your
+  /// request" are posted. Null: Trip-pool still works, just quietly.
+  final NotificationController? notifications;
 
   List<PoolRequest> incoming = const [];
   List<PoolRequest> outgoing = const [];
@@ -244,6 +250,11 @@ class TripPoolService extends ChangeNotifier {
     }
   }
 
+  /// Set once the first [refresh] in this session has completed, so that
+  /// refresh does not announce every pending request as brand new the moment
+  /// the app opens — only what changes after that.
+  bool _primed = false;
+
   /// Loads the requests to and from this traveller and their open trips, then
   /// brings their itineraries in line with the approved ones.
   Future<void> refresh() async {
@@ -252,6 +263,8 @@ class TripPoolService extends ChangeNotifier {
     if (c == null || me == null) return;
     loading = true;
     notifyListeners();
+    final oldIncoming = {for (final r in incoming) r.id: r.status};
+    final oldOutgoing = {for (final r in outgoing) r.id: r.status};
     try {
       final rows = await c.from('trip_pool_requests').select().or('from_user.eq.$me,to_user.eq.$me').order('created_at', ascending: false).limit(100);
       final reqs = [for (final r in rows) PoolRequest.fromRow(r)];
@@ -266,12 +279,51 @@ class TripPoolService extends ChangeNotifier {
       outgoing = [for (final r in reqs) if (r.fromUser == me) r.withListing(listings[r.listingId])];
       mine = [for (final l in listings.values) if (l.userId == me) l];
       error = null;
+      if (_primed) unawaited(_notifyChanges(oldIncoming, oldOutgoing));
+      _primed = true;
       await syncItineraries();
     } catch (e) {
       error = 'Could not load Trip-pool requests. Check your connection.';
     } finally {
       loading = false;
       notifyListeners();
+    }
+  }
+
+  /// A request that appeared since the last refresh, or one of your own that
+  /// changed status, becomes a notification.
+  Future<void> _notifyChanges(Map<String, PoolRequestStatus> oldIncoming, Map<String, PoolRequestStatus> oldOutgoing) async {
+    final n = notifications;
+    if (n == null) return;
+    for (final r in incoming) {
+      if (oldIncoming.containsKey(r.id) || r.status != PoolRequestStatus.pending) continue;
+      final dest = r.listing?.destination.split(',').first.trim();
+      await n.add(
+        kind: NotificationKind.poolRequest,
+        title: '${r.fromName} wants to Trip-pool',
+        body: dest == null ? '${r.fromName} asked to share your ride.' : '${r.fromName} asked to join your trip to $dest.',
+        target: const NotificationTarget.route('/trip-pool'),
+      );
+    }
+    for (final r in outgoing) {
+      final was = oldOutgoing[r.id];
+      if (was == null || was == r.status || r.status == PoolRequestStatus.pending) continue;
+      final dest = r.listing?.destination.split(',').first.trim() ?? 'your trip';
+      if (r.status == PoolRequestStatus.approved) {
+        await n.add(
+          kind: NotificationKind.poolApproved,
+          title: 'Trip-pool approved',
+          body: '${r.listing?.name ?? 'They'} approved your request to share the ride to $dest.',
+          target: const NotificationTarget.route('/trip-pool'),
+        );
+      } else if (r.status == PoolRequestStatus.declined) {
+        await n.add(
+          kind: NotificationKind.poolDeclined,
+          title: 'Trip-pool declined',
+          body: '${r.listing?.name ?? 'They'} declined your request for $dest.',
+          target: const NotificationTarget.route('/trip-pool'),
+        );
+      }
     }
   }
 

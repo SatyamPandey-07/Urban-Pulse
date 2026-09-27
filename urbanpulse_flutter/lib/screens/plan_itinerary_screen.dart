@@ -6,6 +6,7 @@ import '../core/formatting.dart';
 import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
 import '../services/itinerary_pdf.dart';
+import 'itinerary_map_link.dart';
 import '../state/itinerary_edit_controller.dart';
 import '../widgets/itinerary/access_audit_view.dart';
 import '../widgets/itinerary/budget_breakdown.dart';
@@ -187,6 +188,7 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
               onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WeatherTwinScreen(itinerary: it))),
               icon: const Icon(Icons.thunderstorm_outlined),
             ),
+            IconButton(tooltip: 'Save the map for offline use', onPressed: () => saveTripMapOffline(context, it), icon: const Icon(Icons.download_for_offline_outlined)),
             IconButton(
               tooltip: 'Share or print as PDF',
               onPressed: _pdfBusy ? null : _sharePdf,
@@ -340,6 +342,7 @@ class _DaysTabState extends State<_DaysTab> with AutomaticKeepAliveClientMixin {
                   tileLayer: widget.tileLayer,
                   locked: widget.locked,
                   onSlotTap: widget.onSlotTap == null ? null : (slot) => widget.onSlotTap!(slot, day.number),
+                  onOpenMap: () => showDayOnLiveMap(context, day),
                 ),
               ),
             ),

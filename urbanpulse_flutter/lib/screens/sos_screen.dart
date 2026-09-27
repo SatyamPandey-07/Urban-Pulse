@@ -1,889 +1,603 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../core/app_colors.dart';
 import '../core/formatting.dart';
-import '../services/ble_sos_service.dart';
+import '../services/sos/sos_locator.dart';
+import '../services/sos/sos_models.dart';
 import '../state/app_scope.dart';
-import '../state/emergency_sos_controller.dart';
+import '../state/sos_controller.dart';
 import '../widgets/common.dart';
-import 'emergency_contacts_screen.dart';
 
-/// Screen for raising emergency SOS alerts and listening for nearby BLE emergency beacons.
-///
-/// Features:
-/// - 3-second hold to broadcast high-priority BLE emergency beacon.
-/// - Peer-to-peer offline Bluetooth mesh radar scanning.
-/// - Live proximity alert notifications when nearby app users trigger SOS.
-/// - Active broadcast HUD with beacon ID, responder reach count, and GPS fix.
+const _red = Color(0xFFDC2626);
+
+/// Emergency SOS: your own (raise, see its state, end it), how the power-button
+/// trigger is set up, and SOS alerts from people near you.
 class SosScreen extends StatefulWidget {
   const SosScreen({super.key});
+
+  /// How many SOS screens are open: the overlay does not stack another, and
+  /// hides its "SOS active" pill while one is showing.
+  static final open = ValueNotifier<int>(0);
 
   @override
   State<SosScreen> createState() => _SosScreenState();
 }
 
-class _SosScreenState extends State<SosScreen>
-    with TickerProviderStateMixin {
-  static const _holdDuration = Duration(seconds: 3);
-
-  late final AnimationController _holdController =
-      AnimationController(vsync: this, duration: _holdDuration)
-        ..addStatusListener((status) {
-          if (status == AnimationStatus.completed) _triggerSos();
-        });
-
-  late final AnimationController _radarController =
-      AnimationController(vsync: this, duration: const Duration(seconds: 2))
-        ..repeat();
-
-  final BleSosService _bleService = BleSosService.instance;
-  bool _isSending = false;
-  String? _category = 'Medical';
-
-  EmergencySosController? _sos;
+class _SosScreenState extends State<SosScreen> with WidgetsBindingObserver {
+  SosController? _sos;
+  SosCategory _category = SosCategory.general;
+  final _responded = <String>{};
 
   @override
   void initState() {
     super.initState();
-    _bleService.addListener(_onBleUpdate);
+    SosScreen.open.value++;
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // The same controller the watch drives, so an SOS raised on either side shows
-    // the same countdown and the same outcome here.
-    final sos = AppScope.of(context).emergencySos;
-    if (_sos != sos) {
-      _sos?.removeListener(_onBleUpdate);
-      _sos = sos..addListener(_onBleUpdate);
+    if (_sos != null) return;
+    _sos = AppScope.of(context).sos;
+    unawaited(_sos!.refreshNativeStatus().then((_) => mounted ? setState(() {}) : null));
+    unawaited(_sos!.refreshNearby());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Back from a system settings screen: permissions may have changed.
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_sos?.refreshNativeStatus().then((_) => mounted ? setState(() {}) : null));
     }
   }
 
   @override
   void dispose() {
-    _sos?.removeListener(_onBleUpdate);
-    _bleService.removeListener(_onBleUpdate);
-    _holdController.dispose();
-    _radarController.dispose();
+    SosScreen.open.value--;
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  void _onBleUpdate() {
-    if (mounted) setState(() {});
-  }
-
-  void _onPressStart() => _holdController.forward();
-
-  void _onPressEnd() {
-    final wasIncomplete = _holdController.value < 1.0;
-    _holdController.reverse();
-    if (wasIncomplete && !_isSending && !_bleService.isBroadcasting) {
-      showToast(context, 'Hold for 3 seconds to broadcast SOS beacon');
+  Future<void> _call(String number) async {
+    try {
+      await launchUrl(Uri(scheme: 'tel', path: number));
+    } catch (_) {
+      if (mounted) showToast(context, 'Could not open the dialer. Call $number.');
     }
   }
 
-  Future<void> _triggerSos() async {
-    if (_isSending) return;
-    setState(() => _isSending = true);
+  Future<void> _navigate(SosEvent e) async {
+    if (!e.hasLocation) return;
+    final uri = Uri.https('www.google.com', '/maps/dir/', {'api': '1', 'destination': '${e.lat},${e.lng}', 'travelmode': 'walking'});
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (mounted) showToast(context, 'Could not open maps.');
+    }
+  }
 
-    final location = AppScope.of(context).location;
-    await location.resolve(force: true);
-    if (!mounted) return;
-
-    final lat = location.hasFix ? location.latitude! : 18.9894;
-    final lng = location.hasFix ? location.longitude! : 73.1175;
-
-    await _bleService.broadcastSos(
-      category: _category ?? 'Emergency',
-      latitude: lat,
-      longitude: lng,
-      locationName: location.hasFix ? 'GPS Fix (${fixed(lat, 4)}, ${fixed(lng, 4)})' : 'Offline Peer Mesh Fix',
+  Future<void> _resolve() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('End your SOS?'),
+        content: const Text('People nearby will see that you are safe.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Keep it active')),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text("I'm safe")),
+        ],
+      ),
     );
+    if (ok == true) await _sos!.resolve();
+  }
 
-    // The BLE beacon only reaches strangers in range. This is what reaches the
-    // people the traveller chose, and it reports honestly whether it managed to.
-    final started = await _sos?.trigger() ?? false;
-
-    setState(() => _isSending = false);
-    _holdController.reset();
-
+  Future<void> _respond(SosEvent e) async {
+    final ok = await _sos!.respond(e);
     if (!mounted) return;
-    showToast(
-      context,
-      started
-          ? 'SOS armed - messaging your emergency contacts in 10 seconds'
-          : 'BLE beacon broadcasting. No emergency contacts, so no message was sent.',
-    );
+    if (ok) setState(() => _responded.add(e.id));
+    showToast(context, ok ? '${e.name} can see that someone is on the way.' : 'Could not send that. Check your connection.');
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isBroadcasting = _bleService.isBroadcasting;
-    final nearbySignals = _bleService.nearbySignals;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Emergency SOS & BLE Mesh'),
-        actions: [
-          IconButton(
-            tooltip: 'Simulate Nearby Peer Alert',
-            icon: const Icon(Icons.radar),
-            onPressed: () {
-              _bleService.simulateIncomingSignal(
-                name: 'Traveler Ananya',
-                category: EmergencyCategory.medical,
-                distanceMeters: 28.0,
-                locationName: 'Near Station Gate 3',
-              );
-              showToast(context, 'Simulated incoming BLE peer SOS from 28m away');
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final sos = _sos!;
+    return AnimatedBuilder(
+      animation: sos,
+      builder: (context, _) => Scaffold(
+        appBar: AppBar(title: const Text('Emergency SOS')),
+        body: RefreshIndicator(
+          onRefresh: sos.refreshNearby,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
-              // The shared SOS: its countdown, and the true outcome afterwards.
-              if (_sos != null && _sos!.state.phase != EmergencySosPhase.idle) ...[
-                _buildSosStatusCard(theme, _sos!),
-                const SizedBox(height: 16),
-              ],
-
-              // BLE Mesh Radar status pill
-              _buildBleMeshBanner(theme),
-              const SizedBox(height: 20),
-
-              if (isBroadcasting) ...[
-                _buildActiveBroadcastCard(theme),
-                const SizedBox(height: 24),
-              ],
-
-              // Main SOS Trigger Header
-              Text(
-                isBroadcasting ? 'Broadcasting Active' : 'Are you in an emergency?',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isBroadcasting ? AppColors.sosRed : null,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                isBroadcasting
-                    ? 'Your BLE beacon is pulsing. Nearby travelers & responders are receiving alerts.'
-                    : 'Press & hold the SOS button for 3 seconds to broadcast offline BLE mesh beacon and notify nearby app users.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // Concentric Animated Radar & SOS Button
-              Center(child: _sosButton(context)),
-              const SizedBox(height: 16),
-              Text(
-                _isSending
-                    ? 'Broadcasting BLE beacon…'
-                    : isBroadcasting
-                        ? 'Broadcasting SOS to ${_bleService.nearbyRespondersCount} nearby devices'
-                        : _category == null
-                            ? 'Hold 3 sec for emergency broadcast'
-                            : 'Hold 3 sec for $_category alert',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: isBroadcasting ? AppColors.sosRed : theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // Emergency Category Selectors
-              Text(
-                "Select Emergency Category",
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              if (!sos.hasAccounts || !sos.signedIn) _AccountNotice(signedIn: sos.signedIn, hasAccounts: sos.hasAccounts),
+              _OwnSos(sos: sos, category: _category, onCategory: (c) => setState(() => _category = c), onResolve: _resolve),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _categoryCard(
-                      context,
-                      'Medical',
-                      Icons.medical_services_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _categoryCard(
-                      context,
-                      'Fire',
-                      Icons.local_fire_department_outlined,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: _categoryCard(
-                      context,
-                      'Accident',
-                      Icons.car_crash_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _categoryCard(
-                      context,
-                      'Violence',
-                      Icons.shield_outlined,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
-
-              // Nearby Peer Signals Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.bluetooth_searching, size: 20, color: AppColors.primaryGreen),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Nearby Peer Signals (${nearbySignals.length})',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (nearbySignals.isNotEmpty)
-                    TextButton(
-                      onPressed: () => _bleService.clearSignals(),
-                      child: const Text('Clear', style: TextStyle(fontSize: 12)),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              if (nearbySignals.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.wifi_tethering, size: 36, color: theme.colorScheme.outline),
-                      const SizedBox(height: 8),
-                      Text(
-                        'No Emergency Signals Detected',
-                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Your device is continuously scanning for peer BLE broadcasts within ~150 meters even without internet.',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                ...nearbySignals.map((signal) => _buildPeerSignalCard(context, signal)),
-
-              const SizedBox(height: 24),
-              // Simulation Trigger Card for easy testing
-              _buildDemoToolsCard(theme),
-              const SizedBox(height: 24),
+              _EmergencyNumbers(onCall: _call),
+              if (sos.triggerSupported) ...[const SizedBox(height: 12), _PowerButton(sos: sos)],
+              const SizedBox(height: 16),
+              _Nearby(sos: sos, responded: _responded, onNavigate: _navigate, onRespond: _respond),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  /// The shared [EmergencySosController]'s state, worded so it never over-claims: "sent"
-  /// only where the OS accepted a message, "ready" where a composer opened.
-  Widget _buildSosStatusCard(ThemeData theme, EmergencySosController sos) {
-    final state = sos.state;
-    final (String title, String body, Color colour) = switch (state.phase) {
-      EmergencySosPhase.armed => (
-        'Sending in ${state.secondsLeft}s',
-        state.origin == SosOrigin.watch
-            ? 'Raised from your Garmin watch. Tap Cancel to stop.'
-            : 'Tap Cancel to stop before your contacts are messaged.',
-        AppColors.sosRed,
-      ),
-      EmergencySosPhase.locating => ('Getting your location', 'One moment.', AppColors.sosRed),
-      EmergencySosPhase.sending => ('Messaging your contacts', 'Sending now.', AppColors.sosRed),
-      EmergencySosPhase.sent => (
-        'Message sent',
-        state.detail ?? 'Your emergency contacts have been messaged.',
-        const Color(0xFF16A34A),
-      ),
-      EmergencySosPhase.prepared => (
-        'Ready to send',
-        // Deliberately not "sent": on iPhone nothing leaves without this tap.
-        state.detail ?? 'Your messaging app is open with the message ready. Tap send.',
-        const Color(0xFFD97706),
-      ),
-      EmergencySosPhase.failed => (
-        'Could not send',
-        state.detail ?? 'Nothing was sent.',
-        AppColors.sosRed,
-      ),
-      EmergencySosPhase.cancelled => (
-        'Cancelled',
-        'No message was sent.',
-        theme.colorScheme.onSurfaceVariant,
-      ),
-      EmergencySosPhase.idle => ('', '', theme.colorScheme.onSurfaceVariant),
-    };
+class _AccountNotice extends StatelessWidget {
+  const _AccountNotice({required this.signedIn, required this.hasAccounts});
 
-    final noContacts =
-        state.phase == EmergencySosPhase.failed && (state.detail ?? '').contains('No emergency contacts');
+  final bool signedIn;
+  final bool hasAccounts;
 
-    return SectionCard(
-      borderColor: colour,
-      borderWidth: 1.5,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              if (state.isActive)
-                SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: colour),
-                )
-              else
-                Icon(
-                  state.phase == EmergencySosPhase.sent
-                      ? Icons.check_circle_rounded
-                      : state.phase == EmergencySosPhase.cancelled
-                      ? Icons.cancel_rounded
-                      : Icons.error_rounded,
-                  color: colour,
-                  size: 20,
-                ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colour,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(body, style: theme.textTheme.bodySmall),
-          if (state.positionAgeS != null) ...[
-            const SizedBox(height: 6),
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: SectionCard(
+      padding: const EdgeInsets.all(14),
+      borderColor: const Color(0xFFF59E0B),
+      borderWidth: 1.2,
+      child: Text(
+        hasAccounts
+            ? 'Sign in with an UrbanPulse account so your SOS reaches people nearby and you receive theirs. The emergency numbers below always work.'
+            : 'This build has no accounts, so SOS alerts cannot reach anyone. Use the emergency numbers below.',
+      ),
+    ),
+  );
+}
+
+// --- your SOS ----------------------------------------------------------------------
+
+class _OwnSos extends StatelessWidget {
+  const _OwnSos({required this.sos, required this.category, required this.onCategory, required this.onResolve});
+
+  final SosController sos;
+  final SosCategory category;
+  final ValueChanged<SosCategory> onCategory;
+  final VoidCallback onResolve;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (sos.phase == SosPhase.idle) {
+      return SectionCard(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          children: [
+            Text('In danger or need urgent help?', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
             Text(
-              'The position sent was ${state.positionAgeS}s old - there was no fresh GPS fix.',
-              style: theme.textTheme.bodySmall?.copyWith(color: colour),
+              sos.triggerSupported
+                  ? 'Press the power button 3 times quickly, from anywhere, even with the app closed. Or hold the button below.'
+                  : 'Hold the button below to alert UrbanPulse users near you.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall,
             ),
-          ],
-          const SizedBox(height: 12),
-          if (state.phase == EmergencySosPhase.armed)
-            FilledButton.icon(
-              onPressed: sos.cancel,
-              style: FilledButton.styleFrom(backgroundColor: AppColors.sosRed),
-              icon: const Icon(Icons.close_rounded),
-              label: const Text('Cancel SOS'),
-            )
-          else if (state.isFinished)
-            noContacts
-                ? OutlinedButton.icon(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const EmergencyContactsScreen(),
-                      ),
-                    ),
-                    icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                    label: const Text('Add emergency contacts'),
-                  )
-                : TextButton(onPressed: sos.acknowledge, child: const Text('Dismiss')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBleMeshBanner(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.primaryGreen.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryGreen.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          AnimatedBuilder(
-            animation: _radarController,
-            builder: (context, _) => Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primaryGreen,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primaryGreen.withValues(alpha: 0.6 * (1 - _radarController.value)),
-                    blurRadius: 6 * _radarController.value,
-                    spreadRadius: 3 * _radarController.value,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 18),
+            _HoldButton(onFire: () => sos.trigger(category: category)),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
               children: [
-                Text(
-                  'BLE Peer-to-Peer Mesh Active',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryGreen,
-                  ),
-                ),
-                Text(
-                  '${_bleService.nearbyRespondersCount} peer app nodes in ~150m listening range',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 11,
-                  ),
-                ),
+                for (final c in SosCategory.values)
+                  ChoiceChip(label: Text(c.label), selected: c == category, onSelected: (_) => onCategory(c)),
               ],
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primaryGreen.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'OFFLINE OK',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryGreen,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActiveBroadcastCard(ThemeData theme) {
-    final broadcast = _bleService.activeBroadcast;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.sosRed.withValues(alpha: 0.15),
-            AppColors.sosDeepRed.withValues(alpha: 0.08),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.sosRed, width: 1.5),
+      );
+    }
+
+    final since = sos.startedAt ?? sos.mine?.createdAt;
+    final fix = sos.lastFix;
+    final (title, subtitle) = switch (sos.phase) {
+      SosPhase.sending => ('Sending your SOS…', sos.syncProblem ?? 'Getting your location and alerting people near you.'),
+      SosPhase.resolving => ('Ending your SOS…', sos.syncProblem ?? 'Telling people nearby that you are safe.'),
+      _ => (
+        'SOS active',
+        sos.syncProblem ??
+            (sos.responders > 0
+                ? '${sos.responders} ${sos.responders == 1 ? 'person is' : 'people are'} on the way.'
+                : 'UrbanPulse users within a few km can see where you are.'),
       ),
+    };
+    return SectionCard(
+      padding: const EdgeInsets.all(18),
+      borderColor: _red,
+      borderWidth: 1.6,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: AppColors.sosRed,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.broadcast_on_personal, color: Colors.white, size: 20),
-              ),
+              const _Pulse(),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'BROADCASTING EMERGENCY BEACON',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.sosRed,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    Text(
-                      'ID: ${broadcast?.id ?? "UP-SOS-LIVE"} • ${broadcast?.category.label ?? "General"}',
-                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Text(title, style: theme.textTheme.titleLarge?.copyWith(color: _red, fontWeight: FontWeight.w900)),
+                    if (since != null) Text('${sos.category.label} · since ${clock12(since)}', style: theme.textTheme.bodySmall),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            'Location: ${broadcast?.locationName ?? "Active GPS Fix"}',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '⚡ ${_bleService.nearbyRespondersCount} nearby responders alerted',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.sosRed),
-              ),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.sosRed,
-                  side: const BorderSide(color: AppColors.sosRed),
-                  visualDensity: VisualDensity.compact,
-                ),
-                onPressed: () {
-                  _bleService.cancelSos();
-                  showToast(context, 'SOS broadcast canceled');
-                },
-                child: const Text('Cancel SOS'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPeerSignalCard(BuildContext context, BleEmergencySignal signal) {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: signal.isResponded
-              ? AppColors.primaryGreen.withValues(alpha: 0.5)
-              : AppColors.sosRed.withValues(alpha: 0.6),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(signal.category.emoji, style: const TextStyle(fontSize: 22)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${signal.senderName} • ${signal.category.label}',
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '${signal.locationName} • ${signal.timeAgo}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.sosRed.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '~${signal.distanceMeters.round()}m away',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.sosRed,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(Icons.network_ping, size: 14, color: theme.colorScheme.outline),
-              const SizedBox(width: 4),
-              Text(
-                'Signal: ${signal.signalQuality} (${signal.rssi} dBm) • ${signal.meshHops} mesh hop(s)',
-                style: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: theme.colorScheme.outline),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (signal.isResponded)
-                const Chip(
-                  avatar: Icon(Icons.check_circle, size: 16, color: AppColors.primaryGreen),
-                  label: Text('You Responded • Assistance En Route', style: TextStyle(fontSize: 11)),
-                  backgroundColor: Color(0xFFE8F8F0),
-                  visualDensity: VisualDensity.compact,
-                )
-              else
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.sosRed,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  icon: const Icon(Icons.navigation, size: 16),
-                  label: const Text('Navigate & Assist'),
-                  onPressed: () {
-                    _bleService.respondToSignal(signal.id);
-                    showToast(context, 'Responding to ${signal.senderName}! Opening mesh compass route.');
-                  },
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDemoToolsCard(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.science_outlined, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'BLE Mesh Simulation Testing',
-                style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          Text(subtitle, style: theme.textTheme.bodyMedium),
           const SizedBox(height: 8),
-          Text(
-            'Test peer beacon mesh alerts received from other travelers in your vicinity:',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
+          Row(
             children: [
-              ActionChip(
-                avatar: const Text('🚨'),
-                label: const Text('Nearby Medical (25m)', style: TextStyle(fontSize: 11)),
-                onPressed: () {
-                  _bleService.simulateIncomingSignal(
-                    name: 'Traveler Priya',
-                    category: EmergencyCategory.medical,
-                    distanceMeters: 25.0,
-                    locationName: 'North Gate • Taxi Stand',
-                  );
-                },
-              ),
-              ActionChip(
-                avatar: const Text('🚗'),
-                label: const Text('Accident Alert (60m)', style: TextStyle(fontSize: 11)),
-                onPressed: () {
-                  _bleService.simulateIncomingSignal(
-                    name: 'Rider Kabir',
-                    category: EmergencyCategory.accident,
-                    distanceMeters: 60.0,
-                    locationName: 'Main Ring Road Cross',
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sosButton(BuildContext context) => GestureDetector(
-    onTapDown: (_) => _onPressStart(),
-    onTapUp: (_) => _onPressEnd(),
-    onTapCancel: _onPressEnd,
-    child: AnimatedBuilder(
-      animation: Listenable.merge([_holdController, _radarController]),
-      builder: (context, child) {
-        final isBroadcasting = _bleService.isBroadcasting;
-        final radarVal = _radarController.value;
-
-        return SizedBox(
-          width: 230,
-          height: 230,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Outer radar pulse circle
-              Container(
-                width: 170 + 60 * radarVal,
-                height: 170 + 60 * radarVal,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.sosRed.withValues(
-                    alpha: (1 - radarVal) * (isBroadcasting ? 0.35 : 0.12),
-                  ),
-                ),
-              ),
-              // Inner radar wave
-              Container(
-                width: 160 + 30 * radarVal,
-                height: 160 + 30 * radarVal,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.sosRed.withValues(
-                    alpha: (1 - radarVal) * 0.2,
-                  ),
-                ),
-              ),
-              // Base button shell
-              Container(
-                width: 170,
-                height: 170,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.sosRed.withValues(alpha: 0.15),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Hold progress indicator
-                    SizedBox.expand(
-                      child: CircularProgressIndicator(
-                        value: _holdController.value == 0
-                            ? (isBroadcasting ? null : 0.0)
-                            : _holdController.value,
-                        strokeWidth: 7,
-                        backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation(
-                          isBroadcasting ? AppColors.sosRed : Colors.white,
-                        ),
-                      ),
-                    ),
-                    Transform.scale(
-                      scale: 1 - 0.08 * _holdController.value,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [AppColors.sosRed, AppColors.sosDeepRed],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.sosRed.withValues(alpha: 0.4),
-                              blurRadius: 16,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'SOS',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 34,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            Text(
-                              isBroadcasting ? 'BROADCASTING' : 'HOLD 3s',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+              Icon(fix == null ? Icons.location_off_rounded : Icons.my_location_rounded, size: 16, color: fix == null ? _red : theme.colorScheme.primary),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  fix == null
+                      ? switch (sos.locationIssue) {
+                          LocationIssue.denied => 'Location is off for UrbanPulse, so helpers cannot see where you are. Allow it below.',
+                          LocationIssue.serviceOff => 'Location is switched off on this phone. Turn it on so helpers can find you.',
+                          _ => 'Still looking for your location…',
+                        }
+                      : 'Location ${fix.lat.toStringAsFixed(5)}, ${fix.lng.toStringAsFixed(5)}${fix.accuracyM == null ? '' : ' (±${fix.accuracyM!.round()} m)'}',
+                  style: theme.textTheme.bodySmall,
                 ),
               ),
             ],
           ),
-        );
-      },
-    ),
-  );
-
-  Widget _categoryCard(BuildContext context, String label, IconData icon) {
-    final isSelected = _category == label;
-    return SectionCard(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      borderWidth: isSelected ? 2 : 0,
-      borderColor: AppColors.sosRed,
-      onTap: () => setState(() => _category = isSelected ? null : label),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.sosRed),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          ),
-          if (isSelected)
-            const Icon(Icons.check_circle, size: 18, color: AppColors.sosRed),
+          const SizedBox(height: 16),
+          if (sos.phase != SosPhase.resolving)
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF16A34A), padding: const EdgeInsets.symmetric(vertical: 14)),
+                onPressed: onResolve,
+                icon: const Icon(Icons.verified_user_rounded),
+                label: const Text("I'm safe: end SOS"),
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
+/// Hold for 1.5 s to raise an SOS, so a stray tap never does.
+class _HoldButton extends StatefulWidget {
+  const _HoldButton({required this.onFire});
+
+  final Future<void> Function() onFire;
+
+  @override
+  State<_HoldButton> createState() => _HoldButtonState();
+}
+
+class _HoldButtonState extends State<_HoldButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _hold = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
+    ..addStatusListener((s) {
+      if (s == AnimationStatus.completed) {
+        unawaited(HapticFeedback.heavyImpact());
+        _hold.reset();
+        unawaited(widget.onFire());
+      }
+    });
+
+  @override
+  void dispose() {
+    _hold.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Hold to send SOS',
+    child: GestureDetector(
+      onTapDown: (_) => _hold.forward(),
+      onTapUp: (_) => _hold.reverse(),
+      onTapCancel: () => _hold.reverse(),
+      child: AnimatedBuilder(
+        animation: _hold,
+        builder: (context, _) => SizedBox(
+          width: 170,
+          height: 170,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox.expand(
+                child: CircularProgressIndicator(value: _hold.value, strokeWidth: 8, color: Colors.white, backgroundColor: _red.withValues(alpha: 0.25)),
+              ),
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _red,
+                  boxShadow: [BoxShadow(color: _red.withValues(alpha: 0.45), blurRadius: 24, spreadRadius: 2)],
+                ),
+                alignment: Alignment.center,
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('SOS', style: TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.w900)),
+                    Text('HOLD', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 2)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _Pulse extends StatefulWidget {
+  const _Pulse();
+
+  @override
+  State<_Pulse> createState() => _PulseState();
+}
+
+class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: Tween(begin: 0.45, end: 1.0).animate(_c),
+    child: const CircleAvatar(radius: 22, backgroundColor: _red, child: Icon(Icons.sos_rounded, color: Colors.white)),
+  );
+}
+
+// --- emergency numbers -------------------------------------------------------------
+
+class _EmergencyNumbers extends StatelessWidget {
+  const _EmergencyNumbers({required this.onCall});
+
+  final ValueChanged<String> onCall;
+
+  @override
+  Widget build(BuildContext context) => SectionCard(
+    padding: const EdgeInsets.all(14),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Emergency numbers (India)', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final (n, label) in const [('112', 'All emergencies'), ('108', 'Ambulance'), ('1091', "Women's helpline")])
+              OutlinedButton.icon(onPressed: () => onCall(n), icon: const Icon(Icons.call_rounded, size: 18), label: Text('$n · $label')),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+// --- power button ------------------------------------------------------------------
+
+class _PowerButton extends StatelessWidget {
+  const _PowerButton({required this.sos});
+
+  final SosController sos;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final st = sos.nativeStatus;
+    final on = sos.triggerEnabled;
+    final running = sos.triggerRunning;
+    return SectionCard(
+      padding: const EdgeInsets.fromLTRB(14, 6, 14, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: on,
+            onChanged: sos.signedIn ? sos.setTriggerEnabled : null,
+            title: const Text('Power-button SOS', style: TextStyle(fontWeight: FontWeight.w800)),
+            subtitle: Text(
+              !on
+                  ? 'Off. Turn on to send an SOS by pressing the power button 3 times quickly.'
+                  : running
+                  ? 'On: 3 quick presses of the power button send an SOS, even when the app is closed.'
+                  : 'Not running yet. Allow location and notifications below.',
+            ),
+          ),
+          if (on) ...[
+            _Check(
+              ok: sos.locationIssue != LocationIssue.denied,
+              label: 'Location allowed (so helpers can find you)',
+              action: 'Allow',
+              onTap: sos.askLocation,
+            ),
+            _Check(ok: st['notifications'] ?? false, label: 'Notifications allowed (SOS status and alerts)', action: 'Allow', onTap: sos.requestNotifications),
+            _Check(
+              ok: st['batteryUnrestricted'] ?? false,
+              label: 'Battery unrestricted (so Android does not stop the watch)',
+              action: 'Open',
+              onTap: sos.openBatterySettings,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Some phones (Vivo, Oppo, Xiaomi) also need "Autostart" or "Allow background activity" turned on for UrbanPulse in the phone settings.',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Check extends StatelessWidget {
+  const _Check({required this.ok, required this.label, required this.action, required this.onTap});
+
+  final bool ok;
+  final String label;
+  final String action;
+  final Future<Object?> Function() onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 4),
+    child: Row(
+      children: [
+        Icon(ok ? Icons.check_circle_rounded : Icons.error_outline_rounded, size: 18, color: ok ? const Color(0xFF16A34A) : const Color(0xFFF59E0B)),
+        const SizedBox(width: 8),
+        Expanded(child: Text(label, style: Theme.of(context).textTheme.bodySmall)),
+        if (!ok) TextButton(onPressed: () => unawaited(onTap()), child: Text(action)),
+      ],
+    ),
+  );
+}
+
+// --- nearby --------------------------------------------------------------------------
+
+class _Nearby extends StatelessWidget {
+  const _Nearby({required this.sos, required this.responded, required this.onNavigate, required this.onRespond});
+
+  final SosController sos;
+  final Set<String> responded;
+  final ValueChanged<SosEvent> onNavigate;
+  final ValueChanged<SosEvent> onRespond;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final list = sos.nearby;
+    final status = sos.nearbyProblem ??
+        (!sos.signedIn
+            ? 'Sign in to receive SOS alerts from people near you.'
+            : sos.live
+            ? 'Live: new alerts appear instantly.'
+            : 'Checking every minute${sos.lastChecked == null ? '' : ' (last ${clock12(sos.lastChecked!)})'}.');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text('SOS near you', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+            DropdownButton<double>(
+              value: const [2.0, 5.0, 10.0, 25.0].contains(sos.radiusKm) ? sos.radiusKm : 5.0,
+              underline: const SizedBox.shrink(),
+              items: [for (final km in const [2.0, 5.0, 10.0, 25.0]) DropdownMenuItem(value: km, child: Text('within ${km.round()} km'))],
+              onChanged: sos.signedIn ? (v) => v == null ? null : unawaited(sos.setRadius(v)) : null,
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Icon(sos.live ? Icons.wifi_tethering_rounded : Icons.sync_rounded, size: 14, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(width: 6),
+            Expanded(child: Text(status, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (list.isEmpty)
+          SectionCard(
+            padding: const EdgeInsets.all(16),
+            child: Text(sos.signedIn ? 'No one near you needs help right now.' : 'Alerts from people nearby appear here.', style: theme.textTheme.bodyMedium),
+          ),
+        for (final e in list)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _NearbyCard(
+              e: e,
+              distance: sos.distanceKm(e),
+              responded: responded.contains(e.id),
+              onNavigate: () => onNavigate(e),
+              onRespond: () => onRespond(e),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _NearbyCard extends StatelessWidget {
+  const _NearbyCard({required this.e, required this.distance, required this.responded, required this.onNavigate, required this.onRespond});
+
+  final SosEvent e;
+  final double? distance;
+  final bool responded;
+  final VoidCallback onNavigate;
+  final VoidCallback onRespond;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final quiet = DateTime.now().difference(e.updatedAt);
+    return SectionCard(
+      padding: const EdgeInsets.all(14),
+      borderColor: _red,
+      borderWidth: 1.2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const CircleAvatar(radius: 18, backgroundColor: _red, child: Icon(Icons.sos_rounded, color: Colors.white, size: 20)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${e.name} · ${e.category.label}', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                    Text(
+                      [
+                        'since ${clock12(e.createdAt)}',
+                        if (quiet.inMinutes >= 5) 'last update ${quiet.inMinutes} min ago' else 'updating live',
+                      ].join(' · '),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              if (distance != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(color: _red.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(20)),
+                  child: Text(SosController.distanceLabel(distance!), style: const TextStyle(color: _red, fontWeight: FontWeight.w800)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                style: FilledButton.styleFrom(backgroundColor: _red),
+                onPressed: e.hasLocation ? onNavigate : null,
+                icon: const Icon(Icons.navigation_rounded, size: 18),
+                label: const Text('Navigate'),
+              ),
+              OutlinedButton.icon(
+                onPressed: responded ? null : onRespond,
+                icon: Icon(responded ? Icons.check_rounded : Icons.directions_run_rounded, size: 18),
+                label: Text(responded ? 'On your way' : "I'm on my way"),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

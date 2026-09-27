@@ -5,6 +5,8 @@ import '../../core/routes.dart';
 import '../../models/live_city_data.dart';
 import '../../models/map_category.dart';
 import '../../services/live_location.dart';
+import '../../services/voice/voice_service.dart';
+import '../../state/app_scope.dart';
 import '../../state/live_map_controller.dart';
 
 /// The search box, the category chips and the results under them.
@@ -20,8 +22,28 @@ class MapSearchOverlay extends StatefulWidget {
 class _MapSearchOverlayState extends State<MapSearchOverlay> {
   final _text = TextEditingController();
   final _focus = FocusNode();
+  VoiceService? _voice;
 
   LiveMapController get c => widget.controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _voice ??= context.getInheritedWidgetOfExactType<AppScope>()?.services.voice;
+  }
+
+  /// Say what you are looking for: "petrol pump near me", "Amber Fort".
+  Future<void> _speak() async {
+    final v = _voice;
+    if (v == null) return;
+    _focus.unfocus();
+    await v.toggle((words) {
+      if (!mounted) return;
+      _text.text = words;
+      c.search(words);
+    });
+    if (mounted && v.error != null) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(v.error!)));
+  }
 
   @override
   void initState() {
@@ -99,6 +121,17 @@ class _MapSearchOverlayState extends State<MapSearchOverlay> {
                     ),
                     if (c.searching)
                       const Padding(padding: EdgeInsets.symmetric(horizontal: 14), child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)))
+                    else if (_text.text.isEmpty && _voice != null)
+                      ListenableBuilder(
+                        listenable: _voice!,
+                        builder: (context, _) => IconButton(
+                          tooltip: _voice!.recording ? 'Stop and search' : 'Search by voice',
+                          onPressed: () => _speak(),
+                          icon: _voice!.state == VoiceState.transcribing
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                              : Icon(_voice!.recording ? Icons.stop_circle_rounded : Icons.mic_rounded, color: _voice!.recording ? Theme.of(context).colorScheme.error : null),
+                        ),
+                      )
                     else if (_text.text.isNotEmpty)
                       IconButton(
                         tooltip: 'Clear',
@@ -235,7 +268,7 @@ class MapControls extends StatelessWidget {
           children: [
             _RoundButton(
               icon: Icons.emergency_rounded,
-              tooltip: 'Emergency SOS & BLE Mesh',
+              tooltip: 'Emergency SOS',
               backgroundColor: const Color(0xFFDC2626),
               iconColor: Colors.white,
               onTap: () => Navigator.of(context).pushNamed(Routes.sos),

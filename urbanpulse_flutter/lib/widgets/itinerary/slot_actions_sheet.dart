@@ -4,6 +4,7 @@ import '../../agents/editor/edit_ops.dart';
 import '../../core/formatting.dart';
 import '../../models/itinerary/itinerary.dart';
 import '../../models/itinerary/itinerary_parts.dart';
+import '../../screens/itinerary_map_link.dart';
 import '../../state/itinerary_edit_controller.dart';
 
 /// What can be done with one stop of the plan: why it is there, replace it,
@@ -72,6 +73,11 @@ class _SlotActionsState extends State<_SlotActions> {
       _Mode.menu => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (slot.location != null)
+            tile(Icons.navigation_rounded, 'Navigate here', () {
+              final d = c.current.days.where((d) => d.number == widget.day).firstOrNull;
+              if (d != null) showDayOnLiveMap(context, d, navigateToRefId: id);
+            }, sub: 'Show the day on the Live Map and set off'),
           tile(Icons.help_outline_rounded, 'Why is this here?', () => setState(() => _mode = _Mode.why)),
           tile(Icons.swap_horiz_rounded, 'Replace with something else', () => setState(() => _mode = _Mode.replace)),
           tile(Icons.event_repeat_rounded, 'Move to another day', () => setState(() => _mode = _Mode.move)),

@@ -13,6 +13,9 @@ class HospitalityStay {
     required this.carbonFootprintPerNight,
     required this.pricePerNight,
     required this.contactPhone,
+    this.bookingUrl,
+    this.rating,
+    this.reviewCount,
   });
 
   final String id;
@@ -39,4 +42,11 @@ class HospitalityStay {
   final String carbonFootprintPerNight;
   final String pricePerNight;
   final String contactPhone;
+
+  /// Where to see or book it, when the finder had a link.
+  final String? bookingUrl;
+
+  /// Guest rating out of 5 and how many reviews it rests on, when known.
+  final double? rating;
+  final int? reviewCount;
 }

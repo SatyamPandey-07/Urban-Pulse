@@ -6,6 +6,10 @@ import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
+import '../../services/live_stays.dart';
+import '../../widgets/tool_location_sheet.dart';
+import '../hospitality_screen.dart';
+import '../location_picker_screen.dart';
 import '../trip_pool_screen.dart';
 
 /// Port of `SettingsFragment` / `fragment_settings.xml` + `item_setting_option.xml`.
@@ -33,15 +37,19 @@ class _SettingsTabState extends State<SettingsTab> {
         services.emergencyContacts,
       ]),
       builder: (context, _) {
-        final wheelchairStatus = services.accessibility.isWheelchairModeEnabled
-            ? 'Active (Step-Free Rerouting)'
-            : 'Disabled';
+        final a = services.accessibility;
+        final accessOn = [
+          if (a.isWheelchairModeEnabled) 'Wheelchair / step-free',
+          if (a.isVisualAssistanceEnabled) 'High contrast',
+          if (a.isHearingAssistanceEnabled) 'Flash alerts',
+          if (a.isServiceAnimalFriendlyOnly) 'Service animal',
+        ];
         final co2Kg = services.gamification.co2SavedGrams / 1000.0;
 
         final items = <_SettingItem>[
           _SettingItem(
             title: 'Inclusive Accessibility Profile',
-            subtitle: 'Wheelchair: $wheelchairStatus, Visual & Hearing alerts',
+            subtitle: accessOn.isEmpty ? 'No needs saved · tap to set them and find suitable stays' : accessOn.join(' · '),
             icon: Icons.accessible_forward_rounded,
             iconBg: const Color(0xFFE0E7FF),
             onTap: _showAccessibilityDialog,
@@ -68,14 +76,14 @@ class _SettingsTabState extends State<SettingsTab> {
           ),
           _SettingItem(
             title: 'Sustainable & Inclusive Stays',
-            subtitle: 'Verified solar hotels & accessibility audits',
+            subtitle: 'Live stays for a place you choose, checked for your access needs',
             icon: Icons.hotel_outlined,
             iconBg: const Color(0xFFE0F2FE),
             onTap: () => Navigator.of(context).pushNamed(Routes.hospitality),
           ),
           _SettingItem(
             title: 'Multimodal Green Route Planner',
-            subtitle: 'Metro, EV cab, bus emissions tradeoff',
+            subtitle: 'Real places and road distances, ranked by emissions',
             icon: Icons.alt_route_rounded,
             iconBg: const Color(0xFFFEF3C7),
             onTap: () =>
@@ -103,8 +111,8 @@ class _SettingsTabState extends State<SettingsTab> {
             onTap: () => Navigator.of(context).pushNamed(Routes.garminWatch),
           ),
           _SettingItem(
-            title: 'Emergency SOS & Offline BLE Mesh',
-            subtitle: 'Offline beacon broadcast, siren & nearby peer mesh responder',
+            title: 'Emergency SOS',
+            subtitle: 'Press power 3 times quickly to send an SOS · alerts from people near you',
             icon: Icons.emergency_rounded,
             iconBg: const Color(0xFFFEE2E2),
             onTap: () => Navigator.of(context).pushNamed(Routes.sos),
@@ -126,26 +134,24 @@ class _SettingsTabState extends State<SettingsTab> {
             onTap: _showApiKeyOverridesSheet,
           ),
           _SettingItem(
-            title: 'Appearance & Accent',
+            title: 'Theme & Appearance',
             subtitle:
-                'Theme: ${_accentLabel(services.theme.accent)} • Follows system settings',
-            icon: Icons.wb_sunny_rounded,
-            iconBg: const Color(0xFFFEF9C3),
-            onTap: _showAccentDialog,
+                '${_themeModeLabel(services.theme.themeMode)} • Signature Emerald',
+            icon: Icons.palette_rounded,
+            iconBg: const Color(0xFFD1FAE5),
+            onTap: _showThemeModeSheet,
           ),
           _SettingItem(
             title: 'Detected Location',
-            subtitle: services.location.hasFix
-                ? '${services.location.displayTitle} • ${services.location.displaySubtitle}'
-                : 'Panvel • Maharashtra, India',
+            subtitle: '${services.location.displayTitle} • ${services.location.displaySubtitle}',
             icon: Icons.location_on_rounded,
             iconBg: const Color(0xFFF1F5F9),
-            onTap: () => services.location.resolve(force: true),
+            onTap: () => LocationPickerScreen.open(context),
           ),
           _SettingItem(
             title: 'Sign Out',
             subtitle: services.auth.userEmail.isEmpty
-                ? 'demo.traveler@urbanpulse.ai'
+                ? 'Sign out of this device'
                 : services.auth.userEmail,
             icon: Icons.logout_rounded,
             iconBg: const Color(0xFFFEE2E2),
@@ -303,36 +309,211 @@ class _SettingsTabState extends State<SettingsTab> {
     if (!mounted) return;
     showToast(
       context,
-      'Accessibility preferences updated & synced with Yatri AI.',
+      'Accessibility preferences saved.',
     );
-  }
+    if (needsFromSettings(accessibility).isEmpty) return;
 
-  Future<void> _showAccentDialog() async {
-    final themeController = AppScope.of(context).theme;
-    final chosen = await showDialog<AccentColor>(
+    // The saved needs are only useful if something uses them: offer to find
+    // stays that suit them, for the current location or a place typed in.
+    final go = await showDialog<bool>(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('Choose Accent Color'),
-        children: [
-          for (final accent in AccentColor.values)
-            SimpleDialogOption(
-              onPressed: () => Navigator.of(context).pop(accent),
-              child: Row(
-                children: [
-                  CircleAvatar(radius: 10, backgroundColor: accent.seed),
-                  const SizedBox(width: 12),
-                  Text(_accentLabel(accent)),
-                  if (accent == themeController.accent) ...[
-                    const Spacer(),
-                    const Icon(Icons.check, size: 18),
-                  ],
-                ],
-              ),
-            ),
+      builder: (context) => AlertDialog(
+        title: const Text('Find stays that suit you?'),
+        content: const Text('I can search real stays near your current location, or a place you choose, and check them against these needs.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Not now')),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Choose a place')),
         ],
       ),
     );
-    if (chosen != null) await themeController.setAccent(chosen);
+    if (go != true || !mounted) return;
+    final place = await chooseToolPlace(context, title: 'Find accessible stays near…');
+    if (place == null || !mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => HospitalityScreen(place: place)));
+  }
+
+  Future<void> _showThemeModeSheet() async {
+    final themeController = AppScope.of(context).theme;
+    final currentMode = themeController.themeMode;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        Widget themeCard({
+          required ThemeMode mode,
+          required String title,
+          required String subtitle,
+          required IconData icon,
+          required Color iconBg,
+          required Color iconColor,
+        }) {
+          final isSelected = currentMode == mode;
+          return InkWell(
+            onTap: () async {
+              await themeController.setThemeMode(mode);
+              if (context.mounted) Navigator.of(context).pop();
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primaryGreen.withValues(alpha: isDark ? 0.20 : 0.10)
+                    : (isDark ? AppColors.surfaceElevated : const Color(0xFFF8FAFC)),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.primaryGreen
+                      : (isDark ? AppColors.surfaceBorder : AppColors.surfaceLightBorder),
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: iconColor, size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: isSelected ? AppColors.primaryGreen : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isSelected)
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryGreen,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check, size: 16, color: Colors.white),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceCard : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(
+              color: isDark ? AppColors.surfaceBorder : AppColors.surfaceLightBorder,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGreen.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.palette_rounded, color: AppColors.primaryGreen, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Appearance & Theme',
+                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                      Text(
+                        'Signature Emerald & Forest Look',
+                        style: theme.textTheme.bodySmall?.copyWith(color: AppColors.primaryGreen, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              themeCard(
+                mode: ThemeMode.dark,
+                title: 'Dark Theme',
+                subtitle: 'Deep obsidian canvas with radiant emerald accents',
+                icon: Icons.dark_mode_rounded,
+                iconBg: const Color(0xFF064E3B),
+                iconColor: const Color(0xFF34D399),
+              ),
+              const SizedBox(height: 12),
+              themeCard(
+                mode: ThemeMode.light,
+                title: 'Light Theme',
+                subtitle: 'Clean pearl white with lush forest emerald accents',
+                icon: Icons.light_mode_rounded,
+                iconBg: const Color(0xFFD1FAE5),
+                iconColor: const Color(0xFF047857),
+              ),
+              const SizedBox(height: 12),
+              themeCard(
+                mode: ThemeMode.system,
+                title: 'System Mode',
+                subtitle: 'Automatically matches your device dark/light settings',
+                icon: Icons.brightness_auto_rounded,
+                iconBg: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                iconColor: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  static String _themeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.dark:
+        return 'Dark Theme';
+      case ThemeMode.light:
+        return 'Light Theme';
+      case ThemeMode.system:
+        return 'System Default';
+    }
   }
 
   Future<void> _signOut() async {
@@ -388,8 +569,6 @@ class _SettingsTabState extends State<SettingsTab> {
         '${contacts == 1 ? '' : 's'}';
   }
 
-  static String _accentLabel(AccentColor accent) =>
-      '${accent.key[0].toUpperCase()}${accent.key.substring(1)}';
 }
 
 class _ApiKeyOverridesSheet extends StatefulWidget {

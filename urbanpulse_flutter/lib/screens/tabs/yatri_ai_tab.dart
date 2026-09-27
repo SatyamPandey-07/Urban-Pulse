@@ -8,13 +8,16 @@ import '../../agents/core/llm_gateway.dart';
 import '../../agents/receptionist/receptionist_agent.dart';
 import '../../core/config.dart';
 import '../../core/routes.dart';
+import '../../models/app_notification.dart';
 import '../../models/trip_brief.dart';
 import '../../models/trip_models.dart';
 import '../../services/place_geocoder.dart';
+import '../../services/voice/voice_service.dart';
 import '../../state/activity_tracker.dart';
 import '../../state/app_scope.dart';
 import '../../state/yatri_controller.dart';
 import '../../widgets/common.dart';
+import '../../widgets/live/live_mode_view.dart';
 import '../../widgets/yatri/brief_progress.dart';
 import '../../widgets/yatri/chat_bubbles.dart';
 import '../../widgets/yatri/chat_entry_view.dart';
@@ -35,7 +38,10 @@ class YatriAiTab extends StatefulWidget {
   State<YatriAiTab> createState() => _YatriAiTabState();
 }
 
+enum _YatriMode { chat, live }
+
 class _YatriAiTabState extends State<YatriAiTab> {
+  _YatriMode _mode = _YatriMode.chat;
   static const _wideBreakpoint = 900.0;
   static const _chatMaxWidth = 720.0;
 
@@ -46,12 +52,16 @@ class _YatriAiTabState extends State<YatriAiTab> {
   final _geocoder = PlaceGeocoder();
   final Map<int, GlobalKey> _entryKeys = {};
   bool _isListening = false;
+  VoiceService? _voice;
+  int _spokenUpTo = -1;
+  String? _shownVoiceError;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_controller != null) return;
     final services = AppScope.of(context);
+    _voice = services.voice..addListener(_onVoice);
     _controller =
         YatriController(
             receptionist: ReceptionistAgent(const GroqLlmGateway()),
@@ -61,8 +71,36 @@ class _YatriAiTabState extends State<YatriAiTab> {
             hasKey: () => AppConfig.hasGroqKey,
             detectedCity: () => services.location.originCity,
             settingsNeeds: () => _settingsNeeds(services),
-            onTripPlanned: () => services.activity.increment(TrackedAction.tripsPlanned),
-            onTripSaved: () => services.activity.increment(TrackedAction.tripsSaved),
+            onTripCreated: (dest) => services.notifications.add(
+              kind: NotificationKind.itinerary,
+              title: 'Planning your trip to ${_short(dest)}',
+              body: 'Yatri and the team are putting together your ${_short(dest)} itinerary.',
+              target: const NotificationTarget.tab(3),
+            ),
+            onTripPlanned: (dest) {
+              services.activity.increment(TrackedAction.tripsPlanned);
+              return services.notifications.add(
+                kind: NotificationKind.itinerary,
+                title: 'Your itinerary is ready',
+                body: 'The plan for ${_short(dest)} is ready to review.',
+                target: const NotificationTarget.tab(3),
+              );
+            },
+            onTripSaved: (dest) {
+              services.activity.increment(TrackedAction.tripsSaved);
+              return services.notifications.add(
+                kind: NotificationKind.tripSaved,
+                title: 'Trip saved',
+                body: '${_short(dest)} was added to My Trips.',
+                target: const NotificationTarget.tab(2),
+              );
+            },
+            onTripUpdated: (dest) => services.notifications.add(
+              kind: NotificationKind.tripUpdated,
+              title: 'Itinerary updated',
+              body: 'Changes applied to your ${_short(dest)} itinerary.',
+              target: const NotificationTarget.tab(3),
+            ),
             geocode: _geocoder.lookup,
             toolkit: services.agentToolkit,
             itineraries: services.itineraries,
@@ -99,6 +137,8 @@ class _YatriAiTabState extends State<YatriAiTab> {
   @override
   void dispose() {
     _inbox?.removeListener(_takeFromInbox);
+    _voice?.removeListener(_onVoice);
+    _voice?.cancel();
     _controller?.removeListener(_onChanged);
     _controller?.dispose();
     _input.dispose();
@@ -106,6 +146,9 @@ class _YatriAiTabState extends State<YatriAiTab> {
     _speech.cancel();
     super.dispose();
   }
+
+  /// "Jaipur, Rajasthan" -> "Jaipur", for a short notification title.
+  static String _short(String destination) => destination.split(',').first.trim();
 
   static Set<AccessibilityNeed> _settingsNeeds(AppServices s) => {
     if (s.accessibility.isWheelchairModeEnabled) AccessibilityNeed.wheelchair,
@@ -118,6 +161,41 @@ class _YatriAiTabState extends State<YatriAiTab> {
     if (!mounted) return;
     setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
+    _speakNewReplies();
+  }
+
+  /// Reads new agent messages and questions aloud when that is switched on.
+  void _speakNewReplies() {
+    final v = _voice;
+    final c = _controller;
+    if (v == null || c == null || c.entries.isEmpty) return;
+    if (_spokenUpTo < 0) {
+      // Whatever is already there when the chat opens is not read out.
+      _spokenUpTo = c.entries.last.id;
+      return;
+    }
+    for (final e in c.entries) {
+      if (e.id <= _spokenUpTo) continue;
+      _spokenUpTo = e.id;
+      final text = switch (e) {
+        AgentText(:final text) => text,
+        QuestionEntry(:final question) => question.displayText,
+        _ => null,
+      };
+      if (text != null) v.sayReply(text);
+    }
+  }
+
+  void _onVoice() {
+    if (!mounted) return;
+    setState(() {});
+    final err = _voice?.error;
+    if (err != null && err != _shownVoiceError) {
+      _shownVoiceError = err;
+      showToast(context, err);
+    } else if (err == null) {
+      _shownVoiceError = null;
+    }
   }
 
   /// A new question is scrolled to its top so the wording and the start of the
@@ -151,6 +229,13 @@ class _YatriAiTabState extends State<YatriAiTab> {
   }
 
   Future<void> _toggleVoice() async {
+    final v = _voice;
+    // With a Groq key the words are transcribed by Groq (Whisper), which copes
+    // with accents and mixed languages far better than the phone's recogniser.
+    if (v != null && v.canTranscribe) {
+      await v.toggle(_send);
+      return;
+    }
     if (_isListening) {
       await _speech.stop();
       setState(() => _isListening = false);
@@ -240,6 +325,27 @@ class _YatriAiTabState extends State<YatriAiTab> {
     final c = _controller;
     if (c == null) return const SizedBox.shrink();
 
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: SegmentedButton<_YatriMode>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment(value: _YatriMode.chat, icon: Icon(Icons.chat_bubble_outline_rounded), label: Text('Chat')),
+              ButtonSegment(value: _YatriMode.live, icon: Icon(Icons.headset_mic_rounded), label: Text('Live mode')),
+            ],
+            selected: {_mode},
+            onSelectionChanged: (m) => setState(() => _mode = m.first),
+          ),
+        ),
+        // Both stay built, so Live Mode keeps running while the chat is open.
+        Expanded(child: IndexedStack(index: _mode.index, children: [_chatView(c), const LiveModeView()])),
+      ],
+    );
+  }
+
+  Widget _chatView(YatriController c) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= _wideBreakpoint;
@@ -324,7 +430,8 @@ class _YatriAiTabState extends State<YatriAiTab> {
           hint: c.activeQuestion == null
               ? 'Tell me about your trip…'
               : 'Or type your answer…',
-          isListening: _isListening,
+          isListening: _isListening || (_voice?.recording ?? false),
+          transcribing: _voice?.state == VoiceState.transcribing,
           onSend: _send,
           onMic: _toggleVoice,
         ),
@@ -372,21 +479,24 @@ class _YatriAiTabState extends State<YatriAiTab> {
                   _openForm();
                 case 'reset':
                   c.start();
-                case 'demo':
-                  c.startDemoPlan();
                 case 'list':
                   _openAddExperienceDialog();
                 case 'provider':
                   _openProviderDashboard();
+                case 'speak':
+                  _voice?.setSpeakReplies(!(_voice?.speakReplies ?? false));
               }
             },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'form', child: Text('Open trip form')),
-              PopupMenuItem(value: 'reset', child: Text('Start over')),
-              PopupMenuItem(value: 'demo', child: Text('Preview agent graph (demo)')),
-              PopupMenuDivider(),
-              PopupMenuItem(value: 'list', child: Text('List an experience')),
-              PopupMenuItem(value: 'provider', child: Text('Provider dashboard')),
+            itemBuilder: (_) => [
+              const PopupMenuItem(value: 'form', child: Text('Open trip form')),
+              const PopupMenuItem(value: 'reset', child: Text('Start over')),
+              PopupMenuItem(
+                value: 'speak',
+                child: Row(children: [Icon((_voice?.speakReplies ?? false) ? Icons.volume_up_rounded : Icons.volume_off_rounded, size: 20), const SizedBox(width: 10), Text((_voice?.speakReplies ?? false) ? 'Reading replies aloud: on' : 'Read replies aloud: off')]),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(value: 'list', child: Text('List an experience')),
+              const PopupMenuItem(value: 'provider', child: Text('Provider dashboard')),
             ],
           ),
         ],

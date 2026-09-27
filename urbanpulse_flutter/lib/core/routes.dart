@@ -11,11 +11,13 @@ import '../screens/hospitality_screen.dart';
 import '../screens/hotel_optimizer_screen.dart';
 import '../screens/itinerary_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/notifications_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/sos_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/sustainable_trips_hub_screen.dart';
 import '../screens/trip_detail_screen.dart';
+import '../screens/trip_pool_screen.dart';
 import '../screens/weather_twin_screen.dart';
 import '../screens/welcome_screen.dart';
 
@@ -38,6 +40,8 @@ abstract final class Routes {
   static const tripDetail = '/trip-detail';
   static const sustainableTripsHub = '/sustainable-trips-hub';
   static const weatherTwin = '/weather-twin';
+  static const tripPool = '/trip-pool';
+  static const notifications = '/notifications';
   static const garminWatch = '/garmin-watch';
   static const emergencyContacts = '/emergency-contacts';
 
@@ -56,6 +60,8 @@ abstract final class Routes {
     itinerary: (_) => const ItineraryScreen(),
     sustainableTripsHub: (_) => const SustainableTripsHubScreen(),
     weatherTwin: (_) => const WeatherTwinScreen(),
+    tripPool: (_) => const TripPoolScreen(),
+    notifications: (_) => const NotificationsScreen(),
     garminWatch: (_) => const GarminWatchScreen(),
     emergencyContacts: (_) => const EmergencyContactsScreen(),
   };

@@ -1,8 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Carried over from the original app's manifest. CALL_PHONE is still not
-         re-declared: "Call Venue" hands off to the dialer via an intent, which
-         does not place a call on the user's behalf. -->
+    <!-- CALL_PHONE is still not re-declared: "Call Venue" and the SOS screen's
+         emergency numbers hand off to the dialer via an intent, which does not
+         place a call on the user's behalf. SEND_SMS *is* now declared, because
+         the watch SOS genuinely sends one message per emergency contact - see
+         below. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -10,10 +12,19 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Emergency SOS sends one SMS per emergency contact. Requested at the
+    <!-- Emergency SOS: a foreground service watches for three quick presses of
+         the power button (SosTriggerService), with location for the SOS fix. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- The emergency-contact SOS sends one SMS per contact. Requested at the
          moment it is needed, never at launch, and refusing it is a supported
-         path: the SOS controller then opens the system composer instead and
-         reports `prepared` rather than `sent`. -->
+         path: the controller then opens the system composer instead and reports
+         `prepared` rather than `sent`. -->
     <uses-permission android:name="android.permission.SEND_SMS" />
 
     <!-- The Connect IQ SDK reaches the watch over Garmin Connect Mobile's bound
@@ -48,6 +59,25 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service
+            android:name=".SosTriggerService"
+            android:exported="false"
+            android:foregroundServiceType="location|specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Personal safety: listens for three quick power-button presses to raise an emergency SOS." />
+        </service>
+        <receiver
+            android:name=".SosActionReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".SosBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

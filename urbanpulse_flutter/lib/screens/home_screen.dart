@@ -1,3 +1,5 @@
+import '../state/map_requests.dart';
+import 'location_picker_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
@@ -40,12 +42,51 @@ class HomeTabController extends InheritedWidget {
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  /// Allows external navigation (like in-app notification toasts) to switch tabs.
+  static final ValueNotifier<int?> tabSwitcher = ValueNotifier<int?>(null);
+  static void selectTab(int index) {
+    tabSwitcher.value = index;
+  }
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
+  MapRequests? _mapRequests;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // A day of the trip sent to the map from the itinerary screen: go and look.
+    _mapRequests ??= AppScope.of(context).mapRequests..addListener(_mapRequested);
+  }
+
+  void _mapRequested() {
+    if (_mapRequests?.pending != null && mounted) _switchToTab(1);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    HomeScreen.tabSwitcher.addListener(_onExternalTabSwitch);
+  }
+
+  @override
+  void dispose() {
+    _mapRequests?.removeListener(_mapRequested);
+    HomeScreen.tabSwitcher.removeListener(_onExternalTabSwitch);
+    super.dispose();
+  }
+
+  void _onExternalTabSwitch() {
+    final target = HomeScreen.tabSwitcher.value;
+    if (target != null && mounted) {
+      _switchToTab(target);
+      HomeScreen.tabSwitcher.value = null;
+    }
+  }
 
   static const _pages = <Widget>[
     ResponsiveCenter(maxWidth: 1180, child: DashboardTab()),
@@ -215,22 +256,15 @@ class _LocationAppBarState extends State<_LocationAppBar> {
         animation: location,
         builder: (context, _) => InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => location.resolve(force: true),
+          onTap: () => LocationPickerScreen.open(context),
           child: Row(
             children: [
               Container(
                 width: 38,
                 height: 38,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.primaryGreen,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryGreen.withValues(alpha: 0.35),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: const Icon(
                   Icons.location_on_rounded,
@@ -290,82 +324,50 @@ class _LocationAppBarState extends State<_LocationAppBar> {
         ),
       ),
       actions: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () => Navigator.of(context).pushNamed(Routes.sos),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFDC2626), Color(0xFFB91C1C)],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFDC2626).withValues(alpha: 0.4),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.emergency_rounded, size: 16, color: Colors.white),
-                  SizedBox(width: 4),
-                  Text(
-                    'SOS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
+        AnimatedBuilder(
+          animation: AppScope.of(context).notifications,
+          builder: (context, _) {
+            final unread = AppScope.of(context).notifications.unreadCount;
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerLow,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant,
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      unread > 0 ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
+                      size: 20,
+                      color: unread > 0 ? AppColors.primaryGreen : theme.colorScheme.onSurface,
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerLow,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: theme.colorScheme.outlineVariant,
-                    width: 1,
+                  tooltip: 'Notifications',
+                  onPressed: () => Navigator.of(context).pushNamed(Routes.notifications),
+                ),
+                if (unread > 0)
+                  Positioned(
+                    top: 15,
+                    right: 13,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.solidError,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                   ),
-                ),
-                child: Icon(
-                  Icons.notifications_none_rounded,
-                  size: 20,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              tooltip: 'Notifications & Achievements',
-              onPressed: () => Navigator.of(context).pushNamed(Routes.achievements),
-            ),
-            Positioned(
-              top: 16,
-              right: 14,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppColors.solidError,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
         Padding(
           padding: const EdgeInsets.only(right: 14),

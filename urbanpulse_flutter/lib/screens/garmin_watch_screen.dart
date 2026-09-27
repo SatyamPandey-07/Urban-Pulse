@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../services/watch/watch_link.dart';
 import '../services/watch/watch_service.dart';
 import '../state/app_scope.dart';
+import '../state/emergency_sos_controller.dart';
 import '../widgets/common.dart';
 import 'emergency_contacts_screen.dart';
 
@@ -58,12 +59,19 @@ class _GarminWatchScreenState extends State<GarminWatchScreen> {
         subtitle: 'Mirror your trip to your wrist',
       ),
       body: AnimatedBuilder(
-        animation: Listenable.merge([watch, services.emergencyContacts]),
+        animation: Listenable.merge([watch, services.emergencyContacts, services.emergencySos]),
         builder: (context, _) {
           final status = watch.status;
+          final sos = services.emergencySos;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             children: [
+              // A watch-raised SOS is cancellable from either side, so its
+              // countdown has to be reachable on the phone too.
+              if (sos.state.phase != EmergencySosPhase.idle) ...[
+                _sosProgressCard(theme, sos),
+                const SizedBox(height: 16),
+              ],
               _statusCard(theme, watch, status),
               const SizedBox(height: 16),
               _mirrorCard(theme, watch, status),
@@ -79,6 +87,107 @@ class _GarminWatchScreenState extends State<GarminWatchScreen> {
   }
 
   // --------------------------------------------------------------------------
+
+
+  /// The live state of an SOS raised from the watch: its countdown, a phone-side
+  /// cancel, and afterwards the true outcome.
+  ///
+  /// Worded so it never over-claims - "sent" only where the OS accepted a
+  /// message, "ready" where a composer was merely opened.
+  Widget _sosProgressCard(ThemeData theme, EmergencySosController sos) {
+    final state = sos.state;
+    final (String title, String body, Color colour) = switch (state.phase) {
+      EmergencySosPhase.armed => (
+        'Sending in ${state.secondsLeft}s',
+        state.origin == SosOrigin.watch
+            ? 'Raised from your watch. Cancel here or on the watch.'
+            : 'Cancel before your emergency contacts are messaged.',
+        const Color(0xFFDC2626),
+      ),
+      EmergencySosPhase.locating => ('Getting your location', 'One moment.', const Color(0xFFDC2626)),
+      EmergencySosPhase.sending => ('Messaging your contacts', 'Sending now.', const Color(0xFFDC2626)),
+      EmergencySosPhase.sent => (
+        'Message sent',
+        state.detail ?? 'Your emergency contacts have been messaged.',
+        const Color(0xFF16A34A),
+      ),
+      EmergencySosPhase.prepared => (
+        'Ready to send',
+        state.detail ?? 'Your messaging app is open with the message ready. Tap send.',
+        const Color(0xFFD97706),
+      ),
+      EmergencySosPhase.failed => (
+        'Could not send',
+        state.detail ?? 'Nothing was sent.',
+        const Color(0xFFDC2626),
+      ),
+      EmergencySosPhase.cancelled => (
+        'Cancelled',
+        'No message was sent.',
+        theme.colorScheme.onSurfaceVariant,
+      ),
+      EmergencySosPhase.idle => ('', '', theme.colorScheme.onSurfaceVariant),
+    };
+
+    return SectionCard(
+      borderColor: colour,
+      borderWidth: 1.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (state.isActive)
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: colour),
+                )
+              else
+                Icon(
+                  state.phase == EmergencySosPhase.sent
+                      ? Icons.check_circle_rounded
+                      : state.phase == EmergencySosPhase.cancelled
+                      ? Icons.cancel_rounded
+                      : Icons.error_rounded,
+                  color: colour,
+                  size: 20,
+                ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colour,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(body, style: theme.textTheme.bodySmall),
+          if (state.positionAgeS != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              'The position sent was ${state.positionAgeS}s old - there was no fresh GPS fix.',
+              style: theme.textTheme.bodySmall?.copyWith(color: colour),
+            ),
+          ],
+          const SizedBox(height: 12),
+          if (state.phase == EmergencySosPhase.armed)
+            FilledButton.icon(
+              onPressed: sos.cancel,
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+              icon: const Icon(Icons.close_rounded),
+              label: const Text('Cancel SOS'),
+            )
+          else if (state.isFinished)
+            TextButton(onPressed: sos.acknowledge, child: const Text('Dismiss')),
+        ],
+      ),
+    );
+  }
 
   Widget _statusCard(ThemeData theme, WatchService watch, WatchStatus status) {
     final good = status.isConnected;

@@ -12,26 +12,20 @@ class AgentAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [scheme.primary, scheme.tertiary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: isDark ? const Color(0xFF064E3B) : const Color(0xFFE8F8F0),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.3 : 0.2),
+          width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.35),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
-      child: Icon(Icons.auto_awesome, size: size * 0.55, color: scheme.onPrimary),
+      child: Icon(Icons.auto_awesome, size: size * 0.5, color: theme.colorScheme.primary),
     );
   }
 }
@@ -144,18 +138,11 @@ class UserBubble extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.colorScheme.primary,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
+            topLeft: Radius.circular(18),
             topRight: Radius.circular(4),
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
+            bottomLeft: Radius.circular(18),
+            bottomRight: Radius.circular(18),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.primary.withValues(alpha: 0.25),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Text(
           text,

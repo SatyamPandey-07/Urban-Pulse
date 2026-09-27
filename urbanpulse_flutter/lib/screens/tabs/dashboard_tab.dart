@@ -4,6 +4,7 @@ import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../models/live_city_data.dart';
+import '../../state/location_controller.dart';
 import '../../services/open_meteo_service.dart';
 import '../../services/tomtom_service.dart';
 import '../../state/app_scope.dart';
@@ -30,6 +31,8 @@ class DashboardTab extends StatefulWidget {
 class _DashboardTabState extends State<DashboardTab> {
   DashboardTelemetry? _telemetry;
   LiveTrafficData? _traffic;
+  (double, double)? _loadedFor;
+  LocationController? _loc;
   bool _isLoading = true;
 
   @override
@@ -37,7 +40,25 @@ class _DashboardTabState extends State<DashboardTab> {
     super.initState();
     // Deferred: _load() reads AppScope, and an inherited-widget lookup is not
     // legal until the first frame has been scheduled.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _load();
+      // Choosing another address (or going back to the device) refreshes the
+      // dashboard for that place.
+      _loc = AppScope.of(context).location..addListener(_locationChanged);
+    });
+  }
+
+  @override
+  void dispose() {
+    _loc?.removeListener(_locationChanged);
+    super.dispose();
+  }
+
+  void _locationChanged() {
+    if (!mounted) return;
+    final now = AppScope.of(context).location.coordinatesOrDefault;
+    final was = _loadedFor;
+    if (was == null || (was.$1 - now.$1).abs() > 0.005 || (was.$2 - now.$2).abs() > 0.005) _load();
   }
 
   Future<void> _load() async {
@@ -46,6 +67,7 @@ class _DashboardTabState extends State<DashboardTab> {
     final services = AppScope.of(context);
     await services.location.resolve();
     final (lat, lon) = services.location.coordinatesOrDefault;
+    _loadedFor = (lat, lon);
 
     final telemetry = await OpenMeteoService.fetchDashboardTelemetry(lat, lon);
     final traffic = await TomTomService.getLiveTraffic(lat, lon);
@@ -80,8 +102,6 @@ class _DashboardTabState extends State<DashboardTab> {
           _heroBannerCard(context, city),
           const SizedBox(height: 14),
           _surpriseCard(context),
-          const SizedBox(height: 14),
-          _emergencySosBanner(context),
           const SizedBox(height: 22),
           _popularDestinationsSection(context),
           const SizedBox(height: 22),
@@ -99,73 +119,12 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  /// Emergency SOS & Offline BLE Mesh Quick Banner
-  Widget _emergencySosBanner(BuildContext context) {
-    return InkWell(
-      onTap: () => Navigator.of(context).pushNamed(Routes.sos),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF7F1D1D), Color(0xFF991B1B)],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFDC2626), width: 1.2),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFDC2626).withValues(alpha: 0.25),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Color(0xFFDC2626),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.emergency_rounded, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Emergency SOS & Offline BLE Mesh',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Hold for 3s to broadcast offline beacon to nearby users',
-                    style: TextStyle(
-                      color: Color(0xFFFCA5A5),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: Colors.white70, size: 22),
-          ],
-        ),
-      ),
-    );
-  }
-
   /// Surprise Me: Yatri picks a short trip from the traveller's past ones.
   Widget _surpriseCard(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     void open() {
       final tabs = HomeTabController.maybeOf(context);
       final inbox = AppScope.of(context).yatriInbox;
@@ -173,8 +132,6 @@ class _DashboardTabState extends State<DashboardTab> {
         MaterialPageRoute<void>(
           builder: (routeContext) => SurpriseMeScreen(
             onPlan: (pick) {
-              // Close Surprise Me first: Yatri opens its review form over the
-              // home screen, and a pop after that would close the form instead.
               Navigator.of(routeContext).pop();
               tabs?.switchToTab(3);
               inbox.value = pick.brief;
@@ -189,39 +146,54 @@ class _DashboardTabState extends State<DashboardTab> {
       child: InkWell(
         onTap: open,
         borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          padding: const EdgeInsets.all(18),
+        child: Container(
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceCard : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF7C3AED), Color(0xFF0EA5E9), Color(0xFF10B981)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+            border: Border.all(
+              color: isDark ? AppColors.surfaceBorder : const Color(0xFFE2E8F0),
+              width: 1,
             ),
           ),
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)),
-                child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 26),
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF064E3B) : const Color(0xFFE8F8F0),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppColors.primaryGreen.withValues(alpha: isDark ? 0.3 : 0.2),
+                    width: 1,
+                  ),
+                ),
+                child: const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryGreen, size: 22),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Surprise me', style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                    Text(
+                      'Surprise me',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurface,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     Text(
-                      'A weekend trip Yatri and the agents pick for you, from the trips you have planned before',
-                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+                      'A tailored eco-trip Yatri picks for you based on your history',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.white),
+              Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -350,16 +322,9 @@ class _DashboardTabState extends State<DashboardTab> {
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.surfaceLightBorder,
-            width: 1.2,
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
+            width: 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Row(
           children: [
@@ -411,40 +376,42 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _categoryIconsRow(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final categories = [
       (
         'Hotels',
         Icons.hotel_rounded,
-        const Color(0xFF00A86B),
-        const Color(0xFFE8F8F0),
+        const Color(0xFF10B981),
+        isDark ? const Color(0x2410B981) : const Color(0xFFE8F8F0),
         () => Navigator.of(context).pushNamed(Routes.hospitality),
       ),
       (
         'Flights',
         Icons.flight_rounded,
-        const Color(0xFF1E88E5),
-        const Color(0xFFE8F2FE),
+        const Color(0xFF38BDF8),
+        isDark ? const Color(0x2438BDF8) : const Color(0xFFE0F2FE),
         () => Navigator.of(context).pushNamed(Routes.greenRoutePlanner),
       ),
       (
         'Trains',
         Icons.train_rounded,
-        const Color(0xFF00ACC1),
-        const Color(0xFFE6F7FA),
+        const Color(0xFF34D399),
+        isDark ? const Color(0x2434D399) : const Color(0xFFE6F7FA),
         () => Navigator.of(context).pushNamed(Routes.greenRoutePlanner),
       ),
       (
         'Attractions',
         Icons.star_rounded,
-        const Color(0xFFFB8C00),
-        const Color(0xFFFEF7E6),
+        const Color(0xFFFBBF24),
+        isDark ? const Color(0x24FBBF24) : const Color(0xFFFEF3C7),
         () => Navigator.of(context).pushNamed(Routes.itinerary),
       ),
       (
         'More',
         Icons.more_horiz_rounded,
-        const Color(0xFF64748B),
-        const Color(0xFFF1F5F9),
+        const Color(0xFF94A3B8),
+        isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
         () => Navigator.of(context).pushNamed(Routes.hotelOptimizer),
       ),
     ];
@@ -465,8 +432,8 @@ class _DashboardTabState extends State<DashboardTab> {
                   color: cat.$4,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: cat.$3.withValues(alpha: 0.15),
-                    width: 1,
+                    color: cat.$3.withValues(alpha: 0.25),
+                    width: 1.2,
                   ),
                 ),
                 child: Icon(cat.$2, color: cat.$3, size: 24),
@@ -474,10 +441,10 @@ class _DashboardTabState extends State<DashboardTab> {
               const SizedBox(height: 6),
               Text(
                 cat.$1,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ],
@@ -496,13 +463,10 @@ class _DashboardTabState extends State<DashboardTab> {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
+            width: 1,
+          ),
         ),
         child: Stack(
           children: [
@@ -581,13 +545,6 @@ class _DashboardTabState extends State<DashboardTab> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
                     child: const Icon(
                       Icons.arrow_forward_rounded,
@@ -716,16 +673,9 @@ class _DashboardTabState extends State<DashboardTab> {
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: AppColors.surfaceLightBorder,
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
             width: 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -1236,13 +1186,6 @@ class _DashboardTabState extends State<DashboardTab> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.primaryGreen,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryGreen.withValues(alpha: 0.6),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ],
                     ),
                   ),
                   const SizedBox(width: 8),

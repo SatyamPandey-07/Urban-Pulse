@@ -235,22 +235,20 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final base = tint ?? scheme.primary;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            base.withValues(alpha: 0.16),
-            (tint ?? scheme.tertiary).withValues(alpha: 0.07),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: isDark ? const Color(0xFF16202C) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: tint != null
+              ? tint!.withValues(alpha: 0.4)
+              : (isDark ? const Color(0xFF233242) : const Color(0xFFE2E8F0)),
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: base.withValues(alpha: 0.35)),
       ),
       child: child,
     );
