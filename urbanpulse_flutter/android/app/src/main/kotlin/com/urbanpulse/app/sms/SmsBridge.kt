@@ -92,14 +92,13 @@ class SmsBridge(
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>?,
-        grantResults: IntArray?,
+        permissions: Array<out String>,
+        grantResults: IntArray,
     ): Boolean {
         if (requestCode != REQUEST_CODE) return false
         val pending = pendingPermission ?: return true
         pendingPermission = null
-        val granted = grantResults != null &&
-            grantResults.isNotEmpty() &&
+        val granted = grantResults.isNotEmpty() &&
             grantResults[0] == PackageManager.PERMISSION_GRANTED
         pending.success(granted)
         return true

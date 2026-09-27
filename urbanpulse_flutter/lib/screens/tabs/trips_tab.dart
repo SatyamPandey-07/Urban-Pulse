@@ -5,6 +5,7 @@ import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../models/app_notification.dart';
 import '../../models/trip_models.dart';
+import '../../repositories/trip_repository.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
 import '../home_screen.dart';
@@ -20,18 +21,29 @@ class TripsTab extends StatefulWidget {
 
 class _TripsTabState extends State<TripsTab> {
   List<TripPlan> _trips = const [];
+  TripRepository? _repo;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // A trip saved or edited from another tab (Yatri chat, pooling, SOS...)
+      // shows up here without a manual pull-to-refresh.
+      _repo = AppScope.of(context).trips..addListener(_loadTrips);
       _loadTrips();
     });
   }
 
+  @override
+  void dispose() {
+    _repo?.removeListener(_loadTrips);
+    super.dispose();
+  }
+
   void _loadTrips() {
     if (!mounted) return;
-    setState(() => _trips = AppScope.of(context).trips.getTrips());
+    setState(() => _trips = _repo?.getTrips() ?? const []);
   }
 
   void _openTripDetail(TripPlan trip) {

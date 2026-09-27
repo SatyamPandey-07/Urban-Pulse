@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -71,6 +73,21 @@ jobs:
         run: |
           ls -lh urbanpulse_flutter/build/app/outputs/flutter-apk/
           cp urbanpulse_flutter/build/app/outputs/flutter-apk/app-release.apk ./UrbanPulse-v1.3.0.apk
+
+      - name: Build Flutter Web App
+        run: |
+          cd urbanpulse_flutter
+          flutter build web --release --base-href "/Urban-Pulse/" --dart-define-from-file=config.json
+          # Single Page Application fallback for deep links on GitHub Pages
+          cp build/web/index.html build/web/404.html
+          touch build/web/.nojekyll
+
+      - name: Deploy Flutter Web to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./urbanpulse_flutter/build/web
 
       - name: Upload APK as Workflow Artifact
         uses: actions/upload-artifact@v4

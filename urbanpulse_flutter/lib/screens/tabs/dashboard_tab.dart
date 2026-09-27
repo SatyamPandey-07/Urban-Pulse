@@ -811,14 +811,19 @@ class _DashboardTabState extends State<DashboardTab> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        place.ecoScore,
-                        style: const TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryGreen,
+                      Expanded(
+                        child: Text(
+                          place.ecoScore,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryGreen,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 4),
                       const Icon(
                         Icons.arrow_circle_right_rounded,
                         size: 16,

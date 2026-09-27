@@ -20,6 +20,14 @@ class OpResult {
   final String note;
 }
 
+/// What `rest` did: the day was made lighter, and these stops came off it
+/// without being placed anywhere yet.
+class RestResult extends OpResult {
+  const RestResult(super.ok, super.note, {this.displaced = const []});
+
+  final List<String> displaced;
+}
+
 /// A working copy of a finished plan that edits are applied to. Days are lists
 /// of place ids (what goes where); the planner later lays each day out. The
 /// copy is thrown away if the edit fails, so a failed edit never damages the
@@ -154,6 +162,29 @@ class EditState {
     return slack[day - 1] >= h.visitMinutes + 25;
   }
 
+  /// Spare minutes left on a day for sightseeing, or null when slack isn't
+  /// known for it (in which case only the place-count cap applies).
+  int? spareMinutes(int day) => (slack.isEmpty || day - 1 >= slack.length) ? null : slack[day - 1];
+
+  /// How many of [ids], in order, would fit on [day] without changing
+  /// anything: a dry run of the same cap and time checks `_addTo` relies on.
+  int roomFor(List<String> ids, int day) {
+    var cap = capOf(day) - visitsOn(day).length;
+    var spare = spareMinutes(day);
+    var count = 0;
+    for (final id in ids) {
+      if (cap <= 0) break;
+      final h = pool[id];
+      if (h == null || !_allowedOn(h, day)) continue;
+      final cost = h.visitMinutes + 25;
+      if (spare != null && spare < cost) continue;
+      if (spare != null) spare -= cost;
+      cap--;
+      count++;
+    }
+    return count;
+  }
+
   void _spend(Hotspot h, int day, int sign) {
     if (slack.isEmpty || day - 1 >= slack.length) return;
     slack[day - 1] = math.max(0, slack[day - 1] - sign * (h.visitMinutes + 25));
@@ -221,11 +252,7 @@ class EditState {
     if (h == null) return null;
     final options = <(int, double)>[];
     for (var d = 1; d <= dayCount; d++) {
-      if (d == avoid) continue;
-      if (visitsOn(d).length >= capOf(d) + extra) continue;
-      if ((caps[d] ?? 1) == 0) continue;
-      if (!_allowedOn(h, d)) continue;
-      if (!_hasTimeFor(h, d)) continue;
+      if (d == avoid || !canTake(id, d, extra: extra)) continue;
       final later = avoid != null && d > avoid;
       final km = haversineKm(h.location.latitude, h.location.longitude, centroidOf(d).latitude, centroidOf(d).longitude);
       // Later days first when asked, then distance.
@@ -234,6 +261,18 @@ class EditState {
     if (options.isEmpty) return null;
     options.sort((a, b) => a.$2.compareTo(b.$2));
     return options.first.$1;
+  }
+
+  /// Whether [id] could go on [day]: open, not full, and time for it.
+  bool canTake(String id, int day, {int extra = 0}) {
+    final h = pool[id];
+    if (h == null) return false;
+    if (day < 1 || day > dayCount) return false;
+    if (visitsOn(day).length >= capOf(day) + extra) return false;
+    if ((caps[day] ?? 1) == 0) return false;
+    if (!_allowedOn(h, day)) return false;
+    if (!_hasTimeFor(h, day)) return false;
+    return true;
   }
 
   void _addTo(String id, int day) {
@@ -311,9 +350,10 @@ class EditState {
     return OpResult(true, 'Removed ${h.name}.');
   }
 
-  /// Makes a day lighter. What is displaced goes to another day if there is room.
-  OpResult rest(int day, bool free) {
-    if (day < 1 || day > dayCount) return const OpResult(false, 'That day is not in the trip.');
+  /// Makes a day lighter. What is displaced comes off the day but is not
+  /// placed anywhere yet — the caller decides where with [placeDisplaced].
+  RestResult rest(int day, bool free) {
+    if (day < 1 || day > dayCount) return const RestResult(false, 'That day is not in the trip.');
     final keepCount = free ? 0 : 2;
     final visits = visitsOn(day);
     // Locked places stay; then the most important.
@@ -339,28 +379,46 @@ class EditState {
     } else {
       windows[day] = (10 * 60 + 30, 17 * 60 + 30);
     }
-    final moved = <String>[];
-    final lost = <String>[];
     for (final id in displaced) {
       membership[day - 1].remove(id);
-      final to = bestDayFor(id, avoid: day);
+    }
+    final note = free
+        ? 'Day $day is now a free day.'
+        : 'Day $day is lighter: it keeps ${keep.length} place${keep.length == 1 ? '' : 's'} and starts later.';
+    return RestResult(true, note, displaced: displaced);
+  }
+
+  /// Places stops that `rest` took off [from]. When [onDay] is given, each one
+  /// tries that day first; whatever doesn't fit there (or when [onDay] is
+  /// null) falls back to [bestDayFor], exactly as `rest` used to decide on its
+  /// own. Returns the sentence to add to the reply.
+  String placeDisplaced(List<String> ids, {required int from, int? onDay}) {
+    final onChosen = <String>[];
+    final elsewhere = <String>[];
+    final lost = <String>[];
+    for (final id in ids) {
+      if (onDay != null && canTake(id, onDay)) {
+        _addTo(id, onDay);
+        onChosen.add(id);
+        continue;
+      }
+      final to = bestDayFor(id, avoid: from);
       if (to == null) {
         lost.add(id);
+        unplaced.add(id);
       } else {
         _addTo(id, to);
-        moved.add(id);
+        elsewhere.add(id);
       }
-    }
-    for (final id in lost) {
-      unplaced.add(id);
     }
     String names(List<String> ids) => ids.map((id) => pool[id]?.name ?? 'a stop').take(3).join(', ');
     final parts = <String>[
-      free ? 'Day $day is now a free day.' : 'Day $day is lighter: it keeps ${keep.length} place${keep.length == 1 ? '' : 's'} and starts later.',
-      if (moved.isNotEmpty) '${names(moved)} moved to other days.',
+      if (onChosen.isNotEmpty) '${names(onChosen)} moved to day $onDay.',
+      if (elsewhere.isNotEmpty)
+        (onDay == null ? '${names(elsewhere)} moved to other days.' : '${names(elsewhere)} did not fit on day $onDay, so moved to other days.'),
       if (lost.isNotEmpty) 'There was no room elsewhere for ${names(lost)}.',
     ];
-    return OpResult(true, parts.join(' '));
+    return parts.join(' ');
   }
 
   /// Whether the planner can lay the plan out with [newId] on [day] in place of

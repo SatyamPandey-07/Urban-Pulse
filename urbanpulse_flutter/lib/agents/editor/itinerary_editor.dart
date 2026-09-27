@@ -318,8 +318,10 @@ Rules: at most 5 operations. Only use stops that are in the plan (or "Other plac
     switch (op) {
       case RestDayOp():
         final r = st.rest(op.day, op.level == RestLevel.free);
-        ctx.say(op.level == RestLevel.free ? 'is clearing day ${op.day}' : 'is lightening day ${op.day}', why: 'Fewer stops and a later start; what no longer fits moves to a later day with room.', kind: FeedKind.decide);
-        return r;
+        ctx.say(op.level == RestLevel.free ? 'is clearing day ${op.day}' : 'is lightening day ${op.day}', why: 'Fewer stops and a later start; you choose where what no longer fits goes.', kind: FeedKind.decide);
+        if (!r.ok || r.displaced.isEmpty) return r;
+        final where = await _placeRested(ctx, st, op.day, r.displaced, current);
+        return OpResult(true, [r.note, where].where((s) => s.isNotEmpty).join(' '));
       case MoveStopOp():
         return st.moveStop(op.placeId, op.toDay);
       case RemoveStopOp():
@@ -466,6 +468,60 @@ Rules: at most 5 operations. Only use stops that are in the plan (or "Other plac
       default:
         return OpResult(false, 'Left ${h.name} out.');
     }
+  }
+
+  /// Asks where the stops a rest day freed up should go, when there is a real
+  /// choice, then places them. A day either side of the rest day is offered
+  /// whole (the planner still fits stops in wherever they are open within a
+  /// day; nothing here promises a specific time of day).
+  Future<String> _placeRested(TaskContext ctx, EditState st, int day, List<String> ids, Itinerary current) async {
+    final neighbours = [
+      day - 1,
+      day + 1,
+    ].where((d) => d >= 1 && d <= st.dayCount && ids.any((id) => st.canTake(id, d))).toList();
+    if (neighbours.isEmpty) return st.placeDisplaced(ids, from: day);
+
+    final what = ids.length == 1 ? (st.place(ids.first)?.name ?? 'That stop') : '${ids.length} stops';
+    final them = ids.length == 1 ? 'it' : 'them';
+    final options = [
+      for (final d in neighbours)
+        IssueOption(id: 'day$d', label: d < day ? 'Day $d, the day before' : 'Day $d, the day after', subtitle: _dayRoomNote(st, current, d, ids)),
+      const IssueOption(id: 'auto', label: 'Let Yatri pick the best fit', subtitle: 'Later days with room first, then the nearest', recommended: true),
+      IssueOption(id: 'skip', label: 'Leave $them out of the plan'),
+    ];
+    ctx.say('needs your decision: where the stops from day $day go', why: 'Resting frees up stops, and where they go is your call.', kind: FeedKind.ask);
+    final choice = await _askChoice(
+      ctx,
+      id: 'rest.${_nodeCounter++}',
+      text: 'Day $day is lighter now. Where should $what go?',
+      why: 'The days either side may have free time. Yatri fits the stops in wherever they are open there; anything that does not fit goes to another day with room.',
+      options: options,
+    );
+    if (choice.id == 'skip') {
+      for (final id in ids) {
+        st.drop(id);
+      }
+      final names = [for (final id in ids) st.place(id)?.name ?? 'a stop'].take(3).join(', ');
+      return 'Left $names out of the plan.';
+    }
+    if (choice.id == 'auto') return st.placeDisplaced(ids, from: day);
+    return st.placeDisplaced(ids, from: day, onDay: int.parse(choice.id.substring(3)));
+  }
+
+  /// A day's current free time, in words, without promising an exact clock
+  /// slot — the planner still decides exactly when within the day.
+  String _dayRoomNote(EditState st, Itinerary current, int day, List<String> ids) {
+    final d = current.days.where((x) => x.number == day).firstOrNull;
+    final visits = d?.slots.where((s) => s.kind == SlotKind.visit).toList() ?? const [];
+    final lastEnd = visits.isEmpty ? null : visits.map((s) => s.end).reduce((a, b) => a.isAfter(b) ? a : b);
+    final spare = st.spareMinutes(day);
+    final fit = st.roomFor(ids, day);
+    final bits = [
+      if (lastEnd != null) 'Sightseeing ends by ${clock12(lastEnd)}',
+      if (spare != null) 'about ${minutesLabel(spare)} free',
+      fit >= ids.length ? 'room for all' : 'room for $fit of ${ids.length}',
+    ];
+    return bits.join(' · ');
   }
 
   /// Bhatkanti looks further out for more places, and they join the pool.

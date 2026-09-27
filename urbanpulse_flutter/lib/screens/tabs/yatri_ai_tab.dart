@@ -307,6 +307,9 @@ class _YatriAiTabState extends State<YatriAiTab> {
   void _openItinerary(ItineraryEntry entry) {
     final c = _controller;
     if (c == null) return;
+    // A saved plan may have since been edited from My Trips: start from that,
+    // so a further edit here can't silently overwrite it.
+    c.refreshFromStore(entry);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PlanItineraryScreen(
