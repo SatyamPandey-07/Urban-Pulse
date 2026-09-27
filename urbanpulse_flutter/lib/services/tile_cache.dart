@@ -138,7 +138,7 @@ class TileLoader {
 
 /// A tile provider that remembers what it has drawn.
 class CachedTileProvider extends TileProvider {
-  CachedTileProvider({required this.loader}) : super(headers: const {'User-Agent': TileLoader.userAgent});
+  CachedTileProvider({required this.loader}) : super(headers: <String, String>{'User-Agent': TileLoader.userAgent});
 
   final TileLoader loader;
 
