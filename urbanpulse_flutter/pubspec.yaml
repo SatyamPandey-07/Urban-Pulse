@@ -53,6 +53,7 @@ dependencies:
   # device's speech engine (to read replies and turn-by-turn directions aloud).
   record: ^6.2.1
   flutter_tts: ^4.2.5
+  wakelock_plus: ^1.7.0
 
 dev_dependencies:
   flutter_test:
