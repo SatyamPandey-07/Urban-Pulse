@@ -280,11 +280,8 @@ class _TaskPill extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: borderColor.withValues(alpha: faded ? 0.28 : (active ? 1 : 0.6)),
-                  width: active ? 1.8 : 1.2,
+                  width: active ? 2.0 : 1.0,
                 ),
-                boxShadow: active
-                    ? [BoxShadow(color: borderColor.withValues(alpha: 0.32), blurRadius: 14, spreadRadius: 0.5)]
-                    : const [],
               ),
               child: Material(
                 type: MaterialType.transparency,

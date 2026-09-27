@@ -221,16 +221,9 @@ class _LocationAppBarState extends State<_LocationAppBar> {
               Container(
                 width: 38,
                 height: 38,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.primaryGreen,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryGreen.withValues(alpha: 0.35),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: const Icon(
                   Icons.location_on_rounded,

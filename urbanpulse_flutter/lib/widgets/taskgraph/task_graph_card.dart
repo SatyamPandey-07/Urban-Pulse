@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -88,12 +87,6 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
     });
   }
 
-  void _expand() => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      fullscreenDialog: true,
-      builder: (_) => TaskGraphPage(graph: widget.graph, clock: widget.clock, title: widget.title),
-    ),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -101,88 +94,100 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
     final scheme = theme.colorScheme;
     final graph = widget.graph;
     final dark = theme.brightness == Brightness.dark;
+    final screenH = MediaQuery.of(context).size.height;
+    final targetHeight = (screenH * 0.54).clamp(350.0, 540.0);
 
     return Container(
+      height: targetHeight,
       decoration: BoxDecoration(
-        color: dark ? AppColors.surfaceDark : scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: dark ? AppColors.surfaceBorder : scheme.outlineVariant),
+        color: dark ? AppColors.surfaceCard : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: dark ? AppColors.surfaceBorder : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InkWell(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            onTap: _expand,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 6),
-              child: ListenableBuilder(
-                listenable: graph,
-                builder: (context, _) => Row(
-                  children: [
-                    Icon(Icons.hub_rounded, size: 20, color: AgentKind.yatri.color),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(widget.title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-                          Text(
-                            planStatusLine(graph),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: graph.hasWaitingUser ? AppColors.solidWarning : scheme.onSurfaceVariant,
-                              fontWeight: graph.hasWaitingUser ? FontWeight.w700 : null,
-                            ),
-                          ),
-                        ],
-                      ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 12, 10),
+            child: ListenableBuilder(
+              listenable: graph,
+              builder: (context, _) => Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AgentKind.yatri.color.withValues(alpha: dark ? 0.2 : 0.12),
+                      shape: BoxShape.circle,
                     ),
-                    if (widget.clock != null && widget.clock!.started)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: Text(
-                          _elapsedLabel(widget.clock!.elapsed),
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            fontFeatures: const [FontFeature.tabularFigures()],
+                    child: Icon(Icons.hub_rounded, size: 18, color: AgentKind.yatri.color),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                        Text(
+                          planStatusLine(graph),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: graph.hasWaitingUser ? AppColors.solidWarning : scheme.onSurfaceVariant,
+                            fontWeight: graph.hasWaitingUser ? FontWeight.w700 : null,
                           ),
                         ),
-                      ),
-                    if (widget.onStop != null && !graph.isFinished)
-                      IconButton(
-                        tooltip: 'Stop and show what is ready',
-                        onPressed: widget.onStop,
-                        icon: const Icon(Icons.stop_circle_outlined, size: 20),
-                      ),
-                    IconButton(
-                      tooltip: 'Open full view',
-                      onPressed: _expand,
-                      icon: const Icon(Icons.open_in_full_rounded, size: 20),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  if (widget.clock != null && widget.clock!.started)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: dark ? AppColors.surfaceElevated : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _elapsedLabel(widget.clock!.elapsed),
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                  if (widget.onStop != null && !graph.isFinished)
+                    IconButton(
+                      tooltip: 'Stop and show what is ready',
+                      onPressed: widget.onStop,
+                      icon: const Icon(Icons.stop_circle_outlined, size: 20),
+                    ),
+                ],
               ),
             ),
           ),
-          SizedBox(
-            height: 176,
+          const Divider(height: 1),
+          Expanded(
             child: ListenableBuilder(
               listenable: graph,
               builder: (context, _) {
-                final layout = GraphLayout.compute(graph.nodes, metrics: GraphMetrics.compact);
                 return SingleChildScrollView(
                   controller: _scroll,
                   scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(vertical: math.max(0, (176 - layout.size.height) / 2)),
-                  child: TaskGraphView(graph: graph, metrics: GraphMetrics.compact),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: TaskGraphView(graph: graph, metrics: GraphMetrics.compact),
+                  ),
                 );
               },
             ),
           ),
           const Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 10, 12),
-            child: AgentFeed(graph: graph, maxEvents: 4),
+            padding: const EdgeInsets.fromLTRB(16, 8, 12, 10),
+            child: AgentFeed(graph: graph, maxEvents: 3),
           ),
         ],
       ),
