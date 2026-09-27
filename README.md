@@ -624,7 +624,10 @@ The original UrbanPulse experience is still here, now in Flutter:
 |---|---|
 | **Local discovery** | Pareto-ranked local experiences that balance carbon, accessibility and price, a 2-hour micro-experience filter near your live location, and one-tap adaptation to rain or delays |
 | **Evidence-based accessibility** | Every accessibility and sustainability claim is tagged *Verified / Reported / Inferred*; traveller confirmations and "report an issue" feed it as an independent second source |
-| **Live map** | Dual-route comparison (green transit corridor vs petrol cab) with live TomTom routing, CO₂ avoided and a live AQI readout |
+| **Live map** | A native map like a maps app: search with pins, places by category (food, hotels, attractions, hospitals, pharmacies, EV charging), long-press to drop a pin, drive or walk routes (TomTom with live traffic, or OpenStreetMap routing without a key), turn-by-turn navigation with spoken directions and rerouting, standard/dark/satellite maps and a live traffic layer |
+| **Your trip on the map** | From the itinerary, *Show on Live Map* draws a day's stops in order and *Navigate here* / *Navigate to next stop* starts real directions; *Save the map for offline use* keeps the trip area on the device (viewed map tiles are cached too) |
+| **Location like a delivery app** | Tap the location at the top to pick where the app works from: your current location, Home, Work or your own saved addresses, or search with debounced completions. Yatri's "where will you start" question works the same way |
+| **Voice** | Tap the mic in Yatri chat, the edit panel or the map search: your speech is transcribed by Groq Whisper (falls back to the phone's recogniser without a key), and replies and directions can be read aloud |
 | **Provider hub** | Local artisans and guides list experiences, toggle availability and see real demand |
 | **Hospitality & ESG** | A B2B tool that forecasts resource use for hotels and exports an ISO 14064-style A4 audit PDF with computed pass/fail and a content hash |
 | **Wallet, achievements, SOS** | Carbon wallet, badges and challenges, and an emergency screen |

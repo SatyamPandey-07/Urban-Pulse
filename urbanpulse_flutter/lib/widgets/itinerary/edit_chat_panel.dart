@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../agents/editor/itinerary_diff.dart';
 import '../../agents/runtime/agent_kind.dart';
 import '../../core/app_colors.dart';
+import '../../services/voice/voice_service.dart';
+import '../../state/app_scope.dart';
 import '../../state/itinerary_edit_controller.dart';
 import '../taskgraph/task_graph_card.dart';
 import '../yatri/answer_view.dart';
@@ -25,6 +27,8 @@ class _EditChatPanelState extends State<EditChatPanel> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
   int _seen = 0;
+  int _spoken = -1;
+  VoiceService? _voice;
 
   ItineraryEditController get c => widget.controller;
 
@@ -35,7 +39,43 @@ class _EditChatPanelState extends State<EditChatPanel> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_voice == null) {
+      _voice = context.getInheritedWidgetOfExactType<AppScope>()?.services.voice;
+      _voice?.addListener(_voiceChanged);
+      _spoken = c.messages.length - 1;
+    }
+  }
+
+  void _voiceChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Says the assistant's new replies aloud, if that is switched on.
+  void _speakNew() {
+    final v = _voice;
+    if (v == null) return;
+    while (_spoken < c.messages.length - 1) {
+      _spoken++;
+      final m = c.messages[_spoken];
+      if (!m.fromUser) v.sayReply(m.text);
+    }
+  }
+
+  Future<void> _speak() async {
+    final v = _voice;
+    if (v == null) return;
+    await v.toggle((words) {
+      if (mounted && !c.busy) c.send(words);
+    });
+    if (mounted && v.error != null) ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(v.error!)));
+  }
+
+  @override
   void dispose() {
+    _voice?.removeListener(_voiceChanged);
+    _voice?.cancel();
     c.removeListener(_changed);
     _input.dispose();
     _scroll.dispose();
@@ -45,6 +85,7 @@ class _EditChatPanelState extends State<EditChatPanel> {
   void _changed() {
     if (!mounted) return;
     setState(() {});
+    _speakNew();
     if (c.messages.length != _seen || c.pending != null || c.busy) {
       _seen = c.messages.length;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -163,6 +204,15 @@ class _EditChatPanelState extends State<EditChatPanel> {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  if (!c.busy && _voice != null && _voice!.canTranscribe && c.pending == null)
+                    IconButton.filledTonal(
+                      tooltip: _voice!.recording ? 'Stop and send' : 'Speak your change',
+                      onPressed: _voice!.state == VoiceState.transcribing ? null : _speak,
+                      icon: _voice!.state == VoiceState.transcribing
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                          : Icon(_voice!.recording ? Icons.stop_rounded : Icons.mic_rounded, color: _voice!.recording ? scheme.error : null),
+                    ),
+                  const SizedBox(width: 4),
                   c.busy
                       ? IconButton.filledTonal(tooltip: 'Stop', onPressed: c.stop, icon: const Icon(Icons.stop_rounded))
                       : IconButton.filled(tooltip: 'Send', onPressed: c.pending == null ? _send : null, icon: const Icon(Icons.arrow_upward_rounded)),

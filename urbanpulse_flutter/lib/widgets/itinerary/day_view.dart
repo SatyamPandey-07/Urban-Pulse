@@ -5,6 +5,7 @@ import '../../agents/runtime/agent_kind.dart';
 import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../models/itinerary/itinerary.dart';
+import '../../services/tile_cache.dart';
 import '../../models/itinerary/itinerary_parts.dart';
 import '../../models/trip_brief.dart';
 import '../yatri/route_map_card.dart' show transportModeIcon;
@@ -36,7 +37,7 @@ Color levelColor(BuildContext context, SupportLevel l) => switch (l) {
 
 /// One day of the itinerary: a map of where the day goes, then the timeline.
 class DayView extends StatelessWidget {
-  const DayView({required this.day, required this.hotel, required this.needs, this.tileLayer, this.onSlotTap, this.locked = const {}, super.key});
+  const DayView({required this.day, required this.hotel, required this.needs, this.tileLayer, this.onSlotTap, this.locked = const {}, this.onOpenMap, super.key});
 
   final ItineraryDay day;
   final HotelOption? hotel;
@@ -48,6 +49,9 @@ class DayView extends StatelessWidget {
 
   /// Ids of stops the traveller locked in place.
   final Set<String> locked;
+
+  /// Show this day on the Live Map. Null hides the button.
+  final VoidCallback? onOpenMap;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,8 @@ class DayView extends StatelessWidget {
           Text(day.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           if (day.weather != null)
             _Pill(icon: Icons.cloud_outlined, text: day.weather!, color: theme.colorScheme.onSurfaceVariant),
+          if (onOpenMap != null && visits.isNotEmpty)
+            ActionChip(avatar: const Icon(Icons.map_rounded, size: 18), label: const Text('Show on Live Map'), onPressed: onOpenMap),
         ],
       ),
     );
@@ -156,6 +162,7 @@ class DayMap extends StatelessWidget {
             tileLayer ??
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  tileProvider: TileCache.instance.provider,
                   userAgentPackageName: 'com.urbanpulse.app',
                 ),
             if (route.length > 1)

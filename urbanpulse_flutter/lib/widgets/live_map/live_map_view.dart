@@ -9,6 +9,7 @@ import '../../models/live_city_data.dart';
 import '../../models/map_category.dart';
 import '../../models/map_route.dart';
 import '../../services/live_location.dart';
+import '../../services/tile_cache.dart';
 import '../../state/live_map_controller.dart';
 
 /// The map itself: tiles, routes, your position, and the places on it. It draws
@@ -152,7 +153,7 @@ class LiveMapViewState extends State<LiveMapView> with SingleTickerProviderState
           if (c.traffic) widget.trafficLayer ?? _trafficTiles(),
           ..._routeLayers(context),
           if (c.user?.accuracyM != null && (c.user!.accuracyM! > 8)) CircleLayer(circles: [CircleMarker(point: c.user!.point, radius: math.min(c.user!.accuracyM!, 400), useRadiusInMeter: true, color: const Color(0x223B82F6), borderColor: const Color(0x663B82F6), borderStrokeWidth: 1)]),
-          MarkerLayer(markers: _placeMarkers(context)),
+          MarkerLayer(markers: [..._tripMarkers(context), ..._placeMarkers(context)]),
           if (c.selected != null) MarkerLayer(markers: [_selectedMarker(context, c.selected!)]),
           if (c.user != null) MarkerLayer(markers: [_userMarker(c.user!)]),
           _attribution(c.style),
@@ -164,11 +165,11 @@ class LiveMapViewState extends State<LiveMapView> with SingleTickerProviderState
   Widget _tiles(MapStyle s) {
     switch (s) {
       case MapStyle.standard:
-        return TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 19);
+        return TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 19, tileProvider: TileCache.instance.provider);
       case MapStyle.dark:
-        return TileLayer(urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', subdomains: const ['a', 'b', 'c', 'd'], userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 19, retinaMode: RetinaMode.isHighDensity(context));
+        return TileLayer(urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', subdomains: const ['a', 'b', 'c', 'd'], userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 19, retinaMode: RetinaMode.isHighDensity(context), tileProvider: TileCache.instance.provider);
       case MapStyle.satellite:
-        return TileLayer(urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 18);
+        return TileLayer(urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 18, tileProvider: TileCache.instance.provider);
     }
   }
 
@@ -236,6 +237,42 @@ class LiveMapViewState extends State<LiveMapView> with SingleTickerProviderState
       out.add(Marker(point: LatLng(p.lat, p.lon), width: 40, height: 40, child: _PlacePin(place: p, number: cat == null ? n : null, category: cat, onTap: () => c.select(p))));
     }
     return out;
+  }
+
+  /// The stops of the trip day, numbered in order, with a tick once reached.
+  List<Marker> _tripMarkers(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final sel = c.selected;
+    return [
+      for (var i = 0; i < c.tripStops.length; i++)
+        if (!(sel != null && c.tripIndexOf(sel) == i))
+          Marker(
+            point: c.tripStops[i].point,
+            width: 44,
+            height: 44,
+            child: Semantics(
+              button: true,
+              label: 'Stop ${i + 1}: ${c.tripStops[i].name}',
+              child: GestureDetector(
+                onTap: () => c.selectStop(i),
+                behavior: HitTestBehavior.opaque,
+                child: Center(
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: c.visitedStops.contains(i) ? scheme.outline : scheme.tertiary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 5, offset: Offset(0, 2))],
+                    ),
+                    child: c.visitedStops.contains(i) ? Icon(Icons.check_rounded, size: 18, color: scheme.onTertiary) : Center(child: Text('${i + 1}', style: TextStyle(color: scheme.onTertiary, fontSize: 13, fontWeight: FontWeight.w900))),
+                  ),
+                ),
+              ),
+            ),
+          ),
+    ];
   }
 
   Marker _selectedMarker(BuildContext context, LivePoiResult p) {

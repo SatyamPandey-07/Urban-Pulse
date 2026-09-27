@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../services/live_location.dart';
+import '../../state/app_scope.dart';
+import '../../state/map_requests.dart';
 import '../../services/live_map_data.dart';
 import '../../state/live_map_controller.dart';
 import '../../widgets/live_map/live_map_view.dart';
@@ -37,8 +39,21 @@ class _LiveMapTabState extends State<LiveMapTab> {
   void initState() {
     super.initState();
     _owns = widget.controller == null;
-    _c = widget.controller ?? LiveMapController(data: ServiceLiveMapData(), location: const DeviceLocation());
+    // The app's voice reads directions aloud (absent in a bare preview).
+    final voice = context.getInheritedWidgetOfExactType<AppScope>()?.services.voice;
+    _c = widget.controller ?? LiveMapController(data: ServiceLiveMapData(), location: const DeviceLocation(), speak: voice == null ? null : (t) => voice.say(t));
     if (_owns) WidgetsBinding.instance.addPostFrameCallback((_) => _c.start());
+    _requests = context.getInheritedWidgetOfExactType<AppScope>()?.services.mapRequests;
+    _requests?.addListener(_onRequest);
+    if (_requests?.pending != null) WidgetsBinding.instance.addPostFrameCallback((_) => _onRequest());
+  }
+
+  MapRequests? _requests;
+
+  /// A day of the trip to show, sent from the itinerary screen.
+  void _onRequest() {
+    final r = _requests?.take();
+    if (r != null && mounted) _c.showTrip(r);
   }
 
   @override
@@ -53,6 +68,7 @@ class _LiveMapTabState extends State<LiveMapTab> {
 
   @override
   void dispose() {
+    _requests?.removeListener(_onRequest);
     if (_owns) _c.dispose();
     super.dispose();
   }

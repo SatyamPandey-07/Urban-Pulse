@@ -77,7 +77,7 @@ void main() {
   test('replies are made fit to be read aloud', () {
     expect(speechText('**Day 2** is lighter 🌿 see https://x.y/z'), 'Day 2 is lighter see');
     expect(speechText('It costs ₹4,000 and CO₂ is low'), 'It costs rupees 4,000 and carbon dioxide is low');
-    final long = '${'A sentence here. ' * 60}';
+    final long = 'A sentence here. ' * 60;
     expect(speechText(long).length, lessThanOrEqualTo(420));
     expect(speechText(long).endsWith('.'), isTrue);
   });
