@@ -88,6 +88,19 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
   }
 
 
+  void _expand() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => TaskGraphPage(
+          graph: widget.graph,
+          clock: widget.clock,
+          title: widget.title,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -111,7 +124,7 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 12, 10),
+            padding: const EdgeInsets.fromLTRB(14, 10, 10, 8),
             child: ListenableBuilder(
               listenable: graph,
               builder: (context, _) => Row(
@@ -125,25 +138,41 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
                     ),
                     child: Icon(Icons.hub_rounded, size: 18, color: AgentKind.yatri.color),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(widget.title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-                        Text(
-                          planStatusLine(graph),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: graph.hasWaitingUser ? AppColors.solidWarning : scheme.onSurfaceVariant,
-                            fontWeight: graph.hasWaitingUser ? FontWeight.w700 : null,
-                          ),
+                    child: InkWell(
+                      onTap: _expand,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              planStatusLine(graph),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: graph.hasWaitingUser ? AppColors.solidWarning : scheme.onSurfaceVariant,
+                                fontWeight: graph.hasWaitingUser ? FontWeight.w700 : null,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  if (widget.clock != null && widget.clock!.started)
+                  const SizedBox(width: 4),
+                  if (widget.clock != null && widget.clock!.started) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
                         color: dark ? AppColors.surfaceElevated : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
@@ -157,12 +186,25 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
                         ),
                       ),
                     ),
+                    const SizedBox(width: 4),
+                  ],
                   if (widget.onStop != null && !graph.isFinished)
                     IconButton(
                       tooltip: 'Stop and show what is ready',
+                      visualDensity: VisualDensity.compact,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      padding: const EdgeInsets.all(4),
                       onPressed: widget.onStop,
-                      icon: const Icon(Icons.stop_circle_outlined, size: 20),
+                      icon: const Icon(Icons.stop_circle_outlined, size: 19),
                     ),
+                  IconButton(
+                    tooltip: 'Full screen mission control',
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    padding: const EdgeInsets.all(4),
+                    onPressed: _expand,
+                    icon: const Icon(Icons.open_in_full_rounded, size: 19),
+                  ),
                 ],
               ),
             ),
@@ -186,8 +228,40 @@ class _TaskGraphCardState extends State<TaskGraphCard> {
           ),
           const Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 12, 10),
+            padding: const EdgeInsets.fromLTRB(16, 8, 12, 6),
             child: AgentFeed(graph: graph, maxEvents: 3),
+          ),
+          InkWell(
+            onTap: _expand,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: (dark ? Colors.white : Colors.black).withValues(alpha: 0.03),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.open_in_full_rounded, size: 13, color: AgentKind.yatri.color),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      'Mission Control (Full screen pan & zoom)',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AgentKind.yatri.color,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -251,25 +325,51 @@ class _TaskGraphPageState extends State<TaskGraphPage> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [AgentChip(agent: n.agent), const SizedBox(width: 10), Text(statusLabel(n.status), style: theme.textTheme.labelLarge)]),
+              Row(
+                children: [
+                  AgentChip(agent: n.agent),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      statusLabel(n.status),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
-              Text(n.spec.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-              if (n.summary != null) ...[const SizedBox(height: 6), Text(n.summary!, style: theme.textTheme.bodyMedium)],
+              Text(
+                n.spec.title,
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              if (n.summary != null) ...[
+                const SizedBox(height: 6),
+                Text(n.summary!, style: theme.textTheme.bodyMedium),
+              ],
               if ((n.why ?? n.spec.why) != null) ...[
                 const SizedBox(height: 10),
-                Text('Why', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                Text(
+                  'Why',
+                  style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
                 Text((n.why ?? n.spec.why)!, style: theme.textTheme.bodyMedium),
               ],
               if (n.elapsed != null) ...[
                 const SizedBox(height: 10),
-                Text('Took ${_elapsedLabel(n.elapsed!)}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                Text(
+                  'Took ${_elapsedLabel(n.elapsed!)}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
               ],
             ],
           ),
@@ -304,8 +404,13 @@ class _TaskGraphPageState extends State<TaskGraphPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          child: Text('What the agents are doing', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+          child: Text(
+            'What the agents are doing',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
         ),
         Expanded(
           child: AgentFeed(graph: graph, controller: _feedScroll, padding: const EdgeInsets.fromLTRB(16, 4, 12, 16)),
@@ -315,13 +420,30 @@ class _TaskGraphPageState extends State<TaskGraphPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         leading: IconButton(icon: const Icon(Icons.close_rounded), tooltip: 'Close', onPressed: () => Navigator.of(context).pop()),
         actions: [
           if (widget.clock != null && widget.clock!.started)
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: Center(child: Text(_elapsedLabel(widget.clock!.elapsed), style: theme.textTheme.labelLarge)),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.surfaceElevated
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _elapsedLabel(widget.clock!.elapsed),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              ),
             ),
         ],
       ),
@@ -338,13 +460,21 @@ class _TaskGraphPageState extends State<TaskGraphPage> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(planStatusLine(graph), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                          child: Text(
+                            planStatusLine(graph),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: graph.hasWaitingUser ? AppColors.solidWarning : theme.colorScheme.onSurfaceVariant,
+                              fontWeight: graph.hasWaitingUser ? FontWeight.w700 : null,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                   SizedBox(
-                    height: 34,
+                    height: 36,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
