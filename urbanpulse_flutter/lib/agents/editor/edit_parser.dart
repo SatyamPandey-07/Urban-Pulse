@@ -242,22 +242,26 @@ abstract final class EditRules {
     final ambiguities = <Ambiguity>[];
 
     int? dayIn(String s) {
-      final m = RegExp(r'\bday\s*(\d{1,2})\b').firstMatch(s);
+      // "day 6" or "day 6th", and "6th day".
+      final m = RegExp(r'\bday\s*(\d{1,2})(?:st|nd|rd|th)?\b').firstMatch(s) ?? RegExp(r'\b(\d{1,2})(?:st|nd|rd|th)\s+day\b').firstMatch(s);
       if (m == null) return null;
       final d = int.parse(m.group(1)!);
       return d >= 1 && d <= index.dayCount ? d : null;
     }
 
+    // A pure pace phrase ("a more relaxed trip") shouldn't be mistaken for a
+    // broken rest-day request when it names no day.
+    final pacePhrase = RegExp(r'\b(more relaxed|relaxed pace|slower|slow down|fewer places|less packed|less rushed)\b').hasMatch(t);
+
     // Rest
-    if (RegExp(r'\b(rest|relax|lighter|light day|take it easy|slow(er)? day|free day|day off|nothing planned)\b').hasMatch(t)) {
+    if (RegExp(r'\b(rest(ed|ful)?|relax(ed|ing)?|lighter|light day|take it easy|slow(er)? day|free day|day off|nothing planned)\b').hasMatch(t)) {
       final d = dayIn(t);
       if (d != null) {
         ops.add(RestDayOp(d, RegExp(r'\b(free day|day off|nothing planned|no plans)\b').hasMatch(t) ? RestLevel.free : RestLevel.light));
-      } else {
+      } else if (!pacePhrase) {
         problems.add('Which day should be lighter?');
       }
     }
-
     // Stops by name: remove / add / move / replace
     String? afterVerb(RegExp verb) => verb.firstMatch(t)?.group(1)?.trim();
     void stopOp(String? ref, EditOp Function(String) make, {int? day}) {
@@ -332,6 +336,8 @@ abstract final class EditRules {
     TripPace? pace;
     if (RegExp(r'\b(more relaxed|relaxed pace|slower|slow down|fewer places|less packed|less rushed)\b').hasMatch(t)) pace = TripPace.relaxed;
     if (RegExp(r'\b(faster|packed|more places|see more|busier|more to do)\b').hasMatch(t)) pace = TripPace.packed;
+    // "day 6 should be more relaxed" is about that one day, not the whole trip's pace.
+    if (pace == TripPace.relaxed && ops.any((o) => o is RestDayOp)) pace = null;
     final greener = RegExp(r'\b(greener|eco[- ]friendly|more sustainable|lower carbon|less carbon|reduce (?:my )?(?:carbon|co2))\b').hasMatch(t);
     final cheaper = RegExp(r'\b(cheaper|reduce (?:the )?budget|save money|less expensive|lower (?:the )?cost)\b').hasMatch(t) && !t.contains('hotel');
     final budget = RegExp(r'\bbudget\s*(?:of|to|is|=)?\s*(?:rs\.?|₹|inr)?\s*(\d[\d,]{3,8})\b').firstMatch(t);

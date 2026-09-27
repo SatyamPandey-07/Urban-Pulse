@@ -264,6 +264,7 @@ class AppServices {
     accessibility.dispose();
     tripPlan.dispose();
     location.dispose();
+    trips.dispose();
     tripPool.dispose();
     sos.dispose();
     notifications.dispose();
