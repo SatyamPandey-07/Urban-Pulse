@@ -6,6 +6,7 @@ import '../domain/trip_brief/brief_validator.dart';
 import '../domain/trip_brief/question_catalog.dart';
 import '../models/trip_brief.dart';
 import '../models/yatri_question.dart';
+import '../services/trip_pool/trip_pool_service.dart';
 import '../widgets/yatri/answer_view.dart';
 import '../widgets/yatri/choice_answers.dart';
 import '../widgets/yatri/option_card.dart';
@@ -20,6 +21,7 @@ class TripBriefFormScreen extends StatefulWidget {
     required this.now,
     this.detectedCity,
     this.settingsNeeds = const {},
+    this.poolMatches,
     super.key,
   });
 
@@ -28,12 +30,17 @@ class TripBriefFormScreen extends StatefulWidget {
   final String? detectedCity;
   final Set<AccessibilityNeed> settingsNeeds;
 
+  /// Other travellers going to the same place on the same day. Null without an
+  /// account: the Trip-pool question is not shown.
+  final Future<List<PoolListing>> Function(TripBrief brief)? poolMatches;
+
   static Future<TripBrief?> open(
     BuildContext context, {
     required TripBrief initial,
     required DateTime now,
     String? detectedCity,
     Set<AccessibilityNeed> settingsNeeds = const {},
+    Future<List<PoolListing>> Function(TripBrief brief)? poolMatches,
   }) => Navigator.of(context).push<TripBrief>(
     MaterialPageRoute(
       fullscreenDialog: true,
@@ -42,6 +49,7 @@ class TripBriefFormScreen extends StatefulWidget {
         now: now,
         detectedCity: detectedCity,
         settingsNeeds: settingsNeeds,
+        poolMatches: poolMatches,
       ),
     ),
   );
@@ -52,6 +60,23 @@ class TripBriefFormScreen extends StatefulWidget {
 
 class _TripBriefFormScreenState extends State<TripBriefFormScreen> {
   late TripBrief _brief;
+
+  /// Trip-pool matches for the destination and start day now in the form.
+  Future<List<PoolListing>>? _pool;
+  String? _poolFor;
+
+  Future<List<PoolListing>>? _poolLookup() {
+    final find = widget.poolMatches;
+    final dest = _brief.destination;
+    final start = _brief.start;
+    if (find == null || dest == null || dest.trim().isEmpty || start == null) return null;
+    final key = '${TripPoolService.keyOf(dest)}|${start.year}-${start.month}-${start.day}';
+    if (key != _poolFor) {
+      _poolFor = key;
+      _pool = find(_brief);
+    }
+    return _pool;
+  }
   late final TextEditingController _destination;
   late final TextEditingController _origin;
   late final TextEditingController _notes;
@@ -413,6 +438,16 @@ class _TripBriefFormScreenState extends State<TripBriefFormScreen> {
                               _apply('transport', a, field: BriefField.transport),
                         ),
                       ),
+                      if (widget.poolMatches != null)
+                        _Section(
+                          icon: Icons.directions_car_filled_rounded,
+                          title: 'Trip-pool',
+                          child: _TripPoolChoice(
+                            brief: _brief,
+                            matches: _poolLookup(),
+                            onChanged: (v) => setState(() => _brief = _brief.copyWith(tripPool: v)),
+                          ),
+                        ),
                       _Section(
                         key: _keys[BriefField.budget],
                         icon: Icons.account_balance_wallet_rounded,
@@ -553,6 +588,82 @@ class DateTimeAnswerViewHost extends StatelessWidget {
     onSubmit: (_) {},
     onChanged: onChanged,
   );
+}
+
+/// "Do you want to Trip-pool?": yes or no, with who else is going that day.
+class _TripPoolChoice extends StatelessWidget {
+  const _TripPoolChoice({required this.brief, required this.matches, required this.onChanged});
+
+  final TripBrief brief;
+  final Future<List<PoolListing>>? matches;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final dest = (brief.destination ?? '').split(',').first.trim();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Share the ride with other UrbanPulse travellers going to ${dest.isEmpty ? 'the same place' : dest} the same day, '
+          'and split the cost and the CO₂. They only see your first name, where you start and how many of you there are.',
+          style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 10),
+        if (matches == null)
+          Text('Choose a destination and dates to see who else is going.', style: theme.textTheme.bodySmall)
+        else
+          FutureBuilder<List<PoolListing>>(
+            future: matches,
+            builder: (context, snap) {
+              if (snap.connectionState != ConnectionState.done) {
+                return const Padding(padding: EdgeInsets.symmetric(vertical: 4), child: LinearProgressIndicator(minHeight: 2));
+              }
+              final found = snap.data ?? const <PoolListing>[];
+              if (found.isEmpty) {
+                return Text(
+                  'Nobody else yet. Say yes and travellers going there that day can ask to join you.',
+                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${found.length} ${found.length == 1 ? 'traveller is' : 'travellers are'} going to $dest that day:',
+                    style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700, color: scheme.primary),
+                  ),
+                  const SizedBox(height: 4),
+                  for (final l in found.take(4))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        '• ${l.name}${l.origin == null ? '' : ' from ${l.origin}'} · ${l.travellers} ${l.travellers == 1 ? 'person' : 'people'}'
+                        '${l.seatsFree > 0 ? ' · ${l.seatsFree} seat${l.seatsFree == 1 ? '' : 's'} free' : ''}',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                  const SizedBox(height: 2),
+                  Text('Say yes and Yatri asks to join them when you confirm.', style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                ],
+              );
+            },
+          ),
+        const SizedBox(height: 12),
+        SegmentedButton<bool>(
+          segments: const [
+            ButtonSegment(value: true, label: Text('Yes, Trip-pool'), icon: Icon(Icons.group_rounded)),
+            ButtonSegment(value: false, label: Text('No, on my own'), icon: Icon(Icons.person_rounded)),
+          ],
+          selected: {brief.tripPool},
+          showSelectedIcon: false,
+          onSelectionChanged: (v) => onChanged(v.first),
+        ),
+      ],
+    );
+  }
 }
 
 class _Section extends StatelessWidget {

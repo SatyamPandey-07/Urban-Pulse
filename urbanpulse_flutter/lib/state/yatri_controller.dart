@@ -27,7 +27,9 @@ import '../repositories/itinerary_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
 import '../services/cloud/cloud_store.dart';
+import '../core/formatting.dart';
 import '../services/groq_api_client.dart';
+import '../services/trip_pool/trip_pool_service.dart';
 
 enum YatriPhase { intake, review, planning, done }
 
@@ -171,6 +173,7 @@ class YatriController extends ChangeNotifier {
     this.toolkit,
     this.itineraries,
     this.cloud,
+    this.tripPool,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     brief = TripBrief.empty(_clock());
@@ -201,6 +204,9 @@ class YatriController extends ChangeNotifier {
   /// The traveller's account: every planning run, its task graph and the
   /// decisions they made are kept there (nothing happens without Supabase).
   final CloudStore? cloud;
+
+  /// Trip-pooling (shared rides); null or unavailable without an account.
+  final TripPoolService? tripPool;
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
@@ -743,6 +749,16 @@ class YatriController extends ChangeNotifier {
 
   // --- confirm & hand-off ---------------------------------------------------
 
+  /// Opens [b] for review with a note from Yatri (Surprise Me hands trips in
+  /// this way); confirming it plans it like any other.
+  void loadBrief(TripBrief b, {String? note}) {
+    _cancelPlan();
+    start();
+    brief = b;
+    if (note != null) entries.add(AgentText(note));
+    _enterReview();
+  }
+
   /// Called with the brief the review form validated and returned.
   Future<void> confirmBrief(TripBrief confirmed) async {
     if (busy) return;
@@ -755,6 +771,7 @@ class YatriController extends ChangeNotifier {
     _notify();
 
     await briefs.save(confirmed);
+    if (confirmed.tripPool) await _openToTripPool(confirmed);
     if (tk != null) {
       await _planWithAgents(tk, confirmed);
       return;
@@ -779,6 +796,72 @@ class YatriController extends ChangeNotifier {
         entries.add(ErrorEntry(kind, () => confirmBrief(confirmed)));
     }
     busy = false;
+    _notify();
+  }
+
+  /// The traveller said yes to Trip-pooling: their trip is published for others
+  /// going there that day, and if some already are, Yatri asks whom to join.
+  Future<void> _openToTripPool(TripBrief b) async {
+    final pool = tripPool;
+    if (pool == null || !pool.available || b.start == null) {
+      entries.add(AgentText('Trip-pooling needs an UrbanPulse account. Sign in, then open it from Settings → Trip-pool.'));
+      _notify();
+      return;
+    }
+    final dest = (b.destination ?? '').split(',').first.trim();
+    final day = shortDate(b.start!);
+    final listing = await pool.publish(b);
+    final others = await pool.matches(b);
+    if (others.isEmpty) {
+      entries.add(
+        AgentText(
+          listing == null
+              ? 'I could not open your trip to Trip-pooling just now. You can try again from Settings → Trip-pool.'
+              : 'Your trip is open to Trip-pooling: travellers going to $dest on $day can ask to join you. '
+                    'Requests appear in Settings → Trip-pool; approve one and both itineraries switch to the shared ride.',
+        ),
+      );
+      _notify();
+      return;
+    }
+    final answer = await askPlanQuestion(
+      YatriQuestion(
+        id: 'pool.ask.${b.id}',
+        fields: const [],
+        widget: AnswerWidget.multiSelect,
+        defaultText: '${others.length == 1 ? 'Someone else is' : '${others.length} travellers are'} going to $dest on $day. Ask to Trip-pool with:',
+        agent: 'yatri',
+        why: 'Sharing one car splits the journey cost and its CO₂. They see only your first name, starting city and group size, and choose whether to accept.',
+        options: [
+          for (final l in others)
+            QuestionOption(
+              id: l.id,
+              label: '${l.name}${l.origin == null ? '' : ' from ${l.origin}'}',
+              subtitle: '${l.travellers} ${l.travellers == 1 ? 'person' : 'people'}${l.seatsFree > 0 ? ' · ${l.seatsFree} seats free' : ''}',
+            ),
+          const QuestionOption(id: 'none', label: 'No thanks, just keep my trip open'),
+        ],
+        preselected: {for (final l in others) l.id},
+      ),
+    );
+    final picked = switch (answer) {
+      MultiChoiceAnswer(:final optionIds) => optionIds.toSet(),
+      ChoiceAnswer(:final optionId) => {optionId},
+      _ => <String>{},
+    };
+    final chosen = picked.contains('none') ? const <PoolListing>[] : [for (final l in others) if (picked.contains(l.id)) l];
+    var sent = 0;
+    for (final l in chosen) {
+      if (await pool.ask(l, b)) sent++;
+    }
+    entries.add(
+      AgentText(
+        sent == 0
+            ? 'Your trip stays open to Trip-pooling; others going to $dest on $day can still ask to join you.'
+            : 'Asked ${chosen.map((l) => l.name).join(', ')} to Trip-pool. When ${sent == 1 ? 'they approve' : 'someone approves'}, '
+                  'both itineraries switch to the shared ride with the cost split. Track it in Settings → Trip-pool.',
+      ),
+    );
     _notify();
   }
 
@@ -1003,6 +1086,8 @@ class YatriController extends ChangeNotifier {
     await itineraries?.save(entry.itinerary);
     await trips.addTrip(entry.itinerary.toTripPlan(), itineraryClientId: entry.itinerary.id);
     entry.saved = true;
+    // An approved Trip-pool for this trip applies to the saved plan.
+    unawaited(tripPool?.refresh());
     await onTripSaved?.call();
     _notify();
   }

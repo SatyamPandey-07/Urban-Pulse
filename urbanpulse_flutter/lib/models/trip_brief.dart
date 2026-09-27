@@ -164,6 +164,7 @@ class TripBrief {
     this.sustainability = SustainabilityPriority.balanced,
     this.notes,
     this.uncertain = const {},
+    this.tripPool = false,
   });
 
   factory TripBrief.empty(DateTime now) =>
@@ -213,6 +214,10 @@ class TripBrief {
   /// that the traveler still has to confirm.
   final Set<BriefField> uncertain;
 
+  /// Open to Trip-pooling: sharing the ride with other UrbanPulse travellers
+  /// going to the same place on the same day.
+  final bool tripPool;
+
   /// The adult / senior / child split is known (possibly worked out from the
   /// traveller's own words), whether or not the women count is.
   bool get hasPartsBreakdown =>
@@ -257,6 +262,7 @@ class TripBrief {
     SustainabilityPriority? sustainability,
     String? notes,
     Set<BriefField>? uncertain,
+    bool? tripPool,
   }) => TripBrief(
     id: id,
     createdAt: createdAt,
@@ -285,6 +291,7 @@ class TripBrief {
     sustainability: sustainability ?? this.sustainability,
     notes: notes ?? this.notes,
     uncertain: uncertain ?? this.uncertain,
+    tripPool: tripPool ?? this.tripPool,
   );
 
   /// Resets one field back to "not answered" (a null-valued [copyWith] cannot).
@@ -374,6 +381,7 @@ class TripBrief {
     sustainability: sustainability,
     notes: keepNotes ? this.notes : notes,
     uncertain: uncertain,
+    tripPool: tripPool,
   );
 
   Map<String, dynamic> toJson() => {
@@ -405,6 +413,7 @@ class TripBrief {
     'sustainability': sustainability.name,
     'notes': notes,
     'uncertain': [for (final f in uncertain) f.name],
+    'tripPool': tripPool,
   };
 
   static TripBrief fromJson(Map<String, dynamic> json) {
@@ -463,6 +472,7 @@ class TripBrief {
           SustainabilityPriority.balanced,
       notes: json['notes'] as String?,
       uncertain: enumSet(BriefField.values, json['uncertain']),
+      tripPool: json['tripPool'] == true,
     );
   }
 
