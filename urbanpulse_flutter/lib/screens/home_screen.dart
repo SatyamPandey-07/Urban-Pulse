@@ -1,3 +1,5 @@
+import '../state/map_requests.dart';
+import 'location_picker_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
@@ -46,6 +48,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
+  MapRequests? _mapRequests;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // A day of the trip sent to the map from the itinerary screen: go and look.
+    _mapRequests ??= AppScope.of(context).mapRequests..addListener(_mapRequested);
+  }
+
+  void _mapRequested() {
+    if (_mapRequests?.pending != null && mounted) _switchToTab(1);
+  }
+
+  @override
+  void dispose() {
+    _mapRequests?.removeListener(_mapRequested);
+    super.dispose();
+  }
 
   static const _pages = <Widget>[
     ResponsiveCenter(maxWidth: 1180, child: DashboardTab()),
@@ -215,7 +235,7 @@ class _LocationAppBarState extends State<_LocationAppBar> {
         animation: location,
         builder: (context, _) => InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => location.resolve(force: true),
+          onTap: () => LocationPickerScreen.open(context),
           child: Row(
             children: [
               Container(

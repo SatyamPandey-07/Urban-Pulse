@@ -8,6 +8,7 @@ import 'package:urbanpulse/models/map_route.dart';
 import 'package:urbanpulse/services/live_location.dart';
 import 'package:urbanpulse/services/live_map_data.dart';
 import 'package:urbanpulse/state/live_map_controller.dart';
+import 'package:urbanpulse/state/map_requests.dart';
 
 import '../services/map_route_test.dart' show northRoute;
 
@@ -429,6 +430,130 @@ void main() {
       expect(c.selected, isNotNull);
       await c.dropPin(const LatLng(2, 2));
       expect(c.selected!.name, 'Fort');
+    });
+  });
+
+  group('a day of the trip', () {
+    const stops = [
+      TripStop(name: 'Amber Fort', point: LatLng(10.0004, 77), when: '9:30 AM', refId: 'a'),
+      TripStop(name: 'Hawa Mahal', point: LatLng(10.02, 77), when: '1:00 PM', refId: 'b'),
+      TripStop(name: 'City Palace', point: LatLng(10.04, 77), when: '4:00 PM', refId: 'c'),
+    ];
+    const day = TripMapRequest(title: 'Day 1 · Old city', stops: stops);
+
+    test('the stops are shown in order and the first is next', () async {
+      await c.start();
+      await c.showTrip(day);
+      expect(c.tripActive, isTrue);
+      expect(c.tripStops.map((s) => s.name), ['Amber Fort', 'Hawa Mahal', 'City Palace']);
+      expect(c.nextStopIndex, 0);
+      await settle();
+      expect(cameras.whereType<FitPlaces>().last.points.length, 4, reason: 'you and the three stops');
+    });
+
+    test('a close stop is walked to, a far one is driven to', () async {
+      await c.start();
+      data.routeResults = [northRoute()];
+      await c.showTrip(day);
+      await c.navigateToStop(0);
+      expect(data.routeAsks.last.$3, NavMode.walk);
+      expect(c.selected!.name, 'Amber Fort');
+      c.closeDirections();
+      c.clearSelection();
+      await c.navigateToStop(2);
+      expect(data.routeAsks.last.$3, NavMode.drive);
+    });
+
+    test('asking to navigate on showing sets off for that stop', () async {
+      await c.start();
+      data.routeResults = [northRoute()];
+      await c.showTrip(const TripMapRequest(title: 'Day 1', stops: stops, navigateTo: 1));
+      expect(c.selected!.name, 'Hawa Mahal');
+      expect(c.routing, RoutingStatus.ready);
+    });
+
+    test('arriving marks the stop done, and the next one is offered', () async {
+      await c.start();
+      data.routeResults = [northRoute()];
+      await c.showTrip(day);
+      await c.navigateToNextStop();
+      await c.startNavigation();
+      loc.positions.add(const UserFix(point: LatLng(10.0199, 77)));
+      await settle();
+      expect(c.progress!.arrived, isTrue);
+      await c.stopNavigation(keepRoutes: false);
+      expect(c.visitedStops, {0});
+      expect(c.nextStopIndex, 1);
+      expect(c.selected, isNull, reason: 'back to the day');
+    });
+
+    test('a stop with nonsense coordinates is left out, and an empty day shows nothing', () async {
+      await c.showTrip(const TripMapRequest(title: 'x', stops: [TripStop(name: 'bad', point: LatLng(double.nan, 1))]));
+      expect(c.tripActive, isFalse);
+      await c.navigateToStop(5);
+      expect(c.selected, isNull);
+    });
+
+    test('hiding the trip clears it', () async {
+      await c.showTrip(day);
+      c.clearTrip();
+      expect(c.tripActive, isFalse);
+    });
+  });
+
+  group('spoken directions', () {
+    Future<(LiveMapController, List<String>)> ready({bool voice = true}) async {
+      final said = <String>[];
+      final d = LiveMapController(data: data, location: loc, speak: said.add);
+      addTearDown(d.dispose);
+      d.voiceGuidance = voice;
+      await d.start();
+      data.routeResults = [northRoute()];
+      d.select(poi('Amber Fort', 10.02, 77));
+      await d.directions();
+      await d.startNavigation();
+      return (d, said);
+    }
+
+    test('the trip is announced, then each turn as it nears, then arrival', () async {
+      final (d, said) = await ready();
+      expect(said.single, startsWith('Starting navigation to Amber Fort.'));
+      loc.positions.add(const UserFix(point: LatLng(10.0075, 77))); // about 167 m before the 1000 m turn
+      await settle();
+      expect(said.last, 'In 150 metres, turn left onto Park Road');
+      loc.positions.add(const UserFix(point: LatLng(10.0076, 77)));
+      await settle();
+      expect(said.length, 2, reason: 'a turn is announced once at that distance');
+      loc.positions.add(const UserFix(point: LatLng(10.0088, 77))); // a few metres before it
+      await settle();
+      expect(said.last, 'Turn left onto Park Road');
+      loc.positions.add(const UserFix(point: LatLng(10.0199, 77)));
+      await settle();
+      expect(said.last, 'You have arrived at Amber Fort.');
+      final n = said.length;
+      loc.positions.add(const UserFix(point: LatLng(10.0199, 77.00001)));
+      await settle();
+      expect(said.length, n, reason: 'arrival is said once');
+      expect(d.progress!.arrived, isTrue);
+    });
+
+    test('muting says nothing', () async {
+      final (d, said) = await ready(voice: false);
+      loc.positions.add(const UserFix(point: LatLng(10.0075, 77)));
+      await settle();
+      expect(said, isEmpty);
+      d.setVoiceGuidance(true);
+      expect(d.voiceGuidance, isTrue);
+    });
+
+    test('distances are said the way a person says them', () {
+      expect(distanceWords(30), '30 metres');
+      expect(distanceWords(190), '200 metres');
+      expect(distanceWords(640), '650 metres');
+      expect(distanceWords(1000), '1 kilometre');
+      expect(distanceWords(1500), '1.5 kilometres');
+      expect(distanceWords(12400), '12 kilometres');
+      expect(distanceWords(double.nan), '');
     });
   });
 
