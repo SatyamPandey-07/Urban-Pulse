@@ -12,7 +12,7 @@ import 'package:urbanpulse/services/data/data_cache.dart';
 import 'package:urbanpulse/services/data/wikipedia_client.dart';
 import 'package:urbanpulse/services/groq_api_client.dart';
 
-import 'fakes.dart';
+import 'scripted.dart';
 
 http.Response jsonResp(Object body, [int status = 200]) => http.Response(
   jsonEncode(body),
@@ -24,8 +24,8 @@ http.Response jsonResp(Object body, [int status = 200]) => http.Response(
 void main() {
   group('web_search chain', () {
     test('uses the first provider that has results, and remembers them', () async {
-      final tavily = FakeSearchProvider('Tavily', results: [result('Hotel A', 'https://a.example')]);
-      final compound = FakeSearchProvider('Groq search', results: [result('B', 'https://b.example')]);
+      final tavily = ScriptedSearchProvider('Tavily', results: [result('Hotel A', 'https://a.example')]);
+      final compound = ScriptedSearchProvider('Groq search', results: [result('B', 'https://b.example')]);
       final tool = WebSearchTool(providers: [tavily, compound], budget: ToolBudget());
 
       final out = await tool.run({'query': 'hotels in Munnar'});
@@ -41,9 +41,9 @@ void main() {
     });
 
     test('falls through the chain when a provider fails or is unavailable', () async {
-      final tavily = FakeSearchProvider('Tavily', results: null);
-      final off = FakeSearchProvider('Groq search', available: false, results: [result('x', 'https://x.example')]);
-      final wiki = FakeSearchProvider('Wikipedia', results: [result('Munnar', 'https://en.wikipedia.org/wiki/Munnar')]);
+      final tavily = ScriptedSearchProvider('Tavily', results: null);
+      final off = ScriptedSearchProvider('Groq search', available: false, results: [result('x', 'https://x.example')]);
+      final wiki = ScriptedSearchProvider('Wikipedia', results: [result('Munnar', 'https://en.wikipedia.org/wiki/Munnar')]);
       final tool = WebSearchTool(providers: [tavily, off, wiki], budget: ToolBudget());
       final out = await tool.run({'query': 'Munnar'});
       expect(out.ok, isTrue);
@@ -53,14 +53,14 @@ void main() {
 
     test('reports a clean failure and refunds the budget when nothing answers', () async {
       final budget = ToolBudget(maxSearches: 1);
-      final tool = WebSearchTool(providers: [FakeSearchProvider('T', results: null)], budget: budget);
+      final tool = WebSearchTool(providers: [ScriptedSearchProvider('T', results: null)], budget: budget);
       final out = await tool.run({'query': 'zzzz'});
       expect(out.ok, isFalse);
       expect(budget.searchesUsed, 0);
     });
 
     test('once the budget is spent only the free Wikipedia provider still runs', () async {
-      final tavily = FakeSearchProvider('Tavily', results: [result('paid', 'https://p.example')]);
+      final tavily = ScriptedSearchProvider('Tavily', results: [result('paid', 'https://p.example')]);
       final wiki = WikipediaSearchProvider(
         WikipediaClient(client: MockClient((_) async => jsonResp({'query': {'search': [{'pageid': 1, 'title': 'Munnar', 'snippet': 'x'}]}}))),
       );
@@ -76,7 +76,7 @@ void main() {
     });
 
     test('bad arguments are rejected, and queries are sanitised and capped', () async {
-      final tavily = FakeSearchProvider('T', results: [result('a', 'https://a.example')]);
+      final tavily = ScriptedSearchProvider('T', results: [result('a', 'https://a.example')]);
       final tool = WebSearchTool(providers: [tavily], budget: ToolBudget(), maxQueryLength: 20);
       expect((await tool.run({})).ok, isFalse);
       expect((await tool.run({'query': '   '})).ok, isFalse);
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('max_results is clamped', () async {
-      final tavily = FakeSearchProvider('T', results: [result('a', 'https://a.example')]);
+      final tavily = ScriptedSearchProvider('T', results: [result('a', 'https://a.example')]);
       final tool = WebSearchTool(providers: [tavily], budget: ToolBudget());
       final out = await tool.run({'query': 'q', 'max_results': 999});
       expect(out.ok, isTrue);
@@ -345,10 +345,10 @@ void main() {
 
   group('tool loop', () {
     late ToolRegistry registry;
-    late FakeTool search;
+    late ScriptedTool search;
 
     setUp(() {
-      search = FakeTool(
+      search = ScriptedTool(
         'web_search',
         ToolOutput(ok: true, text: '1. Hotel A — https://a.example\n   step-free', data: [result('Hotel A', 'https://a.example')]),
       );
@@ -402,7 +402,7 @@ void main() {
     });
 
     test('a tool that is not on the allow-list is refused', () async {
-      final other = FakeTool('fetch_page', const ToolOutput(ok: true, text: 'x'));
+      final other = ScriptedTool('fetch_page', const ToolOutput(ok: true, text: 'x'));
       registry.register(other);
       final llm = ScriptedLlm([
         '{"tool":"fetch_page","args":{"url":"https://a.example"}}',
@@ -489,8 +489,8 @@ void main() {
 
   test('registry describes only the allowed tools', () {
     final reg = ToolRegistry()
-      ..register(FakeTool('web_search', const ToolOutput(ok: true)))
-      ..register(FakeTool('fetch_page', const ToolOutput(ok: true)));
+      ..register(ScriptedTool('web_search', const ToolOutput(ok: true)))
+      ..register(ScriptedTool('fetch_page', const ToolOutput(ok: true)));
     final d = reg.describe(['web_search']);
     expect(d, contains('web_search'));
     expect(d, isNot(contains('fetch_page')));
@@ -499,7 +499,7 @@ void main() {
 
   test('memory cache is shared between search calls', () async {
     final cache = MemoryCache();
-    final p = FakeSearchProvider('T', results: [result('a', 'https://a.example')]);
+    final p = ScriptedSearchProvider('T', results: [result('a', 'https://a.example')]);
     await WebSearchTool(providers: [p], budget: ToolBudget(), cache: cache).run({'query': 'shared'});
     await WebSearchTool(providers: [p], budget: ToolBudget(), cache: cache).run({'query': 'shared'});
     expect(p.calls, 1);

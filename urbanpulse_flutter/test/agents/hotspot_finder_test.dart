@@ -11,7 +11,7 @@ import 'package:urbanpulse/services/data/data_cache.dart';
 import 'package:urbanpulse/services/data/overpass_client.dart';
 import 'package:urbanpulse/services/data/wikipedia_client.dart';
 
-import 'fakes.dart';
+import 'scripted.dart';
 import 'hotel_world.dart';
 
 void main() {

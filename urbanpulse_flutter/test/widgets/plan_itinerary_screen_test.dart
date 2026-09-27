@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:urbanpulse/core/app_colors.dart';
 import 'package:urbanpulse/core/app_theme.dart';
 import 'package:urbanpulse/core/safe_launch.dart';
+import 'package:urbanpulse/models/itinerary/plan_snapshot.dart';
 import 'package:urbanpulse/screens/plan_itinerary_screen.dart';
 
 import '../models/itinerary_test.dart' show sampleItinerary;
@@ -65,6 +66,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('How this plan was made'), findsOneWidget);
     expect(find.text('Atithi 12s'), findsOneWidget);
+  });
+
+  testWidgets('the trip tab lists what was changed after the first plan', (tester) async {
+    tester.view.physicalSize = const Size(360, 740);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(AccentColor.green),
+        home: PlanItineraryScreen(
+          itinerary: sampleItinerary().copyWith(version: 3, edits: [
+            EditRecord(at: DateTime(2026, 10, 1), request: 'More rest on day 2', summary: 'Day 2 is lighter.'),
+            EditRecord(at: DateTime(2026, 10, 2), request: 'A cheaper hotel', summary: 'Changed the stay.'),
+          ]),
+          tileLayer: const SizedBox.shrink(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Trip'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Your changes (version 3)'), findsOneWidget);
+    expect(find.textContaining('A cheaper hotel'), findsOneWidget);
+    expect(find.textContaining('More rest on day 2'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('saving works once and then says saved', (tester) async {

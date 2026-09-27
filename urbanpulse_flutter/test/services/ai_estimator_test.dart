@@ -4,7 +4,7 @@ import 'package:urbanpulse/domain/regional_defaults.dart';
 import 'package:urbanpulse/services/data/ai_estimator.dart';
 import 'package:urbanpulse/services/groq_api_client.dart';
 
-import '../agents/fakes.dart';
+import '../agents/scripted.dart';
 
 void main() {
   group('AiEstimator.fill', () {

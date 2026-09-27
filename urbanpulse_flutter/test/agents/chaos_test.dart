@@ -18,7 +18,7 @@ import 'package:urbanpulse/agents/tools/web_search_tool.dart';
 import 'package:urbanpulse/domain/trip_brief/extraction.dart';
 import 'package:urbanpulse/services/groq_api_client.dart';
 
-import 'fakes.dart';
+import 'scripted.dart';
 
 /// Hostile and odd strings a judge (or a model steered by one) might produce.
 final hostile = <String>[
@@ -87,7 +87,7 @@ void main() {
 
   group('tools shrug off hostile input', () {
     test('web_search caps and sanitises every hostile query', () async {
-      final p = FakeSearchProvider('T', results: [result('a', 'https://a.example')]);
+      final p = ScriptedSearchProvider('T', results: [result('a', 'https://a.example')]);
       final tool = WebSearchTool(providers: [p], budget: ToolBudget(maxSearches: 10000), maxQueryLength: 200);
       for (final q in hostile) {
         final out = await tool.run({'query': q});
@@ -98,7 +98,7 @@ void main() {
     });
 
     test('web_search with odd argument types never throws', () async {
-      final tool = WebSearchTool(providers: [FakeSearchProvider('T', results: [result('a', 'https://a.example')])], budget: ToolBudget());
+      final tool = WebSearchTool(providers: [ScriptedSearchProvider('T', results: [result('a', 'https://a.example')])], budget: ToolBudget());
       for (final args in <Map<String, Object?>>[
         {},
         {'query': null},
@@ -130,8 +130,8 @@ void main() {
   group('tool loop against a hostile model', () {
     test('every hostile reply ends in a result, never an exception, and never runs a forbidden tool', () async {
       for (final reply in hostile) {
-        final search = FakeTool('web_search', ToolOutput(ok: true, text: 'r', data: [result('a', 'https://a.example')]));
-        final forbidden = FakeTool('fetch_page', const ToolOutput(ok: true, text: 'secret'));
+        final search = ScriptedTool('web_search', ToolOutput(ok: true, text: 'r', data: [result('a', 'https://a.example')]));
+        final forbidden = ScriptedTool('fetch_page', const ToolOutput(ok: true, text: 'secret'));
         final reg = ToolRegistry()..register(search)..register(forbidden);
         final llm = ScriptedLlm()..fallback = reply;
         final r = await ToolLoop(llm: llm, tools: reg, maxCalls: 3).run(
@@ -150,7 +150,7 @@ void main() {
     test('random model behaviour never breaks the loop', () async {
       final r = Random(3);
       for (var i = 0; i < 300; i++) {
-        final reg = ToolRegistry()..register(FakeTool('web_search', ToolOutput(ok: r.nextBool(), text: 'x' * r.nextInt(9000), data: const [])));
+        final reg = ToolRegistry()..register(ScriptedTool('web_search', ToolOutput(ok: r.nextBool(), text: 'x' * r.nextInt(9000), data: const [])));
         final llm = ScriptedLlm([
           for (var k = 0; k < r.nextInt(6); k++)
             switch (r.nextInt(5)) {

@@ -744,7 +744,7 @@ flutter analyze
 flutter test        # 485 tests
 ```
 
-The suite includes table-driven tests for the deterministic engines (validation, question planning, accessibility rules, opening hours, day planning, budgets, gates), orchestration tests with scripted models and fake services, widget tests for the chat, hotel cards, task graph and itinerary screen at phone, tablet and desktop sizes in light and dark, and **chaos tests** that run the whole planning pipeline, and 60 random edits in a row, against hostile inputs and random failures. Live runs of the editor against the real services: `flutter test test/live/edit_trace_test.dart --dart-define-from-file=config.json`.
+The suite includes table-driven tests for the deterministic engines (validation, question planning, accessibility rules, opening hours, day planning, budgets, gates), orchestration tests with scripted model and service replies, widget tests for the chat, hotel cards, task graph and itinerary screen at phone, tablet and desktop sizes in light and dark, and **chaos tests** that run the whole planning pipeline, and 60 random edits in a row, against hostile inputs and random failures. Live runs of the editor against the real services: `flutter test test/live/edit_trace_test.dart --dart-define-from-file=config.json`.
 
 CI (`.github/workflows/flutter-ci-cd.yml`) builds the Android APK on pushes to `main`.
 

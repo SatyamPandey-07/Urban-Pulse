@@ -12,7 +12,7 @@ import 'package:urbanpulse/models/trip_brief.dart';
 import 'package:urbanpulse/models/yatri_question.dart';
 
 import '../yatri/test_support.dart';
-import 'fakes.dart';
+import 'scripted.dart';
 import 'hotel_world.dart';
 import 'planner_orchestrator_test.dart' show toolkitFor;
 
@@ -172,7 +172,7 @@ void main() {
     test('add a place by name that the plan did not know', () async {
       final ed = editor();
       final out = await ed.apply(base, [const AddStopOp(name: 'Lake Palace')]);
-      // "Lake Palace" is not in the fake map: the plan says so and stays as it was.
+      // "Lake Palace" is not among the scripted map answers: the plan says so and stays as it was.
       expect(out.status, EditStatus.failed, reason: out.say);
       expect(out.say, contains('Lake Palace'));
       expect(out.itinerary, isNull);
@@ -327,7 +327,7 @@ void main() {
 
     test('a name that fits two stops asks which one', () async {
       final titles = base.days.expand(visitTitles).toList();
-      // "Viewpoint" appears in more than one name in the fake data.
+      // "Viewpoint" appears in more than one place name in the scripted answers.
       final two = titles.where((t) => t.contains('Viewpoint')).toList();
       if (two.length < 2) return;
       final asked = <YatriQuestion>[];

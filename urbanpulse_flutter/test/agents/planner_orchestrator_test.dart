@@ -19,7 +19,7 @@ import 'package:urbanpulse/services/data/xotelo_client.dart';
 import 'package:urbanpulse/services/place_geocoder.dart';
 
 import '../yatri/test_support.dart';
-import 'fakes.dart';
+import 'scripted.dart';
 import 'hotel_world.dart';
 
 class _Geocoder extends PlaceGeocoder {

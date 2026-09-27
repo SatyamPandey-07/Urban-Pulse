@@ -6,7 +6,7 @@ import 'package:urbanpulse/agents/runtime/report.dart';
 import 'package:urbanpulse/models/itinerary/itinerary_parts.dart';
 import 'package:urbanpulse/models/trip_brief.dart';
 
-import 'fakes.dart';
+import 'scripted.dart';
 import 'hotel_world.dart';
 
 HotelCandidate cand(String name, {LatLng? at, String source = 'Xotelo', String? key, double? rating, int? nightly}) =>

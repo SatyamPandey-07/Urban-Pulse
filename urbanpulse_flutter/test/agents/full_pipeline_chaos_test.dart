@@ -6,7 +6,7 @@ import 'package:urbanpulse/models/trip_brief.dart';
 import 'package:urbanpulse/models/yatri_question.dart';
 
 import '../yatri/test_support.dart';
-import 'fakes.dart';
+import 'scripted.dart';
 import 'hotel_world.dart';
 import 'planner_orchestrator_test.dart' show toolkitFor;
 
