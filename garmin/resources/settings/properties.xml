@@ -1,7 +1,16 @@
 <properties>
     <!-- Editable by the user in Garmin Connect / Garmin Express, and by you in
          the simulator via Settings Editor. Persisted by the system. -->
-    <property id="degrees"  type="boolean">true</property>
-    <property id="haptics"  type="boolean">true</property>
-    <property id="decimals" type="number">10</property>
+
+    <!-- The six-character code the phone app shows under Settings > Garmin
+         Watch. It is what ties this watch to that traveller's itinerary. -->
+    <property id="pairingCode" type="string"></property>
+
+    <!-- Where the Urban Pulse registry runs, e.g. https://pulse.example.com.
+         It has to be HTTPS and publicly reachable: Connect IQ relays web
+         requests through Garmin's servers rather than sending them from the
+         watch, so a host on your own network is never reachable. See README.md.
+         Leave it blank in development - a debug build with no pairing code
+         shows the sample plan in SamplePlan.mc instead. -->
+    <property id="serverUrl" type="string"></property>
 </properties>

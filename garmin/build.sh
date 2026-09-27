@@ -13,7 +13,7 @@ set -euo pipefail
 
 DEVICE="${DEVICE:-fr965}"
 DEV_KEY="${DEV_KEY:-$HOME/.garmin/developer_key.der}"
-OUT="bin/UrbanPulseCalc.prg"
+OUT="bin/UrbanPulse.prg"
 MODE="${1:-sim}"
 
 mkdir -p bin

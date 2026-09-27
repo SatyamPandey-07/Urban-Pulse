@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
+import '../../services/watch_sync_service.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
 
@@ -26,6 +27,7 @@ class _SettingsTabState extends State<SettingsTab> {
         services.gamification,
         services.theme,
         services.location,
+        services.watch,
       ]),
       builder: (context, _) {
         final wheelchairStatus = services.accessibility.isWheelchairModeEnabled
@@ -78,6 +80,13 @@ class _SettingsTabState extends State<SettingsTab> {
             icon: Icons.recycling_rounded,
             iconBg: const Color(0xFFF3E8FF),
             onTap: () => Navigator.of(context).pushNamed(Routes.hotelOptimizer),
+          ),
+          _SettingItem(
+            title: 'Garmin Watch',
+            subtitle: _watchSubtitle(services.watch),
+            icon: Icons.watch_outlined,
+            iconBg: const Color(0xFFDBEAFE),
+            onTap: _showWatchDialog,
           ),
           _SettingItem(
             title: 'Appearance & Accent',
@@ -259,6 +268,91 @@ class _SettingsTabState extends State<SettingsTab> {
       context,
       'Accessibility preferences updated & synced with Yatri AI.',
     );
+  }
+
+  static String _watchSubtitle(WatchSyncService watch) {
+    if (!watch.isEnabled) return 'Off • itineraries stay on the phone';
+    final what = watch.lastSentSummary;
+    if (watch.state == WatchSyncState.failed) {
+      return watch.lastError ?? 'Last send failed';
+    }
+    return what == null
+        ? 'Code ${watch.pairingCode} • no plan sent yet'
+        : 'Code ${watch.pairingCode} • showing $what';
+  }
+
+  /// The pairing ceremony, in full: read the code here, type it into the watch
+  /// app's settings in Garmin Connect once. Every itinerary the agents finish
+  /// then lands on the watch on its own.
+  Future<void> _showWatchDialog() async {
+    final watch = AppScope.of(context).watch;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Garmin Watch'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Open Garmin Connect → Urban Pulse → Settings and enter this '
+                'pairing code. Finished itineraries then appear on the watch by '
+                'themselves.',
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: SelectableText(
+                  watch.pairingCode,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 6,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Send plans to the watch'),
+                value: watch.isEnabled,
+                onChanged: (v) async {
+                  await watch.setEnabled(v);
+                  setDialogState(() {});
+                },
+              ),
+              if (watch.lastSentSummary != null)
+                Text(
+                  'On the watch: ${watch.lastSentSummary}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              if (watch.lastError != null)
+                Text(
+                  watch.lastError!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await watch.unpublish();
+                await watch.regenerateCode();
+                setDialogState(() {});
+              },
+              child: const Text('New code'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (mounted) setState(() {});
   }
 
   Future<void> _showAccentDialog() async {

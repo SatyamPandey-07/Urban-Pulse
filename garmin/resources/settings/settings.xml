@@ -2,15 +2,11 @@
     <!-- What the user sees in Garmin Connect > the app's settings, and in the
          simulator's Settings Editor. Values land in Application.Properties and
          reach the app through AppBase.onSettingsChanged(). -->
-    <setting propertyKey="@Properties.degrees" title="@Strings.SettingAngle">
-        <settingConfig type="boolean"/>
+    <setting propertyKey="@Properties.pairingCode" title="@Strings.SettingPairingCode">
+        <settingConfig type="alphaNumeric" maxLength="8"/>
     </setting>
 
-    <setting propertyKey="@Properties.haptics" title="@Strings.SettingHaptics">
-        <settingConfig type="boolean"/>
-    </setting>
-
-    <setting propertyKey="@Properties.decimals" title="@Strings.SettingDecimals">
-        <settingConfig type="numeric" min="0" max="12"/>
+    <setting propertyKey="@Properties.serverUrl" title="@Strings.SettingServerUrl">
+        <settingConfig type="alphaNumeric" maxLength="120"/>
     </setting>
 </settings>

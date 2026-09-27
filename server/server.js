@@ -37,6 +37,14 @@ db.exec(`
     created_at TEXT NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS watch_trips (
+    code TEXT PRIMARY KEY,
+    payload TEXT NOT NULL,
+    updated_at INTEGER NOT NULL,
+    destination TEXT,
+    day_count INTEGER NOT NULL DEFAULT 0
+  );
+
   CREATE TABLE IF NOT EXISTS bookings (
     id TEXT PRIMARY KEY,
     experience_id TEXT NOT NULL REFERENCES experiences(id),
@@ -317,6 +325,105 @@ app.get("/api/impact-stats", (req, res) => {
         topExperiences: topExperiences.map(e => ({ id: e.id, name: e.name, location: e.location, bookingCount: e.bookingCount })),
         generatedAt: new Date().toISOString()
     });
+});
+
+// --- Watch hand-off: the phone publishes a finished itinerary, the Garmin
+// --- watch pulls it. One row per pairing code, holding the last plan sent.
+//
+// The payload is the watch-sized projection of an Itinerary built by
+// lib/services/watch_payload.dart: short keys, ASCII only, wall-clock times
+// already rendered. The server does not interpret it beyond the sanity checks
+// below - it stamps `u` with its own clock so the watch's conditional GET is
+// free of any clock skew between the three devices.
+
+const WATCH_CODE = /^[A-Z0-9]{4,8}$/;
+const WATCH_PAYLOAD_LIMIT_BYTES = 16 * 1024;
+
+function watchCode(raw) {
+    const code = String(raw || "").trim().toUpperCase();
+    return WATCH_CODE.test(code) ? code : null;
+}
+
+app.put("/api/watch/:code", (req, res) => {
+    const code = watchCode(req.params.code);
+    if (!code) return res.status(400).json({ error: "pairing code must be 4-8 letters or digits" });
+
+    const payload = req.body;
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        return res.status(400).json({ error: "body must be a trip payload object" });
+    }
+    if (typeof payload.t !== "string" || !payload.t.trim()) {
+        return res.status(400).json({ error: "t (destination) is required" });
+    }
+    if (!Array.isArray(payload.d)) {
+        return res.status(400).json({ error: "d (days) must be an array" });
+    }
+
+    const updatedAt = Math.floor(Date.now() / 1000);
+    const stored = JSON.stringify({ ...payload, u: updatedAt });
+
+    // A watch has kilobytes to spend on this, not megabytes. Refusing here is
+    // far kinder than a request the watch cannot hold.
+    const bytes = Buffer.byteLength(stored, "utf8");
+    if (bytes > WATCH_PAYLOAD_LIMIT_BYTES) {
+        return res.status(413).json({ error: `payload is ${bytes} bytes, limit is ${WATCH_PAYLOAD_LIMIT_BYTES}` });
+    }
+
+    db.prepare(`
+        INSERT INTO watch_trips (code, payload, updated_at, destination, day_count)
+        VALUES (@code, @payload, @updatedAt, @destination, @dayCount)
+        ON CONFLICT(code) DO UPDATE SET
+            payload = @payload, updated_at = @updatedAt,
+            destination = @destination, day_count = @dayCount
+    `).run({
+        code,
+        payload: stored,
+        updatedAt,
+        destination: payload.t.trim(),
+        dayCount: payload.d.length
+    });
+
+    res.json({ code, updatedAt, dayCount: payload.d.length, bytes });
+});
+
+// The watch's GET. `since` is the `u` of the copy the watch already holds, so
+// an unchanged plan costs one 204 instead of a re-download.
+app.get("/api/watch/:code", (req, res) => {
+    const code = watchCode(req.params.code);
+    if (!code) return res.status(400).json({ error: "bad pairing code" });
+
+    const row = db.prepare("SELECT * FROM watch_trips WHERE code = ?").get(code);
+    if (!row) return res.status(404).json({ error: "no trip published for this code" });
+
+    const since = Number.parseInt(req.query.since, 10);
+    if (Number.isFinite(since) && since > 0 && since >= row.updated_at) {
+        return res.status(204).end();
+    }
+
+    res.type("application/json").set("Cache-Control", "no-store").send(row.payload);
+});
+
+// What the phone shows in its own settings: is anything published, and when.
+app.get("/api/watch/:code/status", (req, res) => {
+    const code = watchCode(req.params.code);
+    if (!code) return res.status(400).json({ error: "bad pairing code" });
+
+    const row = db.prepare("SELECT code, updated_at, destination, day_count FROM watch_trips WHERE code = ?").get(code);
+    if (!row) return res.status(404).json({ error: "no trip published for this code" });
+
+    res.json({
+        code: row.code,
+        updatedAt: row.updated_at,
+        destination: row.destination,
+        dayCount: row.day_count
+    });
+});
+
+app.delete("/api/watch/:code", (req, res) => {
+    const code = watchCode(req.params.code);
+    if (!code) return res.status(400).json({ error: "bad pairing code" });
+    db.prepare("DELETE FROM watch_trips WHERE code = ?").run(code);
+    res.status(204).end();
 });
 
 app.listen(PORT, () => {

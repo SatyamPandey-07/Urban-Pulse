@@ -61,6 +61,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
             settingsNeeds: () => _settingsNeeds(services),
             onTripPlanned: () => services.activity.increment(TrackedAction.tripsPlanned),
             onTripSaved: () => services.activity.increment(TrackedAction.tripsSaved),
+            onItineraryReady: services.watch.publish,
             geocode: _geocoder.lookup,
             toolkit: services.agentToolkit,
           )
@@ -198,6 +199,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
           itinerary: entry.itinerary,
           saved: entry.saved,
           onSave: () => c.saveItinerary(entry),
+          onSendToWatch: () => AppScope.of(context).watch.publish(entry.itinerary),
         ),
       ),
     );

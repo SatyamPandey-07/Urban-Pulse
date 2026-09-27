@@ -10,6 +10,7 @@ import '../repositories/traffic_history_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
 import '../services/location_service.dart';
+import '../services/watch_sync_service.dart';
 import 'accessibility_controller.dart';
 import 'activity_tracker.dart';
 import 'auth_controller.dart';
@@ -47,6 +48,7 @@ class AppServices {
       facility: FacilityRepository(),
       trafficHistory: TrafficHistoryRepository(),
       locationService: locationService,
+      watch: WatchSyncService(prefs),
     );
   }
 
@@ -67,6 +69,7 @@ class AppServices {
     required this.facility,
     required this.trafficHistory,
     required this.locationService,
+    required this.watch,
   });
 
   final SharedPreferences prefs;
@@ -86,6 +89,9 @@ class AppServices {
   final TrafficHistoryRepository trafficHistory;
   final LocationService locationService;
 
+  /// Publishes a finished itinerary where the Garmin watch app can read it.
+  final WatchSyncService watch;
+
   /// The planner's shared models, data clients and caches (built on first use).
   late final AgentToolkit agentToolkit = AgentToolkit.fromConfig(prefs: prefs);
 
@@ -97,6 +103,7 @@ class AppServices {
     accessibility.dispose();
     tripPlan.dispose();
     location.dispose();
+    watch.dispose();
   }
 }
 

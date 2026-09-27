@@ -1,17 +1,12 @@
 <resources>
-    <string id="AppName">Pulse Calc</string>
+    <string id="AppName">Urban Pulse</string>
 
-    <string id="SettingsTitle">Settings</string>
-    <string id="SettingAngle">Use degrees (off = radians)</string>
-    <string id="SettingHaptics">Key vibration</string>
-    <string id="SettingDecimals">Decimals</string>
-    <string id="SettingHistory">History</string>
-    <string id="HistoryTitle">History</string>
-    <string id="HistoryEmpty">No calculations yet</string>
+    <string id="MenuSync">Sync now</string>
+    <string id="MenuSyncSub">Fetch the latest plan</string>
+    <string id="MenuToday">Go to today</string>
+    <string id="MenuCode">Pairing code</string>
+    <string id="MenuCodeUnset">Not set</string>
 
-    <string id="ErrSyntax">Syntax error</string>
-    <string id="ErrDivZero">Cannot divide by zero</string>
-    <string id="ErrUndefined">Undefined</string>
-    <string id="ErrOverflow">Overflow</string>
-    <string id="ErrTooLong">Expression too long</string>
+    <string id="SettingPairingCode">Pairing code</string>
+    <string id="SettingServerUrl">Urban Pulse server</string>
 </resources>

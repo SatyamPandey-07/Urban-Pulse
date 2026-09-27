@@ -161,6 +161,7 @@ class YatriController extends ChangeNotifier {
     this.settingsNeeds = _noNeeds,
     this.onTripPlanned,
     this.onTripSaved,
+    this.onItineraryReady,
     this.geocode,
     this.toolkit,
     DateTime Function()? clock,
@@ -180,6 +181,12 @@ class YatriController extends ChangeNotifier {
   final Set<AccessibilityNeed> Function() settingsNeeds;
   final Future<void> Function()? onTripPlanned;
   final Future<void> Function()? onTripSaved;
+
+  /// Called with the finished multi-agent itinerary, before the traveller has
+  /// done anything with it. This is what puts the plan on the Garmin watch:
+  /// the watch is useful precisely when the phone is in a pocket, so waiting
+  /// for a Save would be waiting for the wrong moment. Must not throw.
+  final Future<void> Function(Itinerary itinerary)? onItineraryReady;
 
   /// Looks up a place's coordinates for the route map. Null disables the map.
   final Future<LatLng?> Function(String place)? geocode;
@@ -770,6 +777,7 @@ class YatriController extends ChangeNotifier {
           ),
         )
         ..add(ItineraryEntry(itinerary));
+      await onItineraryReady?.call(itinerary);
       await onTripPlanned?.call();
       busy = false;
       _notify();

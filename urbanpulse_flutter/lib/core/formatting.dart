@@ -40,6 +40,14 @@ const _weekdayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 String shortDate(DateTime d) =>
     '${_weekdayNames[d.weekday - 1]}, ${d.day} ${_monthNames[d.month - 1]}';
 
+/// `"Fri 25 Sep"` — no comma, for the places that count characters (the watch).
+String compactDate(DateTime d) =>
+    '${_weekdayNames[d.weekday - 1]} ${d.day} ${_monthNames[d.month - 1]}';
+
+/// `"09:30"` — 24-hour, fixed width, which is what fits on a watch row.
+String clock24(DateTime d) =>
+    '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
 /// `"9:30 AM"`.
 String clock12(DateTime d) {
   final h = d.hour % 12 == 0 ? 12 : d.hour % 12;

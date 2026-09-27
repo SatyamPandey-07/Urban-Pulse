@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/formatting.dart';
 import '../models/itinerary/itinerary.dart';
 import '../models/trip_brief.dart';
+import '../widgets/common.dart';
 import '../widgets/itinerary/budget_breakdown.dart';
 import '../widgets/itinerary/day_view.dart';
 import '../widgets/itinerary/trip_overview.dart';
@@ -13,6 +14,7 @@ class PlanItineraryScreen extends StatefulWidget {
   const PlanItineraryScreen({
     required this.itinerary,
     this.onSave,
+    this.onSendToWatch,
     this.saved = false,
     this.tileLayer,
     super.key,
@@ -22,6 +24,11 @@ class PlanItineraryScreen extends StatefulWidget {
 
   /// Saves the trip to My Trips. Null hides the button.
   final Future<void> Function()? onSave;
+
+  /// Re-publishes the plan to the paired Garmin watch. The planner already does
+  /// this automatically when the agents finish; this is the retry for a send
+  /// that happened while the server was unreachable. Null hides the button.
+  final Future<bool> Function()? onSendToWatch;
   final bool saved;
 
   /// Replaces the OpenStreetMap tiles (tests only).
@@ -34,6 +41,7 @@ class PlanItineraryScreen extends StatefulWidget {
 class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
   late bool _saved = widget.saved;
   bool _saving = false;
+  bool _sendingToWatch = false;
 
   Itinerary get it => widget.itinerary;
 
@@ -45,6 +53,22 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
       if (mounted) setState(() => _saved = true);
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _sendToWatch() async {
+    if (_sendingToWatch || widget.onSendToWatch == null) return;
+    setState(() => _sendingToWatch = true);
+    try {
+      final sent = await widget.onSendToWatch!();
+      if (mounted) {
+        showToast(
+          context,
+          sent ? 'Sent to your Garmin watch' : 'Could not reach the watch sync server',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sendingToWatch = false);
     }
   }
 
@@ -70,6 +94,14 @@ class _PlanItineraryScreenState extends State<PlanItineraryScreen> {
             ],
           ),
           actions: [
+            if (widget.onSendToWatch != null)
+              IconButton(
+                tooltip: 'Send to Garmin watch',
+                onPressed: _sendingToWatch ? null : _sendToWatch,
+                icon: _sendingToWatch
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.watch_outlined),
+              ),
             if (widget.onSave != null)
               IconButton(
                 tooltip: _saved ? 'Saved to My Trips' : 'Save to My Trips',
