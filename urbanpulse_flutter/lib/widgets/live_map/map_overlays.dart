@@ -235,7 +235,7 @@ class MapControls extends StatelessWidget {
           children: [
             _RoundButton(
               icon: Icons.emergency_rounded,
-              tooltip: 'Emergency SOS & BLE Mesh',
+              tooltip: 'Emergency SOS',
               backgroundColor: const Color(0xFFDC2626),
               iconColor: Colors.white,
               onTap: () => Navigator.of(context).pushNamed(Routes.sos),

@@ -8,6 +8,7 @@ import 'core/app_theme.dart';
 import 'core/config.dart';
 import 'core/routes.dart';
 import 'state/app_scope.dart';
+import 'widgets/sos_overlay.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,9 @@ Future<void> main() async {
     }
   }
   final services = AppServices(prefs, supabase: supabase);
+  // Before sign-in resumes: restores an SOS from before a restart and takes a
+  // power-button SOS that started the app.
+  unawaited(services.sos.init());
   runApp(UrbanPulseApp(services: services));
   // A kept session: bring the traveller's data up to date in the background.
   unawaited(services.auth.resume());
@@ -51,9 +55,12 @@ class UrbanPulseApp extends StatelessWidget {
             darkTheme: AppTheme.dark(accent),
             // `Theme.Material3.DayNight` — follow the device setting.
             themeMode: ThemeMode.system,
+            navigatorKey: services.navigatorKey,
             initialRoute: Routes.splash,
             routes: Routes.table,
             onGenerateRoute: Routes.onGenerateRoute,
+            // Your active SOS, and alerts from people nearby, on every screen.
+            builder: (context, child) => SosOverlay(child: child ?? const SizedBox.shrink()),
           );
         },
       ),

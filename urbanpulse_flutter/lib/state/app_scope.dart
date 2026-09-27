@@ -17,12 +17,14 @@ import '../repositories/trip_repository.dart';
 import '../services/cloud/cloud_store.dart';
 import '../services/cloud/user_sync.dart';
 import '../services/location_service.dart';
+import '../services/sos/sos_backend.dart';
 import '../services/trip_pool/trip_pool_service.dart';
 import 'accessibility_controller.dart';
 import 'activity_tracker.dart';
 import 'auth_controller.dart';
 import 'gamification_controller.dart';
 import 'location_controller.dart';
+import 'sos_controller.dart';
 import 'theme_controller.dart';
 import 'trip_plan_manager.dart';
 
@@ -61,15 +63,25 @@ class AppServices {
       myName: () => auth.userName.isNotEmpty ? auth.userName : auth.userEmail.split('@').first,
       itineraries: itineraries,
     );
+    final sos = SosController(
+      prefs: prefs,
+      myName: () => auth.userName.isNotEmpty ? auth.userName : auth.userEmail.split('@').first,
+      backend: supabase == null ? null : SupabaseSosBackend(supabase),
+    );
     auth
       // After the account's data is in place, bring Trip-pool requests (and the
-      // itineraries they change) up to date.
+      // itineraries they change) up to date, and start SOS (the power-button
+      // watch and alerts from people nearby).
       ..onSignedIn = () async {
         await sync.onSignedIn();
         unawaited(tripPool.refresh());
+        unawaited(sos.onSignedIn());
       }
       ..beforeSignOut = sync.beforeSignOut
-      ..afterSignOut = sync.afterSignOut;
+      ..afterSignOut = () async {
+        await sync.afterSignOut();
+        await sos.onSignedOut();
+      };
     final locationService = LocationService();
     return AppServices._(
       prefs: prefs,
@@ -91,6 +103,7 @@ class AppServices {
       trafficHistory: TrafficHistoryRepository(),
       locationService: locationService,
       tripPool: tripPool,
+      sos: sos,
     );
   }
 
@@ -114,6 +127,7 @@ class AppServices {
     required this.trafficHistory,
     required this.locationService,
     required this.tripPool,
+    required this.sos,
   });
 
   final SharedPreferences prefs;
@@ -140,6 +154,12 @@ class AppServices {
   /// Trip-pooling: shared rides with travellers going the same way that day.
   final TripPoolService tripPool;
 
+  /// Emergency SOS: yours (power button or SOS screen) and alerts from people nearby.
+  final SosController sos;
+
+  /// The app's navigator, so an SOS alert can open the SOS screen from anywhere.
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   /// A trip brief handed to Yatri from elsewhere in the app (Surprise Me); the
   /// Yatri tab picks it up, opens it for review, and plans it.
   final ValueNotifier<TripBrief?> yatriInbox = ValueNotifier(null);
@@ -156,6 +176,7 @@ class AppServices {
     tripPlan.dispose();
     location.dispose();
     tripPool.dispose();
+    sos.dispose();
     yatriInbox.dispose();
   }
 }

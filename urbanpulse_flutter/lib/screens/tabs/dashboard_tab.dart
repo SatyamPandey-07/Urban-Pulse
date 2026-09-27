@@ -80,8 +80,6 @@ class _DashboardTabState extends State<DashboardTab> {
           _heroBannerCard(context, city),
           const SizedBox(height: 14),
           _surpriseCard(context),
-          const SizedBox(height: 14),
-          _emergencySosBanner(context),
           const SizedBox(height: 22),
           _popularDestinationsSection(context),
           const SizedBox(height: 22),
@@ -95,70 +93,6 @@ class _DashboardTabState extends State<DashboardTab> {
                 : Column(children: [_aqiTrendCard(context), const SizedBox(height: 16), _congestionCard(context)]),
           ),
         ],
-      ),
-    );
-  }
-
-  /// Emergency SOS & Offline BLE Mesh Quick Banner
-  Widget _emergencySosBanner(BuildContext context) {
-    return InkWell(
-      onTap: () => Navigator.of(context).pushNamed(Routes.sos),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF7F1D1D), Color(0xFF991B1B)],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFDC2626), width: 1.2),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFDC2626).withValues(alpha: 0.25),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Color(0xFFDC2626),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.emergency_rounded, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Emergency SOS & Offline BLE Mesh',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Hold for 3s to broadcast offline beacon to nearby users',
-                    style: TextStyle(
-                      color: Color(0xFFFCA5A5),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: Colors.white70, size: 22),
-          ],
-        ),
       ),
     );
   }

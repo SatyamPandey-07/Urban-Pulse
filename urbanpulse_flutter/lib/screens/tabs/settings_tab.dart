@@ -94,8 +94,8 @@ class _SettingsTabState extends State<SettingsTab> {
             onTap: () => Navigator.of(context).pushNamed(Routes.weatherTwin),
           ),
           _SettingItem(
-            title: 'Emergency SOS & Offline BLE Mesh',
-            subtitle: 'Offline beacon broadcast, siren & nearby peer mesh responder',
+            title: 'Emergency SOS',
+            subtitle: 'Press power 3 times quickly to send an SOS · alerts from people near you',
             icon: Icons.emergency_rounded,
             iconBg: const Color(0xFFFEE2E2),
             onTap: () => Navigator.of(context).pushNamed(Routes.sos),
