@@ -166,7 +166,12 @@ class LiveMapViewState extends State<LiveMapView> with SingleTickerProviderState
       case MapStyle.standard:
         return TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 19);
       case MapStyle.dark:
-        return TileLayer(urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', subdomains: const ['a', 'b', 'c', 'd'], userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 19, retinaMode: RetinaMode.isHighDensity(context));
+        return TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.urbanpulse.app',
+          maxNativeZoom: 19,
+          tileBuilder: darkModeTileBuilder,
+        );
       case MapStyle.satellite:
         return TileLayer(urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', userAgentPackageName: 'com.urbanpulse.app', maxNativeZoom: 18);
     }
@@ -190,7 +195,7 @@ class LiveMapViewState extends State<LiveMapView> with SingleTickerProviderState
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             child: Text(
-              switch (s) { MapStyle.standard => '© OpenStreetMap contributors', MapStyle.dark => '© OpenStreetMap, CARTO', MapStyle.satellite => '© Esri, Maxar, Earthstar Geographics' },
+              switch (s) { MapStyle.standard => '© OpenStreetMap contributors', MapStyle.dark => '© OpenStreetMap contributors', MapStyle.satellite => '© Esri, Maxar, Earthstar Geographics' },
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 10, color: Colors.black87),
