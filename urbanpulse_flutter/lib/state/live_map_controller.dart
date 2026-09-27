@@ -8,6 +8,7 @@ import '../models/map_category.dart';
 import '../models/map_route.dart';
 import '../services/live_location.dart';
 import '../services/live_map_data.dart';
+import 'map_requests.dart';
 
 enum MapStyle { standard, dark, satellite }
 
@@ -35,12 +36,18 @@ class FitPlaces extends CameraRequest {
 /// which place is chosen, the routes to it, and turn-by-turn progress once you
 /// set off. The map widget only draws this and reports what the user does to it.
 class LiveMapController extends ChangeNotifier {
-  LiveMapController({required this.data, required this.location, Duration searchDelay = const Duration(milliseconds: 400), DateTime Function()? now})
+  LiveMapController({required this.data, required this.location, this.speak, Duration searchDelay = const Duration(milliseconds: 400), DateTime Function()? now})
     : _searchDelay = searchDelay,
       _now = now ?? DateTime.now;
 
   final LiveMapData data;
   final LiveLocation location;
+
+  /// Reads a line aloud (turn-by-turn), when the app has a voice to do it with.
+  final void Function(String text)? speak;
+
+  /// Whether directions are spoken while navigating.
+  bool voiceGuidance = true;
   final Duration _searchDelay;
   final DateTime Function() _now;
 
@@ -76,6 +83,84 @@ class LiveMapController extends ChangeNotifier {
   // --- the chosen place -------------------------------------------------------------
   LivePoiResult? selected;
 
+  // --- a day of the trip ------------------------------------------------------------------
+  String? tripTitle;
+  List<TripStop> tripStops = const [];
+  final Set<int> visitedStops = {};
+
+  bool get tripActive => tripStops.isNotEmpty;
+
+  /// The first stop not yet reached, or null when the day is done.
+  int? get nextStopIndex {
+    for (var i = 0; i < tripStops.length; i++) {
+      if (!visitedStops.contains(i)) return i;
+    }
+    return null;
+  }
+
+  /// Shows a day of the trip on the map and, if asked, sets off for a stop.
+  Future<void> showTrip(TripMapRequest request) async {
+    if (navigating) await stopNavigation(keepRoutes: false);
+    tripTitle = request.title;
+    tripStops = [for (final s in request.stops) if (s.point.latitude.isFinite && s.point.longitude.isFinite) s];
+    visitedStops.clear();
+    clearResults();
+    selected = null;
+    _clearRoutes();
+    _notify();
+    if (tripStops.isEmpty) return;
+    final go = request.navigateTo;
+    if (go != null && go >= 0 && go < tripStops.length) {
+      await navigateToStop(go);
+    } else {
+      _fit([if (user != null) user!.point, for (final s in tripStops) s.point]);
+    }
+  }
+
+  /// Directions to one stop of the day: on foot when it is close, else by road.
+  Future<void> navigateToStop(int index) async {
+    if (index < 0 || index >= tripStops.length || navigating) return;
+    final s = tripStops[index];
+    select(_asPlace(s, index), fly: false);
+    final u = user;
+    final near = u != null && const Distance().as(LengthUnit.Meter, u.point, s.point) < 1200;
+    await directions(withMode: near ? NavMode.walk : NavMode.drive);
+  }
+
+  Future<void> navigateToNextStop() async {
+    final i = nextStopIndex;
+    if (i != null) await navigateToStop(i);
+  }
+
+  LivePoiResult _asPlace(TripStop s, int index) => LivePoiResult(
+    name: s.name,
+    address: s.when.isEmpty ? 'Stop ${index + 1} of ${tripStops.length}' : 'Stop ${index + 1} · ${s.when}',
+    distanceMeters: user == null ? 0 : const Distance().as(LengthUnit.Meter, user!.point, s.point),
+    lat: s.point.latitude,
+    lon: s.point.longitude,
+    category: 'trip stop',
+  );
+
+  /// The stop this place is, if it is one.
+  int? tripIndexOf(LivePoiResult p) {
+    for (var i = 0; i < tripStops.length; i++) {
+      if ((tripStops[i].point.latitude - p.lat).abs() < 1e-6 && (tripStops[i].point.longitude - p.lon).abs() < 1e-6) return i;
+    }
+    return null;
+  }
+
+  void selectStop(int index) {
+    if (index < 0 || index >= tripStops.length) return;
+    select(_asPlace(tripStops[index], index));
+  }
+
+  void clearTrip() {
+    tripTitle = null;
+    tripStops = const [];
+    visitedStops.clear();
+    _notify();
+  }
+
   // --- directions ---------------------------------------------------------------------
   NavMode mode = NavMode.drive;
   List<MapRoute> routes = const [];
@@ -93,6 +178,10 @@ class LiveMapController extends ChangeNotifier {
   DateTime? _lastReroute;
   bool _rerouting = false;
   StreamSubscription<UserFix>? _watch;
+
+  RouteInstruction? _saidFar;
+  RouteInstruction? _saidNear;
+  bool _saidArrived = false;
 
   Timer? _debounce;
   int _searchToken = 0;
@@ -450,7 +539,10 @@ class LiveMapController extends ChangeNotifier {
     _lastReroute = null;
     final u = user;
     progress = u == null ? null : NavProgress.of(route, u.point);
+    _saidFar = _saidNear = null;
+    _saidArrived = false;
     _notify();
+    _say('Starting ${mode == NavMode.walk ? 'the walk' : 'navigation'} to ${selected?.name ?? 'your destination'}. ${distanceWords(route.distanceM)}, about ${route.minutes} minutes.');
     if (u != null) _camera(CameraMove(u.point, zoom: 17));
     await _watch?.cancel();
     _watch = location.watch(distanceFilterM: 5).listen(
@@ -475,6 +567,7 @@ class LiveMapController extends ChangeNotifier {
     }
     final p = NavProgress.of(route, fix.point);
     progress = p;
+    _announce(p);
     if (p.arrived) {
       _watch?.cancel();
       _watch = null;
@@ -484,6 +577,36 @@ class LiveMapController extends ChangeNotifier {
     if (following) _camera(CameraMove(fix.point, zoom: viewZoom < 16.5 ? 17 : null));
     _notify();
     if (p.offRouteM > 60) unawaited(_reroute(fix));
+  }
+
+  void _say(String text) {
+    if (voiceGuidance) speak?.call(text);
+  }
+
+  /// Speaks the coming turn once when it is near, and again when it is here.
+  void _announce(NavProgress p) {
+    if (p.arrived) {
+      if (!_saidArrived) {
+        _saidArrived = true;
+        _say('You have arrived at ${selected?.name ?? 'your destination'}.');
+      }
+      return;
+    }
+    final n = p.next;
+    final d = p.nextInM;
+    if (n == null || d == null) return;
+    if (d <= 40 && !identical(_saidNear, n)) {
+      _saidNear = _saidFar = n;
+      _say(n.text);
+    } else if (d <= 250 && !identical(_saidFar, n)) {
+      _saidFar = n;
+      _say('In ${distanceWords(d)}, ${n.text.isEmpty ? '' : n.text[0].toLowerCase() + n.text.substring(1)}');
+    }
+  }
+
+  void setVoiceGuidance(bool on) {
+    voiceGuidance = on;
+    _notify();
   }
 
   Future<void> _reroute(UserFix fix) async {
@@ -501,6 +624,8 @@ class LiveMapController extends ChangeNotifier {
       routes = found;
       selectedRouteId = found.first.id;
       progress = NavProgress.of(found.first, fix.point);
+      _saidFar = _saidNear = null;
+      _say('Rerouting.');
       _notify();
     } catch (_) {
       // keep the old route; the next position tries again
@@ -511,6 +636,8 @@ class LiveMapController extends ChangeNotifier {
 
   Future<void> stopNavigation({bool keepRoutes = true}) async {
     if (!navigating && _watch == null) return;
+    final arrivedAt = progress?.arrived == true && selected != null ? tripIndexOf(selected!) : null;
+    if (arrivedAt != null) visitedStops.add(arrivedAt);
     _navToken++;
     navigating = false;
     following = true;
@@ -518,6 +645,7 @@ class LiveMapController extends ChangeNotifier {
     await _watch?.cancel();
     _watch = null;
     if (!keepRoutes) _clearRoutes();
+    if (arrivedAt != null) selected = null;
     _notify();
   }
 
@@ -554,4 +682,16 @@ class LiveMapController extends ChangeNotifier {
     _cameras.close();
     super.dispose();
   }
+}
+
+/// A distance as it is said aloud: "300 metres", "2 kilometres", "1.5 kilometres".
+String distanceWords(double meters) {
+  if (!meters.isFinite || meters < 0) return '';
+  if (meters < 950) {
+    final r = meters < 100 ? (meters / 10).round() * 10 : (meters / 50).round() * 50;
+    return '${r == 0 ? meters.round() : r} metres';
+  }
+  final km = meters / 1000;
+  final text = km < 10 ? km.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '') : km.round().toString();
+  return '$text ${text == '1' ? 'kilometre' : 'kilometres'}';
 }

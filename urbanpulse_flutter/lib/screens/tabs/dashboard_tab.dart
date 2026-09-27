@@ -4,6 +4,7 @@ import '../../core/app_colors.dart';
 import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../models/live_city_data.dart';
+import '../../state/location_controller.dart';
 import '../../services/open_meteo_service.dart';
 import '../../services/tomtom_service.dart';
 import '../../state/app_scope.dart';
@@ -30,6 +31,8 @@ class DashboardTab extends StatefulWidget {
 class _DashboardTabState extends State<DashboardTab> {
   DashboardTelemetry? _telemetry;
   LiveTrafficData? _traffic;
+  (double, double)? _loadedFor;
+  LocationController? _loc;
   bool _isLoading = true;
 
   @override
@@ -37,7 +40,25 @@ class _DashboardTabState extends State<DashboardTab> {
     super.initState();
     // Deferred: _load() reads AppScope, and an inherited-widget lookup is not
     // legal until the first frame has been scheduled.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _load();
+      // Choosing another address (or going back to the device) refreshes the
+      // dashboard for that place.
+      _loc = AppScope.of(context).location..addListener(_locationChanged);
+    });
+  }
+
+  @override
+  void dispose() {
+    _loc?.removeListener(_locationChanged);
+    super.dispose();
+  }
+
+  void _locationChanged() {
+    if (!mounted) return;
+    final now = AppScope.of(context).location.coordinatesOrDefault;
+    final was = _loadedFor;
+    if (was == null || (was.$1 - now.$1).abs() > 0.005 || (was.$2 - now.$2).abs() > 0.005) _load();
   }
 
   Future<void> _load() async {
@@ -46,6 +67,7 @@ class _DashboardTabState extends State<DashboardTab> {
     final services = AppScope.of(context);
     await services.location.resolve();
     final (lat, lon) = services.location.coordinatesOrDefault;
+    _loadedFor = (lat, lon);
 
     final telemetry = await OpenMeteoService.fetchDashboardTelemetry(lat, lon);
     final traffic = await TomTomService.getLiveTraffic(lat, lon);

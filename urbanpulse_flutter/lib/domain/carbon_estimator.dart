@@ -131,6 +131,14 @@ abstract final class CarbonEstimator {
     return math.max(math.min(routed, 60.0), 1.5);
   }
 
+  /// Road distance estimate between two known points: the straight line with
+  /// a detour allowance. Unlike [estimateDistanceKm] it is not limited to city
+  /// trips, so a long journey stays long.
+  static double estimateDistanceBetween(double lat1, double lng1, double lat2, double lng2) {
+    final routed = haversineKm(lat1, lng1, lat2, lng2) * 1.35;
+    return math.max(routed, 0.5);
+  }
+
   static MobilityOption estimateOption(TravelMode mode, double distanceKm) {
     final profile = _profiles[mode]!;
     final durationMin = math.max(

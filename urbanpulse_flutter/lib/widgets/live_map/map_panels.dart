@@ -43,6 +43,8 @@ class MapBottomPanel extends StatelessWidget {
           panel = DirectionsPanel(controller: c);
         } else if (c.selected != null) {
           panel = PlacePanel(controller: c);
+        } else if (c.tripActive && c.category == null) {
+          panel = TripPanel(controller: c);
         } else if (c.category != null && (c.results.isNotEmpty || c.searchMessage != null)) {
           panel = ResultsCarousel(controller: c);
         }
@@ -478,9 +480,64 @@ class NavigationPanel extends StatelessWidget {
             ],
           ),
         ),
+        IconButton(tooltip: c.voiceGuidance ? 'Mute voice directions' : 'Speak directions', onPressed: () => c.setVoiceGuidance(!c.voiceGuidance), icon: Icon(c.voiceGuidance ? Icons.volume_up_rounded : Icons.volume_off_rounded)),
         if (!c.following) IconButton.filledTonal(tooltip: 'Follow me', onPressed: c.recenter, icon: const Icon(Icons.my_location_rounded)),
         const SizedBox(width: 8),
         FilledButton.icon(style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError), onPressed: c.stopNavigation, icon: const Icon(Icons.close_rounded), label: const Text('End')),
+      ],
+    );
+  }
+}
+
+/// A day of the trip on the map: its stops in order, and the way to the next.
+class TripPanel extends StatelessWidget {
+  const TripPanel({required this.controller, super.key});
+
+  final LiveMapController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = controller;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final next = c.nextStopIndex;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.route_rounded, color: scheme.tertiary),
+            const SizedBox(width: 8),
+            Expanded(child: Text(c.tripTitle ?? 'Your trip', maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+            IconButton(visualDensity: VisualDensity.compact, tooltip: 'Hide the trip', onPressed: c.clearTrip, icon: const Icon(Icons.close_rounded)),
+          ],
+        ),
+        SizedBox(
+          height: 44,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: c.tripStops.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, i) {
+              final done = c.visitedStops.contains(i);
+              return ActionChip(
+                avatar: CircleAvatar(radius: 11, backgroundColor: done ? scheme.outline : scheme.tertiary, child: done ? Icon(Icons.check_rounded, size: 13, color: scheme.onTertiary) : Text('${i + 1}', style: TextStyle(fontSize: 11, color: scheme.onTertiary, fontWeight: FontWeight.w800))),
+                label: Text(c.tripStops[i].name, overflow: TextOverflow.ellipsis),
+                onPressed: () => c.selectStop(i),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (next == null)
+          Row(children: [Icon(Icons.flag_rounded, color: scheme.primary), const SizedBox(width: 8), const Expanded(child: Text('You have been to every stop of this day.'))])
+        else
+          FilledButton.icon(
+            onPressed: c.navigateToNextStop,
+            icon: const Icon(Icons.navigation_rounded),
+            label: Text('Navigate to ${c.tripStops[next].name}', maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
       ],
     );
   }

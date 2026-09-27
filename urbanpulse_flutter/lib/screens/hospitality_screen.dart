@@ -3,17 +3,23 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../domain/multi_objective_ranker.dart';
 import '../models/evidence.dart';
+import '../core/safe_launch.dart';
+import '../services/live_stays.dart';
 import '../services/trip_intent_parser.dart';
 import '../state/app_scope.dart';
 import '../state/hospitality_view_model.dart';
 import '../state/trip_plan_manager.dart';
 import '../widgets/common.dart';
+import '../widgets/tool_location_sheet.dart';
 
 /// Port of `HospitalityActivity` / `activity_hospitality.xml` +
 /// `item_hospitality_stay.xml`: Pareto-ranked eco stays with evidence-graph
 /// audits, chip filters, search, and the natural-language intent box.
 class HospitalityScreen extends StatefulWidget {
-  const HospitalityScreen({super.key});
+  /// [place] is where to look; without it the screen asks when it opens.
+  const HospitalityScreen({this.place, super.key});
+
+  final ToolPlace? place;
 
   @override
   State<HospitalityScreen> createState() => _HospitalityScreenState();
@@ -21,6 +27,8 @@ class HospitalityScreen extends StatefulWidget {
 
 class _HospitalityScreenState extends State<HospitalityScreen> {
   HospitalityViewModel? _viewModel;
+  ToolPlace? _place;
+  bool _asked = false;
   final _searchController = TextEditingController();
   final _intentController = TextEditingController();
   String? _intentSummary;
@@ -29,7 +37,32 @@ class _HospitalityScreenState extends State<HospitalityScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _viewModel ??= HospitalityViewModel(AppScope.of(context).hospitality);
+    if (_asked) return;
+    _asked = true;
+    final p = widget.place;
+    if (p != null) {
+      _start(p);
+    } else {
+      // Nothing is searched until the traveller says where.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _choose());
+    }
+  }
+
+  Future<void> _choose() async {
+    final p = await chooseToolPlace(context, title: 'Where do you want a stay?');
+    if (p != null && mounted) _start(p);
+  }
+
+  /// Searches stays around [p] with the needs saved in Settings.
+  void _start(ToolPlace p) {
+    final services = AppScope.of(context);
+    _viewModel?.dispose();
+    setState(() {
+      _place = p;
+      _viewModel = HospitalityViewModel(
+        () => LiveStaysService(services.agentToolkit).find(city: p.city, center: p.point, needs: needsFromSettings(services.accessibility)),
+      );
+    });
   }
 
   @override
@@ -167,15 +200,29 @@ class _HospitalityScreenState extends State<HospitalityScreen> {
             onPressed: () => Navigator.of(context).pop('add'),
             child: const Text('Add to My Trip'),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop('call'),
-            child: const Text('Call Venue'),
-          ),
+          if (stay.contactPhone.trim().isNotEmpty)
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop('call'),
+              child: const Text('Call Venue'),
+            )
+          else if (safeWebUri(stay.bookingUrl) != null)
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop('book'),
+              child: const Text('View & book'),
+            ),
         ],
       ),
     );
 
     if (!mounted || action == null || action == 'close') return;
+
+    if (action == 'book') {
+      final uri = safeWebUri(stay.bookingUrl);
+      if (uri != null && !await launchUrl(uri, mode: LaunchMode.externalApplication) && mounted) {
+        showToast(context, 'Could not open the link.');
+      }
+      return;
+    }
 
     if (action == 'call') {
       final uri = Uri(scheme: 'tel', path: stay.contactPhone);
@@ -206,12 +253,28 @@ class _HospitalityScreenState extends State<HospitalityScreen> {
         subtitle: 'Verified Eco-Practices & Accessibility Audits',
       ),
       body: viewModel == null
-          ? const SizedBox.shrink()
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.hotel_outlined, size: 48),
+                    const SizedBox(height: 12),
+                    const Text('Choose where to look for stays. They are searched live and checked against your accessibility needs.', textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(onPressed: _choose, icon: const Icon(Icons.place_outlined), label: const Text('Choose a place')),
+                  ],
+                ),
+              ),
+            )
           : AnimatedBuilder(
               animation: viewModel,
               builder: (context, _) => ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
+                  _placeBar(context, viewModel),
+                  const SizedBox(height: 12),
                   IntentPromptCard(
                     title: "Describe what you're looking for",
                     hint: 'e.g. cheap wheelchair-friendly eco stay',
@@ -239,9 +302,25 @@ class _HospitalityScreenState extends State<HospitalityScreen> {
                   ),
                   const SizedBox(height: 16),
                   if (viewModel.isLoading)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: Center(child: CircularProgressIndicator()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 12),
+                            Text('Searching stays near ${_place?.city ?? 'you'}…'),
+                          ],
+                        ),
+                      ),
+                    )
+                  else if (viewModel.error != null)
+                    Column(
+                      children: [
+                        EmptyState(message: viewModel.error!, icon: Icons.cloud_off_outlined),
+                        FilledButton.icon(onPressed: viewModel.reload, icon: const Icon(Icons.refresh_rounded), label: const Text('Try again')),
+                      ],
                     )
                   else if (viewModel.rankedStays.isEmpty)
                     const EmptyState(
@@ -259,6 +338,42 @@ class _HospitalityScreenState extends State<HospitalityScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+extension on _HospitalityScreenState {
+  /// Where the stays are for, which needs they were checked against, and where
+  /// the results came from.
+  Widget _placeBar(BuildContext context, HospitalityViewModel vm) {
+    final theme = Theme.of(context);
+    final services = AppScope.of(context);
+    final needs = needsFromSettings(services.accessibility);
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.place_rounded, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(child: Text(_place?.label ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800))),
+              TextButton(onPressed: _choose, child: const Text('Change')),
+            ],
+          ),
+          Text(
+            needs.isEmpty ? 'No accessibility needs saved. Set them in Settings to have stays checked for you.' : 'Checked for: ${needs.map((n) => n.label).join(', ')}',
+            style: theme.textTheme.bodySmall,
+          ),
+          if (!vm.isLoading && vm.error == null && vm.sources.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text('Found via ${vm.sources.join(', ')}${vm.considered > 0 ? ' · ${vm.considered} places considered' : ''}. Details marked not reported were not found.', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            ),
+          if (!vm.isLoading && vm.warnings.isNotEmpty)
+            Padding(padding: const EdgeInsets.only(top: 4), child: Text(vm.warnings.take(2).join(' '), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
+        ],
+      ),
     );
   }
 }
@@ -300,7 +415,7 @@ class _StayCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Eco Level ${stay.ecoScore}',
+                  stay.ecoScore == 0 ? 'Eco level not reported' : 'Eco Level ${stay.ecoScore}',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -367,7 +482,7 @@ class _StayCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${stay.accessibilityRating}% Accessibility Match',
+                      stay.accessibilityRating == 0 ? 'Access not confirmed' : '${stay.accessibilityRating}% Accessibility Match',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

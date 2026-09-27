@@ -18,6 +18,10 @@ enum AnswerWidget {
   /// Pick one of the hotels attached to the question ([YatriQuestion.hotels]).
   hotelChoice,
   text,
+
+  /// Where the trip starts: current location, a saved address, or typed with
+  /// completions. Answers with a [ChoiceAnswer] holding the city.
+  place,
 }
 
 /// Why a question is being asked.
