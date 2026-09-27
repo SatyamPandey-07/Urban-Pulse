@@ -12,6 +12,10 @@
     {
       "alignment_id": "alignment_01m3fy3nzv2tnvh9",
       "error": "Finetuning failed: Nugen job creation failed: HTTP 502 Bad Gateway"
+    },
+    {
+      "alignment_id": "alignment_01m3g8cdpa20eaty",
+      "error": "Finetuning failed: Nugen job creation failed: HTTP 502 Bad Gateway"
     }
   ],
   "old_document_ids": [

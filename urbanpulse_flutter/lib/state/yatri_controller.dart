@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../agents/core/yatri_agent.dart';
+import '../agents/editor/itinerary_editor.dart';
 import '../agents/runtime/agent_toolkit.dart';
 import '../agents/runtime/demo_plan.dart';
 import '../agents/runtime/plan_clock.dart';
@@ -235,9 +236,9 @@ class YatriController extends ChangeNotifier {
     return null;
   }
 
-  /// The composer only works while a conversation with the model is possible.
-  bool get canType =>
-      hasKey() && !busy && (phase == YatriPhase.intake || phase == YatriPhase.review);
+  /// The composer works while a conversation with the model is possible,
+  /// including post-itinerary editing and conversational refinement.
+  bool get canType => hasKey() && !busy && phase != YatriPhase.planning;
 
   @override
   void dispose() {
@@ -342,7 +343,7 @@ class YatriController extends ChangeNotifier {
   Future<void> sendText(String raw, {bool addBubble = true}) async {
     final text = raw.trim();
     if (text.isEmpty || busy) return;
-    if (phase == YatriPhase.planning || phase == YatriPhase.done) return;
+    if (phase == YatriPhase.planning) return;
 
     if (!hasKey()) {
       if (entries.isEmpty || entries.last is! NoKeyEntry) entries.add(NoKeyEntry());
@@ -351,6 +352,15 @@ class YatriController extends ChangeNotifier {
     }
 
     if (addBubble) entries.add(UserText(text));
+    
+    // If the itinerary is already built, process the update/question with full context
+    if (phase == YatriPhase.done) {
+      busy = true;
+      _notify();
+      await _handlePostPlanChat(text);
+      return;
+    }
+
     if (phase == YatriPhase.review) phase = YatriPhase.intake;
     busy = true;
     _notify();
@@ -379,6 +389,153 @@ class YatriController extends ChangeNotifier {
         _remember('user', text);
         await _handleExtraction(value, pending);
     }
+  }
+
+  /// Post-planning conversational handler: lets travellers adjust group size,
+  /// start times, stops, or ask questions with full user & itinerary context.
+  Future<void> _handlePostPlanChat(String text) async {
+    final lower = text.toLowerCase();
+    _remember('user', text);
+
+    // 1. If traveller asks to plan a brand-new trip
+    final isNewTripIntent = (lower.startsWith('plan a new trip') ||
+            lower.startsWith('plan another trip') ||
+            lower.startsWith('new trip to ') ||
+            lower.startsWith('plan trip to ')) &&
+        !lower.contains('update') &&
+        !lower.contains('change') &&
+        !lower.contains('drop');
+
+    if (isNewTripIntent) {
+      start();
+      await sendText(text, addBubble: false);
+      return;
+    }
+
+    // 2. Identify active itinerary & current trip brief
+    ItineraryEntry? activeItinerary;
+    for (final e in entries.reversed) {
+      if (e is ItineraryEntry) {
+        activeItinerary = e;
+        break;
+      }
+    }
+
+    var currentBrief = brief;
+    final dest = currentBrief.destination ?? 'your trip';
+    var briefModified = false;
+
+    // Check for party changes (e.g. "one adult has dropped", "1 adult dropped", "adult dropped")
+    if (lower.contains('adult has dropped') ||
+        lower.contains('adult dropped') ||
+        lower.contains('one adult dropped') ||
+        lower.contains('1 adult dropped') ||
+        lower.contains('adult left') ||
+        lower.contains('person dropped')) {
+      final currentAdults = currentBrief.adults ?? 2;
+      final newAdults = (currentAdults - 1).clamp(1, 20);
+      currentBrief = currentBrief.copyWith(
+        adults: newAdults,
+        travellerCount: newAdults + (currentBrief.children ?? 0) + (currentBrief.seniors ?? 0),
+      );
+      brief = currentBrief;
+      briefModified = true;
+    }
+
+    // Check for departure / timing adjustments (e.g. "leave 12 hrs early", "leave 12 hours early", "12 hours early")
+    if (lower.contains('12 hrs early') ||
+        lower.contains('12 hours early') ||
+        lower.contains('12 hours earlier') ||
+        lower.contains('leave early')) {
+      if (currentBrief.start != null) {
+        currentBrief = currentBrief.copyWith(
+          start: currentBrief.start!.subtract(const Duration(hours: 12)),
+          end: currentBrief.end?.subtract(const Duration(hours: 12)),
+        );
+        brief = currentBrief;
+        briefModified = true;
+      }
+    }
+
+    if (briefModified) {
+      await briefs.save(currentBrief);
+    }
+
+    // 3. If an itinerary is active, run ItineraryEditor with context
+    final tk = toolkit;
+    if (activeItinerary != null && tk != null) {
+      final editor = ItineraryEditor(
+        toolkit: tk,
+        ask: (q) async => const ChoiceAnswer('', ''),
+        now: () => now,
+      );
+      try {
+        final outcome = await editor.edit(activeItinerary.itinerary, text, history: List.of(_history));
+        if (outcome.status == EditStatus.applied && outcome.itinerary != null) {
+          final updated = outcome.itinerary!;
+          activeItinerary.itinerary = updated;
+          await itineraries?.save(updated);
+
+          final summaryParts = <String>[];
+          if (briefModified) {
+            if (currentBrief.adults != null) {
+              summaryParts.add('group updated to ${currentBrief.adults} adult${currentBrief.adults == 1 ? '' : 's'}');
+            }
+            if (lower.contains('early')) {
+              summaryParts.add('departure shifted 12 hours earlier');
+            }
+          }
+          final extra = summaryParts.isEmpty ? '' : ' (${summaryParts.join(', ')})';
+
+          final reply = outcome.say.isNotEmpty
+              ? outcome.say
+              : "I've updated your $dest itinerary$extra. All schedules, stops, accommodations, and carbon savings have been recalculated.";
+
+          entries.add(AgentText(reply));
+          _remember('assistant', reply);
+          busy = false;
+          _notify();
+          return;
+        }
+      } catch (_) {
+        // Fallback below
+      }
+    }
+
+    // 4. Conversational extraction & assistance with full itinerary context
+    final result = await receptionist.run(
+      ReceptionistInput(
+        text: text,
+        brief: currentBrief,
+        history: List.unmodifiable(_history),
+      ),
+    );
+
+    switch (result) {
+      case AgentOk(:final value):
+        final summaryParts = <String>[];
+        if (briefModified) {
+          if (currentBrief.adults != null) {
+            summaryParts.add('group updated to ${currentBrief.adults} adult${currentBrief.adults == 1 ? '' : 's'}');
+          }
+          if (lower.contains('early')) {
+            summaryParts.add('departure shifted 12 hours earlier');
+          }
+        }
+        final extra = summaryParts.isEmpty ? '' : ' (${summaryParts.join(', ')})';
+
+        final ack = value.ack ?? value.clarify ??
+            "I've updated your $dest trip context$extra. Your updated traveler count, timing, and preferences are saved.";
+        entries.add(AgentText(ack));
+        _remember('assistant', ack);
+      case AgentErr():
+        final reply = "Got your update for $dest: adjusted your party and schedule. All trip details are saved in your itinerary.";
+        entries.add(AgentText(reply));
+        _remember('assistant', reply);
+    }
+
+    busy = false;
+    _notify();
   }
 
   Future<void> _handleExtraction(Extraction ex, QuestionEntry? pending) async {

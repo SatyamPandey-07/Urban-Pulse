@@ -87,6 +87,13 @@ class _SettingsTabState extends State<SettingsTab> {
             onTap: () => Navigator.of(context).pushNamed(Routes.itinerary),
           ),
           _SettingItem(
+            title: 'What-if Weather Simulator',
+            subtitle: 'Digital twin simulation: stress-test your trip against monsoon, heatwaves & floods',
+            icon: Icons.thunderstorm_rounded,
+            iconBg: const Color(0xFFDCFCE7),
+            onTap: () => Navigator.of(context).pushNamed(Routes.weatherTwin),
+          ),
+          _SettingItem(
             title: 'Hotel Resource & Waste Hub',
             subtitle: 'Energy, water, food surplus & ESG compliance',
             icon: Icons.recycling_rounded,
