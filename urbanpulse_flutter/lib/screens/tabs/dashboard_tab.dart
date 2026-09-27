@@ -11,6 +11,7 @@ import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
 import '../../widgets/mini_charts.dart';
 import '../home_screen.dart';
+import '../surprise_me_screen.dart';
 
 /// Port of `DashboardFragment` / `fragment_dashboard.xml`.
 ///
@@ -81,6 +82,8 @@ class _DashboardTabState extends State<DashboardTab> {
           _categoryIconsRow(context),
           const SizedBox(height: 20),
           _heroBannerCard(context, city),
+          const SizedBox(height: 14),
+          _surpriseCard(context),
           const SizedBox(height: 22),
           _popularDestinationsSection(context),
           const SizedBox(height: 22),
@@ -94,6 +97,70 @@ class _DashboardTabState extends State<DashboardTab> {
                 : Column(children: [_aqiTrendCard(context), const SizedBox(height: 16), _congestionCard(context)]),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Surprise Me: Yatri picks a short trip from the traveller's past ones.
+  Widget _surpriseCard(BuildContext context) {
+    final theme = Theme.of(context);
+    void open() {
+      final tabs = HomeTabController.maybeOf(context);
+      final inbox = AppScope.of(context).yatriInbox;
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (routeContext) => SurpriseMeScreen(
+            onPlan: (pick) {
+              inbox.value = pick.brief;
+              Navigator.of(routeContext).pop();
+              tabs?.switchToTab(3);
+            },
+          ),
+        ),
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: open,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7C3AED), Color(0xFF0EA5E9), Color(0xFF10B981)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)),
+                child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Surprise me', style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 2),
+                    Text(
+                      'A weekend trip Yatri and the agents pick for you, from the trips you have planned before',
+                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white),
+            ],
+          ),
+        ),
       ),
     );
   }

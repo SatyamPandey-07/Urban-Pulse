@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -65,13 +67,31 @@ class _YatriAiTabState extends State<YatriAiTab> {
             toolkit: services.agentToolkit,
             itineraries: services.itineraries,
             cloud: services.cloud,
+            tripPool: services.tripPool,
           )
           ..addListener(_onChanged)
           ..start();
+    _inbox = services.yatriInbox..addListener(_takeFromInbox);
+    // A trip handed in before this tab was first built.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _takeFromInbox());
+  }
+
+  ValueNotifier<TripBrief?>? _inbox;
+
+  /// A trip handed to Yatri (Surprise Me): open it for review and planning.
+  void _takeFromInbox() {
+    final inbox = _inbox;
+    final b = inbox?.value;
+    final c = _controller;
+    if (!mounted || b == null || c == null || c.busy) return;
+    inbox!.value = null;
+    c.loadBrief(b, note: 'Here’s the surprise trip I picked for you. Check the brief, change anything you like, and confirm: my team will plan it.');
+    unawaited(_openForm());
   }
 
   @override
   void dispose() {
+    _inbox?.removeListener(_takeFromInbox);
     _controller?.removeListener(_onChanged);
     _controller?.dispose();
     _input.dispose();
@@ -159,6 +179,7 @@ class _YatriAiTabState extends State<YatriAiTab> {
       now: c.now,
       detectedCity: services.location.originCity,
       settingsNeeds: _settingsNeeds(services),
+      poolMatches: services.tripPool.available ? services.tripPool.matches : null,
     );
     if (result != null) await c.confirmBrief(result);
   }

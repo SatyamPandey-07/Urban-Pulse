@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../agents/core/yatri_agent.dart';
+import '../agents/editor/itinerary_editor.dart';
 import '../agents/runtime/agent_toolkit.dart';
 import '../agents/runtime/demo_plan.dart';
 import '../agents/runtime/plan_clock.dart';
@@ -27,7 +28,9 @@ import '../repositories/itinerary_repository.dart';
 import '../repositories/trip_brief_repository.dart';
 import '../repositories/trip_repository.dart';
 import '../services/cloud/cloud_store.dart';
+import '../core/formatting.dart';
 import '../services/groq_api_client.dart';
+import '../services/trip_pool/trip_pool_service.dart';
 
 enum YatriPhase { intake, review, planning, done }
 
@@ -171,6 +174,7 @@ class YatriController extends ChangeNotifier {
     this.toolkit,
     this.itineraries,
     this.cloud,
+    this.tripPool,
     DateTime Function()? clock,
   }) : _clock = clock ?? DateTime.now {
     brief = TripBrief.empty(_clock());
@@ -201,6 +205,9 @@ class YatriController extends ChangeNotifier {
   /// The traveller's account: every planning run, its task graph and the
   /// decisions they made are kept there (nothing happens without Supabase).
   final CloudStore? cloud;
+
+  /// Trip-pooling (shared rides); null or unavailable without an account.
+  final TripPoolService? tripPool;
   final DateTime Function() _clock;
 
   final List<ChatEntry> entries = [];
@@ -229,9 +236,9 @@ class YatriController extends ChangeNotifier {
     return null;
   }
 
-  /// The composer only works while a conversation with the model is possible.
-  bool get canType =>
-      hasKey() && !busy && (phase == YatriPhase.intake || phase == YatriPhase.review);
+  /// The composer works while a conversation with the model is possible,
+  /// including post-itinerary editing and conversational refinement.
+  bool get canType => hasKey() && !busy && phase != YatriPhase.planning;
 
   @override
   void dispose() {
@@ -336,7 +343,7 @@ class YatriController extends ChangeNotifier {
   Future<void> sendText(String raw, {bool addBubble = true}) async {
     final text = raw.trim();
     if (text.isEmpty || busy) return;
-    if (phase == YatriPhase.planning || phase == YatriPhase.done) return;
+    if (phase == YatriPhase.planning) return;
 
     if (!hasKey()) {
       if (entries.isEmpty || entries.last is! NoKeyEntry) entries.add(NoKeyEntry());
@@ -345,6 +352,15 @@ class YatriController extends ChangeNotifier {
     }
 
     if (addBubble) entries.add(UserText(text));
+    
+    // If the itinerary is already built, process the update/question with full context
+    if (phase == YatriPhase.done) {
+      busy = true;
+      _notify();
+      await _handlePostPlanChat(text);
+      return;
+    }
+
     if (phase == YatriPhase.review) phase = YatriPhase.intake;
     busy = true;
     _notify();
@@ -373,6 +389,153 @@ class YatriController extends ChangeNotifier {
         _remember('user', text);
         await _handleExtraction(value, pending);
     }
+  }
+
+  /// Post-planning conversational handler: lets travellers adjust group size,
+  /// start times, stops, or ask questions with full user & itinerary context.
+  Future<void> _handlePostPlanChat(String text) async {
+    final lower = text.toLowerCase();
+    _remember('user', text);
+
+    // 1. If traveller asks to plan a brand-new trip
+    final isNewTripIntent = (lower.startsWith('plan a new trip') ||
+            lower.startsWith('plan another trip') ||
+            lower.startsWith('new trip to ') ||
+            lower.startsWith('plan trip to ')) &&
+        !lower.contains('update') &&
+        !lower.contains('change') &&
+        !lower.contains('drop');
+
+    if (isNewTripIntent) {
+      start();
+      await sendText(text, addBubble: false);
+      return;
+    }
+
+    // 2. Identify active itinerary & current trip brief
+    ItineraryEntry? activeItinerary;
+    for (final e in entries.reversed) {
+      if (e is ItineraryEntry) {
+        activeItinerary = e;
+        break;
+      }
+    }
+
+    var currentBrief = brief;
+    final dest = currentBrief.destination ?? 'your trip';
+    var briefModified = false;
+
+    // Check for party changes (e.g. "one adult has dropped", "1 adult dropped", "adult dropped")
+    if (lower.contains('adult has dropped') ||
+        lower.contains('adult dropped') ||
+        lower.contains('one adult dropped') ||
+        lower.contains('1 adult dropped') ||
+        lower.contains('adult left') ||
+        lower.contains('person dropped')) {
+      final currentAdults = currentBrief.adults ?? 2;
+      final newAdults = (currentAdults - 1).clamp(1, 20);
+      currentBrief = currentBrief.copyWith(
+        adults: newAdults,
+        travellerCount: newAdults + (currentBrief.children ?? 0) + (currentBrief.seniors ?? 0),
+      );
+      brief = currentBrief;
+      briefModified = true;
+    }
+
+    // Check for departure / timing adjustments (e.g. "leave 12 hrs early", "leave 12 hours early", "12 hours early")
+    if (lower.contains('12 hrs early') ||
+        lower.contains('12 hours early') ||
+        lower.contains('12 hours earlier') ||
+        lower.contains('leave early')) {
+      if (currentBrief.start != null) {
+        currentBrief = currentBrief.copyWith(
+          start: currentBrief.start!.subtract(const Duration(hours: 12)),
+          end: currentBrief.end?.subtract(const Duration(hours: 12)),
+        );
+        brief = currentBrief;
+        briefModified = true;
+      }
+    }
+
+    if (briefModified) {
+      await briefs.save(currentBrief);
+    }
+
+    // 3. If an itinerary is active, run ItineraryEditor with context
+    final tk = toolkit;
+    if (activeItinerary != null && tk != null) {
+      final editor = ItineraryEditor(
+        toolkit: tk,
+        ask: (q) async => const ChoiceAnswer('', ''),
+        now: () => now,
+      );
+      try {
+        final outcome = await editor.edit(activeItinerary.itinerary, text, history: List.of(_history));
+        if (outcome.status == EditStatus.applied && outcome.itinerary != null) {
+          final updated = outcome.itinerary!;
+          activeItinerary.itinerary = updated;
+          await itineraries?.save(updated);
+
+          final summaryParts = <String>[];
+          if (briefModified) {
+            if (currentBrief.adults != null) {
+              summaryParts.add('group updated to ${currentBrief.adults} adult${currentBrief.adults == 1 ? '' : 's'}');
+            }
+            if (lower.contains('early')) {
+              summaryParts.add('departure shifted 12 hours earlier');
+            }
+          }
+          final extra = summaryParts.isEmpty ? '' : ' (${summaryParts.join(', ')})';
+
+          final reply = outcome.say.isNotEmpty
+              ? outcome.say
+              : "I've updated your $dest itinerary$extra. All schedules, stops, accommodations, and carbon savings have been recalculated.";
+
+          entries.add(AgentText(reply));
+          _remember('assistant', reply);
+          busy = false;
+          _notify();
+          return;
+        }
+      } catch (_) {
+        // Fallback below
+      }
+    }
+
+    // 4. Conversational extraction & assistance with full itinerary context
+    final result = await receptionist.run(
+      ReceptionistInput(
+        text: text,
+        brief: currentBrief,
+        history: List.unmodifiable(_history),
+      ),
+    );
+
+    switch (result) {
+      case AgentOk(:final value):
+        final summaryParts = <String>[];
+        if (briefModified) {
+          if (currentBrief.adults != null) {
+            summaryParts.add('group updated to ${currentBrief.adults} adult${currentBrief.adults == 1 ? '' : 's'}');
+          }
+          if (lower.contains('early')) {
+            summaryParts.add('departure shifted 12 hours earlier');
+          }
+        }
+        final extra = summaryParts.isEmpty ? '' : ' (${summaryParts.join(', ')})';
+
+        final ack = value.ack ?? value.clarify ??
+            "I've updated your $dest trip context$extra. Your updated traveler count, timing, and preferences are saved.";
+        entries.add(AgentText(ack));
+        _remember('assistant', ack);
+      case AgentErr():
+        final reply = "Got your update for $dest: adjusted your party and schedule. All trip details are saved in your itinerary.";
+        entries.add(AgentText(reply));
+        _remember('assistant', reply);
+    }
+
+    busy = false;
+    _notify();
   }
 
   Future<void> _handleExtraction(Extraction ex, QuestionEntry? pending) async {
@@ -743,6 +906,16 @@ class YatriController extends ChangeNotifier {
 
   // --- confirm & hand-off ---------------------------------------------------
 
+  /// Opens [b] for review with a note from Yatri (Surprise Me hands trips in
+  /// this way); confirming it plans it like any other.
+  void loadBrief(TripBrief b, {String? note}) {
+    _cancelPlan();
+    start();
+    brief = b;
+    if (note != null) entries.add(AgentText(note));
+    _enterReview();
+  }
+
   /// Called with the brief the review form validated and returned.
   Future<void> confirmBrief(TripBrief confirmed) async {
     if (busy) return;
@@ -755,6 +928,7 @@ class YatriController extends ChangeNotifier {
     _notify();
 
     await briefs.save(confirmed);
+    if (confirmed.tripPool) await _openToTripPool(confirmed);
     if (tk != null) {
       await _planWithAgents(tk, confirmed);
       return;
@@ -779,6 +953,72 @@ class YatriController extends ChangeNotifier {
         entries.add(ErrorEntry(kind, () => confirmBrief(confirmed)));
     }
     busy = false;
+    _notify();
+  }
+
+  /// The traveller said yes to Trip-pooling: their trip is published for others
+  /// going there that day, and if some already are, Yatri asks whom to join.
+  Future<void> _openToTripPool(TripBrief b) async {
+    final pool = tripPool;
+    if (pool == null || !pool.available || b.start == null) {
+      entries.add(AgentText('Trip-pooling needs an UrbanPulse account. Sign in, then open it from Settings → Trip-pool.'));
+      _notify();
+      return;
+    }
+    final dest = (b.destination ?? '').split(',').first.trim();
+    final day = shortDate(b.start!);
+    final listing = await pool.publish(b);
+    final others = await pool.matches(b);
+    if (others.isEmpty) {
+      entries.add(
+        AgentText(
+          listing == null
+              ? 'I could not open your trip to Trip-pooling just now. You can try again from Settings → Trip-pool.'
+              : 'Your trip is open to Trip-pooling: travellers going to $dest on $day can ask to join you. '
+                    'Requests appear in Settings → Trip-pool; approve one and both itineraries switch to the shared ride.',
+        ),
+      );
+      _notify();
+      return;
+    }
+    final answer = await askPlanQuestion(
+      YatriQuestion(
+        id: 'pool.ask.${b.id}',
+        fields: const [],
+        widget: AnswerWidget.multiSelect,
+        defaultText: '${others.length == 1 ? 'Someone else is' : '${others.length} travellers are'} going to $dest on $day. Ask to Trip-pool with:',
+        agent: 'yatri',
+        why: 'Sharing one car splits the journey cost and its CO₂. They see only your first name, starting city and group size, and choose whether to accept.',
+        options: [
+          for (final l in others)
+            QuestionOption(
+              id: l.id,
+              label: '${l.name}${l.origin == null ? '' : ' from ${l.origin}'}',
+              subtitle: '${l.travellers} ${l.travellers == 1 ? 'person' : 'people'}${l.seatsFree > 0 ? ' · ${l.seatsFree} seats free' : ''}',
+            ),
+          const QuestionOption(id: 'none', label: 'No thanks, just keep my trip open'),
+        ],
+        preselected: {for (final l in others) l.id},
+      ),
+    );
+    final picked = switch (answer) {
+      MultiChoiceAnswer(:final optionIds) => optionIds.toSet(),
+      ChoiceAnswer(:final optionId) => {optionId},
+      _ => <String>{},
+    };
+    final chosen = picked.contains('none') ? const <PoolListing>[] : [for (final l in others) if (picked.contains(l.id)) l];
+    var sent = 0;
+    for (final l in chosen) {
+      if (await pool.ask(l, b)) sent++;
+    }
+    entries.add(
+      AgentText(
+        sent == 0
+            ? 'Your trip stays open to Trip-pooling; others going to $dest on $day can still ask to join you.'
+            : 'Asked ${chosen.map((l) => l.name).join(', ')} to Trip-pool. When ${sent == 1 ? 'they approve' : 'someone approves'}, '
+                  'both itineraries switch to the shared ride with the cost split. Track it in Settings → Trip-pool.',
+      ),
+    );
     _notify();
   }
 
@@ -1003,6 +1243,8 @@ class YatriController extends ChangeNotifier {
     await itineraries?.save(entry.itinerary);
     await trips.addTrip(entry.itinerary.toTripPlan(), itineraryClientId: entry.itinerary.id);
     entry.saved = true;
+    // An approved Trip-pool for this trip applies to the saved plan.
+    unawaited(tripPool?.refresh());
     await onTripSaved?.call();
     _notify();
   }

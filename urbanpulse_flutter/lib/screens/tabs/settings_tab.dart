@@ -6,6 +6,7 @@ import '../../core/formatting.dart';
 import '../../core/routes.dart';
 import '../../state/app_scope.dart';
 import '../../widgets/common.dart';
+import '../trip_pool_screen.dart';
 
 /// Port of `SettingsFragment` / `fragment_settings.xml` + `item_setting_option.xml`.
 class SettingsTab extends StatefulWidget {
@@ -27,6 +28,7 @@ class _SettingsTabState extends State<SettingsTab> {
         services.gamification,
         services.theme,
         services.location,
+        services.tripPool,
       ]),
       builder: (context, _) {
         final wheelchairStatus = services.accessibility.isWheelchairModeEnabled
@@ -41,6 +43,17 @@ class _SettingsTabState extends State<SettingsTab> {
             icon: Icons.accessible_forward_rounded,
             iconBg: const Color(0xFFE0E7FF),
             onTap: _showAccessibilityDialog,
+          ),
+          _SettingItem(
+            title: 'Trip-pool',
+            subtitle: !services.tripPool.available
+                ? 'Share rides with travellers going your way (needs an account)'
+                : services.tripPool.pendingForMe > 0
+                ? '${services.tripPool.pendingForMe} request${services.tripPool.pendingForMe == 1 ? '' : 's'} waiting for you'
+                : 'Shared rides: your requests and trips open to pooling',
+            icon: Icons.directions_car_filled_rounded,
+            iconBg: const Color(0xFFFEF3C7),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TripPoolScreen())),
           ),
           _SettingItem(
             title: 'Green Travel Passport',
@@ -72,6 +85,13 @@ class _SettingsTabState extends State<SettingsTab> {
             icon: Icons.auto_awesome_rounded,
             iconBg: const Color(0xFFFFE4E6),
             onTap: () => Navigator.of(context).pushNamed(Routes.itinerary),
+          ),
+          _SettingItem(
+            title: 'What-if Weather Simulator',
+            subtitle: 'Digital twin simulation: stress-test your trip against monsoon, heatwaves & floods',
+            icon: Icons.thunderstorm_rounded,
+            iconBg: const Color(0xFFDCFCE7),
+            onTap: () => Navigator.of(context).pushNamed(Routes.weatherTwin),
           ),
           _SettingItem(
             title: 'Hotel Resource & Waste Hub',

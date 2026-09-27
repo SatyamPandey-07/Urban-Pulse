@@ -63,5 +63,11 @@ void main() {
 
     // Verify Settings tab subtitle reflects the override
     expect(find.text('Custom key overrides active'), findsOneWidget);
+
+    // Verify What-if Weather Simulator option is present
+    final simulatorFinder = find.text('What-if Weather Simulator');
+    await tester.scrollUntilVisible(simulatorFinder, 100);
+    expect(simulatorFinder, findsOneWidget);
+    expect(find.textContaining('stress-test your trip against monsoon'), findsOneWidget);
   });
 }
