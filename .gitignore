@@ -24,3 +24,15 @@ server/data/*.db-shm
 server/server.log
 hs_err_pid*.log
 replay_pid*.log
+
+# --- Garmin watch companion ---------------------------------------------------
+# The Connect IQ developer key signs every build and is per-developer; a leaked
+# one lets someone else publish as you.
+garmin/**/developer_key*
+*.iq
+# Compiled Monkey C output.
+garmin/**/bin/
+# Garmin distributes the iOS Companion SDK as a binary framework under its own
+# licence. Fetch it with ios/scripts/fetch_connectiq_sdk.sh instead of committing.
+urbanpulse_flutter/ios/Frameworks/ConnectIQ.xcframework/
+urbanpulse_flutter/ios/Frameworks/ConnectIQ-README.md

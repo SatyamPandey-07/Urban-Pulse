@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../models/trip_models.dart';
 import '../screens/achievements_screen.dart';
 import '../screens/carbon_wallet_screen.dart';
+import '../screens/emergency_contacts_screen.dart';
+import '../screens/garmin_watch_screen.dart';
 import '../screens/green_route_planner_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/hospitality_screen.dart';
@@ -36,6 +38,8 @@ abstract final class Routes {
   static const tripDetail = '/trip-detail';
   static const sustainableTripsHub = '/sustainable-trips-hub';
   static const weatherTwin = '/weather-twin';
+  static const garminWatch = '/garmin-watch';
+  static const emergencyContacts = '/emergency-contacts';
 
   static Map<String, WidgetBuilder> get table => {
     splash: (_) => const SplashScreen(),
@@ -52,6 +56,8 @@ abstract final class Routes {
     itinerary: (_) => const ItineraryScreen(),
     sustainableTripsHub: (_) => const SustainableTripsHubScreen(),
     weatherTwin: (_) => const WeatherTwinScreen(),
+    garminWatch: (_) => const GarminWatchScreen(),
+    emergencyContacts: (_) => const EmergencyContactsScreen(),
   };
 
   /// [tripDetail] is the one route that carries an argument.

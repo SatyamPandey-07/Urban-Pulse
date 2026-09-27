@@ -1,15 +1,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Carried over from the original app's manifest. SEND_SMS / CALL_PHONE are
-         deliberately not re-declared: the migrated SOS screen raises an in-app
-         alert and "Call Venue" hands off to the dialer via an intent, neither of
-         which places a call or sends a message on the user's behalf. -->
+    <!-- Carried over from the original app's manifest. CALL_PHONE is still not
+         re-declared: "Call Venue" hands off to the dialer via an intent, which
+         does not place a call on the user's behalf. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Emergency SOS sends one SMS per emergency contact. Requested at the
+         moment it is needed, never at launch, and refusing it is a supported
+         path: the SOS controller then opens the system composer instead and
+         reports `prepared` rather than `sent`. -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
+    <!-- The Connect IQ SDK reaches the watch over Garmin Connect Mobile's bound
+         service; on Android 12+ that needs the new Bluetooth permission. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <application
         android:label="UrbanPulse"
@@ -46,7 +55,10 @@
             android:value="2" />
     </application>
 
+    <!-- Garmin Connect Mobile, which hosts the Connect IQ service the SDK binds
+         to. Declared so the SDK can see whether it is installed on Android 11+. -->
     <queries>
+        <package android:name="com.garmin.android.apps.connectmobile" />
         <!-- Required to query activities that can process text, see:
              https://developer.android.com/training/package-visibility -->
         <intent>
@@ -61,6 +73,11 @@
         <!-- speech_to_text: voice input on the Yatri AI composer. -->
         <intent>
             <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <!-- The SOS composer fallback, when SEND_SMS is refused. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="sms" />
         </intent>
     </queries>
 </manifest>

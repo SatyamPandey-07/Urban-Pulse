@@ -76,7 +76,38 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tel</string>
+		<!-- The SOS composer fallback: iOS cannot send an SMS without the
+		     traveller tapping send, so the message is handed to Messages. -->
+		<string>sms</string>
+		<!-- Garmin Connect Mobile, which the Connect IQ SDK launches to let the
+		     traveller choose which watch to share with this app. -->
+		<string>gcm-ciq</string>
+		<string>garminconnect</string>
 	</array>
+	<!-- Garmin Connect Mobile returns the chosen devices by opening this scheme.
+	     Must match GarminWatchBridge.urlScheme. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.urbanpulse.app.connectiq</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>urbanpulse-ciq</string>
+			</array>
+		</dict>
+	</array>
+	<!-- The Connect IQ SDK talks to the watch over BLE through Garmin Connect.
+	     `bluetooth-central` plus the SDK's state-restoration identifier is what
+	     lets iOS relaunch the app when a paired watch becomes active. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>UrbanPulse uses Bluetooth to mirror your trip to a paired Garmin watch and to receive button presses from it.</string>
 	<!-- The Central Registry backend (server/) is reached over plain HTTP on a
 	     local network during development. -->
 	<key>NSAppTransportSecurity</key>

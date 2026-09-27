@@ -29,6 +29,8 @@ class _SettingsTabState extends State<SettingsTab> {
         services.theme,
         services.location,
         services.tripPool,
+        services.watch,
+        services.emergencyContacts,
       ]),
       builder: (context, _) {
         final wheelchairStatus = services.accessibility.isWheelchairModeEnabled
@@ -92,6 +94,13 @@ class _SettingsTabState extends State<SettingsTab> {
             icon: Icons.thunderstorm_rounded,
             iconBg: const Color(0xFFDCFCE7),
             onTap: () => Navigator.of(context).pushNamed(Routes.weatherTwin),
+          ),
+          _SettingItem(
+            title: 'Garmin watch',
+            subtitle: _watchSubtitle(services),
+            icon: Icons.watch_rounded,
+            iconBg: const Color(0xFFDBEAFE),
+            onTap: () => Navigator.of(context).pushNamed(Routes.garminWatch),
           ),
           _SettingItem(
             title: 'Emergency SOS & Offline BLE Mesh',
@@ -365,6 +374,18 @@ class _SettingsTabState extends State<SettingsTab> {
       setState(() {});
       showToast(context, 'API key overrides updated successfully');
     }
+  }
+
+  /// The Garmin row's subtitle: the real link status, plus whether there is
+  /// anyone for a watch SOS to reach.
+  static String _watchSubtitle(AppServices services) {
+    final watch = services.watch;
+    final status = watch.status.label;
+    if (!watch.status.isConnected) return status;
+    final contacts = services.emergencyContacts.contacts.length;
+    final mirror = watch.mirrorAlerts ? 'mirroring on' : 'mirroring off';
+    return '$status • $mirror • $contacts emergency contact'
+        '${contacts == 1 ? '' : 's'}';
   }
 
   static String _accentLabel(AccentColor accent) =>

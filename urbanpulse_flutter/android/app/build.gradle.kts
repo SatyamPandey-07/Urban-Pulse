@@ -48,3 +48,13 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Garmin's Connect IQ Mobile SDK for Android, which the watch bridge in
+    // src/main/kotlin/com/urbanpulse/app/watch uses. Published by Garmin to Maven
+    // Central, so unlike the iOS half nothing has to be fetched by hand.
+    implementation("com.garmin.connectiq:ciq-companion-app-sdk:2.2.0")
+
+    // ActivityCompat / ContextCompat for the SEND_SMS runtime permission.
+    implementation("androidx.core:core-ktx:1.15.0")
+}

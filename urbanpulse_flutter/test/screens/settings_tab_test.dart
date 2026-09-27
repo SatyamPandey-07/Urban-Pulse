@@ -35,7 +35,11 @@ void main() {
     expect(keySettingFinder, findsOneWidget);
     expect(find.textContaining('Using embedded build keys'), findsOneWidget);
 
-    // Tap to open sheet
+    // Tap to open sheet. `scrollUntilVisible` only scrolls until the widget
+    // exists; `ensureVisible` is what brings it fully inside the viewport, which
+    // matters now that the Garmin row sits above it.
+    await tester.ensureVisible(keySettingFinder);
+    await tester.pumpAndSettle();
     await tester.tap(keySettingFinder);
     await tester.pumpAndSettle();
 

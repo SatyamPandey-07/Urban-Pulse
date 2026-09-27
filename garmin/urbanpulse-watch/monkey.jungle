@@ -1,0 +1,12 @@
+# One device for now. Every coordinate in the views is derived from
+# dc.getWidth() / dc.getHeight(), so adding a product to manifest.xml
+# (Monkey C: Edit Products) needs no code change.
+#
+# `tests` is on the source path for every build: functions marked (:test) are
+# stripped unless `monkeyc -t` is given, so this costs nothing in the release
+# build and means the tests cannot drift out of compiling.
+
+project.manifest = manifest.xml
+
+base.sourcePath   = source;tests
+base.resourcePath = resources

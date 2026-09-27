@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../services/live_location.dart';
 import '../../services/live_map_data.dart';
+import '../../services/watch/live_map_watch_bridge.dart';
+import '../../state/app_scope.dart';
 import '../../state/live_map_controller.dart';
 import '../../widgets/live_map/live_map_view.dart';
 import '../../widgets/live_map/map_overlays.dart';
@@ -33,6 +35,10 @@ class _LiveMapTabState extends State<LiveMapTab> {
   final _view = GlobalKey<LiveMapViewState>();
   bool _styled = false;
 
+  /// Mirrors navigation to a Garmin watch, when one is linked. Built in
+  /// [didChangeDependencies] because it needs the AppScope.
+  LiveMapWatchBridge? _watchBridge;
+
   @override
   void initState() {
     super.initState();
@@ -49,10 +55,17 @@ class _LiveMapTabState extends State<LiveMapTab> {
       _styled = true;
       if (Theme.of(context).brightness == Brightness.dark) _c.setStyle(MapStyle.dark);
     }
+    // The bridge is cheap and does nothing while the mirror is off or no watch is
+    // linked, so it is safe to attach whenever this tab is on screen.
+    if (_watchBridge == null && _owns) {
+      final services = AppScope.of(context);
+      _watchBridge = LiveMapWatchBridge(controller: _c, mirror: services.watch.mirror);
+    }
   }
 
   @override
   void dispose() {
+    _watchBridge?.dispose();
     if (_owns) _c.dispose();
     super.dispose();
   }

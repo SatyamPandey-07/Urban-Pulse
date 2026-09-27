@@ -6,7 +6,9 @@ import '../core/app_colors.dart';
 import '../core/formatting.dart';
 import '../services/ble_sos_service.dart';
 import '../state/app_scope.dart';
+import '../state/sos_controller.dart';
 import '../widgets/common.dart';
+import 'emergency_contacts_screen.dart';
 
 /// Screen for raising emergency SOS alerts and listening for nearby BLE emergency beacons.
 ///
@@ -40,6 +42,8 @@ class _SosScreenState extends State<SosScreen>
   bool _isSending = false;
   String? _category = 'Medical';
 
+  SosController? _sos;
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +51,20 @@ class _SosScreenState extends State<SosScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The same controller the watch drives, so an SOS raised on either side shows
+    // the same countdown and the same outcome here.
+    final sos = AppScope.of(context).sos;
+    if (_sos != sos) {
+      _sos?.removeListener(_onBleUpdate);
+      _sos = sos..addListener(_onBleUpdate);
+    }
+  }
+
+  @override
   void dispose() {
+    _sos?.removeListener(_onBleUpdate);
     _bleService.removeListener(_onBleUpdate);
     _holdController.dispose();
     _radarController.dispose();
@@ -86,13 +103,19 @@ class _SosScreenState extends State<SosScreen>
       locationName: location.hasFix ? 'GPS Fix (${fixed(lat, 4)}, ${fixed(lng, 4)})' : 'Offline Peer Mesh Fix',
     );
 
+    // The BLE beacon only reaches strangers in range. This is what reaches the
+    // people the traveller chose, and it reports honestly whether it managed to.
+    final started = await _sos?.trigger() ?? false;
+
     setState(() => _isSending = false);
     _holdController.reset();
 
     if (!mounted) return;
     showToast(
       context,
-      '🚨 BLE SOS Broadcast Active! Alerting nearby app users in ~150m radius.',
+      started
+          ? 'SOS armed - messaging your emergency contacts in 10 seconds'
+          : 'BLE beacon broadcasting. No emergency contacts, so no message was sent.',
     );
   }
 
@@ -127,6 +150,12 @@ class _SosScreenState extends State<SosScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // The shared SOS: its countdown, and the true outcome afterwards.
+              if (_sos != null && _sos!.state.phase != SosPhase.idle) ...[
+                _buildSosStatusCard(theme, _sos!),
+                const SizedBox(height: 16),
+              ],
+
               // BLE Mesh Radar status pill
               _buildBleMeshBanner(theme),
               const SizedBox(height: 20),
@@ -285,6 +314,117 @@ class _SosScreenState extends State<SosScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// The shared [SosController]'s state, worded so it never over-claims: "sent"
+  /// only where the OS accepted a message, "ready" where a composer opened.
+  Widget _buildSosStatusCard(ThemeData theme, SosController sos) {
+    final state = sos.state;
+    final (String title, String body, Color colour) = switch (state.phase) {
+      SosPhase.armed => (
+        'Sending in ${state.secondsLeft}s',
+        state.origin == SosOrigin.watch
+            ? 'Raised from your Garmin watch. Tap Cancel to stop.'
+            : 'Tap Cancel to stop before your contacts are messaged.',
+        AppColors.sosRed,
+      ),
+      SosPhase.locating => ('Getting your location', 'One moment.', AppColors.sosRed),
+      SosPhase.sending => ('Messaging your contacts', 'Sending now.', AppColors.sosRed),
+      SosPhase.sent => (
+        'Message sent',
+        state.detail ?? 'Your emergency contacts have been messaged.',
+        const Color(0xFF16A34A),
+      ),
+      SosPhase.prepared => (
+        'Ready to send',
+        // Deliberately not "sent": on iPhone nothing leaves without this tap.
+        state.detail ?? 'Your messaging app is open with the message ready. Tap send.',
+        const Color(0xFFD97706),
+      ),
+      SosPhase.failed => (
+        'Could not send',
+        state.detail ?? 'Nothing was sent.',
+        AppColors.sosRed,
+      ),
+      SosPhase.cancelled => (
+        'Cancelled',
+        'No message was sent.',
+        theme.colorScheme.onSurfaceVariant,
+      ),
+      SosPhase.idle => ('', '', theme.colorScheme.onSurfaceVariant),
+    };
+
+    final noContacts =
+        state.phase == SosPhase.failed && (state.detail ?? '').contains('No emergency contacts');
+
+    return SectionCard(
+      borderColor: colour,
+      borderWidth: 1.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (state.isActive)
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: colour),
+                )
+              else
+                Icon(
+                  state.phase == SosPhase.sent
+                      ? Icons.check_circle_rounded
+                      : state.phase == SosPhase.cancelled
+                      ? Icons.cancel_rounded
+                      : Icons.error_rounded,
+                  color: colour,
+                  size: 20,
+                ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colour,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(body, style: theme.textTheme.bodySmall),
+          if (state.positionAgeS != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              'The position sent was ${state.positionAgeS}s old - there was no fresh GPS fix.',
+              style: theme.textTheme.bodySmall?.copyWith(color: colour),
+            ),
+          ],
+          const SizedBox(height: 12),
+          if (state.phase == SosPhase.armed)
+            FilledButton.icon(
+              onPressed: sos.cancel,
+              style: FilledButton.styleFrom(backgroundColor: AppColors.sosRed),
+              icon: const Icon(Icons.close_rounded),
+              label: const Text('Cancel SOS'),
+            )
+          else if (state.isFinished)
+            noContacts
+                ? OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const EmergencyContactsScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                    label: const Text('Add emergency contacts'),
+                  )
+                : TextButton(onPressed: sos.acknowledge, child: const Text('Dismiss')),
+        ],
       ),
     );
   }

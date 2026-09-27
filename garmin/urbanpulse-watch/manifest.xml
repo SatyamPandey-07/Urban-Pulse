@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+  Urban Pulse watch companion.
+
+  type        watch-app   unrestricted input, no timeout, and a real UI - a
+                          widget cannot hold a 3 second SOS press.
+  minApiLevel 5.0.0       the fr965 reports API 5.2; anything higher excludes it.
+
+  Permissions, and why each is needed:
+    Communications  registerForPhoneAppMessages / transmit - the whole link
+    Background      registerForPhoneAppMessageEvent, so an alert can buzz while
+                    the app is not on screen (see README for what each device
+                    actually allows)
+-->
+<iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
+    <iq:application
+        entry="UrbanPulseApp"
+        id="f2ad5fab4ae240d984032ec48e3179d8"
+        launcherIcon="@Drawables.LauncherIcon"
+        name="@Strings.AppName"
+        type="watch-app"
+        minApiLevel="5.0.0">
+
+        <iq:products>
+            <iq:product id="fr965"/>
+        </iq:products>
+
+        <iq:permissions>
+            <iq:uses-permission id="Communications"/>
+            <iq:uses-permission id="Background"/>
+        </iq:permissions>
+
+        <iq:languages>
+            <iq:language>eng</iq:language>
+        </iq:languages>
+
+        <iq:barrels/>
+    </iq:application>
+</iq:manifest>
