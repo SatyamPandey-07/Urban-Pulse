@@ -14,6 +14,7 @@ import '../../state/activity_tracker.dart';
 import '../../state/app_scope.dart';
 import '../../state/yatri_controller.dart';
 import '../../widgets/common.dart';
+import '../../widgets/live/live_mode_view.dart';
 import '../../widgets/yatri/brief_progress.dart';
 import '../../widgets/yatri/chat_bubbles.dart';
 import '../../widgets/yatri/chat_entry_view.dart';
@@ -34,7 +35,10 @@ class YatriAiTab extends StatefulWidget {
   State<YatriAiTab> createState() => _YatriAiTabState();
 }
 
+enum _YatriMode { chat, live }
+
 class _YatriAiTabState extends State<YatriAiTab> {
+  _YatriMode _mode = _YatriMode.chat;
   static const _wideBreakpoint = 900.0;
   static const _chatMaxWidth = 720.0;
 
@@ -261,6 +265,27 @@ class _YatriAiTabState extends State<YatriAiTab> {
     final c = _controller;
     if (c == null) return const SizedBox.shrink();
 
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: SegmentedButton<_YatriMode>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment(value: _YatriMode.chat, icon: Icon(Icons.chat_bubble_outline_rounded), label: Text('Chat')),
+              ButtonSegment(value: _YatriMode.live, icon: Icon(Icons.headset_mic_rounded), label: Text('Live mode')),
+            ],
+            selected: {_mode},
+            onSelectionChanged: (m) => setState(() => _mode = m.first),
+          ),
+        ),
+        // Both stay built, so Live Mode keeps running while the chat is open.
+        Expanded(child: IndexedStack(index: _mode.index, children: [_chatView(c), const LiveModeView()])),
+      ],
+    );
+  }
+
+  Widget _chatView(YatriController c) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= _wideBreakpoint;
